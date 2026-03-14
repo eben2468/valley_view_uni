@@ -1,192 +1,346 @@
 <?php
-$pageTitle = "Office of the Registrar - Valley View University";
-$activePage = "office_of_the_registrar";
+require_once 'includes/db_connect.php';
+require_once 'includes/administration_content_helper.php';
+
+// Initialize content helper
+$content = new AdministrationContent($pdo);
+$page = $content->getPageBySlug('office_of_the_registrar');
+
+// Get all content sections
+$pageContent = [];
+if ($page) {
+    $pageContent = $content->getPageContent($page['id']);
+}
+
+// Helper function to get field value with HTML cleaning
+if (!function_exists('getContent')) {
+    function getContent($sections, $section_key, $field_key, $default = '') {
+        $value = isset($sections[$section_key]['fields'][$field_key]) ? $sections[$section_key]['fields'][$field_key] : $default;
+        // Clean HTML tags and entities from CKEditor content
+        return AdministrationContent::cleanHtml($value);
+    }
+}
+
+$page_title = $page ? $page['page_title'] . " - Valley View University" : "Office of the Registrar - Valley View University";
+$active_page = "about";
 include 'includes/header.php';
 ?>
 
-<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
-  <div class="layout-container flex h-full grow flex-col">
-    <!-- TopNavBar Component -->
-    <div class="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-40 flex justify-center py-3 border-b border-surface-light dark:border-surface-dark">
-      <div class="w-full max-w-screen-xl">
-        <header class="flex items-center justify-between whitespace-nowrap px-4 py-3">
-          <div class="flex items-center gap-8">
-            <div class="flex items-center gap-4 text-text-primary-light dark:text-text-primary-dark">
-              <div class="size-6 text-secondary dark:text-accent">
-                <span class="material-symbols-outlined !text-3xl">school</span>
-              </div>
-              <h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">Valley View University</h2>
-            </div>
-            <nav class="hidden lg:flex items-center gap-9">
-              <a class="text-sm font-medium leading-normal hover:text-secondary dark:hover:text-accent" href="#">Academics</a>
-              <a class="text-sm font-medium leading-normal hover:text-secondary dark:hover:text-accent" href="#">Admissions</a>
-              <a class="text-sm font-medium leading-normal hover:text-secondary dark:hover:text-accent" href="#">Research</a>
-              <a class="text-sm font-medium leading-normal hover:text-secondary dark:hover:text-accent" href="#">Student Life</a>
-              <a class="text-sm font-medium leading-normal hover:text-secondary dark:hover:text-accent" href="#">About</a>
-            </nav>
-          </div>
-          <div class="flex flex-1 justify-end items-center gap-4">
-            <label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
-              <div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-surface-light dark:bg-surface-dark">
-                <div class="text-text-secondary-light dark:text-text-secondary-dark flex items-center justify-center pl-3">
-                  <span class="material-symbols-outlined">search</span>
-                </div>
-                <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-text-secondary-light/70 dark:placeholder:text-text-secondary-dark/70 px-2 text-base font-normal leading-normal" placeholder="Search" value=""/>
-              </div>
-            </label>
-            <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-secondary dark:bg-accent text-white dark:text-secondary text-sm font-bold leading-normal tracking-[0.015em]">
-              <span class="truncate">Apply</span>
-            </button>
-          </div>
-        </header>
-      </div>
-    </div>
-    <!-- Main Content Area -->
-    <div class="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-40 flex flex-1 justify-center py-5">
-      <div class="w-full max-w-screen-xl">
-        <!-- HeroSection Component -->
-        <div class="mb-8">
-          <div class="flex min-h-[400px] flex-col gap-6 bg-cover bg-center bg-no-repeat rounded-xl items-center justify-center p-4 text-center" data-alt="Bright, modern university administration building under a clear blue sky" style='background-image: linear-gradient(rgba(0, 51, 102, 0.4) 0%, rgba(0, 51, 102, 0.7) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAdHExs_SfkRASYoES-KYWziZLFeXa6CwRE1tFfcoJoSatmp3K87chu9ZaDIp4kjBmAC4kTIatiMlZ3XOe354S5VOhhunVP4Wo9_FMc1LLmh72jKzKTTlzaL4qCmkTEo6z_WERGbhxGfFNtdyLOIJMxOTvuW1sK-AmKP0QVv4GCOd6a1lt3FrWoQ9IVoflIKJeoTiDMa44B7wkgq0Ykb3ud1rt5gDR_byRW18BjRjWDIiNKKd4-z8QKco_zxFkDaYymChai--z4X8Hv");'>
-            <div class="flex flex-col gap-2">
-              <h1 class="text-white text-4xl font-black leading-tight tracking-[-0.033em] sm:text-5xl">Office of the Registrar</h1>
-              <h2 class="text-white text-base font-normal leading-normal sm:text-lg max-w-2xl">Your partner in academic success. We are committed to providing exceptional service to the Valley View University community.</h2>
-            </div>
-          </div>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .service-card {
+        transition: all 0.3s ease;
+    }
+    .service-card:hover {
+        transform: translateY(-10px);
+    }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section class="relative min-h-[65vh] flex items-center overflow-hidden bg-gray-900">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags(getContent($pageContent, 'hero_section', 'background_image', 'https://lh3.googleusercontent.com/aida-public/AB6AXuAdHExs_SfkRASYoES-KYWziZLFeXa6CwRE1tFfcoJoSatmp3K87chu9ZaDIp4kjBmAC4kTIatiMlZ3XOe354S5VOhhunVP4Wo9_FMc1LLmh72jKzKTTlzaL4qCmkTEo6z_WERGbhxGfFNtdyLOIJMxOTvuW1sK-AmKP0QVv4GCOd6a1lt3FrWoQ9IVoflIKJeoTiDMa44B7wkgq0Ykb3ud1rt5gDR_byRW18BjRjWDIiNKKd4-z8QKco_zxFkDaYymChai--z4X8Hv')); ?>" 
+                 alt="VVU Administration Building" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
         </div>
-        <!-- Tabs Component as Quick Links Bar -->
-        <div class="mb-12">
-          <div class="flex flex-wrap border-b border-surface-light dark:border-surface-dark justify-center sm:justify-between">
-            <a class="flex flex-col items-center justify-center border-b-[3px] border-b-secondary dark:border-b-accent text-text-primary-light dark:text-text-primary-dark gap-2 pb-3 pt-2.5 flex-1 min-w-[180px]" href="#">
-              <div class="text-secondary dark:text-accent">
-                <span class="material-symbols-outlined !text-3xl">description</span>
-              </div>
-              <p class="text-sm font-bold leading-normal tracking-[0.015em]">Request Transcript</p>
-            </a>
-            <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent gap-2 pb-3 pt-2.5 flex-1 min-w-[180px]" href="#">
-              <div class=""><span class="material-symbols-outlined !text-3xl">app_registration</span></div>
-              <p class="text-sm font-bold leading-normal tracking-[0.015em]">Register for Classes</p>
-            </a>
-            <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent gap-2 pb-3 pt-2.5 flex-1 min-w-[180px]" href="#">
-              <div class=""><span class="material-symbols-outlined !text-3xl">calendar_month</span></div>
-              <p class="text-sm font-bold leading-normal tracking-[0.015em]">View Academic Calendar</p>
-            </a>
-            <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent gap-2 pb-3 pt-2.5 flex-1 min-w-[180px]" href="#">
-              <div class=""><span class="material-symbols-outlined !text-3xl">folder_open</span></div>
-              <p class="text-sm font-bold leading-normal tracking-[0.015em]">Find Forms</p>
-            </a>
-          </div>
-        </div>
-        <div class="flex flex-col lg:flex-row gap-12">
-          <!-- SideNavBar Component -->
-          <aside class="w-full lg:w-1/4">
-            <div class="flex flex-col gap-4 p-4 rounded-xl bg-surface-light dark:bg-surface-dark sticky top-5">
-              <div class="flex flex-col gap-2">
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary/10 dark:bg-accent/20" href="#">
-                  <div class="text-secondary dark:text-accent"><span class="material-symbols-outlined">design_services</span></div>
-                  <p class="text-secondary dark:text-accent text-sm font-bold leading-normal">Our Services</p>
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary/10 dark:hover:bg-accent/20" href="#">
-                  <div class=""><span class="material-symbols-outlined">folder_shared</span></div>
-                  <p class="text-sm font-medium leading-normal">Forms &amp; Documents</p>
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary/10 dark:hover:bg-accent/20" href="#">
-                  <div class=""><span class="material-symbols-outlined">group</span></div>
-                  <p class="text-sm font-medium leading-normal">Staff Directory</p>
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary/10 dark:hover:bg-accent/20" href="#">
-                  <div class=""><span class="material-symbols-outlined">gavel</span></div>
-                  <p class="text-sm font-medium leading-normal">Policies</p>
-                </a>
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary/10 dark:hover:bg-accent/20" href="#">
-                  <div class=""><span class="material-symbols-outlined">quiz</span></div>
-                  <p class="text-sm font-medium leading-normal">FAQ</p>
-                </a>
-              </div>
-              <hr class="border-surface-light dark:border-surface-dark/20 my-4"/>
-              <div class="p-4 rounded-lg bg-secondary/5 dark:bg-accent/10">
-                <h4 class="font-bold text-text-primary-light dark:text-text-primary-dark mb-3">Contact Us</h4>
-                <div class="flex flex-col gap-3 text-sm">
-                  <div class="flex items-start gap-3">
-                    <span class="material-symbols-outlined text-base mt-0.5">location_on</span>
-                    <p>123 University Drive,<br/>Valley View, USA 12345</p>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-base">call</span>
-                    <p>(123) 456-7890</p>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-base">mail</span>
-                    <p>registrar@vvu.edu</p>
-                  </div>
-                  <div class="flex items-start gap-3">
-                    <span class="material-symbols-outlined text-base mt-0.5">schedule</span>
-                    <p>Mon-Fri, 9am - 5pm</p>
-                  </div>
+        
+        <div class="container relative z-10 py-24">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-10 py-4 mb-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-xl md:text-2xl font-black tracking-widest uppercase text-yellow-400"><?php echo strip_tags(getContent($pageContent, 'hero_section', 'badge_text', 'Administrative Excellence')); ?></span>
                 </div>
-              </div>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-10 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_main', 'Office of the')); ?> <br>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-4"><?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_highlight', 'Registrar')); ?></span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    "<?php echo strip_tags(getContent($pageContent, 'hero_section', 'subtitle', 'Your partner in academic success. We are committed to providing exceptional service to the Valley View University community from registration to graduation.')); ?>"
+                </p>
             </div>
-          </aside>
-          <!-- Main Content -->
-          <main class="w-full lg:w-3/4 flex flex-col gap-10">
-            <!-- About Us Section -->
-            <section>
-              <h3 class="text-text-primary-light dark:text-text-primary-dark text-2xl font-bold leading-tight tracking-[-0.015em] px-4 pb-2">About Us</h3>
-              <p class="px-4 text-base leading-relaxed">The Office of the Registrar at Valley View University is dedicated to supporting the academic journey of our students from registration to graduation. We manage student records, course information, and academic policies with integrity and accuracy, ensuring a seamless experience for students, faculty, and staff.</p>
-            </section>
-            <!-- Our Services Section -->
-            <section>
-              <h3 class="text-text-primary-light dark:text-text-primary-dark text-2xl font-bold leading-tight tracking-[-0.015em] px-4 pb-4">Our Services</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 flex flex-col gap-3">
-                  <div class="text-accent"><span class="material-symbols-outlined !text-3xl">verified_user</span></div>
-                  <h4 class="font-bold text-text-primary-light dark:text-text-primary-dark">Enrollment Verification</h4>
-                  <p class="text-sm">We provide official verification of student enrollment status for scholarships, insurance, and other needs.</p>
-                  <a class="text-secondary dark:text-accent font-bold text-sm mt-2" href="#">Learn More →</a>
-                </div>
-                <div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 flex flex-col gap-3">
-                  <div class="text-accent"><span class="material-symbols-outlined !text-3xl">school</span></div>
-                  <h4 class="font-bold text-text-primary-light dark:text-text-primary-dark">Graduation Services</h4>
-                  <p class="text-sm">Assisting with diploma applications, degree audits, and commencement information to celebrate your achievement.</p>
-                  <a class="text-secondary dark:text-accent font-bold text-sm mt-2" href="#">Learn More →</a>
-                </div>
-                <div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 flex flex-col gap-3">
-                  <div class="text-accent"><span class="material-symbols-outlined !text-3xl">history_edu</span></div>
-                  <h4 class="font-bold text-text-primary-light dark:text-text-primary-dark">Student Records</h4>
-                  <p class="text-sm">Maintaining the accuracy and privacy of your academic records, including grades and personal information.</p>
-                  <a class="text-secondary dark:text-accent font-bold text-sm mt-2" href="#">Learn More →</a>
-                </div>
-                <div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 flex flex-col gap-3">
-                  <div class="text-accent"><span class="material-symbols-outlined !text-3xl">event_available</span></div>
-                  <h4 class="font-bold text-text-primary-light dark:text-text-primary-dark">Course Scheduling</h4>
-                  <p class="text-sm">Managing the university's academic timetable and classroom scheduling to facilitate your learning.</p>
-                  <a class="text-secondary dark:text-accent font-bold text-sm mt-2" href="#">Learn More →</a>
-                </div>
-              </div>
-            </section>
-            <!-- FAQ Section -->
-            <section>
-              <h3 class="text-text-primary-light dark:text-text-primary-dark text-2xl font-bold leading-tight tracking-[-0.015em] px-4 pb-4">Frequently Asked Questions</h3>
-              <div class="flex flex-col gap-3">
-                <details class="group bg-surface-light dark:bg-surface-dark rounded-xl p-4 cursor-pointer">
-                  <summary class="flex items-center justify-between font-medium text-text-primary-light dark:text-text-primary-dark">How do I request an official transcript? <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span></summary>
-                  <p class="text-sm mt-3 pt-3 border-t border-surface-light dark:border-gray-600">You can request an official transcript through the National Student Clearinghouse. The link is available under our "Forms &amp; Documents" section. Both electronic and paper transcripts are available.</p>
-                </details>
-                <details class="group bg-surface-light dark:bg-surface-dark rounded-xl p-4 cursor-pointer">
-                  <summary class="flex items-center justify-between font-medium text-text-primary-light dark:text-text-primary-dark">What is the deadline to add or drop a class? <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span></summary>
-                  <p class="text-sm mt-3 pt-3 border-t border-surface-light dark:border-gray-600">The add/drop deadline varies by semester. Please refer to the official Academic Calendar for the most up-to-date information on important deadlines.</p>
-                </details>
-                <details class="group bg-surface-light dark:bg-surface-dark rounded-xl p-4 cursor-pointer">
-                  <summary class="flex items-center justify-between font-medium text-text-primary-light dark:text-text-primary-dark">How do I change my major? <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span></summary>
-                  <p class="text-sm mt-3 pt-3 border-t border-surface-light dark:border-gray-600">To change your major, you must complete the "Change of Major" form, obtain the required signatures from your new academic advisor, and submit it to our office for processing.</p>
-                </details>
-              </div>
-            </section>
-          </main>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
+    </section>
+
+    <!-- Registrar Profile Section -->
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="flex flex-col lg:flex-row gap-16 items-center lg:items-start">
+                <!-- Profile Image -->
+                <div class="w-full lg:w-1/3 animate-fadeInUp">
+                    <div class="relative group">
+                        <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-yellow-400 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                        <div class="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
+                            <img src="<?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'profile_image', 'https://vvu.edu.gh/images/2021/04/20/mr-ibrah-web.jpg')); ?>" 
+                                 alt="<?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'name', 'Albert Kweku Imbrah')); ?>" class="w-full h-full object-cover">
+                        </div>
+                        <div class="mt-8 text-center lg:text-left">
+                            <h2 class="text-4xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'name', 'Albert Kweku Imbrah')); ?></h2>
+                            <p class="text-xl font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider"><?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'title', 'Registrar')); ?></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Content -->
+                <div class="w-full lg:w-2/3 space-y-10 animate-fadeInUp" style="animation-delay: 0.2s;">
+                    <div>
+                        <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'section_title', 'Profile & Background')); ?></h3>
+                        <div class="h-2 w-24 bg-yellow-400 rounded-full mb-8"></div>
+                        <div class="space-y-6 text-5xl sm:text-6xl font-bold text-gray-700 dark:text-gray-300 leading-relaxed">
+                            <p>
+                                <?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'bio_paragraph_1', 'Albert Kweku Imbrah joined Valley View University on March 1, 2006, having been appointed to set up and run the University\'s Human Resource Department. His experience at Valley View University spans three administrations with each serving for a quinquennium.')); ?>
+                            </p>
+                            <p>
+                                <?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'bio_paragraph_2', 'With extensive experience of the workings of the administrative machinery of the contemporary tertiary academic landscape coupled with his strong leadership capabilities, the Registrar\'s collaborative vision is to engender an administrative apparatus that ensures the University becomes a leading centre of excellence for value-based Christian Education.')); ?>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="p-8 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border-l-8 border-blue-600">
+                            <span class="material-symbols-outlined text-5xl text-blue-600 mb-4">school</span>
+                            <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'credentials_title', 'Academic Credentials')); ?></h4>
+                            <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'credentials_text', 'MA in Human Resource Management, BA in Social Science, LLB from KNUST')); ?></p>
+                        </div>
+                        <div class="p-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl border-l-8 border-yellow-500">
+                            <span class="material-symbols-outlined text-5xl text-yellow-500 mb-4">workspace_premium</span>
+                            <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'membership_title', 'Professional Membership')); ?></h4>
+                            <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags(getContent($pageContent, 'registrar_profile', 'membership_text', 'Member, Institute of Human Resource Practitioners, Ghana')); ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Services Section -->
+    <section class="py-24 bg-gray-50 dark:bg-gray-950">
+        <div class="container">
+            <div class="max-w-4xl mx-auto text-center mb-20">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(getContent($pageContent, 'our_services', 'section_title', 'Our Services')); ?></h2>
+                <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
+                <p class="text-4xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                    <?php echo strip_tags(getContent($pageContent, 'our_services', 'section_subtitle', 'The Office of the Registrar provides comprehensive administrative support for students, faculty, and staff throughout your academic journey.')); ?>
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Service Card 1 -->
+                <div class="service-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+                    <div class="w-20 h-20 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">verified_user</span>
+                    </div>
+                    <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'our_services', 'service_1_title', 'Enrollment Verification')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'our_services', 'service_1_description', 'Official verification of student enrollment status for scholarships, insurance, loans, and other requirements.')); ?>
+                    </p>
+                </div>
+
+                <!-- Service Card 2 -->
+                <div class="service-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+                    <div class="w-20 h-20 rounded-2xl bg-yellow-500 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">description</span>
+                    </div>
+                    <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'our_services', 'service_2_title', 'Transcripts & Records')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'our_services', 'service_2_description', 'Processing official transcripts, maintaining accurate academic records, and ensuring data privacy.')); ?>
+                    </p>
+                </div>
+
+                <!-- Service Card 3 -->
+                <div class="service-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+                    <div class="w-20 h-20 rounded-2xl bg-green-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">app_registration</span>
+                    </div>
+                    <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'our_services', 'service_3_title', 'Course Registration')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'our_services', 'service_3_description', 'Guidance and support for course registration, add/drop procedures, and schedule changes.')); ?>
+                    </p>
+                </div>
+
+                <!-- Service Card 4 -->
+                <div class="service-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+                    <div class="w-20 h-20 rounded-2xl bg-purple-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">school</span>
+                    </div>
+                    <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'our_services', 'service_4_title', 'Graduation Services')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'our_services', 'service_4_description', 'Diploma applications, degree audits, commencement information, and graduation clearance.')); ?>
+                    </p>
+                </div>
+
+                <!-- Service Card 5 -->
+                <div class="service-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+                    <div class="w-20 h-20 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">event_available</span>
+                    </div>
+                    <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'our_services', 'service_5_title', 'Academic Calendar')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'our_services', 'service_5_description', 'Managing the university\'s academic timetable, exam schedules, and important deadlines.')); ?>
+                    </p>
+                </div>
+
+                <!-- Service Card 6 -->
+                <div class="service-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+                    <div class="w-20 h-20 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">folder_open</span>
+                    </div>
+                    <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'our_services', 'service_6_title', 'Forms & Documents')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'our_services', 'service_6_description', 'Access to academic forms, policy documents, and essential university paperwork.')); ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Links Section -->
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="max-w-4xl mx-auto text-center mb-16">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'section_title', 'Quick Links')); ?></h2>
+                <p class="text-4xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'section_description', 'Frequently accessed services and resources for your convenience.')); ?></p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="<?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_1_url', '#')); ?>" class="group p-8 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:-translate-y-2 border-2 border-transparent hover:border-blue-600">
+                    <div class="text-blue-600 mb-4">
+                        <span class="material-symbols-outlined text-5xl">description</span>
+                    </div>
+                    <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_1_text', 'Request Transcript')); ?></h4>
+                    <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_1_sub', 'Order official transcripts')); ?></p>
+                </a>
+
+                <a href="<?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_2_url', 'academic_calendar.php')); ?>" class="group p-8 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all hover:-translate-y-2 border-2 border-transparent hover:border-yellow-500">
+                    <div class="text-yellow-500 mb-4">
+                        <span class="material-symbols-outlined text-5xl">calendar_month</span>
+                    </div>
+                    <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_2_text', 'Academic Calendar')); ?></h4>
+                    <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_2_sub', 'View important dates')); ?></p>
+                </a>
+
+                <a href="<?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_3_url', '#')); ?>" class="group p-8 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:-translate-y-2 border-2 border-transparent hover:border-green-600">
+                    <div class="text-green-600 mb-4">
+                        <span class="material-symbols-outlined text-5xl">folder_shared</span>
+                    </div>
+                    <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_3_text', 'Download Forms')); ?></h4>
+                    <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_3_sub', 'Access academic forms')); ?></p>
+                </a>
+
+                <a href="<?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_4_url', '#')); ?>" class="group p-8 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:-translate-y-2 border-2 border-transparent hover:border-purple-600">
+                    <div class="text-purple-600 mb-4">
+                        <span class="material-symbols-outlined text-5xl">gavel</span>
+                    </div>
+                    <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_4_text', 'Academic Policies')); ?></h4>
+                    <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags(getContent($pageContent, 'quick_links', 'link_4_sub', 'View university policies')); ?></p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-24 bg-gray-50 dark:bg-gray-950">
+        <div class="container">
+            <div class="glass p-12 rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800">
+                <div class="text-center mb-12">
+                    <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'section_title', 'Get in Touch')); ?></h3>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'section_description', 'We\'re here to assist you with all your academic needs.')); ?></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center p-8 rounded-3xl bg-white dark:bg-gray-900 shadow-lg border border-gray-100 dark:border-gray-800">
+                        <div class="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mx-auto mb-6">
+                            <span class="material-symbols-outlined text-4xl">mail</span>
+                        </div>
+                        <p class="text-lg font-black text-gray-400 uppercase tracking-widest mb-2">Email</p>
+                        <a href="mailto:<?php echo strip_tags(getContent($pageContent, 'contact_section', 'email', 'registrar@vvu.edu.gh')); ?>" class="text-3xl font-bold text-gray-900 dark:text-white hover:text-blue-600 transition-colors"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'email', 'registrar@vvu.edu.gh')); ?></a>
+                    </div>
+                    <div class="text-center p-8 rounded-3xl bg-white dark:bg-gray-900 shadow-lg border border-gray-100 dark:border-gray-800">
+                        <div class="w-16 h-16 rounded-2xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 mx-auto mb-6">
+                            <span class="material-symbols-outlined text-4xl">call</span>
+                        </div>
+                        <p class="text-lg font-black text-gray-400 uppercase tracking-widest mb-2">Phone</p>
+                        <a href="tel:<?php echo strip_tags(getContent($pageContent, 'contact_section', 'phone', '+233307051149')); ?>" class="text-3xl font-bold text-gray-900 dark:text-white hover:text-yellow-600 transition-colors"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'phone', '+233 (0) 307 051 149')); ?></a>
+                    </div>
+                    <div class="text-center p-8 rounded-3xl bg-white dark:bg-gray-900 shadow-lg border border-gray-100 dark:border-gray-800">
+                        <div class="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 mx-auto mb-6">
+                            <span class="material-symbols-outlined text-4xl">location_on</span>
+                        </div>
+                        <p class="text-lg font-black text-gray-400 uppercase tracking-widest mb-2">Location</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'office_location', 'Admin Block, Oyibi Campus')); ?></p>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-8 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border-l-8 border-blue-600">
+                    <div class="flex items-start gap-6">
+                        <span class="material-symbols-outlined text-5xl text-blue-600 mt-1">schedule</span>
+                        <div>
+                            <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'hours_title', 'Office Hours')); ?></h4>
+                            <p class="text-3xl text-gray-700 dark:text-gray-300 font-bold"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'hours_text', 'Monday - Friday: 8:00 AM - 5:00 PM')); ?></p>
+                            <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium mt-2"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'hours_sub', 'Closed on weekends and public holidays')); ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="relative py-24 overflow-hidden">
+        <div class="absolute inset-0 bg-blue-900"></div>
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[150px] -mr-72 -mt-72"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -ml-72 -mb-72"></div>
+        
+        <div class="container relative z-10">
+            <div class="max-w-5xl mx-auto text-center">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight tracking-tight">
+                    <?php echo strip_tags(getContent($pageContent, 'cta_section', 'cta_title', 'Need Assistance?')); ?> <br><span class="text-yellow-400 text-6xl sm:text-7xl md:text-8xl lg:text-6xl block mt-2"><?php echo strip_tags(getContent($pageContent, 'cta_section', 'cta_highlight', 'We\'re Here to Help')); ?></span>
+                </h2>
+                <p class="text-2xl sm:text-3xl md:text-4xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
+                    <?php echo strip_tags(getContent($pageContent, 'cta_section', 'cta_description', 'Have questions about registration, transcripts, or academic records? Contact the Office of the Registrar today.')); ?>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                    <a href="<?php echo strip_tags(getContent($pageContent, 'cta_section', 'button_1_url', 'contact_us.php')); ?>" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">mail</span>
+                        <?php echo strip_tags(getContent($pageContent, 'cta_section', 'button_1_text', 'Contact Us')); ?>
+                    </a>
+                    <a href="<?php echo strip_tags(getContent($pageContent, 'cta_section', 'button_2_url', 'apply.php')); ?>" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">how_to_reg</span>
+                        <?php echo strip_tags(getContent($pageContent, 'cta_section', 'button_2_text', 'Apply Now')); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
 
 <?php
 include 'includes/footer.php';

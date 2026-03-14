@@ -8,7 +8,7 @@ $activePage = "academics";
 <main class="flex-1">
 <!-- HeroSection -->
 <div class="px-4 md:px-8 lg:px-16 py-10 md:py-20">
-<div class="mx-auto max-w-7xl @container">
+<div class="container @container">
 <div class="@[480px]:p-0">
 <div class="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 rounded-xl items-center justify-center p-4 text-center" data-alt="Faculty members collaborating with students in a modern university setting" style='background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCe0XB0Dje9wLQ_LevvWRCtTawVC5cN9xy0tuqupErU9EHnd0urF5XghY5Ujfne0BcSSPEiLJvrqnIq98pXD9jxUkozsaD_2YHibAG0iBBOU_Iut5QGcmFQirnRU6R2fyes-M3HreqxJcmDGWRHmclgKvHWKFqADXMBvTLSGBg4rQfeB1WhiHqnQkFu2C-XqXB4-xo9B3QQ0wzAue_jYCz2GEz7SzF3FJat9OI2ve8mEOc--0jpMZRRBprM0qjdA0fQ8L4h8gvCXDKI");'>
 <div class="flex flex-col gap-4">
@@ -20,7 +20,7 @@ $activePage = "academics";
 </div>
 </div>
 <div class="px-4 md:px-8 lg:px-16 pb-16">
-<div class="mx-auto max-w-7xl flex flex-col gap-8">
+<div class="container flex flex-col gap-8">
 <!-- Chips/Filters -->
 <div class="flex flex-wrap items-center gap-3">
 <p class="text-sm font-medium mr-2">Filter by:</p>

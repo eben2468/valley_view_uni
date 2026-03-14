@@ -8,7 +8,7 @@ include 'includes/header.php';
 <!-- HeroSection -->
 <section class="relative">
 <div class="flex min-h-[560px] flex-col items-start justify-end bg-cover bg-center bg-no-repeat px-6 py-16 md:px-12 md:py-24" data-alt="Students collaborating on a project in a modern university computer lab." style='background-image: linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAW95d0dbX4loaPFiLcG31lrT7GovHdxFE7MvbKfOtDYpQq2KFuRvuSnnOFQLZTlYTZwheikwsBDQ1cWYnpSyIaepQ4vhMFomCxo2jN5ARRgls5zHfhQZOaOQgV5_AALKEaOLE24yPM3rk_9a5iBQ4_XieMa0uMrHUgZcD1vnDql0ZP79_9sRvXf94xOeXgTbJmAtSDtkQkemgvqZjlVTyj2acoe8k9BInmWBEEwyUzYIbm7vY7ubTetXZbSzz4e3HJ_yQo9lJddl0G");'>
-<div class="mx-auto w-full max-w-7xl">
+<div class="container w-full">
 <div class="flex flex-col gap-4 text-left max-w-3xl">
 <h1 class="text-white text-4xl font-black leading-tight tracking-tighter md:text-6xl">B.S. in Computer Science</h1>
 <p class="text-white/90 text-lg font-normal leading-relaxed md:text-xl">Shaping the future of technology, one line of code at a time. Discover our innovative curriculum and world-class faculty.</p>
@@ -26,7 +26,7 @@ include 'includes/header.php';
 </section>
 <!-- Sticky Tabs -->
 <nav class="sticky top-[69px] z-40 bg-off-white/80 dark:bg-background-dark/80 backdrop-blur-md">
-<div class="mx-auto max-w-7xl border-b border-gray-200 dark:border-gray-800">
+<div class="container border-b border-gray-200 dark:border-gray-800">
 <div class="flex px-6 gap-8">
 <a class="flex flex-col items-center justify-center border-b-[3px] border-b-vibrant-blue text-dark-charcoal dark:text-off-white pb-3 pt-4" href="#overview">
 <p class="text-sm font-bold tracking-wide">Overview</p>
@@ -43,7 +43,7 @@ include 'includes/header.php';
 </div>
 </div>
 </nav>
-<div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 space-y-24">
+<div class="container px-6 py-16 sm:py-24 space-y-24">
 <!-- Stats -->
 <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 <div class="flex flex-row items-center gap-4 rounded-xl p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50">

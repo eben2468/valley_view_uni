@@ -1,187 +1,258 @@
 <?php
-$pageTitle = "Valley View University Water Factory";
-$activePage = "ventures";
+$page_title = "Water Factory - Valley View University";
+$active_page = "ventures";
 include 'includes/header.php';
+require_once 'includes/db_connect.php';
+
+$stmt = $pdo->prepare("SELECT * FROM ventures_pages_content WHERE page_key = 'water_factory'");
+$stmt->execute();
+$content = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->prepare("SELECT * FROM ventures_pages_sections WHERE page_key = 'water_factory' ORDER BY display_order");
+$stmt->execute();
+$sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$sections_map = [];
+foreach ($sections as $s) $sections_map[$s['section_key']] = $s;
+
+$stmt = $pdo->prepare("SELECT * FROM ventures_pages_items WHERE page_key = 'water_factory' AND is_active = 1 ORDER BY section_key, display_order");
+$stmt->execute();
+$all_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$items = [];
+foreach ($all_items as $item) $items[$item['section_key']][] = $item;
+
+$stmt = $pdo->prepare("SELECT * FROM ventures_pages_stats WHERE page_key = 'water_factory' ORDER BY display_order");
+$stmt->execute();
+$stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+if (!$content) {
+    $content = ['hero_badge'=>'VVU Ventures','hero_title'=>'Water Factory','hero_subtitle'=>'Pure, Safe & Refreshing','hero_description'=>'','hero_image'=>'','about_heading'=>'','about_text'=>'','about_image'=>'','banner_image'=>'','cta_heading'=>'','cta_subtitle'=>'','cta_text'=>'','contact_phone'=>'','contact_location'=>'','contact_address'=>''];
+}
 ?>
 
-<main class="flex-grow">
-<!-- HeroSection -->
-<section class="relative">
-<div class="flex min-h-[60vh] md:min-h-[75vh] flex-col gap-6 bg-cover bg-center bg-no-repeat items-center justify-center p-4 text-center" data-alt="Abstract image of flowing, pure water" style='background-image: linear-gradient(rgba(10, 42, 91, 0.6) 0%, rgba(10, 42, 91, 0.8) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAXCKbNczcm4HaqAIa9kvYGLFZ-9n1fhskepGNxgC6vzqo-3HIDZuo8MrZLOL3FcREEpUA_RjP7A71CSoA-sHbq69DypseQqUlFwpL1RDLPmwx9sxTw0Dcer3b_PdfJwQ6p_gC9IB6QosIOnN1OAu03kGUHNY8K_q9msfPbYVWtFAE2gR6hJ2pvkvOjSTcBCelbhpJU5SuObA3H-JuQCNTvr9TeTOoc0hIiU28gdVCJ70TmrJCAtnzb-mJldTnwRXmesRwXkZdbJxBf");'>
-<div class="flex flex-col gap-4 max-w-3xl">
-<h1 class="text-white text-4xl font-black leading-tight tracking-tighter md:text-6xl">
-                            Purely VVU: Refreshing Our Community
-                        </h1>
-<h2 class="text-white/90 text-base font-normal leading-normal md:text-lg">
-                            Experience the purity of nature, bottled with care. Sourced and produced with the highest standards, right here at Valley View University.
-                        </h2>
-</div>
-</div>
-</section>
-<!-- Sticky Tabs -->
-<div class="sticky top-[68px] z-40 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
-<div class="max-w-7xl mx-auto">
-<div class="border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8">
-<div class="flex justify-center">
-<a class="flex flex-col items-center justify-center border-b-2 border-b-secondary text-primary dark:text-secondary pb-3 pt-4 px-4 sm:px-6" href="#products">
-<p class="text-sm font-bold tracking-wide">Our Products</p>
-</a>
-<a class="flex flex-col items-center justify-center border-b-2 border-b-transparent text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-secondary hover:border-secondary/50 pb-3 pt-4 px-4 sm:px-6 transition-colors" href="#process">
-<p class="text-sm font-bold tracking-wide">The Process</p>
-</a>
-<a class="flex flex-col items-center justify-center border-b-2 border-b-transparent text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-secondary hover:border-secondary/50 pb-3 pt-4 px-4 sm:px-6 transition-colors" href="#quality">
-<p class="text-sm font-bold tracking-wide">Quality</p>
-</a>
-<a class="flex flex-col items-center justify-center border-b-2 border-b-transparent text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-secondary hover:border-secondary/50 pb-3 pt-4 px-4 sm:px-6 transition-colors" href="#contact">
-<p class="text-sm font-bold tracking-wide">Contact</p>
-</a>
-</div>
-</div>
-</div>
-</div>
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 space-y-24">
-<!-- Introduction Text -->
-<section class="text-center max-w-3xl mx-auto">
-<p class="text-lg md:text-xl font-normal leading-relaxed text-slate-600 dark:text-slate-300">
-                        Valley View Water Factory is a university-led venture dedicated to providing our community with pure, safe, and refreshing drinking water. We combine modern technology with a commitment to sustainability and student empowerment.
-                    </p>
-</section>
-<!-- Product Showcase -->
-<section id="products">
-<div class="text-center mb-12">
-<h2 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Our Products</h2>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
-<div class="flex flex-col items-center text-center group">
-<div class="relative w-40 h-80 mb-4 transition-transform duration-300 group-hover:scale-105">
-<img alt="500ml bottle of Valley View University water" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvxfyX8Ku4B5teq2WW3rKVmJKbUh-2ZiwLQQaE1W1y4oS5LEUauW1ClXlBrYt8qSkP1MN5c6RDSy_cpMAGG5sA-Ny8f2ERFfnb7IIm19ia1jtc9_3cRwv2j-j57ab8vvhILwoeTMCeQB90UJMyIAmAfK8EnNqsNmIG69U1Jp-L39hcx6I_5nztUxQoWns3LFuwvoM7onstE3Cz69h0lrGpghF-S6ec6W1IQsFFtreq5ixb7yrXqnSrgvt7YkbAbInP6TkAVe5pAebz"/>
-</div>
-<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">500ml Bottle</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Perfect for on-the-go hydration</p>
-</div>
-<div class="flex flex-col items-center text-center group">
-<div class="relative w-56 h-96 mb-4 transition-transform duration-300 group-hover:scale-105">
-<img alt="1.5L bottle of Valley View University water" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVsVfV-JA8mBevf7EkdvIQDiKBz0HLpKKVERyLo-DSdg23t6nzSC9vXaSfgEAIQygN-TPIe6fdPqNmLJxbHbtxeurG7VK2IVRdV6oXUoAW5LpXYFJwJMLAi2O1yxOlPUF_ZRj9fPCJuX-lxXb2NmFUI_Ud-J4jHGDgyW2SzOFNrkE-JNyBHWzNgL-cf2e_GeCa76POJaKFCu2Pz2JfuFru0RUtKlbe8MSIREdPPrZvboH9NRwMgaPslo-MpG-ENfQEgnWEwRTDewG6"/>
-</div>
-<h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">1.5L Bottle</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Ideal for family and office use</p>
-</div>
-<div class="flex flex-col items-center text-center group">
-<div class="relative w-40 h-80 mb-4 transition-transform duration-300 group-hover:scale-105">
-<img alt="Sachet of Valley View University water" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjhfjJMa24bQsSStwwh2o134H5tY2woogEBvY0DWKxi6rSN0zRsdzYBDRPcX-2U-wJ23wkgByOOnesS3fgCsAI74BI2hdFHldeqvU_vFGb33-V7SsPuPt_31puUmpF0KlxGIxWo05lI0eCDYhCtevwHn3hAnYlp0ixRTpAFusMs-9itm1oDe7lIXbMHiXGgLuM-3iKkdGxCEG7SOM7Ijxb9tFfc8pLrlP7v2jxzNoHBtRuJPnbb0GhLvlCaUkoZ9H-jQcgSGHGH5fj"/>
-</div>
-<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Sachet Water</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Convenient and affordable purity</p>
-</div>
-</div>
-</section>
-<!-- The Process -->
-<section id="process">
-<div class="text-center mb-12">
-<h2 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Our Purification Process</h2>
-<p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-300">From natural source to sealed bottle, every step is meticulously managed for unparalleled purity.</p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-<div class="flex flex-col items-center p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm">
-<div class="flex items-center justify-center size-12 mb-4 rounded-full bg-secondary/10 text-secondary">
-<span class="material-symbols-outlined">filter_alt</span>
-</div>
-<h3 class="text-lg font-bold mb-2 text-slate-800 dark:text-slate-100">Advanced Filtration</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Multi-stage micro-filtration and reverse osmosis remove impurities while retaining essential minerals.</p>
-</div>
-<div class="flex flex-col items-center p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm">
-<div class="flex items-center justify-center size-12 mb-4 rounded-full bg-secondary/10 text-secondary">
-<span class="material-symbols-outlined">science</span>
-</div>
-<h3 class="text-lg font-bold mb-2 text-slate-800 dark:text-slate-100">UV Sterilization</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Water is passed through UV light chambers to ensure it's free from any harmful microorganisms.</p>
-</div>
-<div class="flex flex-col items-center p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm">
-<div class="flex items-center justify-center size-12 mb-4 rounded-full bg-secondary/10 text-secondary">
-<span class="material-symbols-outlined">local_shipping</span>
-</div>
-<h3 class="text-lg font-bold mb-2 text-slate-800 dark:text-slate-100">Automated Bottling</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Our state-of-the-art facility ensures a hygienic, hands-free bottling and sealing process.</p>
-</div>
-</div>
-</section>
-<!-- Quality Section -->
-<section id="quality">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-<div>
-<h2 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">A Commitment to Quality</h2>
-<p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
-                                We adhere to the strictest national and international standards to guarantee the safety and quality of every drop.
-                            </p>
-<ul class="mt-8 space-y-4">
-<li class="flex items-start">
-<div class="flex-shrink-0 flex items-center justify-center size-6 rounded-full bg-green-500 text-white mr-4 mt-1">
-<span class="material-symbols-outlined text-base">done</span>
-</div>
-<p class="text-slate-600 dark:text-slate-300"><span class="font-bold text-slate-800 dark:text-slate-100">FDA Approved:</span> Fully certified by the Food and Drugs Authority, meeting all regulatory requirements.</p>
-</li>
-<li class="flex items-start">
-<div class="flex-shrink-0 flex items-center justify-center size-6 rounded-full bg-green-500 text-white mr-4 mt-1">
-<span class="material-symbols-outlined text-base">done</span>
-</div>
-<p class="text-slate-600 dark:text-slate-300"><span class="font-bold text-slate-800 dark:text-slate-100">Regular Testing:</span> Our in-house lab conducts hourly quality checks on every production batch.</p>
-</li>
-<li class="flex items-start">
-<div class="flex-shrink-0 flex items-center justify-center size-6 rounded-full bg-green-500 text-white mr-4 mt-1">
-<span class="material-symbols-outlined text-base">done</span>
-</div>
-<p class="text-slate-600 dark:text-slate-300"><span class="font-bold text-slate-800 dark:text-slate-100">Eco-Friendly Packaging:</span> We use recyclable materials and are committed to reducing our environmental footprint.</p>
-</li>
-</ul>
-</div>
-<div class="aspect-w-4 aspect-h-3">
-<img alt="Scientist in a lab coat holding a beaker of clear water, representing quality control." class="w-full h-full object-cover rounded-xl shadow-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNVcThmbACjczdDRt4TfSWR1JqS1mFmf2mHRjP8Z_r2aJ54-FqG8AvPlfo4wxUZHJrtKlFZXwtf6UOGJF4mr1MxINz6AeQ1w6lWDoaTqsJSlJ6feoufP_xfUXMw316Kcf4mhDEupaqHT02p0QGVXp0ZUyTnl1WaYthOVF9MOYgC9yJsfEqj4s3mqfpaSQUaf-KdmM6aphq5zFtRGFYg0GPm3fQEmjdyPyIJZtH_XpQZhM13dJNZXPmsomE34jy87D4drjSnX2FlSKh"/>
-</div>
-</div>
-</section>
-</div>
-<!-- CTA Block -->
-<section>
-<div class="flex flex-col gap-6 bg-cover bg-center bg-no-repeat items-center justify-center p-8 md:p-16 text-center my-16" data-alt="Modern water bottling factory machinery" style='background-image: linear-gradient(rgba(66, 165, 245, 0.8), rgba(10, 42, 91, 0.9)), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBIF8_KgbDuPgwdslKE00IT-f3qYkkihHaS14my07vGh5dX5LNhO1b8-q5iUHuLBdZ5t82z42sV-ka8EiQOgwZj-vJOSr6f_sH1KrQWHEi4xZrt9-DbPu-UYT-6EuY-B0p_dFdjl2Nzuj8ah4qfTEXDlx0iJzzqF5q10D71JmOqfviu_NUKV8PoKotRXyMJJSRVGdXh-YC-IecAWHBrMEzRf3RHhZ-HDu4PLh87EbWeYGRJHVFphKZTi9uUJVlT9s-62HAtIdEC9YDT");'>
-<div class="flex flex-col gap-4 max-w-3xl">
-<h2 class="text-white text-3xl font-bold tracking-tight md:text-4xl">Become a Distributor</h2>
-<p class="text-white/90 text-base md:text-lg">Join us in our mission to provide pure, refreshing water to communities everywhere. Partner with a brand built on trust and quality.</p>
-</div>
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-white text-primary text-base font-bold tracking-wide hover:bg-white/90 transition-colors">
-<span class="truncate">Distributor Inquiries</span>
-</button>
-</div>
-</section>
-<!-- Contact & Location -->
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24" id="contact">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-<div>
-<h2 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Get In Touch</h2>
-<p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
-                            Have questions or want to place a bulk order? Our team is ready to assist you.
-                        </p>
-<div class="mt-8 space-y-4">
-<div class="flex items-center gap-4">
-<span class="material-symbols-outlined text-secondary text-2xl">location_on</span>
-<span class="text-slate-600 dark:text-slate-300">Valley View University, Oyibi, Accra, Ghana</span>
-</div>
-<div class="flex items-center gap-4">
-<span class="material-symbols-outlined text-secondary text-2xl">call</span>
-<span class="text-slate-600 dark:text-slate-300">+233 123 456 789</span>
-</div>
-<div class="flex items-center gap-4">
-<span class="material-symbols-outlined text-secondary text-2xl">mail</span>
-<span class="text-slate-600 dark:text-slate-300">water@vvu.edu.gh</span>
-</div>
-</div>
-</div>
-<div class="w-full h-80 rounded-xl overflow-hidden shadow-lg">
-<iframe allowfullscreen="" class="w-full h-full" data-location="Valley View University, Oyibi, Accra, Ghana" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3969.5779777995163!2d-0.1293296852329864!3d5.77258399580482!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf7d3ab7b0a7c9%3A0x64421b333cb9112!2sValley%20View%20University!5e0!3m2!1sen!2sgh!4v1678886475253!5m2!1sen!2sgh" style="border:0;"></iframe>
-</div>
-</div>
-</section>
+<style>
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slowZoom { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+    .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); }
+    .dark .glass { background: rgba(31,41,55,0.7); border: 1px solid rgba(255,255,255,0.1); }
+    .product-card { transition: all 0.3s ease; }
+    .product-card:hover { transform: translateY(-10px); }
+    .water-gradient { background: linear-gradient(135deg, #0077b6 0%, #00b4d8 50%, #90e0ef 100%); }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero -->
+    <section class="relative min-h-[65vh] flex items-center overflow-hidden bg-gray-900">
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags($content['hero_image']); ?>" alt="VVU Water Factory" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-cyan-900/80 via-blue-900/40 to-gray-900"></div>
+        </div>
+        <div class="container relative z-10 py-24">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-10 py-4 mb-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span class="text-xl md:text-2xl font-black tracking-widest uppercase text-cyan-400"><?php echo strip_tags($content['hero_badge']); ?></span>
+                </div>
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-10 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo strip_tags($content['hero_title']); ?> <br>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-200 to-cyan-500 block mt-4"><?php echo strip_tags($content['hero_subtitle']); ?></span>
+                </h1>
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    <?php echo strip_tags($content['hero_description']); ?>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Banner Ad -->
+    <?php if (!empty($content['banner_image'])): ?>
+    <section class="w-full">
+        <img src="<?php echo strip_tags($content['banner_image']); ?>" alt="VVU Water Factory Advertisement" class="w-full h-auto object-cover">
+    </section>
+    <?php endif; ?>
+
+    <!-- About -->
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="max-w-7xl mx-auto text-center">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-8"><?php echo strip_tags($content['about_heading']); ?></h2>
+                <div class="h-2 w-40 bg-cyan-600 mx-auto rounded-full mb-12"></div>
+                <p class="text-2xl md:text-[1.75rem] lg:text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed max-w-6xl mx-auto"><?php echo strip_tags($content['about_text']); ?></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <?php $sec = $sections_map['products'] ?? null; if ($sec && !empty($items['products'])): ?>
+    <section class="py-24 bg-gray-50 dark:bg-gray-800/50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto text-center mb-20">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($sec['section_title']); ?></h2>
+                <div class="h-2 w-40 bg-cyan-600 mx-auto rounded-full mb-8"></div>
+                <p class="text-2xl md:text-[1.75rem] lg:text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($sec['section_subtitle']??''); ?></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 max-w-7xl mx-auto">
+                <?php foreach ($items['products'] as $prod): ?>
+                <div class="product-card relative group">
+                    <div class="relative h-full glass p-10 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($prod['item_color']); ?> flex flex-col items-center text-center">
+                        <div class="w-28 h-28 rounded-3xl water-gradient flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-6xl text-white"><?php echo strip_tags($prod['item_icon']); ?></span>
+                        </div>
+                        <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($prod['item_title']); ?></h3>
+                        <p class="text-2xl text-gray-600 dark:text-gray-400 leading-relaxed mb-6"><?php echo strip_tags($prod['item_description']); ?></p>
+                        <?php if (!empty($prod['item_stat_value'])): ?>
+                        <div class="mt-auto px-6 py-3 bg-cyan-100 dark:bg-cyan-900/30 rounded-full">
+                            <span class="text-xl font-bold text-cyan-700 dark:text-cyan-300"><?php echo strip_tags($prod['item_stat_value']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Process -->
+    <?php $sec = $sections_map['process'] ?? null; if ($sec && !empty($items['process'])): ?>
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto text-center mb-20">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($sec['section_title']); ?></h2>
+                <div class="h-2 w-40 bg-cyan-600 mx-auto rounded-full mb-8"></div>
+                <p class="text-2xl md:text-[1.75rem] lg:text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($sec['section_subtitle']??''); ?></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 max-w-[90rem] mx-auto">
+                <?php foreach ($items['process'] as $step): ?>
+                <div class="relative flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-3xl water-gradient flex items-center justify-center text-white shadow-xl mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($step['item_icon']); ?></span>
+                    </div>
+                    <span class="text-6xl font-black text-cyan-600 mb-4"><?php echo strip_tags($step['item_stat_value']); ?></span>
+                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4"><?php echo strip_tags($step['item_title']); ?></h3>
+                    <p class="text-[1.35rem] text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo strip_tags($step['item_description']); ?></p>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Quality -->
+    <?php $sec = $sections_map['quality'] ?? null; if ($sec && !empty($items['quality'])): ?>
+    <section class="py-24 bg-gray-50 dark:bg-gray-800/50">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center max-w-[90rem] mx-auto">
+                <div class="lg:col-span-5 relative">
+                    <div class="max-w-md mx-auto lg:max-w-full">
+                        <img src="<?php echo strip_tags($content['about_image']); ?>" alt="Quality Control" class="relative z-10 rounded-[3rem] shadow-2xl w-full object-cover aspect-square">
+                    </div>
+                </div>
+                <div class="lg:col-span-7 flex flex-col gap-12">
+                    <div>
+                        <h2 class="text-6xl sm:text-7xl font-black text-gray-900 dark:text-white mb-8 leading-tight"><?php echo strip_tags($sec['section_title']); ?></h2>
+                        <p class="text-2xl md:text-[1.75rem] lg:text-3xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium"><?php echo strip_tags($sec['section_subtitle']??''); ?></p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                        <?php foreach ($items['quality'] as $q): ?>
+                        <div class="flex gap-8 items-start">
+                            <div class="w-20 h-20 shrink-0 rounded-2xl water-gradient flex items-center justify-center text-white shadow-lg">
+                                <span class="material-symbols-outlined text-4xl text-white"><?php echo strip_tags($q['item_icon']); ?></span>
+                            </div>
+                            <div>
+                                <h4 class="text-3xl font-bold text-gray-900 dark:text-white mb-3"><?php echo strip_tags($q['item_title']); ?></h4>
+                                <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400"><?php echo strip_tags($q['item_description']); ?></p>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Why Choose Us -->
+    <?php $sec = $sections_map['why_choose'] ?? null; if ($sec && !empty($items['why_choose'])): ?>
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto text-center mb-20">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($sec['section_title']); ?></h2>
+                <div class="h-2 w-40 bg-cyan-600 mx-auto rounded-full mb-8"></div>
+                <p class="text-2xl md:text-[1.75rem] lg:text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($sec['section_subtitle']??''); ?></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-[90rem] mx-auto">
+                <?php foreach ($items['why_choose'] as $wc): ?>
+                <div class="group p-10 bg-gray-50 dark:bg-gray-800 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:-translate-y-2">
+                    <div class="w-20 h-20 rounded-2xl water-gradient flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-4xl text-white"><?php echo strip_tags($wc['item_icon']); ?></span>
+                    </div>
+                    <h4 class="text-3xl font-bold text-gray-900 dark:text-white mb-4"><?php echo strip_tags($wc['item_title']); ?></h4>
+                    <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400"><?php echo strip_tags($wc['item_description']); ?></p>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- CTA -->
+    <section class="relative py-24 overflow-hidden">
+        <div class="absolute inset-0 water-gradient"></div>
+        <div class="container relative z-10">
+            <div class="max-w-5xl mx-auto text-center">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight tracking-tight">
+                    <?php echo strip_tags($content['cta_heading']); ?> <br><span class="text-cyan-200 text-5xl sm:text-6xl md:text-7xl lg:text-6xl block mt-2"><?php echo strip_tags($content['cta_subtitle']); ?></span>
+                </h2>
+                <p class="text-2xl sm:text-3xl md:text-4xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed font-medium"><?php echo strip_tags($content['cta_text']); ?></p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                    <a href="contact_us.php" class="px-10 py-5 bg-white hover:bg-gray-100 text-cyan-700 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">handshake</span> Distributor Inquiries
+                    </a>
+                    <a href="tel:<?php echo str_replace(' ', '', $content['contact_phone']); ?>" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">call</span> Call Us Now
+                    </a>
+                </div>
+                <?php if (!empty($stats)): ?>
+                <div class="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-12 border-t border-white/10 pt-16">
+                    <?php foreach ($stats as $stat): ?>
+                    <div>
+                        <div class="text-6xl font-black text-white mb-2"><?php echo strip_tags($stat['stat_value']); ?></div>
+                        <div class="text-cyan-200 uppercase tracking-widest text-2xl font-black"><?php echo strip_tags($stat['stat_label']); ?></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="py-24 bg-gray-50 dark:bg-gray-800/50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-7xl mx-auto text-center">
+                <h2 class="text-6xl font-black text-gray-900 dark:text-white mb-16">Get In Touch</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="p-12 glass rounded-[3rem] shadow-xl flex flex-col items-center">
+                        <div class="w-24 h-24 water-gradient rounded-3xl flex items-center justify-center text-white mb-8 shadow-lg"><span class="material-symbols-outlined text-5xl text-white">location_on</span></div>
+                        <h4 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Location</h4>
+                        <p class="text-2xl text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo nl2br(strip_tags($content['contact_location'])); ?></p>
+                    </div>
+                    <div class="p-12 glass rounded-[3rem] shadow-xl flex flex-col items-center">
+                        <div class="w-24 h-24 water-gradient rounded-3xl flex items-center justify-center text-white mb-8 shadow-lg"><span class="material-symbols-outlined text-5xl text-white">call</span></div>
+                        <h4 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Phone</h4>
+                        <p class="text-2xl text-gray-600 dark:text-gray-400"><?php echo strip_tags($content['contact_phone']); ?></p>
+                    </div>
+                    <div class="p-12 glass rounded-[3rem] shadow-xl flex flex-col items-center">
+                        <div class="w-24 h-24 water-gradient rounded-3xl flex items-center justify-center text-white mb-8 shadow-lg"><span class="material-symbols-outlined text-5xl text-white">mail</span></div>
+                        <h4 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Address</h4>
+                        <p class="text-2xl text-gray-600 dark:text-gray-400"><?php echo nl2br(strip_tags($content['contact_address'])); ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
-<?php
-include 'includes/footer.php';
-?>
+<?php include 'includes/footer.php'; ?>

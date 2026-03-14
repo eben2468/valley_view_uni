@@ -1,80 +1,98 @@
-    </main>
-    <footer class="bg-primary text-white/90">
-        <div class="container mx-auto px-4 py-16">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                <div class="flex flex-col gap-4">
-                    <a class="flex items-center gap-3" href="homepage.php">
-                        <div class="bg-white p-1 rounded-md text-primary size-8">
-                            <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                                <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-white">Valley View University</h2>
-                    </a>
-                    <p class="text-sm text-white/70">123 University Drive,<br/>Innovation City, ST 12345</p>
-                    <div class="flex gap-4 mt-4">
-                        <a class="text-white/70 hover:text-secondary transition-colors" href="#">
-                            <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                            </svg>
-                        </a>
-                        <a class="text-white/70 hover:text-secondary transition-colors" href="#">
-                            <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-                            </svg>
-                        </a>
-                        <a class="text-white/70 hover:text-secondary transition-colors" href="#">
-                            <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                <rect height="20" rx="5" ry="5" width="20" x="2" y="2"></rect>
-                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
-                            </svg>
-                        </a>
-                        <a class="text-white/70 hover:text-secondary transition-colors" href="#">
-                            <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                                <rect height="12" width="4" x="2" y="9"></rect>
-                                <circle cx="4" cy="4" r="2"></circle>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-                <div>
-                    <h3 class="font-bold text-white mb-4">Future Students</h3>
-                    <ul class="space-y-3 text-sm">
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="admissions.php">Undergraduate Admissions</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="admissions.php">Graduate Admissions</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="admissions.php#requirements">Financial Aid</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="campus_map_&_facilities_page.php">Visit Campus</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="admissions.php">Request Information</a></li>
+<?php
+// Fetch Footer Settings
+$stmt = $pdo->query("SELECT * FROM footer_settings");
+$footer_settings_raw = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$footer_settings = [];
+foreach ($footer_settings_raw as $s) {
+    $footer_settings[$s['setting_key']] = $s['setting_value'];
+}
+
+// Fetch Footer Sections and Links
+$stmt = $pdo->query("SELECT * FROM footer_sections WHERE is_active = 1 ORDER BY display_order");
+$footer_sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->query("SELECT * FROM footer_links WHERE is_active = 1 ORDER BY section_id, display_order");
+$footer_links_all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$footer_links = [];
+foreach ($footer_links_all as $link) {
+    $footer_links[$link['section_id']][] = $link;
+}
+?>
+
+    <!-- FOOTER -->
+    <section class="wed-hom-footer">
+        <div class="container">
+            <div class="row wed-foot-link">
+                <?php 
+                // Display first 3 sections (Link Columns)
+                for ($i = 0; $i < 3; $i++): 
+                    if (isset($footer_sections[$i])):
+                        $section = $footer_sections[$i];
+                ?>
+                <div class="col-md-4 <?php echo $i == 0 ? 'foot-tc-mar-t-o' : ''; ?>">
+                    <h4><?php echo htmlspecialchars($section['title']); ?></h4>
+                    <ul>
+                        <?php if (isset($footer_links[$section['id']])): ?>
+                            <?php foreach ($footer_links[$section['id']] as $link): ?>
+                                <li><a href="<?php echo htmlspecialchars($link['url']); ?>"><?php echo htmlspecialchars($link['label']); ?></a></li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </ul>
                 </div>
-                <div>
-                    <h3 class="font-bold text-white mb-4">Current Students</h3>
-                    <ul class="space-y-3 text-sm">
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="student_digital_hub.php">MyVVU Portal</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="academic_calendar.php">Academic Calendar</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="office_of_the_registrar.php">Registrar</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="library_resources.php">Library</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="staff_encyclopedia.php">Campus Directory</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold text-white mb-4">Resources</h3>
-                    <ul class="space-y-3 text-sm">
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="faculty_encyclopedia.php">For Faculty & Staff</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="alumni_network_page_1.php">For Alumni</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="employment_opportunity.php">Careers at VVU</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="contact_us.php">Contact Us</a></li>
-                        <li><a class="text-white/70 hover:text-secondary transition-colors" href="policies.php">Privacy Policy</a></li>
-                    </ul>
-                </div>
+                <?php 
+                    endif;
+                endfor; 
+                ?>
             </div>
-            <div class="mt-12 pt-8 border-t border-white/20 text-center text-sm text-white/50">
-                <p>© 2024 Valley View University. All Rights Reserved.</p>
+            <div class="row wed-foot-link-1">
+                <div class="col-md-4 foot-tc-mar-t-o">
+                    <h4>Get In Touch</h4>
+                    <p>Address: <?php echo htmlspecialchars($footer_settings['contact_address'] ?? ''); ?></p>
+                    <p>Phone: <a href="tel:<?php echo htmlspecialchars($footer_settings['contact_phone'] ?? ''); ?>"><?php echo htmlspecialchars($footer_settings['contact_phone'] ?? ''); ?></a></p>
+                    <p>Email: <a href="mailto:<?php echo htmlspecialchars($footer_settings['contact_email'] ?? ''); ?>"><?php echo htmlspecialchars($footer_settings['contact_email'] ?? ''); ?></a></p>
+                </div>
+                <div class="col-md-4">
+                    <h4>Connect With Us</h4>
+                    <p><?php echo htmlspecialchars($footer_settings['connect_description'] ?? ''); ?></p>
+                </div>
+                <div class="col-md-4">
+                    <h4>SOCIAL MEDIA</h4>
+                    <ul>
+                        <?php 
+                        // Section 4 is usually Social Media
+                        $social_section_id = 4;
+                        if (isset($footer_links[$social_section_id])):
+                            foreach ($footer_links[$social_section_id] as $social):
+                        ?>
+                        <li><a href="<?php echo htmlspecialchars($social['url']); ?>"><i class="fa-brands <?php echo htmlspecialchars($social['icon_class']); ?>" aria-hidden="true"></i></a></li>
+                        <?php 
+                            endforeach;
+                        endif; 
+                        ?>
+                    </ul>
+                </div>
             </div>
         </div>
-    </footer>
-</div>
+    </section>
+
+    <!-- COPY RIGHTS -->
+    <section class="wed-rights">
+        <div class="container">
+            <div class="row">
+                <div class="copy-right">
+                   <p><?php echo htmlspecialchars($footer_settings['copyright_text'] ?? '© 2026 Valley View University. All Rights Reserved.'); ?></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--Import jQuery before materialize.js-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="Education-Website-and-AdminPanel/js/bootstrap.min.js"></script>
+    <script src="Education-Website-and-AdminPanel/js/materialize.min.js"></script>
+    <script src="Education-Website-and-AdminPanel/js/custom.js"></script>
+    <!-- Header Auto-hide on Scroll -->
+    <!-- <script src="js/header-scroll.js"></script> -->
 </body>
 </html>

@@ -1,0 +1,82 @@
+═══════════════════════════════════════════════════════════════════
+  HOMEPAGE CONTENT MANAGEMENT - QUICK START GUIDE
+═══════════════════════════════════════════════════════════════════
+
+INSTALLATION (One-time setup)
+──────────────────────────────
+
+1. Open phpMyAdmin: http://localhost/phpmyadmin
+
+2. Select "valley_view_uni" database
+
+3. Go to SQL tab
+
+4. Copy and run: homepage_content_schema.sql
+
+5. Done! ✓
+
+
+LOGIN TO ADMIN PANEL
+────────────────────
+
+URL: http://localhost/valley_view_uni/admin/login.php
+
+Username: admin
+Password: admin123
+
+
+MANAGE HOMEPAGE CONTENT
+───────────────────────
+
+After login → Click "Manage Homepage" in sidebar
+
+7 Tabs Available:
+├─ Sliders (Hero images with text)
+├─ Discover Cards (8 quick link cards)
+├─ Programs (Popular programs section)
+├─ Gallery (Photo gallery)
+├─ News (Latest news & events)
+├─ Video (Campus video)
+└─ Sections (Edit titles of each section)
+
+
+QUICK ACTIONS
+─────────────
+
+ADD NEW:
+1. Fill form at top of tab
+2. Set display order (1, 2, 3...)
+3. Set status to "Active"
+4. Click Add button
+
+EDIT EXISTING:
+1. Click "Edit" in table
+2. Change values
+3. Click Update button
+
+DELETE:
+1. Click "Delete" in table
+2. Confirm
+
+HIDE (Don't Delete):
+1. Edit item
+2. Set status to "Inactive"
+3. Update
+
+
+IMPORTANT NOTES
+───────────────
+
+✓ Changes appear IMMEDIATELY on homepage
+✓ No code changes needed
+✓ Lower display order = appears first
+✓ Inactive = hidden but saved in database
+✓ Use <span>Text</span> in titles for colored text
+
+
+NEED HELP?
+──────────
+
+Read: INSTALLATION_GUIDE.txt (detailed instructions)
+
+═══════════════════════════════════════════════════════════════════

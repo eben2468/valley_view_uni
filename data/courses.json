@@ -1,0 +1,332 @@
+[
+    {
+        "title": "MBA Strategic Management",
+        "category": "School of Graduate Studies",
+        "description": "Advanced leadership training for the modern business landscape.",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/mba-strategic-management"
+    },
+    {
+        "title": "B.Ed Mathematics",
+        "category": "School of Education",
+        "description": "Bachelor of Education in Mathematics",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/mathematics"
+    },
+    {
+        "title": "B.Ed Social Studies",
+        "category": "School of Education",
+        "description": "Bachelor of Education in Social Studies",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bed-social-studies"
+    },
+    {
+        "title": "BSc Information Technology",
+        "category": "Faculty of Science",
+        "description": "Bachelor of Science in Information Technology",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bsc-information-technology"
+    },
+    {
+        "title": "B.Ed Management",
+        "category": "School of Education",
+        "description": "Bachelor of Education in Management",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bed-management"
+    },
+    {
+        "title": "B.Ed Accounting",
+        "category": "School of Education",
+        "description": "Bachelor of Education in Accounting",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bed-accounting"
+    },
+    {
+        "title": "BBA HRM",
+        "category": "School of Business",
+        "description": "Bachelor of Business Administration in Human Resource Management",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bba-human-resource-management"
+    },
+    {
+        "title": "BBA Marketing",
+        "category": "School of Business",
+        "description": "Bachelor of Business Administration in Marketing",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bba-marketing"
+    },
+    {
+        "title": "BBA Management",
+        "category": "School of Business",
+        "description": "Bachelor of Business Administration in Management",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bba-management"
+    },
+    {
+        "title": "BBA Banking and Finance",
+        "category": "School of Business",
+        "description": "Bachelor of Business Administration in Banking and Finance",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bba-banking-and-finance"
+    },
+    {
+        "title": "MBA Human Resource Management",
+        "category": "School of Graduate Studies",
+        "description": "MBA Human Resource Management",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/mba-human-resource-management"
+    },
+    {
+        "title": "MBA Banking and Finance",
+        "category": "School of Graduate Studies",
+        "description": "MBA Banking and Finance",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/mba-banking-and-finance"
+    },
+    {
+        "title": "MPhil Curriculum and Instruction",
+        "category": "School of Graduate Studies",
+        "description": "MPhil in Curriculum and Instruction",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/mphil-curriculum-and-instruction"
+    },
+    {
+        "title": "M.Ed Curriculum and Instruction",
+        "category": "School of Graduate Studies",
+        "description": "Enroll in our prestigious degree programs",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/med-curriculum-and-instruction"
+    },
+    {
+        "title": "MEd Educational Administration and Leadership",
+        "category": "School of Graduate Studies",
+        "description": "MEd in Educational Administration and Leadership",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/med-educational-administration-and-leadership"
+    },
+    {
+        "title": "Postgraduate Diploma in Education",
+        "category": "Faculty of Science",
+        "description": "Postgraduate Diploma (PGD) in Education",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/postgraduate-diploma-in-education"
+    },
+    {
+        "title": "BSc Mathematics with Economics",
+        "category": "Faculty of Science",
+        "description": "Bachelor of Science in Mathematics with Economics",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bsc-mathematics-with-economics"
+    },
+    {
+        "title": "BSc Agribusiness",
+        "category": "Faculty of Science",
+        "description": "Bachelor of Science in Agribusiness",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bsc-agribusiness"
+    },
+    {
+        "title": "BSc Midwifery",
+        "category": "School of Nursing and Midwifery",
+        "description": "Bachelor of Science, Midwifery",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bsc-midwifery"
+    },
+    {
+        "title": "BSc Mental Health Nursing",
+        "category": "School of Nursing and Midwifery",
+        "description": "Bachelor of Science, Mental Health Nursing",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bsc-mental-health-nursing"
+    },
+    {
+        "title": "B.Sc Business Information Systems",
+        "category": "Faculty of Science",
+        "description": "Bachelor of Science in Business Information Systems",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bsc-business-information-systems"
+    },
+    {
+        "title": "B.Sc Development Studies",
+        "category": "Faculty of Arts & Social Sciences",
+        "description": "Bachelor of Science in Development Studies",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/b-sc-development-studies"
+    },
+    {
+        "title": "B.Sc General Nursing",
+        "category": "School of Nursing and Midwifery",
+        "description": "Bachelor of Science in Nursing",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/b-sc-general-nursing"
+    },
+    {
+        "title": "B.Ed Religions",
+        "category": "School of Education",
+        "description": "Bachelor of Education in Religious Studies",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/b-ed-religions"
+    },
+    {
+        "title": "B.Ed information Technology",
+        "category": "School of Education",
+        "description": "Bachelor of Education in Information Technology",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/b-ed-information-technology"
+    },
+    {
+        "title": "MBA Accounting",
+        "category": "School of Graduate Studies",
+        "description": "MBA Accounting",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/mba-accounting"
+    },
+    {
+        "title": "MPhil Educational Administration & Leadership",
+        "category": "School of Graduate Studies",
+        "description": "MPhil Educational Administration & Leadership",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/mphil-educational-administration-leadership"
+    },
+    {
+        "title": "PhD Business Administration - Finance option",
+        "category": "School of Graduate Studies",
+        "description": "PhD Business Administration - Finance option",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/phd-business-administration-finance-option"
+    },
+    {
+        "title": "PhD Business Administration - Management option",
+        "category": "School of Graduate Studies",
+        "description": "PhD Business Administration - Management option",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/phd-business-administration-management-option"
+    },
+    {
+        "title": "Diploma in Development Studies",
+        "category": "Faculty of Arts & Social Sciences",
+        "description": "Diploma in Development Studies",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/diploma-in-development-studies"
+    },
+    {
+        "title": "ACCA-UK",
+        "category": "Professional Courses",
+        "description": "Apply Now",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/acca-uk"
+    },
+    {
+        "title": "ICA-Gh",
+        "category": "Professional Courses",
+        "description": "Apply Now",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/ica-gh"
+    },
+    {
+        "title": "Diploma in Business Administration",
+        "category": "School of Business",
+        "description": "Diploma in Business Administration",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/diploma-in-business-studies"
+    },
+    {
+        "title": "BA Communication Studies",
+        "category": "Faculty of Arts & Social Sciences",
+        "description": "Bachelor of Arts in Communication Studies",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/ba-communication-studies-advertising-and-public-relations-option"
+    },
+    {
+        "title": "PhD Computer Science",
+        "category": "School of Graduate Studies",
+        "description": "PhD in Computer Science",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/phd-in-computer-science"
+    },
+    {
+        "title": "MSc Computer Science",
+        "category": "School of Graduate Studies",
+        "description": "MSc in Computer Science",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/msc-computer-science"
+    },
+    {
+        "title": "Bachelor of Education in Music",
+        "category": "School of Education",
+        "description": "Bachelor of Education in Music",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-education-in-music"
+    },
+    {
+        "title": "Diploma in Music",
+        "category": "School of Education",
+        "description": "Diploma in Music",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/diploma-in-music2"
+    },
+    {
+        "title": "Certificate in Sound Engineering",
+        "category": "School of Education",
+        "description": "Certificate in Sound Engineering",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/certificate-in-sound-engineering"
+    },
+    {
+        "title": "Certificate in Early Childhood Education",
+        "category": "School of Education",
+        "description": "Certificate in Early Childhood Education",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/certificate-in-early-childhood-education"
+    },
+    {
+        "title": "Bachelor of Science in Agriculture",
+        "category": "Faculty of Science",
+        "description": "Bachelor of Science in Agriculture",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-science-in-agriculture"
+    },
+    {
+        "title": "Diploma in Information Technology",
+        "category": "Faculty of Science",
+        "description": "Diploma in Information Technology",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/diploma-in-information-technology"
+    },
+    {
+        "title": "Bachelor of Business Administration in Accounting",
+        "category": "Center for Adult and Continuing Education",
+        "description": "Bachelor of Business Administration in Accounting",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-business-administration-in-accounting"
+    },
+    {
+        "title": "Bachelor of Business Administration in Management",
+        "category": "Center for Adult and Continuing Education",
+        "description": "Bachelor of Business Administration in Management",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-business-administration-in-management"
+    },
+    {
+        "title": "Bachelor of Business Administration in Human Res. Mgt.",
+        "category": "Center for Adult and Continuing Education",
+        "description": "Bachelor of Business Administration in Human Res. Mgt.",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-business-administration-in-human-res-mgt"
+    },
+    {
+        "title": "Bachelor of Business Administration in Marketing",
+        "category": "Center for Adult and Continuing Education",
+        "description": "Bachelor of Business Administration in Marketing",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-business-administration-in-marketing"
+    },
+    {
+        "title": "Bachelor of Arts in Communication Studies",
+        "category": "Center for Adult and Continuing Education",
+        "description": "Bachelor of Arts in Communication Studies",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-arts-in-communication-studies"
+    },
+    {
+        "title": "Bachelor of Science in Development Studies",
+        "category": "Center for Adult and Continuing Education",
+        "description": "Bachelor of Science in Development Studies",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-science-in-development-studies"
+    },
+    {
+        "title": "Bachelor of Business Administration in Banking & Finance",
+        "category": "Center for Adult and Continuing Education",
+        "description": "Bachelor of Business Administration in Banking & Finance",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-business-administration-in-banking-and-finance"
+    },
+    {
+        "title": "BSc Mathematics with Statistics",
+        "category": "Faculty of Science",
+        "description": "Bachelor of Science in Mathematics with Statistics",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/bsc-mathematics-with-statistics"
+    },
+    {
+        "title": "Diploma in Computer Science",
+        "category": "Faculty of Science",
+        "description": "Diploma in Computer Science",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/diploma-in-computer-science"
+    },
+    {
+        "title": "BBA in Accounting",
+        "category": "School of Business",
+        "description": "Bachelor of Business Administration in Accounting",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/accounting"
+    },
+    {
+        "title": "B.Ed English Language",
+        "category": "School of Education",
+        "description": "Bachelor of Education in English Language",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/education"
+    },
+    {
+        "title": "BSc. Biomedical Engineering",
+        "category": "Faculty of Science",
+        "description": "Bachelor of Science in Biomedical Engineering",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/biomedical-engineering"
+    },
+    {
+        "title": "B.A Theological Studies",
+        "category": "Faculty of Arts & Social Sciences",
+        "description": "Bachelor of Arts in Theological Studies",
+        "link": "https://vvu.edu.gh/index.php/lms/courses/course/theology"
+    }
+]

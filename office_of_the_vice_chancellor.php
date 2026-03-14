@@ -1,224 +1,310 @@
 <?php
-$pageTitle = "Office of the Vice Chancellor - Valley View University";
-$activePage = "office_of_the_vice_chancellor";
+require_once 'includes/db_connect.php';
+require_once 'includes/administration_content_helper.php';
+
+// Initialize content helper
+$content = new AdministrationContent($pdo);
+$page = $content->getPageBySlug('office_of_the_vice_chancellor');
+
+// Get all content sections
+$pageContent = [];
+if ($page) {
+    $pageContent = $content->getPageContent($page['id']);
+}
+
+// Helper function to get field value with HTML cleaning
+if (!function_exists('getContent')) {
+    function getContent($sections, $section_key, $field_key, $default = '') {
+        $value = isset($sections[$section_key]['fields'][$field_key]) ? $sections[$section_key]['fields'][$field_key] : $default;
+        // Clean HTML tags and entities from CKEditor content
+        return AdministrationContent::cleanHtml($value);
+    }
+}
+
+// Set page title from database or use default
+$page_title = $page ? $page['page_title'] . " - Valley View University" : "Office of the Vice Chancellor - Valley View University";
+$active_page = "about";
 include 'includes/header.php';
 ?>
 
-<div class="relative flex min-h-screen w-full flex-col">
-  <!-- TopNavBar Component -->
-  <header class="sticky top-0 z-20 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-border-light dark:border-border-dark">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center gap-4 py-3">
-        <div class="h-6 w-6 text-primary">
-          <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
-          </svg>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .text-gradient {
+        background: linear-gradient(to right, #2563eb, #fbbf24);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .profile-card {
+        transition: all 0.3s ease;
+    }
+    .profile-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section class="relative min-h-[65vh] flex items-center overflow-hidden bg-gray-900">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags(getContent($pageContent, 'hero_section', 'background_image', 'https://lh3.googleusercontent.com/aida-public/AB6AXuBo5kZ6ARGIXa5op7ZfwzuPd_3xc-gFuuNqLtlQhfI9FuPove2RJVSOjvla0bPKFyCQOvwkTsYTIZdrFobxFPda_ADJkaxK8QL0qmmVPAKWk_9tEnOjMndUI5kaG1-10q1H3lzodyVSzIKbkMJ7WqnJu9KTZSW1d6XFiKZSRiTidjPlL62RZcBjVtugVdJVT5ppDqxQJA6zTqKqiuG3IU5tUDZ6EebyhVcSLQd5pruhpjRWsJ4DE2gmxOgB7LP1mLj5zrE5d-hXP6bE')); ?>" 
+                 alt="VVU Campus" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
         </div>
-        <h2 class="text-lg font-bold tracking-[-0.015em] text-text-light dark:text-text-dark">Valley View University</h2>
-      </div>
-      <div class="hidden items-center gap-9 lg:flex">
-        <a class="text-sm font-medium text-text-light dark:text-text-dark hover:text-primary dark:hover:text-primary" href="#">Admissions</a>
-        <a class="text-sm font-medium text-text-light dark:text-text-dark hover:text-primary dark:hover:text-primary" href="#">Academics</a>
-        <a class="text-sm font-medium text-text-light dark:text-text-dark hover:text-primary dark:hover:text-primary" href="#">Research</a>
-        <a class="text-sm font-medium text-text-light dark:text-text-dark hover:text-primary dark:hover:text-primary" href="#">About</a>
-        <a class="text-sm font-medium text-text-light dark:text-text-dark hover:text-primary dark:hover:text-primary" href="#">Student Life</a>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold tracking-[0.015em] hover:bg-primary/90 transition-colors">
-          <span class="truncate">Apply Now</span>
-        </button>
-        <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark hover:bg-border-light/80 dark:hover:bg-border-dark/80 transition-colors">
-          <span class="material-symbols-outlined text-xl">search</span>
-        </button>
-        <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark hover:bg-border-light/80 dark:hover:bg-border-dark/80 transition-colors lg:hidden">
-          <span class="material-symbols-outlined text-xl">menu</span>
-        </button>
-      </div>
-    </div>
-  </header>
-  <main class="flex-grow">
-    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-4xl">
-        <!-- ProfileHeader/Hero Section -->
-        <section class="mb-12" id="hero">
-          <div class="flex flex-col gap-8 @container md:flex-row md:items-center">
-            <div class="md:w-1/3">
-              <div class="aspect-[3/4] w-full rounded-xl bg-cover bg-center bg-no-repeat" data-alt="Professional portrait of Dr. Evelyn Reed, Vice Chancellor." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCLxwRQaStcMjctmdRSUlFrbTzHrHZ4QmQ7_w-SjNu0YbuDefwcI5HThsfCdLLv2t2buwPecrNFBE0YG9eouPiuXF_v0W_iZyuf-LqyyZDM_LGTDg50yAveRJO1xUoJWTArmE9HlG_NBbpBogj3YzigfkiFnlpHCvldhseWxVTj3HaJpdFaTDwR34NqL0UJmX8pZa6aANMldz55PZSL0ZrzavkAeMjQv_pYGZbL4ObyJK-1ZZU9mW2rBo-Z6I1hzq_bCvv7QBKpvQy0");'></div>
-            </div>
-            <div class="flex flex-col md:w-2/3 md:pl-8">
-              <h1 class="text-4xl font-bold tracking-tighter text-text-light dark:text-text-dark sm:text-5xl">Dr. Evelyn Reed</h1>
-              <p class="mt-2 text-xl font-medium text-primary">Vice Chancellor, Valley View University</p>
-              <p class="mt-4 text-base leading-relaxed text-text-muted-light dark:text-text-muted-dark">
-                Welcome to the Office of the Vice Chancellor. It is an honor to lead this esteemed institution and to work alongside our dedicated faculty, staff, and students to foster an environment of academic excellence and innovation.
-              </p>
-            </div>
-          </div>
-        </section>
-        <!-- Sticky Sub-Navigation (Chips) -->
-        <nav class="sticky-nav bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm border-b border-border-light dark:border-border-dark py-3 mb-12 overflow-x-auto">
-          <div class="flex gap-2">
-            <a class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 bg-primary/20 hover:bg-primary/30 transition-colors" href="#welcome">
-              <p class="text-sm font-medium text-primary">Welcome Message</p>
-            </a>
-            <a class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 bg-border-light dark:bg-border-dark hover:bg-primary/20 dark:hover:bg-primary/20 transition-colors" href="#biography">
-              <p class="text-sm font-medium text-text-light dark:text-text-dark">Biography</p>
-            </a>
-            <a class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 bg-border-light dark:bg-border-dark hover:bg-primary/20 dark:hover:bg-primary/20 transition-colors" href="#initiatives">
-              <p class="text-sm font-medium text-text-light dark:text-text-dark">Key Initiatives</p>
-            </a>
-            <a class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 bg-border-light dark:bg-border-dark hover:bg-primary/20 dark:hover:bg-primary/20 transition-colors" href="#contact">
-              <p class="text-sm font-medium text-text-light dark:text-text-dark">Contact</p>
-            </a>
-          </div>
-        </nav>
-        <!-- Welcome Message Section -->
-        <section class="mb-16 scroll-mt-24" id="welcome">
-          <h2 class="text-3xl font-bold tracking-tight text-text-light dark:text-text-dark">A Message from the Vice Chancellor</h2>
-          <div class="mt-4 space-y-4 text-base leading-relaxed text-text-light dark:text-text-dark">
-            <p>
-              It is with immense pride and a deep sense of responsibility that I welcome you to Valley View University. Our institution is built on a legacy of academic rigor, innovative research, and a commitment to nurturing the next generation of leaders. We are dedicated to creating a dynamic and inclusive community where every student can thrive and achieve their full potential.
-            </p>
-            <!-- Pull Quote -->
-            <blockquote class="border-l-4 border-primary pl-6 py-2 my-6">
-              <p class="text-xl italic font-medium text-text-light dark:text-text-dark">
-                "As we look to the future, we will continue to champion excellence, drive progress, and make a meaningful impact on the world."
-              </p>
-            </blockquote>
-            <p>
-              Our mission extends beyond the classroom. We are committed to fostering critical thinking, creativity, and a passion for lifelong learning. I invite you to explore our website, learn more about our vibrant community, and discover the endless opportunities that await you at Valley View.
-            </p>
-          </div>
-        </section>
-        <!-- Biography Section -->
-        <section class="mb-16 scroll-mt-24" id="biography">
-          <h2 class="text-3xl font-bold tracking-tight text-text-light dark:text-text-dark">Professional Biography</h2>
-          <div class="mt-4 space-y-4 text-base leading-relaxed text-text-light dark:text-text-dark">
-            <p>
-              Dr. Evelyn Reed is a distinguished academic leader with over two decades of experience in higher education. Before her appointment as Vice Chancellor of Valley View University, she served as the Dean of the College of Arts and Sciences at Northwood University, where she was instrumental in launching several interdisciplinary programs and securing record levels of research funding.
-            </p>
-            <p>
-              A renowned scholar in the field of computational linguistics, Dr. Reed holds a Ph.D. from Stanford University and has published extensively in peer-reviewed journals. Her research focuses on the intersection of artificial intelligence and human language. She is a passionate advocate for leveraging technology to enhance learning and is deeply committed to student success and faculty development.
-            </p>
-          </div>
-        </section>
-        <!-- Key Initiatives Section with Accordion -->
-        <section class="mb-16 scroll-mt-24" id="initiatives">
-          <h2 class="text-3xl font-bold tracking-tight text-text-light dark:text-text-dark">Key Initiatives &amp; Strategic Goals</h2>
-          <div class="mt-6 space-y-4">
-            <details class="group rounded-xl bg-foreground-light dark:bg-foreground-dark p-6 border border-border-light dark:border-border-dark">
-              <summary class="flex cursor-pointer items-center justify-between text-lg font-medium text-text-light dark:text-text-dark">
-                Digital Transformation in Education
-                <span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-              </summary>
-              <p class="mt-4 text-base leading-relaxed text-text-muted-light dark:text-text-muted-dark">
-                Championing the integration of cutting-edge technology into our curriculum to create immersive, flexible, and accessible learning experiences for all students, preparing them for the digital economy.
-              </p>
-            </details>
-            <details class="group rounded-xl bg-foreground-light dark:bg-foreground-dark p-6 border border-border-light dark:border-border-dark">
-              <summary class="flex cursor-pointer items-center justify-between text-lg font-medium text-text-light dark:text-text-dark">
-                Fostering Global Research Partnerships
-                <span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-              </summary>
-              <p class="mt-4 text-base leading-relaxed text-text-muted-light dark:text-text-muted-dark">
-                Expanding our international collaborations to tackle global challenges. This initiative aims to increase joint research projects, faculty exchanges, and global learning opportunities for our students.
-              </p>
-            </details>
-            <details class="group rounded-xl bg-foreground-light dark:bg-foreground-dark p-6 border border-border-light dark:border-border-dark">
-              <summary class="flex cursor-pointer items-center justify-between text-lg font-medium text-text-light dark:text-text-dark">
-                Sustainability and Community Engagement
-                <span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-              </summary>
-              <p class="mt-4 text-base leading-relaxed text-text-muted-light dark:text-text-muted-dark">
-                Committing to environmental stewardship through campus-wide sustainability projects and strengthening our ties with the local community through service-learning and outreach programs.
-              </p>
-            </details>
-          </div>
-        </section>
-        <!-- Contact Section -->
-        <section class="scroll-mt-24" id="contact">
-          <h2 class="text-3xl font-bold tracking-tight text-text-light dark:text-text-dark">Contact the Office</h2>
-          <div class="mt-6 grid grid-cols-1 gap-8 rounded-xl bg-foreground-light dark:bg-foreground-dark p-8 border border-border-light dark:border-border-dark sm:grid-cols-2">
-            <div class="space-y-4">
-              <h3 class="text-lg font-semibold text-text-light dark:text-text-dark">Office Information</h3>
-              <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined mt-1 text-primary">location_on</span>
-                <p class="text-text-muted-light dark:text-text-muted-dark">
-                  Founders Hall, Room 401<br/>
-                  123 University Drive<br/>
-                  Valley View, ST 12345
+        
+        <div class="container relative z-10 py-24">
+            <div class="max-w-8xl mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-10 py-4 mb-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-xl md:text-2xl font-black tracking-widest uppercase text-yellow-400"><?php echo strip_tags(getContent($pageContent, 'hero_section', 'badge_text', 'University Leadership')); ?></span>
+                </div>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-10 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_main', 'Office of the')); ?> <br>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-4"><?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_highlight', 'Vice Chancellor')); ?></span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    "<?php echo strip_tags(getContent($pageContent, 'hero_section', 'subtitle', 'Leading Valley View University towards a future of academic excellence, spiritual growth, and societal impact through dedicated service and visionary leadership.')); ?>"
                 </p>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">mail</span>
-                <a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="mailto:vc.office@vvu.edu">vc.office@vvu.edu</a>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">call</span>
-                <a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="tel:+1234567890">(123) 456-7890</a>
-              </div>
             </div>
-            <div class="space-y-4">
-              <h3 class="text-lg font-semibold text-text-light dark:text-text-dark">Scheduling an Appointment</h3>
-              <p class="text-text-muted-light dark:text-text-muted-dark">
-                To schedule a meeting or make an inquiry, please contact the Executive Assistant to the Vice Chancellor via email or phone.
-              </p>
-              <a class="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary/90 transition-colors" href="#">
-                Use Contact Form
-              </a>
+        </div>
+    </section>
+
+    <!-- VC Profile Section -->
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="max-w-8xl mx-auto">
+                <div class="flex flex-col lg:flex-row gap-16 items-center lg:items-start">
+                    <!-- Profile Image -->
+                    <div class="w-full lg:w-1/3 animate-fadeInUp">
+                        <div class="relative group">
+                            <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-yellow-400 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                            <div class="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
+                                <img src="<?php echo strip_tags(getContent($pageContent, 'vc_profile', 'profile_image', 'https://lh3.googleusercontent.com/aida-public/AB6AXuCLxwRQaStcMjctmdRSUlFrbTzHrHZ4QmQ7_w-SjNu0YbuDefwcI5HThsfCdLLv2t2buwPecrNFBE0YG9eouPiuXF_v0W_iZyuf-LqyyZDM_LGTDg50yAveRJO1xUoJWTArmE9HlG_NBbpBogj3YzigfkiFnlpHCvldhseWxVTj3HaJpdFaTDwR34NqL0UJmX8pZa6aANMldz55PZSL0ZrzavkAeMjQv_pYGZbL4ObyJK-1ZZU9mW2rBo-Z6I1hzq_bCvv7QBKpvQy0')); ?>" 
+                                     alt="<?php echo strip_tags(getContent($pageContent, 'vc_profile', 'name', 'William Kofi Koomson, PhD')); ?>" class="w-full h-full object-cover">
+                            </div>
+                            <div class="mt-8 text-center lg:text-left">
+                                <h2 class="text-5xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags(getContent($pageContent, 'vc_profile', 'name', 'William Kofi Koomson, PhD')); ?></h2>
+                                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider"><?php echo strip_tags(getContent($pageContent, 'vc_profile', 'title', 'Vice Chancellor')); ?></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Content -->
+                    <div class="w-full lg:w-2/3 space-y-10 animate-fadeInUp" style="animation-delay: 0.2s;">
+                        <div>
+                            <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(getContent($pageContent, 'vc_profile', 'section_title', 'Profile & Biography')); ?></h3>
+                            <div class="h-2 w-24 bg-yellow-400 rounded-full mb-8"></div>
+                            <div class="space-y-6 text-4xl sm:text-5xl font-bold text-gray-700 dark:text-gray-300 leading-relaxed">
+                                <p>
+                                    <?php echo strip_tags(getContent($pageContent, 'vc_profile', 'bio_paragraph_1', 'William Kofi Koomson, a Ghanaian by birth, lived and worked in the Americas, including Jamaica, Trinidad and Tobago, Canada, and the United States of America for the past 30 years, after acquiring his initial secondary education in Ghana. He is married with four adult children.')); ?>
+                                </p>
+                                <p>
+                                    <?php echo strip_tags(getContent($pageContent, 'vc_profile', 'bio_paragraph_2', 'He has worked for the Seventh-day Adventist Church for the past 35 years as an Administrator and Departmental Director at the local Conference, Union and General Conference (Review and Herald Publishing Association) levels, Vice Principal for the Literature Ministry Seminary, University Professor, College Principal/Rector and Pastor.')); ?>
+                                </p>
+                                <p>
+                                    <?php echo strip_tags(getContent($pageContent, 'vc_profile', 'bio_paragraph_3', 'As part of his evangelistic outreach, he spearheaded a Community Sharing Ministry program in the USA, Canada and Europe to distribute within seven years over 250,000 copies of the book, Steps to Christ. He led in establishing two Churches in North America and through his evangelistic efforts, more than 1510 souls have been baptized into the Seventh-day Adventist Church.')); ?>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="p-8 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border-l-8 border-blue-600">
+                                <span class="material-symbols-outlined text-6xl text-blue-600 mb-4">history_edu</span>
+                                <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'vc_profile', 'experience_title', 'Experience')); ?></h4>
+                                <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags(getContent($pageContent, 'vc_profile', 'experience_text', '35+ Years of Service in the Seventh-day Adventist Church.')); ?></p>
+                            </div>
+                            <div class="p-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl border-l-8 border-yellow-500">
+                                <span class="material-symbols-outlined text-6xl text-yellow-500 mb-4">public</span>
+                                <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'vc_profile', 'impact_title', 'Global Impact')); ?></h4>
+                                <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags(getContent($pageContent, 'vc_profile', 'impact_text', 'Extensive international experience across the Americas and Europe.')); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </section>
-      </div>
-    </div>
-  </main>
-  <!-- Footer -->
-  <footer class="bg-foreground-light dark:bg-foreground-dark border-t border-border-light dark:border-border-dark">
-    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
-        <div class="col-span-2 md:col-span-1">
-          <div class="flex items-center gap-3">
-            <div class="h-6 w-6 text-primary">
-              <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
-              </svg>
+        </div>
+    </section>
+
+    <!-- Strategic Vision Section -->
+    <section class="py-24 bg-gray-50 dark:bg-gray-950">
+        <div class="container">
+            <div class="max-w-8xl mx-auto text-center mb-20">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'section_title', 'Strategic Vision')); ?></h2>
+                <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
+                <p class="text-4xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                    <?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'section_description', 'Under the leadership of Dr. William Kofi Koomson, the Office of the Vice Chancellor is focused on four key pillars of transformation.')); ?>
+                </p>
             </div>
-            <h2 class="text-lg font-bold text-text-light dark:text-text-dark">Valley View University</h2>
-          </div>
-          <p class="mt-4 text-sm text-text-muted-light dark:text-text-muted-dark">Fostering excellence, innovation, and community since 1965.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Pillar 1 -->
+                <div class="group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:-translate-y-2">
+                    <div class="w-24 h-24 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">school</span>
+                    </div>
+                    <h4 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'pillar_1_title', 'Academic Excellence')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'pillar_1_description', 'Enhancing the quality of teaching and learning through innovative curricula and world-class faculty development.')); ?>
+                    </p>
+                </div>
+
+                <!-- Pillar 2 -->
+                <div class="group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:-translate-y-2">
+                    <div class="w-24 h-24 rounded-2xl bg-yellow-500 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">biotech</span>
+                    </div>
+                    <h4 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'pillar_2_title', 'Research & Innovation')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'pillar_2_description', 'Fostering a culture of research that addresses local and global challenges through interdisciplinary collaboration.')); ?>
+                    </p>
+                </div>
+
+                <!-- Pillar 3 -->
+                <div class="group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:-translate-y-2">
+                    <div class="w-24 h-24 rounded-2xl bg-green-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">groups</span>
+                    </div>
+                    <h4 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'pillar_3_title', 'Community Engagement')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'pillar_3_description', 'Strengthening our impact on society through meaningful service, outreach, and strategic partnerships.')); ?>
+                    </p>
+                </div>
+
+                <!-- Pillar 4 -->
+                <div class="group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:-translate-y-2">
+                    <div class="w-24 h-24 rounded-2xl bg-purple-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white">auto_awesome</span>
+                    </div>
+                    <h4 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'pillar_4_title', 'Spiritual Growth')); ?></h4>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo strip_tags(getContent($pageContent, 'strategic_vision', 'pillar_4_description', 'Nurturing the spiritual well-being of our community, grounded in the values of the Seventh-day Adventist Church.')); ?>
+                    </p>
+                </div>
+            </div>
         </div>
-        <div>
-          <h3 class="font-semibold text-text-light dark:text-text-dark">Quick Links</h3>
-          <ul class="mt-4 space-y-2 text-sm">
-            <li><a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="#">Admissions</a></li>
-            <li><a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="#">Campus Map</a></li>
-            <li><a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="#">Library</a></li>
-            <li><a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="#">Careers</a></li>
-          </ul>
+    </section>
+
+    <!-- Contact & Appointment Section -->
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="max-w-7xl mx-auto">
+                <div class="glass p-12 rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                        <div>
+                            <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-8"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'section_title', 'Contact the Office')); ?></h3>
+                            <p class="text-4xl text-gray-600 dark:text-gray-400 mb-10 font-medium">
+                                <?php echo strip_tags(getContent($pageContent, 'contact_section', 'section_description', 'For official inquiries, scheduling, or administrative matters, please reach out to our dedicated team.')); ?>
+                            </p>
+                            <div class="space-y-8">
+                                <div class="flex items-center gap-6">
+                                    <div class="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                                        <span class="material-symbols-outlined text-4xl">mail</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-lg font-black text-gray-400 uppercase tracking-widest">Email Address</p>
+                                        <a href="mailto:<?php echo strip_tags(getContent($pageContent, 'contact_section', 'email', 'vc@vvu.edu.gh')); ?>" class="text-3xl font-bold text-gray-900 dark:text-white hover:text-blue-600 transition-colors"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'email', 'vc@vvu.edu.gh')); ?></a>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-6">
+                                    <div class="w-16 h-16 rounded-2xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600">
+                                        <span class="material-symbols-outlined text-4xl">call</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-lg font-black text-gray-400 uppercase tracking-widest">Phone Number</p>
+                                        <a href="tel:<?php echo strip_tags(getContent($pageContent, 'contact_section', 'phone', '+233302501101')); ?>" class="text-3xl font-bold text-gray-900 dark:text-white hover:text-yellow-600 transition-colors"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'phone', '+233 (0) 302 501 101')); ?></a>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-6">
+                                    <div class="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+                                        <span class="material-symbols-outlined text-4xl">location_on</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-lg font-black text-gray-400 uppercase tracking-widest">Office Location</p>
+                                        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'office_location', 'Administration Block, Oyibi Campus')); ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-800/50 p-10 rounded-[2rem] border border-gray-100 dark:border-gray-700">
+                            <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(getContent($pageContent, 'contact_section', 'form_title', 'Request an Appointment')); ?></h4>
+                            <p class="text-xl text-gray-600 dark:text-gray-400 mb-8 font-medium">
+                                <?php echo strip_tags(getContent($pageContent, 'contact_section', 'form_description', 'To schedule a meeting with the Vice Chancellor, please provide your details and the purpose of your visit.')); ?>
+                            </p>
+                            <form class="space-y-6">
+                                <div>
+                                    <input type="text" placeholder="Your Full Name" class="w-full px-6 py-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-600 outline-none text-xl">
+                                </div>
+                                <div>
+                                    <input type="email" placeholder="Email Address" class="w-full px-6 py-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-600 outline-none text-xl">
+                                </div>
+                                <div>
+                                    <textarea rows="4" placeholder="Purpose of Appointment" class="w-full px-6 py-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-600 outline-none text-xl"></textarea>
+                                </div>
+                                <button type="submit" class="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-black rounded-2xl transition-all shadow-lg hover:shadow-blue-500/25">
+                                    <?php echo strip_tags(getContent($pageContent, 'contact_section', 'form_btn_text', 'Submit Request')); ?>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div>
-          <h3 class="font-semibold text-text-light dark:text-text-dark">Resources</h3>
-          <ul class="mt-4 space-y-2 text-sm">
-            <li><a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="#">For Students</a></li>
-            <li><a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="#">For Faculty &amp; Staff</a></li>
-            <li><a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="#">For Alumni</a></li>
-            <li><a class="text-text-muted-light dark:text-text-muted-dark hover:text-primary" href="#">Media Relations</a></li>
-          </ul>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="relative py-24 overflow-hidden">
+        <div class="absolute inset-0 bg-blue-900"></div>
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        
+        <div class="container relative z-10">
+            <div class="max-w-7xl mx-auto text-center">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight tracking-tight">
+                    <?php echo strip_tags(getContent($pageContent, 'cta_section', 'cta_title', 'Building a Legacy of')); ?> <br><span class="text-yellow-400 text-6xl sm:text-7xl md:text-8xl lg:text-6xl block mt-2"><?php echo strip_tags(getContent($pageContent, 'cta_section', 'cta_highlight', 'Excellence Together')); ?></span>
+                </h2>
+                <p class="text-2xl sm:text-3xl md:text-4xl text-blue-100 mb-12 max-w-6xl mx-auto leading-relaxed font-medium">
+                    <?php echo strip_tags(getContent($pageContent, 'cta_section', 'cta_description', 'Join us in our mission to transform lives through quality Christian education and dedicated service to humanity.')); ?>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                    <a href="<?php echo strip_tags(getContent($pageContent, 'cta_section', 'button_1_url', 'about_us.php')); ?>" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">info</span>
+                        <?php echo strip_tags(getContent($pageContent, 'cta_section', 'button_1_text', 'About the University')); ?>
+                    </a>
+                    <a href="<?php echo strip_tags(getContent($pageContent, 'cta_section', 'button_2_url', 'contact_us.php')); ?>" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">mail</span>
+                        <?php echo strip_tags(getContent($pageContent, 'cta_section', 'button_2_text', 'Get in Touch')); ?>
+                    </a>
+                </div>
+            </div>
         </div>
-        <div>
-          <h3 class="font-semibold text-text-light dark:text-text-dark">Contact</h3>
-          <ul class="mt-4 space-y-2 text-sm text-text-muted-light dark:text-text-muted-dark">
-            <li>123 University Drive</li>
-            <li>Valley View, ST 12345</li>
-            <li>(123) 456-7890</li>
-          </ul>
-        </div>
-      </div>
-      <div class="mt-12 border-t border-border-light dark:border-border-dark pt-8 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
-        <p>© 2024 Valley View University. All rights reserved. <a class="hover:text-primary" href="#">Privacy Policy</a></p>
-      </div>
-    </div>
-  </footer>
-</div>
+    </section>
+</main>
 
 <?php
 include 'includes/footer.php';

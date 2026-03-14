@@ -1,157 +1,352 @@
 <?php
 $page_title = "Why Choose Valley View University";
 $active_page = "admissions";
+require_once 'includes/db_connect.php';
 include 'includes/header.php';
+
+// Fetch page content
+$stmt = $pdo->prepare("SELECT * FROM academic_pages_content WHERE page_key = 'why_choose_vvu'");
+$stmt->execute();
+$page_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Fetch sections
+$stmt = $pdo->prepare("SELECT * FROM academic_pages_sections WHERE page_key = 'why_choose_vvu' AND is_active = 1 ORDER BY display_order");
+$stmt->execute();
+$sections_raw = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$sections = [];
+foreach ($sections_raw as $s) {
+    $sections[$s['section_key']] = $s;
+}
+
+// Fetch items
+$stmt = $pdo->prepare("SELECT * FROM academic_pages_items WHERE page_key = 'why_choose_vvu' AND is_active = 1 ORDER BY display_order");
+$stmt->execute();
+$items_raw = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$items = [];
+foreach ($items_raw as $i) {
+    $items[$i['section_key']][] = $i;
+}
 ?>
 
-<main>
-<!-- HeroSection -->
-<div class="w-full @container">
-<div class="flex min-h-[60vh] md:min-h-[70vh] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 items-center justify-center p-4 text-center" data-alt="Diverse group of smiling university students collaborating on a project outdoors on a sunny campus lawn" style='background-image: linear-gradient(rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAJmFUoaR98zuc4NBhWNXD_MldG9EYarIs_Jl0D6LYETooA8z80L5tCVCfj8mCMKR5_q0NTXhO9s_mE7hnPbP57VW_XWNMl2Fbo7iZRAfDKfcqnazuzPHeANsmVcMdKa2Uglc1eeyCiaAA-_5J-deAScu-GnQBlKnzvSj9uuw7tb8Z7HBbN9TUG7MRw-xel7kzME4VBHpHEGuSnAmVYqKWPnw8bMTDkXSXlslLsc94OPvik8fvNXJf3vbmFO_POjzf6assWTSpqAStt");'>
-<div class="flex flex-col gap-4 max-w-3xl">
-<h1 class="text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[720px]:text-6xl">Your Future, Forged Here.</h1>
-<p class="text-slate-200 text-base font-normal leading-normal @[480px]:text-lg">Discover an education that inspires, a community that supports, and a future with limitless possibilities at Valley View University.</p>
-</div>
-<div class="flex flex-wrap gap-4 justify-center">
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-secondary text-primary text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
-<span class="truncate">Explore Programs</span>
-</button>
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-white/30 transition-colors">
-<span class="truncate">Schedule a Visit</span>
-</button>
-</div>
-</div>
-</div>
-<!-- FeatureSection -->
-<div class="px-4 sm:px-10 lg:px-20 py-16 lg:py-24 @container bg-background-light dark:bg-background-dark">
-<div class="max-w-7xl mx-auto flex flex-col gap-10">
-<div class="flex flex-col gap-4 text-center items-center">
-<h2 class="text-text-light dark:text-text-dark tracking-light text-3xl font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em] max-w-2xl">The Pillars of Excellence</h2>
-<p class="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal max-w-3xl">At Valley View University, we are committed to a transformative educational experience. Our core strengths are designed to ensure your success both on campus and beyond.</p>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-0">
-<div class="flex flex-1 gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-card-light dark:bg-card-dark p-6 flex-col text-center items-center">
-<div class="text-primary dark:text-secondary p-3 bg-primary/10 dark:bg-secondary/10 rounded-full"><span class="material-symbols-outlined" style="font-size: 32px;">school</span></div>
-<div class="flex flex-col gap-1">
-<h3 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight">Academic Excellence</h3>
-<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-normal">Engage with world-class faculty in our top-ranked programs and innovative learning environments.</p>
-</div>
-</div>
-<div class="flex flex-1 gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-card-light dark:bg-card-dark p-6 flex-col text-center items-center">
-<div class="text-primary dark:text-secondary p-3 bg-primary/10 dark:bg-secondary/10 rounded-full"><span class="material-symbols-outlined" style="font-size: 32px;">groups</span></div>
-<div class="flex flex-col gap-1">
-<h3 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight">Vibrant Campus Life</h3>
-<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-normal">Immerse yourself in a diverse community with hundreds of clubs, events, and traditions.</p>
-</div>
-</div>
-<div class="flex flex-1 gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-card-light dark:bg-card-dark p-6 flex-col text-center items-center">
-<div class="text-primary dark:text-secondary p-3 bg-primary/10 dark:bg-secondary/10 rounded-full"><span class="material-symbols-outlined" style="font-size: 32px;">volunteer_activism</span></div>
-<div class="flex flex-col gap-1">
-<h3 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight">Unparalleled Support</h3>
-<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-normal">From mentorship to wellness, we provide the resources you need to thrive personally and academically.</p>
-</div>
-</div>
-<div class="flex flex-1 gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-card-light dark:bg-card-dark p-6 flex-col text-center items-center">
-<div class="text-primary dark:text-secondary p-3 bg-primary/10 dark:bg-secondary/10 rounded-full"><span class="material-symbols-outlined" style="font-size: 32px;">work</span></div>
-<div class="flex flex-col gap-1">
-<h3 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight">Career Pathways</h3>
-<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-normal">Gain real-world experience and launch your career with our robust internship programs and alumni network.</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Tabbed Section -->
-<div class="px-4 sm:px-10 lg:px-20 py-16 lg:py-24 bg-card-light dark:bg-card-dark">
-<div class="max-w-7xl mx-auto flex flex-col gap-8">
-<h2 class="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-[-0.015em] text-center">Discover What Sets Us Apart</h2>
-<div class="w-full max-w-4xl mx-auto">
-<div class="pb-3">
-<div class="flex border-b border-slate-200 dark:border-slate-700 justify-center">
-<a class="flex flex-col items-center justify-center border-b-[3px] border-primary dark:border-secondary text-primary dark:text-secondary pb-[13px] pt-4 flex-1 text-center" href="#">
-<p class="text-sm sm:text-base font-bold leading-normal tracking-[0.015em]">Student Support</p>
-</a>
-<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-slate-500 dark:text-slate-400 pb-[13px] pt-4 flex-1 text-center hover:text-primary dark:hover:text-secondary" href="#">
-<p class="text-sm sm:text-base font-bold leading-normal tracking-[0.015em]">Career Services</p>
-</a>
-<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-slate-500 dark:text-slate-400 pb-[13px] pt-4 flex-1 text-center hover:text-primary dark:hover:text-secondary" href="#">
-<p class="text-sm sm:text-base font-bold leading-normal tracking-[0.015em]">Research</p>
-</a>
-</div>
-</div>
-<div class="pt-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-<div class="flex flex-col gap-4">
-<h3 class="text-2xl font-bold text-text-light dark:text-text-dark">A Community Invested in You</h3>
-<p class="text-slate-600 dark:text-slate-400 leading-relaxed">At VVU, you're more than just a number. We offer personalized academic advising, a dedicated wellness center, and peer mentorship programs to ensure you have the support system you need to succeed from day one to graduation.</p>
-<ul class="space-y-2">
-<li class="flex items-start gap-3"><span class="material-symbols-outlined text-primary dark:text-secondary mt-1">check_circle</span><span class="text-slate-600 dark:text-slate-400">1-on-1 faculty mentorship and guidance</span></li>
-<li class="flex items-start gap-3"><span class="material-symbols-outlined text-primary dark:text-secondary mt-1">check_circle</span><span class="text-slate-600 dark:text-slate-400">Comprehensive mental health and wellness resources</span></li>
-<li class="flex items-start gap-3"><span class="material-symbols-outlined text-primary dark:text-secondary mt-1">check_circle</span><span class="text-slate-600 dark:text-slate-400">24/7 tutoring and academic skills workshops</span></li>
-</ul>
-</div>
-<div>
-<img alt="A friendly academic advisor meeting with a student in a bright, modern office." class="rounded-xl w-full h-auto object-cover aspect-video md:aspect-square" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBX4t41TPgbVc1-AjxkW4CM4ThufU4oDjrIvd_b4dYRnSyiINM5YwwumVZvYsDTOa9pg5nXtUhGEFFANmo7wRvMLBUTWZ7PO_BSft6n4l1_cuf_xI4bTa48BUQHSBWZuYll5NjOQwmBnjm6WLdHcSOfs8SZdtjcGcxs-GR63hAGWR-C8DfWWqBw54iEQA9wHJ1tAVBQBUyh46IMDGjM53lng7488mhHLZoMGaybSmRZzjnR5XdF5n9Ma2wkA_qKzNPjKVBce3VP30zP"/>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Testimonials Section -->
-<div class="px-4 sm:px-10 lg:px-20 py-16 lg:py-24 bg-background-light dark:bg-background-dark">
-<div class="max-w-7xl mx-auto flex flex-col gap-10 items-center">
-<div class="text-center">
-<h2 class="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-[-0.015em]">Hear From Our Community</h2>
-<p class="text-slate-600 dark:text-slate-400 mt-2 max-w-2xl">Discover the VVU experience through the eyes of our students and alumni.</p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col gap-4">
-<p class="text-slate-600 dark:text-slate-400 italic">"The support I received from my professors at VVU was incredible. They pushed me to be my best and opened doors to internships I never thought possible."</p>
-<div class="flex items-center gap-4 mt-auto pt-4 border-t border-slate-200 dark:border-slate-700">
-<img class="w-12 h-12 rounded-full object-cover" data-alt="Portrait of a smiling young man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWjjzoFz8VDIw9MbK4oQq0ljFtr_-42GX421ZcpvO_GWu6-oyZ_lz33QZFNS6VUI-e0ss7iI3PGYs78dMFg5M3cysUU2kX0nft3Tg6MeTFcTzCnNiZjkyMN8mDZuSp1UrA6rA02BEhce91SVcDZlpYfNROZ4uKcWtXCbTkpHyk-NQRT5hZNy2ZFWv4GM1cy80JHZrFi5c2SS3M3Sno82JbpEVIPuDt8sFr5EkJQupof0d9TVOVPMPy3SOTye7kPaDntIWD4FcGdexo"/>
-<div>
-<p class="font-bold text-text-light dark:text-text-dark">Michael Chen</p>
-<p class="text-sm text-slate-500 dark:text-slate-400">B.S. in Computer Science, '22</p>
-</div>
-</div>
-</div>
-<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col gap-4">
-<p class="text-slate-600 dark:text-slate-400 italic">"Campus life here is so vibrant. I've made lifelong friends in my clubs and feel like I truly belong. There's always something exciting happening."</p>
-<div class="flex items-center gap-4 mt-auto pt-4 border-t border-slate-200 dark:border-slate-700">
-<img class="w-12 h-12 rounded-full object-cover" data-alt="Portrait of a smiling young woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDswxcirV5IbhwnovmXh4izyziFmPNV9NaOul0IFX7VuzS1sjTHTlHDBav5n_URq2lakbXZbDKC6NVwEz1CkFQyhepv3Yrk08wc3-z0BTySJPAC09ti2ZplbTmbql8BZPRCA_LuV3zK7vS0fwpa5dfWNi8AtZc9usGREwx9RLnVlqn-LRKpOX70hy6WgUSkGVe8R1PS_-rvw2hZPy2TNEKH1q2hkKZW4P_rf549XWuBQd7asK91WhbVjFw6-7oEYO0E42nO74sGT_XM"/>
-<div>
-<p class="font-bold text-text-light dark:text-text-dark">Jessica Davis</p>
-<p class="text-sm text-slate-500 dark:text-slate-400">B.A. in Communications, '24</p>
-</div>
-</div>
-</div>
-<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col gap-4">
-<p class="text-slate-600 dark:text-slate-400 italic">"The research opportunities for undergraduates are unparalleled. I was able to co-author a published paper, which was a huge boost for my grad school applications."</p>
-<div class="flex items-center gap-4 mt-auto pt-4 border-t border-slate-200 dark:border-slate-700">
-<img class="w-12 h-12 rounded-full object-cover" data-alt="Portrait of a smiling person with a beard" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-OUAN2g5ZEP_xBuHo9eSJ5SkIS9lXLbEI-cGW9NbC382z6FCJwNVpUsfWg3PzfN0wSTdunDcnfg4KNALJuCGyWvpiPGH9cN2zMK2Y4c-FjvcXt3NVq6opUQaYDPd5eCnphL4j1sy5SEtMwqUWDS4yj4YR86dkZJx1pZ7ZRCDMV-BGaFT04R2rrDT8Bdjwy3A9ohK3dMR40RyxO9BEjvdj7JJwgq1ltOoy3St8oEElpkXP7nN2ZVrKkbazgYEmsj-QaeZZbO7alJtg"/>
-<div>
-<p class="font-bold text-text-light dark:text-text-dark">David Rodriguez</p>
-<p class="text-sm text-slate-500 dark:text-slate-400">B.S. in Biology, '23</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- CTA Block -->
-<div class="px-4 sm:px-10 lg:px-20 py-16 lg:py-24 bg-primary text-white">
-<div class="max-w-4xl mx-auto text-center flex flex-col items-center gap-8">
-<h2 class="text-3xl md:text-4xl font-black">Ready to Start Your Journey?</h2>
-<p class="text-slate-200 max-w-2xl">Your future starts here. Take the next step to becoming a part of the Valley View University community.</p>
-<div class="flex flex-wrap gap-4 justify-center">
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-secondary text-primary text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
-<span class="truncate">Request Information</span>
-</button>
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-white/30 transition-colors">
-<span class="truncate">Apply Now</span>
-</button>
-</div>
-</div>
-</div>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.8s ease-out forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    
+    .glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+        background: rgba(31, 41, 55, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .feature-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .feature-card:hover { 
+        transform: translateY(-15px) scale(1.02);
+        box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.25);
+    }
+    
+    .text-gradient {
+        background: linear-gradient(to right, #fbbf24, #f59e0b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .section-spacing {
+        padding-top: 10rem;
+        padding-bottom: 10rem;
+    }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section class="relative min-h-[65vh] flex items-center overflow-hidden bg-gray-900">
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags($page_data['hero_image'] ?? 'Education-Website-and-AdminPanel/images/pro-bg.jpg'); ?>" 
+                 alt="VVU Campus" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
+        </div>
+        
+        <div class="container relative z-10 py-24">
+            <div class="max-w-7xl mx-auto text-center">
+                <?php if ($page_data['hero_badge']): ?>
+                <div class="inline-flex items-center gap-4 px-12 py-5 mb-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-4 h-4 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-lg md:text-xl font-black tracking-widest uppercase text-yellow-400"><?php echo strip_tags($page_data['hero_badge']); ?></span>
+                </div>
+                <?php endif; ?>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-12 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo $page_data['hero_title']; ?> <br>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-6"><?php echo $page_data['hero_subtitle']; ?></span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-5xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    "<?php echo strip_tags($page_data['hero_description']); ?>"
+                </p>
+
+                <div class="mt-12 flex flex-wrap justify-center gap-6 animate-fadeInUp" style="animation-delay: 0.3s;">
+                    <a href="apply.php" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-lg font-black rounded-xl transition-all transform hover:scale-105 shadow-2xl flex items-center gap-3">
+                        <span class="material-symbols-outlined text-3xl text-blue-900">how_to_reg</span>
+                        Apply Now
+                    </a>
+                    <a href="#discover" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-lg font-black rounded-xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-2xl flex items-center gap-3">
+                        <span class="material-symbols-outlined text-3xl text-white">explore</span>
+                        Explore More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction Section -->
+    <?php if (isset($sections['intro'])): ?>
+    <section id="discover" class="section-spacing bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                    <div class="animate-fadeInUp">
+                        <div class="inline-flex items-center gap-5 px-10 py-4 mb-10 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 font-black uppercase tracking-widest text-xl">
+                            <span class="material-symbols-outlined text-3xl">school</span>
+                            <?php echo strip_tags($sections['intro']['section_title']); ?>
+                        </div>
+                        <?php if ($sections['intro']['section_subtitle']): ?>
+                        <div class="text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-10 leading-tight">
+                            <?php echo $sections['intro']['section_subtitle']; ?>
+                        </div>
+                        <?php endif; ?>
+                        <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed mb-12">
+                            <?php echo strip_tags($sections['intro']['section_description']); ?>
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <?php if (isset($items['intro'])): ?>
+                            <?php foreach ($items['intro'] as $item): ?>
+                            <div class="flex items-start gap-6">
+                                <div class="w-16 h-16 rounded-2xl bg-<?php echo !empty($item['item_color']) ? $item['item_color'] : 'blue-600'; ?> flex items-center justify-center shrink-0 shadow-lg">
+                                    <span class="material-symbols-outlined text-white text-3xl"><?php echo strip_tags($item['item_icon']); ?></span>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags($item['item_title']); ?></h4>
+                                    <p class="text-xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags($item['item_description']); ?></p>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="relative animate-fadeInUp" style="animation-delay: 0.2s;">
+                        <div class="absolute -inset-6 bg-gradient-to-r from-blue-600 to-yellow-400 rounded-[4rem] blur-3xl opacity-20"></div>
+                        <img src="<?php echo strip_tags($sections['intro']['section_image'] ?? 'Education-Website-and-AdminPanel/images/h-about.jpg'); ?>" 
+                             alt="Students Collaborating" class="relative rounded-[3rem] shadow-2xl w-full h-[600px] object-cover">
+                        <div class="absolute -bottom-12 -left-12 glass p-10 rounded-[2.5rem] shadow-2xl max-w-sm animate-float">
+                            <div class="text-5xl font-black text-blue-600 mb-2">97%</div>
+                            <p class="text-xl font-bold text-gray-700 dark:text-gray-300">Nursing Licensure Exam Pass Rate (2015)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Achievements Grid -->
+    <?php if (isset($sections['achievements'])): ?>
+    <section class="section-spacing bg-gray-50 dark:bg-gray-950 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 rounded-full blur-[150px] -mr-96 -mt-96"></div>
+        <div class="absolute bottom-0 left-0 w-[800px] h-[800px] bg-yellow-400/5 rounded-full blur-[150px] -ml-96 -mb-96"></div>
+        
+        <div class="container relative z-10">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-24">
+                    <h2 class="text-6xl md:text-7xl lg:text-8xl font-black text-gray-900 dark:text-white mb-8">
+                        <?php echo $sections['achievements']['section_title']; ?>
+                    </h2>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium max-w-4xl mx-auto">
+                        <?php echo strip_tags($sections['achievements']['section_subtitle']); ?>
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                    <?php if (isset($items['achievements'])): ?>
+                    <?php foreach ($items['achievements'] as $item): ?>
+                    <div class="feature-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-<?php echo !empty($item['item_color']) ? $item['item_color'] : 'blue-600'; ?>">
+                        <div class="w-24 h-24 rounded-3xl bg-<?php echo !empty($item['item_color']) ? $item['item_color'] : 'blue-600'; ?> flex items-center justify-center text-white shadow-lg mb-10">
+                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($item['item_icon']); ?></span>
+                        </div>
+                        <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($item['item_title']); ?></h3>
+                        <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                            <?php echo strip_tags($item['item_description']); ?>
+                        </p>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Eco-Friendly Section -->
+    <?php if (isset($sections['eco_friendly'])): ?>
+    <section class="section-spacing bg-white dark:bg-gray-900 overflow-hidden">
+        <div class="container">
+            <div class="max-w-7xl mx-auto">
+                <div class="bg-blue-900 rounded-[4rem] p-16 lg:p-24 relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                    <div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-4 px-8 py-3 mb-10 rounded-full bg-green-500/20 text-green-400 font-black uppercase tracking-widest text-xl">
+                                <span class="material-symbols-outlined">eco</span>
+                                <?php echo strip_tags($sections['eco_friendly']['section_subtitle']); ?>
+                            </div>
+                            <h2 class="text-6xl md:text-7xl font-black text-white mb-10 leading-tight">
+                                <?php echo $sections['eco_friendly']['section_title']; ?>
+                            </h2>
+                            <p class="text-3xl text-blue-100 font-medium leading-relaxed mb-12">
+                                <?php echo strip_tags($sections['eco_friendly']['section_description']); ?>
+                            </p>
+                            <ul class="space-y-8">
+                                <?php if (isset($items['eco_friendly'])): ?>
+                                <?php foreach ($items['eco_friendly'] as $item): ?>
+                                <li class="flex items-center gap-6">
+                                    <div class="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-white text-3xl"><?php echo strip_tags($item['item_icon']); ?></span>
+                                    </div>
+                                    <span class="text-2xl text-white font-bold"><?php echo strip_tags($item['item_title']); ?></span>
+                                </li>
+                                <?php endforeach; ?>
+                                <?php endif; ?>
+                            </ul>
+                        </div>
+                        <div class="relative">
+                            <img src="<?php echo strip_tags($sections['eco_friendly']['section_image'] ?? 'Education-Website-and-AdminPanel/images/h-cam1.jpg'); ?>" 
+                                 alt="Eco Campus" class="rounded-[3rem] shadow-2xl w-full h-[500px] object-cover">
+                            <div class="absolute -top-10 -right-10 w-40 h-40 bg-yellow-400 rounded-full flex items-center justify-center shadow-2xl animate-float">
+                                <span class="material-symbols-outlined text-white text-6xl">energy_savings_leaf</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Facilities & Services -->
+    <?php if (isset($sections['facilities'])): ?>
+    <section class="section-spacing bg-gray-50 dark:bg-gray-950">
+        <div class="container">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-24">
+                    <h2 class="text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-8">
+                        <?php echo $sections['facilities']['section_title']; ?>
+                    </h2>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium max-w-4xl mx-auto">
+                        <?php echo strip_tags($sections['facilities']['section_subtitle']); ?>
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                    <?php if (isset($items['facilities'])): ?>
+                    <?php foreach ($items['facilities'] as $item): ?>
+                    <div class="p-10 bg-white dark:bg-gray-900 rounded-[3rem] shadow-sm hover:shadow-xl transition-all border border-gray-100 dark:border-gray-800 text-center">
+                        <div class="w-20 h-20 rounded-2xl bg-<?php echo !empty($item['item_color']) ? $item['item_color'] : 'blue-600'; ?> flex items-center justify-center mx-auto mb-8">
+                            <span class="material-symbols-outlined text-white text-4xl"><?php echo strip_tags($item['item_icon']); ?></span>
+                        </div>
+                        <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($item['item_title']); ?></h4>
+                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags($item['item_description']); ?></p>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Student Life Section -->
+    <?php if (isset($sections['student_life'])): ?>
+    <section class="section-spacing bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                    <div class="order-2 lg:order-1">
+                        <div class="grid grid-cols-2 gap-6">
+                            <img src="<?php echo strip_tags($sections['student_life']['section_image'] ?? 'Education-Website-and-AdminPanel/images/h-cam.jpg'); ?>" alt="Campus Life" class="rounded-3xl shadow-xl h-80 w-full object-cover">
+                            <img src="<?php echo strip_tags($sections['student_life']['section_image_2'] ?? 'Education-Website-and-AdminPanel/images/h-about1.jpg'); ?>" alt="Students" class="rounded-3xl shadow-xl h-80 w-full object-cover mt-12">
+                        </div>
+                    </div>
+                    <div class="order-1 lg:order-2">
+                        <h2 class="text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-10 leading-tight">
+                            <?php echo $sections['student_life']['section_title']; ?>
+                        </h2>
+                        <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed mb-12">
+                            <?php echo strip_tags($sections['student_life']['section_description']); ?>
+                        </p>
+                        <div class="space-y-6">
+                            <?php if (isset($items['student_life'])): ?>
+                            <?php foreach ($items['student_life'] as $item): ?>
+                            <div class="flex items-center gap-6 p-6 bg-gray-50 dark:bg-gray-800 rounded-3xl">
+                                <div class="w-14 h-14 rounded-xl bg-<?php echo !empty($item['item_color']) ? $item['item_color'] : 'blue-600'; ?> flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-white text-3xl"><?php echo strip_tags($item['item_icon']); ?></span>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-700 dark:text-gray-300"><?php echo strip_tags($item['item_title']); ?></span>
+                            </div>
+                            <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- CTA Section -->
+    <?php if ($page_data['cta_title']): ?>
+    <section class="relative py-24 overflow-hidden">
+        <div class="absolute inset-0 bg-blue-900"></div>
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        
+        <div class="container relative z-10">
+            <div class="max-w-7xl mx-auto text-center">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-10 leading-tight">
+                    <?php echo $page_data['cta_title']; ?> <br><span class="text-lg sm:text-xl md:text-2xl lg:text-4xl text-white font-medium"><?php echo $page_data['cta_subtitle']; ?></span>
+                </h2>
+                <p class="text-lg sm:text-xl md:text-2xl text-white mb-20 max-w-5xl mx-auto leading-relaxed font-medium">
+                    <?php echo strip_tags($page_data['hero_description'] ?? 'Join the thousands of successful graduates who chose Valley View University for their future.'); ?>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-8 justify-center">
+                    <a href="<?php echo strip_tags($page_data['cta_button_link'] ?? 'apply.php'); ?>" class="px-12 py-6 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-lg font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-4">
+                        <span class="material-symbols-outlined text-4xl text-blue-900">how_to_reg</span>
+                        <?php echo strip_tags($page_data['cta_button_text'] ?? 'Apply Now'); ?>
+                    </a>
+                    <a href="contact_us.php" class="px-12 py-6 bg-white/10 hover:bg-white/20 text-white text-lg font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-4">
+                        <span class="material-symbols-outlined text-4xl text-white">support_agent</span>
+                        Talk to an Advisor
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
 </main>
 
 <?php

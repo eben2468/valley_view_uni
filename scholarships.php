@@ -1,321 +1,302 @@
 <?php
-$pageTitle = "Scholarships - Valley View University";
-$activePage = "scholarships";
+/**
+ * Valley View University - Scholarships & Financial Aid Page
+ * Fetching content dynamically from academic_pages_* tables
+ */
+require_once 'includes/db_connect.php';
+
+$page_key = 'scholarships';
+
+// Fetch page content
+try {
+    $stmt = $pdo->prepare("SELECT * FROM academic_pages_content WHERE page_key = ?");
+    $stmt->execute([$page_key]);
+    $page_data = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    
+    // Fetch sections
+    $stmt = $pdo->prepare("SELECT * FROM academic_pages_sections WHERE page_key = ? ORDER BY display_order");
+    $stmt->execute([$page_key]);
+    $page_sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Fetch items
+    $stmt = $pdo->prepare("SELECT * FROM academic_pages_items WHERE page_key = ? AND is_active = 1 ORDER BY display_order");
+    $stmt->execute([$page_key]);
+    $all_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $items_map = [];
+    foreach ($all_items as $item) {
+        $items_map[$item['section_key']][] = $item;
+    }
+} catch (PDOException $e) {
+    $page_data = [];
+    $page_sections = [];
+    $items_map = [];
+}
+
+$page_title = ($page_data['page_title'] ?? 'Scholarships & Financial Aid') . " - Valley View University";
+$active_page = "admissions";
+
 include 'includes/header.php';
 ?>
 
-<div class="relative flex min-h-screen w-full flex-col">
-  <!-- TopNavBar -->
-  <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
-    <div class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-800 px-4 sm:px-6 lg:px-10 py-3 max-w-7xl mx-auto">
-      <div class="flex items-center gap-4">
-        <div class="size-6 text-primary">
-          <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
-          </svg>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.8s ease-out forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    
+    .glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+        background: rgba(31, 41, 55, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .scholarship-card { transition: all 0.4s ease; }
+    .scholarship-card:hover { 
+        transform: translateY(-15px);
+        box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.25);
+    }
+    
+    .text-gradient {
+        background: linear-gradient(to right, #fbbf24, #f59e0b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .step-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 5rem;
+        height: 5rem;
+        border-radius: 9999px;
+        background-color: #2563eb;
+        color: #ffffff;
+        font-size: 1.875rem;
+        font-weight: 900;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section class="relative min-h-[60vh] flex items-center overflow-hidden bg-gray-900">
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags($page_data['hero_image'] ?? 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'); ?>" 
+                 alt="Scholarships" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
         </div>
-        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] dark:text-white">Valley View University</h2>
-      </div>
-      <div class="hidden md:flex flex-1 justify-end gap-8">
-        <nav class="flex items-center gap-9">
-          <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Admissions</a>
-          <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Academics</a>
-          <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Research</a>
-          <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Student Life</a>
-          <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">About</a>
-        </nav>
-        <div class="flex gap-2">
-          <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90">
-            <span class="truncate">Apply Now</span>
-          </button>
-          <button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-gray-200/80 dark:bg-gray-800 text-[#0d0d1b] dark:text-gray-200 gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5 hover:bg-gray-200 dark:hover:bg-gray-700">
-            <span class="material-symbols-outlined text-xl">search</span>
-          </button>
-        </div>
-      </div>
-      <button class="md:hidden flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-gray-200/80 dark:bg-gray-800 text-[#0d0d1b] dark:text-gray-200 gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5 hover:bg-gray-200 dark:hover:bg-gray-700">
-        <span class="material-symbols-outlined text-xl">menu</span>
-      </button>
-    </div>
-  </header>
-  <main class="flex-grow">
-    <!-- HeroSection -->
-    <section class="w-full">
-      <div class="container mx-auto px-4 py-16 sm:py-24">
-        <div class="min-h-[480px] flex flex-col gap-8 rounded-xl items-center justify-center p-6 text-center bg-cover bg-center bg-no-repeat" data-alt="Diverse group of university students smiling and collaborating on a sunny campus green." style='background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAAFc3ceHHlSQdfCgiRz0iiVEhzXoEGQvP9J6bpkm2QEaVz01Lq81H7W0FogNK5yZ_L1qZmb3iTiAVfPvYMN0nYRLoMEFUlacxB-OArHoArYGK9h8WkNlIzdurDg-8Eu1Mmmi7QbIHCH_cJuraw591KIn813kqEnLTQjKyJrGOjnEp7trQ_aajlSyzk7OTlhAZBglXb2iK44heqR3V_Zw5kRsX7UMu9Uhrguf9YtVotTdfnWS0FwdImNsDG2sKyafa8oNS1pd8uuIcR");'>
-          <div class="flex flex-col gap-4 max-w-3xl">
-            <h1 class="text-white text-4xl font-black leading-tight tracking-[-0.033em] md:text-5xl">
-              Your Future Starts Here: Scholarships at Valley View
-            </h1>
-            <p class="text-white text-base font-normal leading-normal md:text-lg">
-              We are committed to helping you achieve your academic dreams through a wide range of financial aid opportunities.
-            </p>
-          </div>
-          <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90">
-            <span class="truncate">Explore Scholarships</span>
-          </button>
-        </div>
-      </div>
-    </section>
-    <!-- Scholarship Listings -->
-    <section class="w-full container mx-auto px-4 pb-16">
-      <!-- SectionHeader -->
-      <h2 class="text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-4 pt-5 text-center md:text-left dark:text-white">Find Your Scholarship</h2>
-      <!-- Chips/Filters -->
-      <div class="flex flex-wrap gap-3 p-3">
-        <button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/20 dark:bg-primary/30 pl-4 pr-4 ring-2 ring-primary">
-          <p class="text-primary dark:text-white text-sm font-medium leading-normal">All</p>
-        </button>
-        <button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-800 pl-4 pr-4 hover:bg-gray-300 dark:hover:bg-gray-700">
-          <p class="text-sm font-medium leading-normal">Undergraduate</p>
-        </button>
-        <button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-800 pl-4 pr-4 hover:bg-gray-300 dark:hover:bg-gray-700">
-          <p class="text-sm font-medium leading-normal">Graduate</p>
-        </button>
-        <button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-800 pl-4 pr-4 hover:bg-gray-300 dark:hover:bg-gray-700">
-          <p class="text-sm font-medium leading-normal">Merit-Based</p>
-        </button>
-        <button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-800 pl-4 pr-4 hover:bg-gray-300 dark:hover:bg-gray-700">
-          <p class="text-sm font-medium leading-normal">Need-Based</p>
-        </button>
-      </div>
-      <!-- Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
-        <!-- Card 1 -->
-        <div class="flex flex-col items-stretch justify-start rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-          <div class="w-full bg-center bg-no-repeat aspect-video bg-cover" data-alt="A student working with robotics equipment in a modern engineering lab." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAkeW-zJ3nL3TSKVD87ad6ZT_rsIg3Z5Jz0x5ubjTrSY9Lc7cSw5wtS9juCtjDGg9iBBLP-Pr0gQHR_nY8bPoWeI77Ocab0ATklJOT0QHtcaV13t0h6HkLYuOu_DwzybrsERWGHUsSpXTIMglFdZ-7yvJCxy7wDgl1LSesHdpfZMLDySSFApsJFnmyyZzSuArW6LZQJLUT6hW4pgCXVCLklnxXkdCq9vrzFYXMRO_nTKnB4brDaSGnlZNiDnPF8uXGcnKCFdZry3mNz");'></div>
-          <div class="flex w-full grow flex-col items-stretch justify-between gap-4 p-6">
-            <div>
-              <p class="text-primary dark:text-accent text-sm font-medium leading-normal">Merit-Based | For Engineering Students</p>
-              <p class="text-lg font-bold leading-tight tracking-[-0.015em] mt-1 dark:text-white">Innovators of Tomorrow Scholarship</p>
-              <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal mt-2">
-                Awarded to outstanding undergraduate students in the Faculty of Engineering based on academic excellence and leadership potential.
-              </p>
-            </div>
-            <div class="flex items-end justify-between gap-3 mt-4">
-              <p class="text-gray-700 dark:text-gray-300 text-lg font-bold leading-normal">Value: $10,000</p>
-              <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-medium leading-normal hover:bg-primary/90">
-                <span class="truncate">Learn More &amp; Apply</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- Card 2 -->
-        <div class="flex flex-col items-stretch justify-start rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-          <div class="w-full bg-center bg-no-repeat aspect-video bg-cover" data-alt="A student painting on a canvas in a bright art studio." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA7ZOlh06V9KT--sAda4jBs9HTCUsGs3e8o8DoMK7sqKBkHf8dFhT_ItT2fUTIWTGyIMdV39eTbu3XW5ijRYdwB5Y9yY2guLdp0Z33x0uU9rhwqWwnA87Gb9iJ-MFQNUnvj-XsgN2MadjHUOb5q_n_Fdz4CUEyPoRqvTLU1RrCus_H4opdHiVUpmmsN9uhj-ieEqHvaGhzS26pAtdVNU4mfiRhbSOPCdELRf3QkSx-DXdFd9DbX2Fdyuiz_9UmLNpIRZY-yN6tH_fpU");'></div>
-          <div class="flex w-full grow flex-col items-stretch justify-between gap-4 p-6">
-            <div>
-              <p class="text-primary dark:text-accent text-sm font-medium leading-normal">Merit-Based | For Arts &amp; Humanities</p>
-              <p class="text-lg font-bold leading-tight tracking-[-0.015em] mt-1 dark:text-white">Creative Visionary Grant</p>
-              <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal mt-2">
-                Supports talented graduate students in the Arts &amp; Humanities who demonstrate exceptional creative potential and a unique artistic voice.
-              </p>
-            </div>
-            <div class="flex items-end justify-between gap-3 mt-4">
-              <p class="text-gray-700 dark:text-gray-300 text-lg font-bold leading-normal">Value: $8,500</p>
-              <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-medium leading-normal hover:bg-primary/90">
-                <span class="truncate">Learn More &amp; Apply</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- Card 3 -->
-        <div class="flex flex-col items-stretch justify-start rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-          <div class="w-full bg-center bg-no-repeat aspect-video bg-cover" data-alt="A diverse group of students studying together in a library." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAC1txR_pa4b0trv1wfyuI2EG3j1ojIokwY7-aFwIs_3y201M1Hp5j9NyyWRDd_W0M1lTAriiSLx1zPsMLwBkQKp1LkcsBTn2TLwTbPYJm2cQKerQXLqyfJH0G38pTXnbeHHSLeOUCMs8HDFaaJPg8NHmmgS0hYvyovJBiFEtj3ZBdgMpkDJ16eig1OL6SC7QiGFPwX42PwOmUDoQFSFQ3MP3UNqVMuHeZjYoCjMCD1FiPEvGx0-ats0BhVlOLzY4-3dHjAxRqExtzq");'></div>
-          <div class="flex w-full grow flex-col items-stretch justify-between gap-4 p-6">
-            <div>
-              <p class="text-primary dark:text-accent text-sm font-medium leading-normal">Need-Based | All Majors</p>
-              <p class="text-lg font-bold leading-tight tracking-[-0.015em] mt-1 dark:text-white">Community Leader Award</p>
-              <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal mt-2">
-                For students who have demonstrated strong commitment to community service and leadership, with consideration for financial need.
-              </p>
-            </div>
-            <div class="flex items-end justify-between gap-3 mt-4">
-              <p class="text-gray-700 dark:text-gray-300 text-lg font-bold leading-normal">Value: $5,000</p>
-              <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-medium leading-normal hover:bg-primary/90">
-                <span class="truncate">Learn More &amp; Apply</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- Card 4 -->
-        <div class="flex flex-col items-stretch justify-start rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-          <div class="w-full bg-center bg-no-repeat aspect-video bg-cover" data-alt="Close-up of a scientist looking into a microscope in a laboratory." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBXbPc32IPd4JDCWysH_hC0q17-AwaJru1IDWS0taFZbOcTbambVs1K9XY9BQy3wVOxExslw3Nhds5SkJDPFo7fGRydSpoj7q4FeRjv-S8MNZpiCkVpNZ49luWBwGtAn5jzJYmlSVn98CmZSV_g1ydBrH-xNTCSCD2GyNk4EB3_QNrsx3Ps4VCurmMQ3qIPepvuTJmeSQXn_iaySdIRbNXJdje4d2UiMvZ8vTYvefwDcSnD7DWJTjdf93nc31piZzvy97Iui_ktsK-y");'></div>
-          <div class="flex w-full grow flex-col items-stretch justify-between gap-4 p-6">
-            <div>
-              <p class="text-primary dark:text-accent text-sm font-medium leading-normal">Research | Graduate</p>
-              <p class="text-lg font-bold leading-tight tracking-[-0.015em] mt-1 dark:text-white">Future of Science Fellowship</p>
-              <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal mt-2">
-                A prestigious fellowship for graduate students pursuing groundbreaking research in the natural sciences.
-              </p>
-            </div>
-            <div class="flex items-end justify-between gap-3 mt-4">
-              <p class="text-gray-700 dark:text-gray-300 text-lg font-bold leading-normal">Value: $20,000</p>
-              <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-medium leading-normal hover:bg-primary/90">
-                <span class="truncate">Learn More &amp; Apply</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- How to Apply Section -->
-    <section class="w-full bg-white dark:bg-gray-900 py-16 sm:py-24">
-      <div class="container mx-auto px-4">
-        <h2 class="text-2xl md:text-3xl font-bold text-center leading-tight tracking-[-0.015em] dark:text-white">Simple Steps to Apply</h2>
-        <p class="mt-4 max-w-2xl mx-auto text-center text-gray-600 dark:text-gray-400">Follow our straightforward process to secure your funding. We're here to help you every step of the way.</p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 max-w-5xl mx-auto">
-          <!-- Step 1 -->
-          <div class="flex flex-col items-center text-center">
-            <div class="flex items-center justify-center size-16 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-accent">
-              <span class="material-symbols-outlined text-4xl">search</span>
-            </div>
-            <h3 class="text-lg font-bold mt-4 dark:text-white">1. Find a Scholarship</h3>
-            <p class="mt-2 text-gray-600 dark:text-gray-400">Use our filters to browse scholarships that match your profile and academic goals.</p>
-          </div>
-          <!-- Step 2 -->
-          <div class="flex flex-col items-center text-center">
-            <div class="flex items-center justify-center size-16 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-accent">
-              <span class="material-symbols-outlined text-4xl">description</span>
-            </div>
-            <h3 class="text-lg font-bold mt-4 dark:text-white">2. Prepare Documents</h3>
-            <p class="mt-2 text-gray-600 dark:text-gray-400">Gather your transcripts, essays, and letters of recommendation as required by the application.</p>
-          </div>
-          <!-- Step 3 -->
-          <div class="flex flex-col items-center text-center">
-            <div class="flex items-center justify-center size-16 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-accent">
-              <span class="material-symbols-outlined text-4xl">send</span>
-            </div>
-            <h3 class="text-lg font-bold mt-4 dark:text-white">3. Submit Application</h3>
-            <p class="mt-2 text-gray-600 dark:text-gray-400">Complete the online form and upload your documents before the deadline.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- FAQ and Contact Section -->
-    <section class="w-full py-16 sm:py-24">
-      <div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 gap-12">
-        <!-- FAQ -->
-        <div class="lg:col-span-3">
-          <h2 class="text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em] dark:text-white">Have Questions? We Have Answers.</h2>
-          <div class="mt-8 space-y-4">
-            <details class="group rounded-lg bg-gray-100 dark:bg-gray-900 p-4 cursor-pointer">
-              <summary class="flex items-center justify-between font-medium dark:text-white">
-                When is the application deadline?
-                <span class="material-symbols-outlined transition-transform duration-300 group-open:rotate-180">expand_more</span>
-              </summary>
-              <p class="mt-3 text-gray-600 dark:text-gray-400">Deadlines vary by scholarship. Please check the details on each scholarship card. Most applications for the fall semester are due by March 31st.</p>
-            </details>
-            <details class="group rounded-lg bg-gray-100 dark:bg-gray-900 p-4 cursor-pointer">
-              <summary class="flex items-center justify-between font-medium dark:text-white">
-                Can international students apply?
-                <span class="material-symbols-outlined transition-transform duration-300 group-open:rotate-180">expand_more</span>
-              </summary>
-              <p class="mt-3 text-gray-600 dark:text-gray-400">Yes, many of our scholarships are open to international students. Look for the 'International Students Welcome' tag on the scholarship details page.</p>
-            </details>
-            <details class="group rounded-lg bg-gray-100 dark:bg-gray-900 p-4 cursor-pointer">
-              <summary class="flex items-center justify-between font-medium dark:text-white">
-                How will I be notified if I receive an award?
-                <span class="material-symbols-outlined transition-transform duration-300 group-open:rotate-180">expand_more</span>
-              </summary>
-              <p class="mt-3 text-gray-600 dark:text-gray-400">Successful applicants will be notified via email approximately 6-8 weeks after the application deadline. You can also check your status on the student portal.</p>
-            </details>
-          </div>
-        </div>
-        <!-- Contact -->
-        <div class="lg:col-span-2">
-          <div class="rounded-xl bg-primary/10 dark:bg-primary/20 p-8">
-            <h3 class="text-xl font-bold text-primary dark:text-white">Need Help? Get in Touch.</h3>
-            <p class="mt-3 text-gray-700 dark:text-gray-300">Our financial aid advisors are ready to assist you with your questions.</p>
-            <div class="mt-6 space-y-4">
-              <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-primary dark:text-accent mt-1">mail</span>
-                <div>
-                  <h4 class="font-semibold dark:text-white">Email</h4>
-                  <a class="text-primary dark:text-gray-300 hover:underline" href="mailto:finaid@valleyview.edu">finaid@valleyview.edu</a>
+        
+        <div class="container relative z-10 py-24">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-8 py-3 mb-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-base md:text-lg font-black tracking-widest uppercase text-yellow-400"><?php echo strip_tags($page_data['hero_badge'] ?? 'Financial Support'); ?></span>
                 </div>
-              </div>
-              <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-primary dark:text-accent mt-1">call</span>
-                <div>
-                  <h4 class="font-semibold dark:text-white">Phone</h4>
-                  <a class="text-primary dark:text-gray-300 hover:underline" href="tel:+1234567890">(123) 456-7890</a>
-                </div>
-              </div>
-              <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-primary dark:text-accent mt-1">schedule</span>
-                <div>
-                  <h4 class="font-semibold dark:text-white">Office Hours</h4>
-                  <p class="text-gray-700 dark:text-gray-300">Mon - Fri, 9:00 AM - 5:00 PM</p>
-                </div>
-              </div>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-8 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo strip_tags($page_data['hero_title'] ?? 'Scholarships'); ?> <br>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-3"><?php echo strip_tags($page_data['hero_subtitle'] ?? '& Awards'); ?></span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    "<?php echo strip_tags($page_data['hero_description'] ?? 'Empowering excellence through financial aid.'); ?>"
+                </p>
             </div>
-            <button class="mt-6 flex w-full min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90">
-              <span class="truncate">Schedule an Appointment</span>
-            </button>
-          </div>
         </div>
-      </div>
     </section>
-  </main>
-  <!-- Footer -->
-  <footer class="bg-gray-100 dark:bg-gray-900">
-    <div class="container mx-auto px-4 py-12">
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-        <div class="col-span-2 lg:col-span-1">
-          <div class="flex items-center gap-2">
-            <div class="size-6 text-primary">
-              <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
-              </svg>
+
+    <!-- Introduction and Categories Section -->
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="max-w-7xl mx-auto">
+                <?php foreach ($page_sections as $section): ?>
+                <?php if ($section['section_key'] === 'intro'): ?>
+                    <div class="text-center mb-24 animate-fadeInUp px-4">
+                        <div class="inline-flex items-center gap-4 px-6 py-2.5 mb-8 rounded-2xl bg-gradient-to-r from-blue-700 to-blue-500 shadow-xl text-white mx-auto">
+                            <span class="material-symbols-outlined text-2xl text-white">workspace_premium</span>
+                            <span class="text-xl font-black uppercase tracking-[0.2em] text-white"><?php echo strip_tags($section['section_title']); ?></span>
+                        </div>
+                        <h2 class="text-4xl md:text-6xl font-black text-gray-900 dark:text-white mb-10 tracking-tight max-w-4xl mx-auto">
+                            <?php echo !empty($section['section_description']) ? htmlspecialchars_decode(strip_tags($section['section_description'], '<span><br><i><b><strong><em>')) : 'Investing in Your <span class="text-blue-600">Future Success</span>'; ?>
+                        </h2>
+                        <div class="h-2 w-24 bg-blue-600 mx-auto rounded-full mb-12"></div>
+                        <div class="inline-flex items-center justify-center bg-white dark:bg-gray-800 px-10 py-5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-800 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+                            <p class="text-2xl md:text-3xl text-slate-600 dark:text-slate-300 font-medium m-0">
+                                <?php echo nl2br(strip_tags($section['section_subtitle'])); ?>
+                            </p>
+                        </div>
+                    </div>
+                <?php elseif ($section['section_key'] === 'categories'): ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-24 animate-fadeInUp">
+                        <?php if (isset($items_map['categories'])): ?>
+                            <?php foreach ($items_map['categories'] as $item): ?>
+                            <div class="scholarship-card glass p-10 rounded-[3rem] shadow-xl border-t-[12px] border-<?php echo $item['item_color'] ?? 'blue-600'; ?>">
+                                <div class="w-16 h-16 rounded-2xl bg-<?php echo explode('-', $item['item_color'])[0]; ?>-600 flex items-center justify-center text-white shadow-lg mb-8">
+                                    <span class="material-symbols-outlined text-3xl text-white"><?php echo strip_tags($item['item_icon'] ?? 'workspace_premium'); ?></span>
+                                </div>
+                                <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($item['item_title']); ?></h3>
+                                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                                    <?php echo strip_tags($item['item_description']); ?>
+                                </p>
+                            </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                <?php elseif ($section['section_key'] === 'process'): ?>
+                    <div class="mb-24 animate-fadeInUp">
+                        <div class="text-center mb-16">
+                            <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($section['section_title']); ?></h2>
+                            <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium max-w-2xl mx-auto"><?php echo strip_tags($section['section_subtitle']); ?></p>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                            <?php if (isset($items_map['process'])): ?>
+                                <?php foreach ($items_map['process'] as $item): ?>
+                                <div class="glass p-12 rounded-[3rem] relative overflow-hidden group">
+                                    <div class="step-number"><?php echo strip_tags($item['item_stat_value']); ?></div>
+                                    <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($item['item_title']); ?></h4>
+                                    <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed font-bold"><?php echo strip_tags($item['item_description']); ?></p>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                <?php endforeach; ?>
             </div>
-            <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] dark:text-white">Valley View University</h2>
-          </div>
-          <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">Empowering minds, shaping futures.</p>
         </div>
-        <div>
-          <h4 class="font-semibold dark:text-white">Prospective Students</h4>
-          <ul class="mt-4 space-y-2 text-sm">
-            <li><a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" href="#">Apply</a></li>
-            <li><a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" href="#">Visit Campus</a></li>
-            <li><a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" href="#">Programs</a></li>
-          </ul>
+    </section>
+
+    <!-- Success Stories Section -->
+    <?php 
+    $success_section = null;
+    foreach ($page_sections as $s) if ($s['section_key'] === 'success') $success_section = $s;
+    if ($success_section && isset($items_map['success'])): 
+    ?>
+    <section class="py-24 bg-blue-900 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="container relative z-10">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <?php foreach ($items_map['success'] as $item): ?>
+                    <div>
+                        <h2 class="text-4xl md:text-5xl font-black text-white mb-8 leading-tight"><?php echo strip_tags($success_section['section_title'] ?? 'Changing Lives'); ?></h2>
+                        <p class="text-3xl text-blue-100 font-medium leading-relaxed mb-10">
+                            "<?php echo strip_tags($item['item_description']); ?>"
+                        </p>
+                        <div class="flex items-center gap-5">
+                            <div class="w-16 h-16 rounded-full bg-yellow-400 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-3xl text-white"><?php echo strip_tags($item['item_icon'] ?: 'person'); ?></span>
+                            </div>
+                            <div>
+                                <h4 class="text-2xl font-black text-white"><?php echo strip_tags($item['item_title']); ?></h4>
+                                <p class="text-2xl text-yellow-400 font-bold"><?php echo strip_tags($item['item_subtitle']); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                    <div class="relative">
+                        <div class="aspect-square rounded-[3rem] overflow-hidden shadow-2xl rotate-3 group hover:rotate-0 transition-transform duration-700 max-w-md mx-auto">
+                            <img src="<?php echo !empty($success_section['section_image']) ? strip_tags($success_section['section_image']) : 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'; ?>" alt="Student Success" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute -bottom-6 -left-6 glass p-8 rounded-2xl shadow-2xl animate-float">
+                            <h4 class="text-3xl font-black text-blue-900 dark:text-white"><?php echo !empty($success_section['section_subtitle']) ? strip_tags($success_section['section_subtitle']) : '$2M+'; ?></h4>
+                            <p class="text-2xl font-bold text-gray-600 dark:text-gray-400"><?php echo !empty($success_section['section_description']) ? strip_tags($success_section['section_description']) : 'Annual Aid'; ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div>
-          <h4 class="font-semibold dark:text-white">Current Students</h4>
-          <ul class="mt-4 space-y-2 text-sm">
-            <li><a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" href="#">Portal</a></li>
-            <li><a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" href="#">Library</a></li>
-            <li><a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" href="#">Events</a></li>
-          </ul>
+    </section>
+    <?php endif; ?>
+
+    <!-- Resources Section -->
+    <?php 
+    $resource_section = null;
+    foreach ($page_sections as $s) if ($s['section_key'] === 'resources') $resource_section = $s;
+    if ($resource_section && isset($items_map['resources'])): 
+    ?>
+    <section class="py-24 bg-gray-50 dark:bg-gray-950">
+        <div class="container">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($resource_section['section_title']); ?></h2>
+                    <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium max-w-2xl mx-auto"><?php echo strip_tags($resource_section['section_subtitle']); ?></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <?php foreach ($items_map['resources'] as $item): ?>
+                    <?php if ($item['item_link']): ?>
+                        <a href="<?php echo strip_tags($item['item_link']); ?>" class="glass p-10 rounded-[3rem] hover:bg-blue-600 group transition-all duration-500 shadow-xl">
+                            <div class="w-16 h-16 rounded-2xl bg-blue-600 group-hover:bg-white flex items-center justify-center mb-8 transition-colors">
+                                <span class="material-symbols-outlined text-3xl text-white group-hover:text-blue-600"><?php echo strip_tags($item['item_icon'] ?? 'description'); ?></span>
+                            </div>
+                            <h4 class="text-2xl font-black text-gray-900 dark:text-white group-hover:text-white mb-4"><?php echo strip_tags($item['item_title']); ?></h4>
+                            <p class="text-2xl text-gray-600 dark:text-gray-400 group-hover:text-blue-50 font-medium"><?php echo strip_tags($item['item_description']); ?></p>
+                        </a>
+                    <?php else: ?>
+                        <div class="glass p-10 rounded-[3rem] shadow-xl border-l-[12px] border-yellow-500">
+                            <div class="w-16 h-16 rounded-2xl bg-yellow-500 flex items-center justify-center mb-8">
+                                <span class="material-symbols-outlined text-3xl text-white"><?php echo strip_tags($item['item_icon'] ?? 'contact_support'); ?></span>
+                            </div>
+                            <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($item['item_title']); ?></h4>
+                            <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium mb-6 font-bold"><?php echo nl2br(strip_tags($item['item_description'])); ?></p>
+                        </div>
+                    <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
-        <div>
-          <h4 class="font-semibold dark:text-white">Resources</h4>
-          <ul class="mt-4 space-y-2 text-sm">
-            <li><a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" href="#">News</a></li>
-            <li><a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" href="#">Directory</a></li>
-            <li><a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" href="#">Careers</a></li>
-          </ul>
+    </section>
+    <?php endif; ?>
+
+    <!-- CTA Section -->
+    <?php if ($page_data['cta_title']): ?>
+    <section class="relative py-32 overflow-hidden">
+        <div class="absolute inset-0 bg-blue-900"></div>
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        
+        <div class="container relative z-10">
+            <div class="max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl sm:text-4xl font-black text-white mb-6 leading-tight">
+                    <?php echo strip_tags($page_data['cta_title']); ?>
+                </h2>
+                <p class="text-2xl md:text-3xl text-blue-100 mb-10 max-w-4xl mx-auto leading-relaxed font-normal">
+                    <?php echo strip_tags($page_data['cta_subtitle']); ?>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                    <a href="<?php echo strip_tags($page_data['cta_button_link'] ?: 'apply.php'); ?>" class="px-12 py-6 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-2xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-4">
+                        <span class="material-symbols-outlined text-3xl text-blue-900">how_to_reg</span>
+                        <?php echo strip_tags($page_data['cta_button_text'] ?: 'Apply Now'); ?>
+                    </a>
+                    <a href="<?php echo strip_tags($page_data['cta_button_link_2'] ?: 'contact_us.php'); ?>" class="px-12 py-6 bg-white/10 hover:bg-white/20 text-white text-2xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-4">
+                        <span class="material-symbols-outlined text-3xl text-white">support_agent</span>
+                        <?php echo strip_tags($page_data['cta_button_text_2'] ?: 'Contact Admissions'); ?>
+                    </a>
+                </div>
+            </div>
         </div>
-        <div>
-          <h4 class="font-semibold dark:text-white">Contact</h4>
-          <ul class="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-            <li>123 University Drive</li>
-            <li>Valley View, USA 12345</li>
-            <li>(123) 555-0101</li>
-          </ul>
-        </div>
-      </div>
-      <div class="mt-12 border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center">
-        <p class="text-sm text-gray-500">© 2024 Valley View University. All rights reserved.</p>
-        <div class="flex space-x-4 mt-4 sm:mt-0">
-          <a class="text-gray-500 hover:text-primary dark:hover:text-primary" href="#">Privacy Policy</a>
-          <a class="text-gray-500 hover:text-primary dark:hover:text-primary" href="#">Terms of Service</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-</div>
+    </section>
+    <?php endif; ?>
+</main>
 
 <?php
 include 'includes/footer.php';

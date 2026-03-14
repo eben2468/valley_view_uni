@@ -1,95 +1,206 @@
 <?php
-$page_title = "Ecology at Valley View University";
-$active_page = "research";
+$page_title = "Ecological Stewardship - Valley View University";
+$active_page = "about";
+require_once 'includes/db_connect.php';
+
+// Fetch content from database
+$hero = $pdo->query("SELECT * FROM ecology_hero WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetch();
+$philosophy = $pdo->query("SELECT * FROM ecology_philosophy WHERE is_active=1 ORDER BY display_order ASC")->fetchAll();
+$initiatives = $pdo->query("SELECT * FROM ecology_initiatives WHERE is_active=1 ORDER BY display_order ASC")->fetchAll();
+$stats = $pdo->query("SELECT * FROM ecology_stats WHERE is_active=1 ORDER BY display_order ASC")->fetchAll();
+$cta = $pdo->query("SELECT * FROM ecology_cta WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetch();
+
 include 'includes/header.php';
 ?>
 
-<main class="flex-1">
-<section class="w-full">
-<div class="relative flex min-h-[60vh] md:min-h-[75vh] flex-col items-center justify-center p-4">
-<img alt="Lush, sunlit green foliage on the Valley View University campus" class="absolute inset-0 w-full h-full object-cover -z-10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmDxsoRYwbAdA-K6FnHtGy5wBKf5vqZyCFrV-HUs0bGBbSYDDD3Wneaa4B3Mghrt-m8pX84m8r7qCgwcfDWVTgZ50_6SQnuA8eFAgja8xXsyydOyiQerdpRe8ByyUddDBpqrZiEkjhGqS2kqGy0E8GeQPOwbB-ubqUVSYHeioclUPe1rVhk9B5n7d1x91PPmJdcrant8ajJ6wr62nzNnnytxiWlIHbUtB4rcls1XQWOj-_Fb4eja9I6pobhorje4VNZvJg6liAcbOK"/>
-<div class="absolute inset-0 w-full h-full bg-primary-dark/50 -z-10"></div>
-<div class="flex flex-col gap-4 text-center max-w-3xl z-10">
-<h1 class="text-white text-4xl font-black leading-tight tracking-tighter md:text-6xl">Leading the Way in Sustainability</h1>
-<p class="text-white/90 text-base font-normal leading-normal md:text-lg">Valley View University is dedicated to environmental stewardship, pioneering research, and creating a greener future for our community and the world.</p>
-</div>
-</div>
-</section>
-<section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
-<div class="max-w-5xl mx-auto text-center">
-<h2 class="text-primary-dark dark:text-primary text-sm font-bold uppercase tracking-widest">Our Commitment</h2>
-<p class="mt-4 text-3xl font-bold tracking-tight text-text-light dark:text-text-dark sm:text-4xl">Fostering a Sustainable Future</p>
-<p class="mt-6 max-w-2xl mx-auto text-lg leading-8 text-text-light/80 dark:text-text-dark/80">We are dedicated to a holistic approach to ecology, integrating innovative research, green campus initiatives, and community engagement into the core of our university's mission. Explore our environmental philosophies.</p>
-</div>
-<div class="mt-16 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-<div class="flex flex-col items-center text-center gap-3 rounded-xl bg-primary/5 dark:bg-primary/10 p-8 border border-border-light dark:border-border-dark">
-<div class="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-dark"><span class="material-symbols-outlined text-4xl">nature</span></div>
-<h3 class="text-xl font-bold">Green Campus</h3>
-<p class="text-text-light/80 dark:text-text-dark/80">Implementing sustainable infrastructure and practices across all university grounds to minimize our ecological footprint.</p>
-</div>
-<div class="flex flex-col items-center text-center gap-3 rounded-xl bg-primary/5 dark:bg-primary/10 p-8 border border-border-light dark:border-border-dark">
-<div class="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-dark"><span class="material-symbols-outlined text-4xl">lightbulb</span></div>
-<h3 class="text-xl font-bold">Renewable Energy</h3>
-<p class="text-text-light/80 dark:text-text-dark/80">Transitioning to clean energy sources to power our campus and invest in a carbon-neutral future.</p>
-</div>
-<div class="flex flex-col items-center text-center gap-3 rounded-xl bg-primary/5 dark:bg-primary/10 p-8 border border-border-light dark:border-border-dark">
-<div class="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-dark"><span class="material-symbols-outlined text-4xl">science</span></div>
-<h3 class="text-xl font-bold">Conservation Research</h3>
-<p class="text-text-light/80 dark:text-text-dark/80">Leading groundbreaking studies to protect biodiversity, preserve ecosystems, and solve global environmental challenges.</p>
-</div>
-</div>
-</section>
-<section class="bg-primary/5 dark:bg-primary/10 py-16 sm:py-24">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="text-center">
-<h2 class="text-primary-dark dark:text-primary text-sm font-bold uppercase tracking-widest">Explore</h2>
-<p class="mt-4 text-3xl font-bold tracking-tight text-text-light dark:text-text-dark sm:text-4xl">Our Green Campus</p>
-<p class="mt-6 max-w-2xl mx-auto text-lg leading-8 text-text-light/80 dark:text-text-dark/80">Discover sustainable buildings, recycling centers, community gardens, and nature trails. Click on the points to learn more about each location's contribution to our green initiatives.</p>
-</div>
-<div class="mt-12">
-<img alt="Stylized illustration of a university campus map with green spaces and points of interest highlighted" class="rounded-xl object-cover w-full h-[500px] border border-border-light dark:border-border-dark shadow-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyZqHyxRdNOr-653TQ36grnEl1nNlNp1_mKUsUaEjCFeuaX-jsutkE93n7F7FJAZvG_4J0XTtHI81-uIioUyIga4hfBIeVYY3RjAd79Dh3YJtuSCifV7aJfdWdRQu-he-byMXiBgAQaUrX7k0vI3kHobnCDoHMKi-7ZYItMqZLy4i4etXkSUi8e0aAQkju62gtHXd9MY5YIA41K77D3xzVyimDKWqwzPqiVcysUR6BalHSuGtYuRX22SqY0rX-i2MDdD_zNFBhI8oo"/>
-</div>
-</div>
-</section>
-<section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
-<div class="max-w-5xl mx-auto">
-<div class="text-center">
-<h2 class="text-primary-dark dark:text-primary text-sm font-bold uppercase tracking-widest">Our Impact</h2>
-<p class="mt-4 text-3xl font-bold tracking-tight text-text-light dark:text-text-dark sm:text-4xl">By the Numbers</p>
-</div>
-<div class="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-<div>
-<p class="text-5xl font-black text-primary-dark dark:text-primary">10,000+</p>
-<p class="mt-2 text-lg font-medium text-text-light/80 dark:text-text-dark/80">Trees Planted on Campus</p>
-</div>
-<div>
-<p class="text-5xl font-black text-primary-dark dark:text-primary">40%</p>
-<p class="mt-2 text-lg font-medium text-text-light/80 dark:text-text-dark/80">Reduction in Energy Use</p>
-</div>
-<div>
-<p class="text-5xl font-black text-primary-dark dark:text-primary">250+</p>
-<p class="mt-2 text-lg font-medium text-text-light/80 dark:text-text-dark/80">Research Papers Published</p>
-</div>
-</div>
-</div>
-</section>
-<section class="w-full">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-<div class="relative overflow-hidden rounded-xl bg-primary-dark p-12 flex flex-col items-center justify-center text-center isolate">
-<img class="absolute inset-0 h-full w-full object-cover -z-10 opacity-20" data-alt="Students working together in a community garden on campus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAh4lioGuQThvTzxKtw-n-ZC0US6dIqOdkFTWFzh5zsTLwS19lWwXuI2ZtGlN0Zgo1FqzA3kuJZjU-IG5-ZS-ktG25NICCsa1G2OOp41dpLmErbomdRHzaSrTRkvrEepbVFOuY8zsrUirjRpLXQSnuktkKnUw7KXOJkZ5jcx7sjsBK_wlKVYDfWKzi6gBxM3f6lPG59qPbI7H9UqkVH1pwDdQNysFdFud6J8rEy98VzXj8z3yIlGDHxLoLqEzByIGACTzNAFLKZMiYI"/>
-<h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Make a Difference</h2>
-<p class="mt-6 max-w-xl mx-auto text-lg leading-8 text-white/90">Join our community of students, faculty, and staff dedicated to creating a sustainable world. Your involvement is key to our success.</p>
-<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-<button class="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-primary text-primary-dark text-base font-bold tracking-wide hover:opacity-90 transition-opacity">
-<span class="truncate">Get Involved</span>
-</button>
-<button class="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-background-light text-primary-dark text-base font-bold tracking-wide hover:bg-opacity-90 transition-opacity">
-<span class="truncate">Explore Programs</span>
-</button>
-</div>
-</div>
-</div>
-</section>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .pillar-card {
+        transition: all 0.3s ease;
+    }
+    .pillar-card:hover {
+        transform: translateY(-10px);
+    }
+    .text-gradient-green {
+        background: linear-gradient(to right, #4ade80, #facc15);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section class="relative min-h-[60vh] flex items-center overflow-hidden bg-gray-900">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags($hero['hero_image_url'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuAmDxsoRYwbAdA-K6FnHtGy5wBKf5vqZyCFrV-HUs0bGBbSYDDD3Wneaa4B3Mghrt-m8pX84m8r7qCgwcfDWVTgZ50_6SQnuA8eFAgja8xXsyydOyiQerdpRe8ByyUddDBpqrZiEkjhGqS2kqGy0E8GeQPOwbB-ubqUVSYHeioclUPe1rVhk9B5n7d1x91PPmJdcrant8ajJ6wr62nzNnnytxiWlIHbUtB4rcls1XQWOj-_Fb4eja9I6pobhorje4VNZvJg6liAcbOK'); ?>" 
+                 alt="Lush Green VVU Campus" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-green-900/80 via-green-900/40 to-gray-900"></div>
+        </div>
+        
+        <div class="container relative z-10 py-20">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="inline-flex items-center gap-2 px-8 py-3 mb-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
+                    <span class="text-lg md:text-xl font-black tracking-widest uppercase text-green-400"><?php echo strip_tags($hero['page_subtitle'] ?? 'Ecological Stewardship'); ?></span>
+                </div>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-tight tracking-tighter text-white mb-8 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo strip_tags($hero['hero_title'] ?? 'Harmony with'); ?> <br>
+                    <span class="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-200 to-yellow-400 block mt-3"><?php echo strip_tags($hero['hero_subtitle'] ?? "God's Creation"); ?></span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    "<?php echo strip_tags($hero['hero_description'] ?? 'At Valley View University, we believe that caring for the environment is a sacred responsibility. Our campus is a living laboratory for sustainable development and ecological preservation.'); ?>"
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Ecological Philosophy Section -->
+    <section class="py-20 bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="max-w-4xl mx-auto text-center mb-16">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">Our Philosophy</h2>
+                <div class="h-1.5 w-32 bg-green-600 mx-auto rounded-full mb-6"></div>
+                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">We integrate environmental stewardship into our curriculum, campus operations, and community outreach.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+                <?php foreach ($philosophy as $item): ?>
+                <div class="pillar-card relative group">
+                    <div class="relative h-full glass p-8 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($item['border_color'] ?? 'green-600'); ?> flex flex-col">
+                        <div class="w-20 h-20 rounded-2xl bg-<?php echo strip_tags($item['border_color'] ?? 'green-600'); ?> flex items-center justify-center text-white shadow-lg mb-6 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($item['icon'] ?? 'nature_people'); ?></span>
+                        </div>
+                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($item['title']); ?></h3>
+                        <p class="text-2xl text-gray-700 dark:text-gray-300 mb-6 flex-grow leading-relaxed">
+                            <?php echo nl2br(strip_tags($item['description'])); ?>
+                        </p>
+                        <?php if (!empty($item['feature_1']) || !empty($item['feature_2'])): ?>
+                        <ul class="space-y-3 mb-6">
+                            <?php if (!empty($item['feature_1'])): ?>
+                            <li class="flex items-center gap-4">
+                                <span class="material-symbols-outlined text-<?php echo strip_tags($item['border_color'] ?? 'green-600'); ?> text-4xl">check_circle</span>
+                                <span class="text-2xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags($item['feature_1']); ?></span>
+                            </li>
+                            <?php endif; ?>
+                            <?php if (!empty($item['feature_2'])): ?>
+                            <li class="flex items-center gap-4">
+                                <span class="material-symbols-outlined text-<?php echo strip_tags($item['border_color'] ?? 'green-600'); ?> text-4xl">check_circle</span>
+                                <span class="text-2xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags($item['feature_2']); ?></span>
+                            </li>
+                            <?php endif; ?>
+                        </ul>
+                        <?php endif; ?>
+                        <?php if (!empty($item['quote'])): ?>
+                        <div class="p-6 bg-<?php echo str_replace('-600', '-50', strip_tags($item['border_color'] ?? 'green-50')); ?> dark:bg-<?php echo str_replace('-600', '-900/20', strip_tags($item['border_color'] ?? 'green-900/20')); ?> rounded-2xl italic text-gray-700 dark:text-gray-300 border-l-4 border-<?php echo strip_tags($item['border_color'] ?? 'green-600'); ?> text-2xl font-medium">
+                            "<?php echo strip_tags($item['quote']); ?>"
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Green Initiatives in Action -->
+    <section class="py-20 bg-gray-50 dark:bg-gray-950">
+        <div class="container">
+            <div class="max-w-4xl mx-auto text-center mb-12">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">Initiatives in Action</h2>
+                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Our commitment to the environment is visible in every corner of our campus.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <?php foreach ($initiatives as $initiative): ?>
+                <div class="group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:-translate-y-2">
+                    <div class="w-20 h-20 rounded-2xl bg-<?php echo strip_tags($initiative['icon_bg_color'] ?? 'green-600'); ?> flex items-center justify-center text-white shadow-lg mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($initiative['icon'] ?? 'potted_plant'); ?></span>
+                    </div>
+                    <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3"><?php echo strip_tags($initiative['title']); ?></h4>
+                    <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        <?php echo nl2br(strip_tags($initiative['description'])); ?>
+                    </p>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Stats Section -->
+    <section class="py-20 bg-green-900 text-white overflow-hidden relative">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="container relative z-10">
+            <div class="max-w-5xl mx-auto text-center">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mb-12">Our Ecological Impact</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-10">
+                    <?php foreach ($stats as $index => $stat): ?>
+                    <div class="animate-fadeInUp" style="animation-delay: <?php echo (0.1 * ($index + 1)); ?>s;">
+                        <div class="text-6xl md:text-7xl font-black text-green-400 mb-2"><?php echo strip_tags($stat['stat_value']); ?></div>
+                        <div class="text-xl md:text-2xl uppercase tracking-widest font-black text-green-100"><?php echo strip_tags($stat['stat_label']); ?></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="relative py-20 overflow-hidden">
+        <div class="absolute inset-0 bg-gray-900"></div>
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-green-500/10 rounded-full blur-[120px] -mr-60 -mt-60"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-yellow-500/10 rounded-full blur-[120px] -ml-60 -mb-60"></div>
+        
+        <div class="container relative z-10">
+            <div class="max-w-5xl mx-auto text-center">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight tracking-tight">
+                    <?php echo strip_tags($cta['title_white'] ?? 'Join Our Green Revolution,'); ?> <br><span class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-green-400 block mt-2"><?php echo strip_tags($cta['title_green'] ?? 'Protect Our Future'); ?></span>
+                </h2>
+                <p class="text-lg sm:text-xl md:text-2xl text-green-100 mb-10 max-w-4xl mx-auto leading-relaxed font-medium">
+                    <?php echo strip_tags($cta['description'] ?? 'Be part of a community that values the earth as much as education. Discover how you can contribute to our ecological mission.'); ?>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                    <a href="<?php echo strip_tags($cta['button_1_link'] ?? 'student_life.php'); ?>" class="px-8 py-4 bg-green-500 hover:bg-green-400 text-white text-lg font-bold rounded-xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-2xl"><?php echo strip_tags($cta['button_1_icon'] ?? 'eco'); ?></span>
+                        <?php echo strip_tags($cta['button_1_text'] ?? 'Get Involved'); ?>
+                    </a>
+                    <a href="<?php echo strip_tags($cta['button_2_link'] ?? 'contact_us.php'); ?>" class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white text-lg font-bold rounded-xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-2xl"><?php echo strip_tags($cta['button_2_icon'] ?? 'mail'); ?></span>
+                        <?php echo strip_tags($cta['button_2_text'] ?? 'Contact Eco-Office'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php
+include 'includes/footer.php';
+?>

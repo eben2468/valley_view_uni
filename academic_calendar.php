@@ -1,188 +1,267 @@
 <?php
-$page_title = "Academic Calendar - Valley View University";
+require_once 'includes/db_connect.php';
+require_once 'includes/administration_content_helper.php';
+
+$page_slug = 'academic_calendar';
+$adminContent = new AdministrationContent($pdo);
+$page_data = $adminContent->getPageBySlug($page_slug);
+
+if (!$page_data) {
+    include '404.php';
+    exit;
+}
+
+$page_id = $page_data['id'];
+$page_title = $page_data['page_name'] . " - Valley View University";
 $active_page = "academics";
+
+// Fetch sections
+$hero = $adminContent->getSectionFields($page_id, 'hero');
+$intro = $adminContent->getSectionFields($page_id, 'introduction');
+$features = $adminContent->getSectionFields($page_id, 'features');
+$document = $adminContent->getSectionFields($page_id, 'document');
+$support = $adminContent->getSectionFields($page_id, 'support');
+$assistance = $adminContent->getSectionFields($page_id, 'assistance');
+$cta = $adminContent->getSectionFields($page_id, 'cta');
+
 include 'includes/header.php';
 ?>
 
-<!-- Main Content -->
-<main class="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-8 lg:py-12">
-<!-- PageHeading -->
-<div class="mb-10">
-<div class="flex flex-col gap-2">
-<h1 class="text-4xl lg:text-5xl font-black leading-tight tracking-[-0.033em] text-text-light dark:text-text-dark">Academic Calendar 2024-2025</h1>
-<p class="text-base lg:text-lg font-normal leading-normal text-text-light/70 dark:text-text-dark/70">Important dates, deadlines, and holidays for the academic year.</p>
-</div>
-</div>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-<!-- Left Sidebar: Filters -->
-<aside class="lg:col-span-3 space-y-8">
-<div class="p-6 bg-white dark:bg-background-dark rounded-xl border border-border-light dark:border-border-dark">
-<h3 class="text-lg font-bold leading-tight tracking-[-0.015em] pb-4">Filter Events</h3>
-<!-- TextField (Semester Selector) -->
-<div class="mb-6">
-<label class="flex flex-col min-w-40 flex-1">
-<p class="text-sm font-medium leading-normal pb-2">Semester</p>
-<select class="form-select w-full rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark h-12 text-sm font-normal leading-normal">
-<option selected="">Fall 2024</option>
-<option>Spring 2025</option>
-<option>Summer 2025</option>
-</select>
-</label>
-</div>
-<!-- Checklists (Categories) -->
-<div class="space-y-1">
-<h4 class="text-sm font-medium leading-normal pb-2">Category</h4>
-<label class="flex items-center gap-x-3 py-2 cursor-pointer">
-<input checked="" class="h-5 w-5 rounded border-border-light dark:border-border-dark border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-primary/50" type="checkbox"/>
-<p class="text-sm font-normal">Registration Deadlines</p>
-</label>
-<label class="flex items-center gap-x-3 py-2 cursor-pointer">
-<input checked="" class="h-5 w-5 rounded border-border-light dark:border-border-dark border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-primary/50" type="checkbox"/>
-<p class="text-sm font-normal">Holidays</p>
-</label>
-<label class="flex items-center gap-x-3 py-2 cursor-pointer">
-<input class="h-5 w-5 rounded border-border-light dark:border-border-dark border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-primary/50" type="checkbox"/>
-<p class="text-sm font-normal">Examination Periods</p>
-</label>
-<label class="flex items-center gap-x-3 py-2 cursor-pointer">
-<input class="h-5 w-5 rounded border-border-light dark:border-border-dark border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-primary/50" type="checkbox"/>
-<p class="text-sm font-normal">Academic Events</p>
-</label>
-</div>
-<button class="w-full mt-6 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">Apply Filters</button>
-</div>
-<div class="p-6 bg-white dark:bg-background-dark rounded-xl border border-border-light dark:border-border-dark">
-<button class="w-full flex cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-11 px-4 bg-accent-teal/10 dark:bg-accent-teal/20 text-accent-teal text-sm font-bold leading-normal tracking-[0.015em] hover:bg-accent-teal/20 dark:hover:bg-accent-teal/30 transition-colors">
-<span class="material-symbols-outlined text-lg">print</span>
-<span>Print Calendar</span>
-</button>
-</div>
-</aside>
-<!-- Center: Calendar View -->
-<main class="lg:col-span-6">
-<div class="p-4 sm:p-6 bg-white dark:bg-background-dark rounded-xl border border-border-light dark:border-border-dark">
-<div class="flex items-center justify-between mb-4">
-<button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined">chevron_left</span>
-</button>
-<h3 class="text-xl font-bold">October 2024</h3>
-<button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined">chevron_right</span>
-</button>
-</div>
-<div class="grid grid-cols-7 text-center text-sm font-medium text-text-light/60 dark:text-text-dark/60">
-<div class="py-2">Sun</div><div class="py-2">Mon</div><div class="py-2">Tue</div><div class="py-2">Wed</div><div class="py-2">Thu</div><div class="py-2">Fri</div><div class="py-2">Sat</div>
-</div>
-<div class="grid grid-cols-7 text-center">
-<div class="h-20 sm:h-24 py-2 text-text-light/40 dark:text-text-dark/40 border-t border-border-light dark:border-border-dark">29</div>
-<div class="h-20 sm:h-24 py-2 text-text-light/40 dark:text-text-dark/40 border-t border-border-light dark:border-border-dark">30</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">1</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">2</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">3</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">4</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">5</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">6</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">7</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark relative">8
-                  <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-<div class="size-2 rounded-full bg-accent-gold"></div>
-</div>
-</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">9</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">10</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">11</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">12</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">13</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark bg-primary/10 rounded-lg relative">14
-                  <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center font-bold text-primary dark:text-accent-gold bg-primary/20 dark:bg-accent-gold/20 size-8 rounded-full"></span>
-<div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-<div class="size-2 rounded-full bg-accent-teal"></div>
-<div class="size-2 rounded-full bg-accent-gold"></div>
-</div>
-</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">15</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">16</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">17</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">18</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">19</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">20</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">21</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">22</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">23</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">24</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">25</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">26</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">27</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">28</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">29</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">30</div>
-<div class="h-20 sm:h-24 py-2 border-t border-border-light dark:border-border-dark">31</div>
-<div class="h-20 sm:h-24 py-2 text-text-light/40 dark:text-text-dark/40 border-t border-border-light dark:border-border-dark">1</div>
-<div class="h-20 sm:h-24 py-2 text-text-light/40 dark:text-text-dark/40 border-t border-border-light dark:border-border-dark">2</div>
-</div>
-</div>
-</main>
-<!-- Right Sidebar: Event List -->
-<aside class="lg:col-span-3">
-<div class="p-6 bg-white dark:bg-background-dark rounded-xl border border-border-light dark:border-border-dark h-full">
-<h3 class="text-lg font-bold leading-tight tracking-[-0.015em] pb-4">Upcoming Events</h3>
-<div class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-<div class="flex items-start gap-4 p-4 rounded-lg bg-background-light dark:bg-white/5">
-<div class="flex-shrink-0 text-center">
-<p class="text-xs font-bold text-accent-teal uppercase">OCT</p>
-<p class="text-2xl font-black text-primary dark:text-white">08</p>
-</div>
-<div class="flex-grow">
-<p class="font-bold text-sm mb-1">Last Day to Add a Class</p>
-<p class="text-xs text-text-light/70 dark:text-text-dark/70">Final deadline for Fall 2024 course registration without a late fee.</p>
-<button class="text-xs font-bold text-accent-teal mt-2 flex items-center gap-1 hover:underline">
-<span class="material-symbols-outlined text-sm">add_circle</span> Add to Calendar
-                  </button>
-</div>
-</div>
-<div class="flex items-start gap-4 p-4 rounded-lg bg-background-light dark:bg-white/5">
-<div class="flex-shrink-0 text-center">
-<p class="text-xs font-bold text-accent-teal uppercase">OCT</p>
-<p class="text-2xl font-black text-primary dark:text-white">14</p>
-</div>
-<div class="flex-grow">
-<p class="font-bold text-sm mb-1">Indigenous Peoples' Day</p>
-<p class="text-xs text-text-light/70 dark:text-text-dark/70">University offices closed. No classes will be held.</p>
-<button class="text-xs font-bold text-accent-teal mt-2 flex items-center gap-1 hover:underline">
-<span class="material-symbols-outlined text-sm">add_circle</span> Add to Calendar
-                  </button>
-</div>
-</div>
-<div class="flex items-start gap-4 p-4 rounded-lg bg-background-light dark:bg-white/5">
-<div class="flex-shrink-0 text-center">
-<p class="text-xs font-bold text-accent-teal uppercase">NOV</p>
-<p class="text-2xl font-black text-primary dark:text-white">11</p>
-</div>
-<div class="flex-grow">
-<p class="font-bold text-sm mb-1">Veterans Day Holiday</p>
-<p class="text-xs text-text-light/70 dark:text-text-dark/70">University closed in observance of Veterans Day.</p>
-<button class="text-xs font-bold text-accent-teal mt-2 flex items-center gap-1 hover:underline">
-<span class="material-symbols-outlined text-sm">add_circle</span> Add to Calendar
-                  </button>
-</div>
-</div>
-<div class="flex items-start gap-4 p-4 rounded-lg bg-background-light dark:bg-white/5">
-<div class="flex-shrink-0 text-center">
-<p class="text-xs font-bold text-accent-teal uppercase">NOV</p>
-<p class="text-2xl font-black text-primary dark:text-white">28</p>
-</div>
-<div class="flex-grow">
-<p class="font-bold text-sm mb-1">Thanksgiving Break</p>
-<p class="text-xs text-text-light/70 dark:text-text-dark/70">Begins Nov 28, classes resume Dec 2.</p>
-<button class="text-xs font-bold text-accent-teal mt-2 flex items-center gap-1 hover:underline">
-<span class="material-symbols-outlined text-sm">add_circle</span> Add to Calendar
-                  </button>
-</div>
-</div>
-</div>
-</div>
-</aside>
-</div>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.8s ease-out forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    
+    .glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+        background: rgba(31, 41, 55, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .calendar-card { transition: all 0.4s ease; }
+    .calendar-card:hover { 
+        transform: translateY(-10px);
+        box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section class="relative min-h-[50vh] flex items-center overflow-hidden bg-gray-900">
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags($hero['image'] ?? 'https://images.unsplash.com/photo-1506784365847-bbad939e9335'); ?>" 
+                 alt="Academic Calendar" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
+        </div>
+        
+        <div class="container relative z-10 py-20">
+            <div class="max-w-7xl mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-8 py-3 mb-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-lg md:text-xl font-black tracking-widest uppercase text-yellow-400"><?php echo strip_tags(strip_tags($hero['badge'] ?? 'Academic Planning')); ?></span>
+                </div>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-8 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo strip_tags(strip_tags($hero['title_part1'] ?? 'Academic')); ?> <br>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-[6.5rem] font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-6"><?php echo strip_tags(strip_tags($hero['title_part2'] ?? 'Calendar')); ?></span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-5xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    <?php echo strip_tags(strip_tags($hero['description'] ?? '')); ?>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction Section -->
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-10">
+                        <?php echo strip_tags(strip_tags($intro['title'] ?? '')); ?>
+                    </h2>
+                    <div class="h-3 w-64 bg-blue-600 mx-auto rounded-full mb-10"></div>
+                    <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed max-w-6xl mx-auto">
+                        <?php echo nl2br(strip_tags(strip_tags($intro['description'] ?? ''))); ?>
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="calendar-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-blue-600">
+                        <div class="w-24 h-24 rounded-3xl bg-blue-600 flex items-center justify-center text-white shadow-lg mb-10">
+                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card1_icon'] ?? 'app_registration'); ?></span>
+                        </div>
+                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(strip_tags($features['card1_title'] ?? 'Registration')); ?></h3>
+                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                            <?php echo strip_tags(strip_tags($features['card1_desc'] ?? '')); ?>
+                        </p>
+                    </div>
+
+                    <div class="calendar-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-yellow-500">
+                        <div class="w-24 h-24 rounded-3xl bg-yellow-500 flex items-center justify-center text-white shadow-lg mb-10">
+                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card2_icon'] ?? 'history_edu'); ?></span>
+                        </div>
+                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(strip_tags($features['card2_title'] ?? 'Lectures & Exams')); ?></h3>
+                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                            <?php echo strip_tags(strip_tags($features['card2_desc'] ?? '')); ?>
+                        </p>
+                    </div>
+
+                    <div class="calendar-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-purple-600">
+                        <div class="w-24 h-24 rounded-3xl bg-purple-600 flex items-center justify-center text-white shadow-lg mb-10">
+                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card3_icon'] ?? 'celebration'); ?></span>
+                        </div>
+                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(strip_tags($features['card3_title'] ?? 'Holidays & Events')); ?></h3>
+                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                            <?php echo strip_tags(strip_tags($features['card3_desc'] ?? '')); ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Calendar Section -->
+    <section class="py-40 bg-gray-50 dark:bg-gray-950">
+        <div class="container">
+            <div class="max-w-[1400px] mx-auto">
+                <!-- Digital Document Container -->
+                <div class="bg-white dark:bg-gray-900 shadow-[0_0_100px_rgba(0,0,0,0.1)] dark:shadow-[0_0_100px_rgba(0,0,0,0.3)] rounded-[1.5rem] overflow-hidden border border-gray-200 dark:border-gray-800 relative">
+                    <!-- Letterhead / Header -->
+                    <div class="p-16 border-b-4 border-blue-600 bg-gray-50 dark:bg-gray-800/50">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-12">
+                            <div class="flex items-center gap-8">
+                                <img src="vvu_logo.jpg" alt="VVU Logo" class="w-32 h-auto">
+                                <div>
+                                    <h2 class="text-4xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Valley View University</h2>
+                                    <p class="text-xl font-bold text-blue-600 tracking-widest uppercase mt-2">Registry - Academic Affairs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Content -->
+                    <div class="p-10 md:p-20">
+                        <?php if (!empty($document['calendar_pdf'])): ?>
+                            <div class="mb-10 text-center">
+                                <a href="<?php echo strip_tags($document['calendar_pdf']); ?>" target="_blank" class="inline-flex items-center gap-4 px-10 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-xl hover:bg-blue-700 transition-all transform hover:scale-105">
+                                    <span class="material-symbols-outlined text-3xl">download</span>
+                                    Download Official Calendar
+                                </a>
+                            </div>
+                            <div class="rounded-[2rem] overflow-hidden border-8 border-gray-100 dark:border-gray-800 shadow-2xl bg-white" style="height: 1100px;">
+                                <iframe src="<?php echo strip_tags($document['calendar_pdf']); ?>#toolbar=0" width="100%" height="100%" frameborder="0">
+                                    <p>Your browser does not support iframes. <a href="<?php echo strip_tags($document['calendar_pdf']); ?>">Click here to download the PDF.</a></p>
+                                </iframe>
+                            </div>
+                        <?php else: ?>
+                            <div class="overflow-x-auto">
+                                <?php echo $document['table_html'] ?? '<!-- Paste calendar table HTML here -->'; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Academic Support Section -->
+    <section class="py-24 bg-gray-50 dark:bg-gray-950">
+        <div class="container">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-10 leading-tight"><?php echo strip_tags(strip_tags($support['title'] ?? '')); ?></h2>
+                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium mb-10 leading-relaxed">
+                            <?php echo strip_tags(strip_tags($support['description'] ?? '')); ?>
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <?php for($i=1; $i<=4; $i++): 
+                                $s_title = $support["item{$i}_title"] ?? '';
+                                $s_desc = $support["item{$i}_desc"] ?? '';
+                                $s_icon = $support["item{$i}_icon"] ?? 'school';
+                                if(empty($s_title)) continue;
+                            ?>
+                            <div class="p-8 bg-white dark:bg-gray-900 rounded-3xl shadow-sm">
+                                <div class="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-6">
+                                    <span class="material-symbols-outlined text-blue-600 text-3xl"><?php echo strip_tags($s_icon); ?></span>
+                                </div>
+                                <h4 class="text-xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags(strip_tags($s_title)); ?></h4>
+                                <p class="text-lg text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags(strip_tags($s_desc)); ?></p>
+                            </div>
+                            <?php endfor; ?>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-[4rem] blur-2xl opacity-20"></div>
+                        <div class="relative glass p-12 rounded-[4rem] shadow-2xl text-center">
+                            <div class="w-32 h-32 mx-auto rounded-[2.5rem] bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white shadow-lg mb-10 animate-float">
+                                <span class="material-symbols-outlined text-6xl text-white">help</span>
+                            </div>
+                            <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(strip_tags($assistance['title'] ?? '')); ?></h3>
+                            <p class="text-xl text-gray-600 dark:text-gray-400 font-medium mb-10">
+                                <?php echo strip_tags(strip_tags($assistance['description'] ?? '')); ?>
+                            </p>
+                            <a href="contact_us.php" class="inline-flex items-center gap-5 px-12 py-6 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-2xl font-black rounded-[2rem] transition-all hover:scale-105 shadow-lg">
+                                Contact Registry
+                                <span class="material-symbols-outlined text-3xl">arrow_forward</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="relative py-24 overflow-hidden">
+        <div class="absolute inset-0 bg-blue-900"></div>
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        
+        <div class="container relative z-10">
+            <div class="max-w-7xl mx-auto text-center">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-white mb-12 leading-tight">
+                    <?php echo strip_tags(strip_tags($cta['title_part1'] ?? '')); ?> <br><span class="text-4xl sm:text-5xl md:text-6xl text-yellow-400"><?php echo strip_tags(strip_tags($cta['title_part2'] ?? '')); ?></span>
+                </h2>
+                <p class="text-2xl sm:text-3xl text-blue-100 mb-20 max-w-5xl mx-auto leading-relaxed font-medium">
+                    <?php echo strip_tags(strip_tags($cta['description'] ?? '')); ?>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-10 justify-center">
+                    <?php if (!empty($document['calendar_pdf'])): ?>
+                    <a href="<?php echo strip_tags($document['calendar_pdf']); ?>" download class="px-16 py-8 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-3xl font-bold rounded-[3rem] transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-5">
+                        <span class="material-symbols-outlined text-4xl text-blue-900">picture_as_pdf</span>
+                        Download PDF
+                    </a>
+                    <?php endif; ?>
+                    <a href="index.php" class="px-16 py-8 bg-white/10 hover:bg-white/20 text-white text-3xl font-bold rounded-[3rem] transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-5">
+                        <span class="material-symbols-outlined text-4xl text-white">home</span>
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php
+include 'includes/footer.php';
+?>

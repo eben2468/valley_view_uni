@@ -1,164 +1,378 @@
 <?php
-$pageTitle = "Valley View University - Staff Encyclopedia";
-$activePage = "staff_encyclopedia";
+$page_title = "Staff Encyclopedia - Valley View University";
+$active_page = "about";
 include 'includes/header.php';
+require_once 'includes/db_connect.php';
+
+// Fetch dynamic content
+$content_stmt = $pdo->prepare("SELECT * FROM encyclopedia_content WHERE page_key = 'staff'");
+$content_stmt->execute();
+$page_content = $content_stmt->fetch();
+
+// Pagination and Filters
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+$unit = isset($_GET['unit']) ? $_GET['unit'] : '';
+
+$query = "SELECT * FROM directory WHERE type = 'staff'";
+$params = [];
+
+if ($search) {
+    $query .= " AND (name LIKE ? OR job_title LIKE ? OR department LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+}
+if ($unit) {
+    $query .= " AND department = ?";
+    $params[] = $unit;
+}
+
+$query .= " ORDER BY name ASC";
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$staff = $stmt->fetchAll();
+
+// Get unique departments/units for filters
+$units = $pdo->query("SELECT DISTINCT department FROM directory WHERE type = 'staff' AND department != ''")->fetchAll(PDO::FETCH_COLUMN);
 ?>
 
-<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
-  <div class="layout-container flex h-full grow flex-col">
-    <div class="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-40 flex flex-1 justify-center py-5">
-      <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
-        <!-- TopNavBar -->
-        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e7e7f3] dark:border-[#2a2a4b] px-4 sm:px-6 md:px-10 py-3">
-          <div class="flex items-center gap-4 text-primary">
-            <div class="size-6">
-              <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
-              </svg>
-            </div>
-            <h2 class="text-[#0d0d1b] dark:text-[#f8f8fc] text-lg font-bold leading-tight tracking-[-0.015em]">Valley View University</h2>
-          </div>
-          <div class="hidden lg:flex flex-1 justify-end gap-8">
-            <div class="flex items-center gap-9">
-              <a class="text-[#0d0d1b] dark:text-[#f8f8fc] text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Admissions</a>
-              <a class="text-[#0d0d1b] dark:text-[#f8f8fc] text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Academics</a>
-              <a class="text-[#0d0d1b] dark:text-[#f8f8fc] text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Research</a>
-              <a class="text-[#0d0d1b] dark:text-[#f8f8fc] text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">Campus Life</a>
-              <a class="text-[#0d0d1b] dark:text-[#f8f8fc] text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#">About</a>
-            </div>
-            <div class="flex gap-2 items-center">
-              <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-colors">
-                <span class="truncate">Apply Now</span>
-              </button>
-              <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC8y8uUB1Vb1wptfgJMp2c5oglSg2G3S7WLM8Rq1W7KRKXsPeQtO0ouhzO3gOMuNZOHAb1te1tjDaMD7CAb8oVqdZs9OaK7S5GMNqGHWTgHfDigAzLZtM_SrNI2x4IzEdjc1Sx56uKZIQgjOe8zQ7Lu81X6-XDVaHgfvPeEWG9Wgk6l9j_df-DI0tRjjNrG6xe7cerPzr_MT87obKdYGDdMcYEG7LHk7PZaRXYmHnuv-9WtQDm98UNVR2sNWrf1Zm-1NJS3RbErQAAi");'></div>
-            </div>
-          </div>
-          <button class="lg:hidden flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#e7e7f3] dark:bg-[#2a2a4b] text-[#0d0d1b] dark:text-[#f8f8fc] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-            <span class="material-symbols-outlined !text-2xl">menu</span>
-          </button>
-        </header>
-        <!-- PageHeading -->
-        <div class="flex flex-wrap justify-between gap-3 p-4 mt-8">
-          <div class="flex min-w-72 flex-col gap-3">
-            <p class="text-[#0d0d1b] dark:text-[#f8f8fc] text-4xl font-black leading-tight tracking-[-0.033em]">Meet Our Dedicated Faculty &amp; Staff</p>
-            <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-base font-normal leading-normal">
-              Explore our directory to connect with the talented individuals who make our university a center for excellence.
-            </p>
-          </div>
-        </div>
-        <!-- SearchBar -->
-        <div class="px-4 py-3">
-          <label class="flex flex-col min-w-40 h-12 w-full">
-            <div class="flex w-full flex-1 items-stretch rounded-xl h-full">
-              <div class="text-[#4c4c9a] dark:text-[#a1a1e2] flex border-none bg-[#e7e7f3] dark:bg-[#2a2a4b] items-center justify-center pl-4 rounded-l-xl border-r-0">
-                <span class="material-symbols-outlined !text-2xl">search</span>
-              </div>
-              <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-xl text-[#0d0d1b] dark:text-[#f8f8fc] focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-[#e7e7f3] dark:bg-[#2a2a4b] h-full placeholder:text-[#4c4c9a] dark:placeholder:text-[#a1a1e2] px-4 text-base font-normal leading-normal" placeholder="Search by name, title, or keyword..." value=""/>
-            </div>
-          </label>
-        </div>
-        <!-- Chips/Filters -->
-        <div class="flex gap-3 p-3 flex-wrap pr-4">
-          <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#e7e7f3] dark:bg-[#2a2a4b] pl-4 pr-2 text-[#0d0d1b] dark:text-[#f8f8fc] hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
-            <p class="text-sm font-medium leading-normal">All Departments</p>
-            <span class="material-symbols-outlined !text-xl">expand_more</span>
-          </button>
-          <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#e7e7f3] dark:bg-[#2a2a4b] pl-4 pr-2 text-[#0d0d1b] dark:text-[#f8f8fc] hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
-            <p class="text-sm font-medium leading-normal">All Campuses</p>
-            <span class="material-symbols-outlined !text-xl">expand_more</span>
-          </button>
-          <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#e7e7f3] dark:bg-[#2a2a4b] pl-4 pr-2 text-[#0d0d1b] dark:text-[#f8f8fc] hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
-            <p class="text-sm font-medium leading-normal">All Titles</p>
-            <span class="material-symbols-outlined !text-xl">expand_more</span>
-          </button>
-        </div>
-        <hr class="border-[#e7e7f3] dark:border-[#2a2a4b] mx-4 mt-2 mb-4"/>
-        <!-- ImageGrid -->
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-4 p-4">
-          <div class="flex flex-col gap-3 pb-3 group">
-            <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform duration-300" data-alt="Professional headshot of Dr. Eleanor Vance" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAOSj5gAPN9F9F_pamaToOjE7-mI1ZUUoSQqCTYTs7LaDyArCzn7HcYwcn4veQcgCVGXEyzV1cvkNZg9umY49LTrSDezdUK7W65JxtfVEO0MfgRKzZE0O95sBH_EzzTYlwTpoV5ofajg8lj97di89gQ1n9qmwXXkBwmAdJl4TnTzafIMIvCLMa6dZ7rpGsH5pEFytiHj2H6ktgUuTZgwwYFxiF0uIzRB_b3DymUnhwEH1P1nLT8RiW5WpnfPiNyrWncxofSVOfS5eAj");'></div>
-            <div>
-              <p class="text-[#0d0d1b] dark:text-[#f8f8fc] text-base font-bold leading-normal">Dr. Eleanor Vance</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Professor of History</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">School of Humanities</p>
-            </div>
-          </div>
-          <div class="flex flex-col gap-3 pb-3 group">
-            <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform duration-300" data-alt="Professional headshot of Prof. Samuel Reed" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA_PzdQFfvFDgGfErT4eJ7Q4koH0S-knxZzt9-TKLJvn1kBYowXz7xEPsnVlu5-x50mq0x47OZwyXgp1U60Uc3F0AvUWOomKDWKC2GRj_0EXRZwIMgZ0ofDJTqApBoh-JMF1KPI1BjFnzQZ-Ch8AnUnt0_kpCA-uDVoIPjURbRb6yu6_UENLFsRRnWKHP-f1M6lMritfZwPugSDnf-MaRxi80dnvuvdkzUQ12invAA1c8fRSzrEpzqKETnsMmgu1o0m1tySqsJ1_dwX");'></div>
-            <div>
-              <p class="text-[#0d0d1b] dark:text-[#f8f8fc] text-base font-bold leading-normal">Prof. Samuel Reed</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Associate Professor</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">College of Sciences</p>
-            </div>
-          </div>
-          <div class="flex flex-col gap-3 pb-3 group">
-            <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform duration-300" data-alt="Professional headshot of Dr. Beatrice Chen" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB25rOHSpmGRKbN5YJBltxCrYnlsKIK12hWV9JloefEbsuV-sAn9gERvtI5azMiDLSF939lknkHG1MDNaQ-reJtmCMNl3xEDkwCXjM-Fp4-LFRvn0FFysxwVX53GjWGRadXZOH-vFCQFcRW2xEJ7S0_ksTZBzxJpfP1HbAeFUiF_C1mr7jLUvi5mA4ILt7V11X_7kWNej0H10imKUR2yb2eNCUm4X1217Bxs7eYuM-exXHFmCMgyAYv996Qt0bz9sHoDdht3TNQcTrn");'></div>
-            <div>
-              <p class="text-[#0d0d1b] dark:text-[#f8f8fc] text-base font-bold leading-normal">Dr. Beatrice Chen</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Head of Computer Science</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">School of Engineering</p>
-            </div>
-          </div>
-          <div class="flex flex-col gap-3 pb-3 group">
-            <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform duration-300" data-alt="Professional headshot of Mr. David Grant" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCUsevv7LIBy0Ewq_uT0JKxewDp2Zu6Z_k14VGTL9BqNApyKlkp2r5OQz8ZY2MzG8RuoThADv4F8df9v6wlDiytJgtrcuXcHbe_rhRB9TnvsXmosMEHRFIISwi9bb7wZo9JfKzt_bcGFnKTA3yWnwVYJMMV1WFLTcjs0_zLoKES250uYqdd6651jcmwAsu4Otl8TfCI3wBHkVBUYBHBB3Vh4jJKyIv3KsEe4Lqi5m-Po9Q1TlAqCQ1fWDY2qIzMfFGGL2cJJ6Q8HWqk");'></div>
-            <div>
-              <p class="text-[#0d0d1b] dark:text-[#f8f8fc] text-base font-bold leading-normal">Mr. David Grant</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Director of Admissions</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Administration</p>
-            </div>
-          </div>
-          <div class="flex flex-col gap-3 pb-3 group">
-            <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform duration-300" data-alt="Professional headshot of Ms. Sofia Rodriguez" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB26-VX19oq2ybmzNg-u6wPJDUfX5168kEoHBwwOpkdaao2zPCqSBEgVRkXk5yjAoYyivanahXxV_Hy4j45sYSZhbffAOTnZpSbXWfnWKTCrElADYd_K-U91zNjvIINLHEaAE3_v9fGIlUo5STHAO0dD0GiU1uEGryHpKMCtYSVE-QEWDzYhBhKbOiQtkpHAN4Pknu_rW0ORIui_Yu2ecpl5lcxo4A6L7vTZZrKs7CxwLXJ_EEr71s8Ve5jkQR_4rnyv3k975MVPhoY");'></div>
-            <div>
-              <p class="text-[#0d0d1b] dark:text-[#f8f8fc] text-base font-bold leading-normal">Ms. Sofia Rodriguez</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Librarian</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">University Library</p>
-            </div>
-          </div>
-          <div class="flex flex-col gap-3 pb-3 group">
-            <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform duration-300" data-alt="Professional headshot of Dr. Michael Thompson" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDXjKNWkwTGTtkrM3Ic7tHGlRSSUYhdBrUPlD-JmAatoYF4cZ-tuMm3E_s15Q0_mz1HGZEbFe51bdGUKiKjNn7BrfB0Vl6kSEvP9sg7rMvHz5uMjfBizoJF0ag1OMRnZnEvtWa_3WKx0igY_hqwsRlKTlvEBpLJCYpyxvFs60ORNW3tP-GQs49iYYuWstGEUFPhpW2BoMrZqhzGqt8t_56b-xHLPjYTeMppqvqsQnVFNienvw3VuQLxJL3HGzyGYaVKIxorqOFhoizF");'></div>
-            <div>
-              <p class="text-[#0d0d1b] dark:text-[#f8f8fc] text-base font-bold leading-normal">Dr. Michael Thompson</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Dean of Arts &amp; Sciences</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Administration</p>
-            </div>
-          </div>
-          <div class="flex flex-col gap-3 pb-3 group">
-            <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform duration-300" data-alt="Professional headshot of Prof. Linda Harris" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD-0kUzyO5TvC0_g7G2M-NZP2vh6pyBvGd9474CB5CordsyX6f0MtDNcyRhRMSaqxOGnvNk6vvSSpJn03MVJA5DJgHxYlrjs8OIbpMskCmt6PHCUtUQ-Hyc0OZE-6jtkxamWnMSPcg6qAw9vzB-8MzcDAAqdQ85L2Y7Dv2jr036Rm8-hM32xQl67O0uv346QNxlU71_ksbRIvguPo3-zUzOR-YpOAmLQdgn02QwNdjBk2GQqYgB9BITtGqXzYQxtlycLRJxjBv4io4o");'></div>
-            <div>
-              <p class="text-[#0d0d1b] dark:text-[#f8f8fc] text-base font-bold leading-normal">Prof. Linda Harris</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Professor of Fine Arts</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">School of Arts</p>
-            </div>
-          </div>
-          <div class="flex flex-col gap-3 pb-3 group">
-            <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform duration-300" data-alt="Professional headshot of Dr. Robert Clark" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAKkLvJRBnEN5CMSpdFrn3FyQ8rXEGrpX468MXwKadIqpyH_7kZlzH3bR2sLHEi28YY5xoxWgNjU3gbC68eUeVgElXBDlcxYVsKCI3W0sCVDW6YLwfaUPO0yszJGzFc6FjrFdGvbQqARbk_qcUo7LWL0OsqC9453ze9Wx7lTXgJAsTRUrbXN2Ok5blo-TI970U8c0wROjHdYtvHUSPcAWz0Vc0quvTM00E-l6geyMvvfIF85FdI2UBzBemF49lBKv9U5phX0ah6e3uh");'></div>
-            <div>
-              <p class="text-[#0d0d1b] dark:text-[#f8f8fc] text-base font-bold leading-normal">Dr. Robert Clark</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Research Scientist</p>
-              <p class="text-[#4c4c9a] dark:text-[#a1a1e2] text-sm font-normal leading-normal">Research Institute</p>
-            </div>
-          </div>
-        </div>
-        <!-- Pagination -->
-        <div class="flex justify-center items-center gap-2 p-4 mt-8">
-          <button class="flex items-center justify-center size-10 rounded-lg bg-[#e7e7f3] dark:bg-[#2a2a4b] text-[#4c4c9a] dark:text-[#a1a1e2] hover:bg-primary/20 dark:hover:bg-primary/30 hover:text-primary dark:hover:text-white transition-colors">
-            <span class="material-symbols-outlined !text-2xl">chevron_left</span>
-          </button>
-          <button class="flex items-center justify-center size-10 rounded-lg bg-primary text-white font-bold text-sm">1</button>
-          <button class="flex items-center justify-center size-10 rounded-lg bg-[#e7e7f3] dark:bg-[#2a2a4b] text-[#0d0d1b] dark:text-[#f8f8fc] font-bold text-sm hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">2</button>
-          <button class="flex items-center justify-center size-10 rounded-lg bg-[#e7e7f3] dark:bg-[#2a2a4b] text-[#0d0d1b] dark:text-[#f8f8fc] font-bold text-sm hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">3</button>
-          <span class="text-[#4c4c9a] dark:text-[#a1a1e2]">...</span>
-          <button class="flex items-center justify-center size-10 rounded-lg bg-[#e7e7f3] dark:bg-[#2a2a4b] text-[#0d0d1b] dark:text-[#f8f8fc] font-bold text-sm hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">12</button>
-          <button class="flex items-center justify-center size-10 rounded-lg bg-[#e7e7f3] dark:bg-[#2a2a4b] text-[#4c4c9a] dark:text-[#a1a1e2] hover:bg-primary/20 dark:hover:bg-primary/30 hover:text-primary dark:hover:text-white transition-colors">
-            <span class="material-symbols-outlined !text-2xl">chevron_right</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+    
+    .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-<?php
-include 'includes/footer.php';
-?>
+    .staff-card {
+        background: white;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .staff-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: #002147;
+    }
+
+    .staff-image-wrapper {
+        position: relative;
+        aspect-ratio: 1/1;
+        overflow: hidden;
+        background: #f8fafc;
+    }
+
+    .staff-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .staff-card:hover .staff-image-wrapper img {
+        transform: scale(1.05);
+    }
+
+    .job-badge {
+        display: inline-block;
+        background: #002147;
+        color: white;
+        padding: 2px 8px;
+        font-size: 8px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-radius: 4px;
+        margin-bottom: 4px;
+    }
+
+    .staff-info {
+        padding: 8px 10px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        text-align: center;
+    }
+
+    .staff-name {
+        font-size: 13px;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 2px;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.4em;
+    }
+
+    .staff-dept {
+        font-size: 10px;
+        color: #64748b;
+        font-weight: 600;
+        line-height: 1.2;
+        margin-bottom: 6px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 1.2em;
+    }
+
+    .btn-profile {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        width: 100%;
+        padding: 5px;
+        background: #f8fafc;
+        color: #334155;
+        font-weight: 700;
+        font-size: 9px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        text-decoration: none !important;
+        text-transform: uppercase;
+        margin-top: auto;
+        border: 1px solid #e2e8f0;
+    }
+
+    .staff-card:hover .btn-profile {
+        background: #002147;
+        color: white;
+        border-color: #002147;
+    }
+
+    /* Filters Layout Update */
+    .filter-container {
+        position: relative;
+        background: white;
+        border-radius: 2rem;
+        padding: 0.75rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .filter-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-icon {
+        position: absolute;
+        left: 1.5rem;
+        color: #64748b;
+        font-size: 1.5rem;
+        pointer-events: none;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 1.25rem 1.5rem 1.25rem 3.5rem;
+        border-radius: 1.5rem;
+        border: 1px solid transparent;
+        background: #f8fafc;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        outline: none;
+        color: #1e293b;
+    }
+
+    .filter-input:focus {
+        background: white;
+        border-color: #002147;
+        box-shadow: 0 0 0 4px rgba(0, 33, 71, 0.05);
+    }
+
+    .filter-select {
+        padding-left: 3.5rem;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.5rem center;
+        background-size: 1.5rem;
+    }
+
+    .btn-search {
+        width: 100%;
+        height: 100%;
+        padding: 1.25rem;
+        border-radius: 1.5rem;
+        background: #002147;
+        color: white;
+        font-weight: 800;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .btn-search:hover {
+        background: #003366;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(0, 33, 71, 0.3);
+    }
+
+    .btn-search:active {
+        transform: translateY(0);
+    }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900 pb-20">
+    <!-- Hero Section (Directly from faqs_about_vvu.php design) -->
+    <section class="relative min-h-[60vh] flex items-center overflow-hidden bg-gray-900">
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags($page_content['hero_image'] ?: 'images/home-2.jpg'); ?>" 
+                 alt="Staff Hero" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
+        </div>
+        
+        <div class="container relative z-10 py-24">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="inline-flex items-center gap-2 px-6 py-2 mb-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-xs md:text-sm font-black tracking-widest uppercase text-yellow-400">Administrative Directory</span>
+                </div>
+                
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none tracking-tighter text-white mb-8 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo strip_tags($page_content['hero_title']); ?> <br>
+                    <span class="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-2">Staff Profiles</span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-3xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    "<?php echo strip_tags($page_content['hero_subtitle']); ?>"
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search/Filter Section -->
+    <section class="py-16 relative z-20 -mt-24">
+        <div class="container">
+            <div class="max-w-6xl mx-auto">
+                <div class="filter-container">
+                    <form action="" method="GET" class="m-0">
+                        <div class="row g-3">
+                            <div class="col-lg-5">
+                                <div class="filter-group">
+                                    <span class="material-symbols-outlined filter-icon">person_search</span>
+                                    <input type="text" name="search" placeholder="Staff name or job title..." 
+                                           class="filter-input" value="<?php echo strip_tags($search); ?>">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="filter-group">
+                                    <span class="material-symbols-outlined filter-icon">account_balance</span>
+                                    <select name="unit" class="filter-input filter-select">
+                                        <option value="">All Departments / Units</option>
+                                        <?php foreach ($units as $u): ?>
+                                            <option value="<?php echo strip_tags($u); ?>" <?php echo $unit == $u ? 'selected' : ''; ?>><?php echo strip_tags($u); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <button type="submit" class="btn-search">
+                                    <span class="material-symbols-outlined">search</span>
+                                    Search Directory
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Staff Grid Section -->
+    <section class="py-12">
+        <div class="container px-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                <?php if (empty($staff)): ?>
+                    <div class="col-span-full text-center py-20">
+                        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                            <span class="material-symbols-outlined text-4xl text-gray-300">search_off</span>
+                        </div>
+                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-2">No results found</h3>
+                        <p class="text-lg text-gray-500 mb-8">Try adjusting your filters or search term.</p>
+                        <a href="staff_encyclopedia.php" class="inline-flex items-center gap-2 text-navy font-black text-lg hover:gap-4 transition-all">
+                            Reset All Filters <span class="material-symbols-outlined">restart_alt</span>
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($staff as $s): ?>
+                        <div class="staff-card animate-fadeInUp">
+                                <div class="staff-image-wrapper">
+                                    <img src="<?php echo strip_tags($s['image_url'] ?: 'images/default-profile.png'); ?>" alt="<?php echo strip_tags($s['name']); ?>">
+                                </div>
+                                <div class="staff-info">
+                                    <h3 class="staff-name"><?php echo strip_tags($s['name']); ?></h3>
+                                    <?php if ($s['job_title']): ?>
+                                        <div class="mb-2"><span class="job-badge"><?php echo strip_tags($s['job_title']); ?></span></div>
+                                    <?php endif; ?>
+                                    <p class="staff-dept"><?php echo strip_tags($s['department']); ?></p>
+                                    <a href="profile.php?id=<?php echo $s['id']; ?>" class="btn-profile">
+                                        View Full Profile
+                                        <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+                                    </a>
+                                </div>
+                            </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section (Directly from faqs_about_vvu.php design) -->
+    <section class="py-24 bg-white dark:bg-gray-900 mt-20">
+        <div class="container">
+            <div class="max-w-5xl mx-auto text-center glass p-20 rounded-[4rem] shadow-2xl">
+                <h2 class="text-5xl sm:text-6xl font-black text-gray-900 dark:text-white mb-8"><?php echo strip_tags($page_content['cta_title']); ?></h2>
+                <p class="text-2xl text-gray-600 dark:text-gray-400 mb-12 font-medium leading-relaxed">
+                    <?php echo strip_tags($page_content['cta_subtitle']); ?>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                    <a href="contact_us.php" class="px-12 py-6 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-4">
+                        <span class="material-symbols-outlined text-3xl">mail</span>
+                        Contact Administration
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<?php include 'includes/footer.php'; ?>

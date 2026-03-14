@@ -1,217 +1,216 @@
 <?php
-$pageTitle = "University Policies - Valley View University";
-$activePage = "policies";
+$page_title = "University Policies - Valley View University";
+$active_page = "about";
+require_once 'includes/db_connect.php';
+
+// Fetch data from database
+$page_key = 'policies';
+$stmt = $pdo->prepare("SELECT * FROM academic_pages_content WHERE page_key = ? AND is_active = 1");
+$stmt->execute([$page_key]);
+$hero = $stmt->fetch();
+
+$stmt = $pdo->prepare("SELECT * FROM academic_pages_sections WHERE page_key = ? ORDER BY display_order");
+$stmt->execute([$page_key]);
+$sections = $stmt->fetchAll();
+
+$stmt = $pdo->prepare("SELECT * FROM academic_pages_items WHERE page_key = ? AND is_active = 1 ORDER BY section_key, display_order");
+$stmt->execute([$page_key]);
+$all_items = $stmt->fetchAll();
+
+$grouped_items = [];
+foreach ($all_items as $item) {
+    if ($item['extra_data']) {
+        $item['documents'] = json_decode($item['extra_data'], true) ?: [];
+    }
+    $grouped_items[$item['section_key']][] = $item;
+}
+
 include 'includes/header.php';
 ?>
 
-<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
-  <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-4 text-brand-navy dark:text-white">
-          <div class="w-8 h-8 flex-shrink-0 text-brand-teal">
-            <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-              <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill-rule="evenodd"></path>
-            </svg>
-          </div>
-          <h2 class="text-xl font-bold tracking-tight">Valley View University</h2>
-        </div>
-        <nav class="hidden md:flex items-center gap-8">
-          <a class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-teal dark:hover:text-primary" href="#">Academics</a>
-          <a class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-teal dark:hover:text-primary" href="#">Admissions</a>
-          <a class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-teal dark:hover:text-primary" href="#">Student Life</a>
-          <a class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-teal dark:hover:text-primary" href="#">Research</a>
-          <a class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-teal dark:hover:text-primary" href="#">About</a>
-        </nav>
-        <div class="flex items-center gap-2">
-          <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-5 bg-brand-teal text-white text-sm font-bold tracking-wide hover:bg-brand-teal/90 transition-colors">
-            <span>Apply</span>
-          </button>
-          <button class="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-gray-200/50 dark:bg-gray-700/50 text-brand-navy dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-            <span class="material-symbols-outlined">search</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-  <main class="flex-grow">
-    <div class="@container">
-      <div class="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 items-center justify-center p-4" data-alt="University library interior with high ceilings and bookshelves, conveying a sense of knowledge and authority." style='background-image: linear-gradient(rgba(10, 35, 66, 0.85) 0%, rgba(10, 35, 66, 0.95) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDlpqAxUpsNTDcRAQIlxSNJQ8SojHcCq-EJUtGi1fL4Ks81Fov4uUGjJrsaziEer_Gb2EzOGjNFYzIvSXn8BgUcJTOJ60Ln7ogU_UGxoqMGsnyt1wEkW1636dKPzO17EdOyoT7GZLZ7-VADxDD39JsJ31e3yOzPXyo_69Va5FW22seP0WfrtmjXil3J2I1YDq8D9rg2aEcx572kdiJMjcAlfXPO3bQ46H2PtAA2WpbTZN8cvvoWSPdLKzgJaKL0f6lY99R4t-07NQsh");'>
-        <div class="flex flex-col gap-2 text-center">
-          <h1 class="text-white text-4xl font-black leading-tight tracking-tight @[480px]:text-5xl">
-            University Policies &amp; Procedures
-          </h1>
-          <h2 class="text-gray-200 text-sm font-normal leading-normal @[480px]:text-base max-w-2xl mx-auto">
-            A comprehensive and searchable guide to the principles and regulations at Valley View University.
-          </h2>
-        </div>
-        <label class="flex flex-col min-w-40 h-14 w-full max-w-[580px] @[480px]:h-16">
-          <div class="flex w-full flex-1 items-stretch rounded-full h-full shadow-lg">
-            <div class="text-gray-500 flex bg-white items-center justify-center pl-6 rounded-l-full border-r-0">
-              <span class="material-symbols-outlined">search</span>
-            </div>
-            <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-brand-navy focus:outline-0 focus:ring-2 focus:ring-brand-gold/50 bg-white h-full placeholder:text-gray-500 px-4 border-none text-base font-normal leading-normal" placeholder="Search for a policy..." value=""/>
-            <div class="flex items-center justify-center rounded-r-full bg-white pr-2">
-              <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-5 @[480px]:h-12 @[480px]:px-6 bg-brand-gold text-brand-navy text-sm font-bold tracking-wide @[480px]:text-base hover:bg-brand-gold/90 transition-colors">
-                <span>Search</span>
-              </button>
-            </div>
-          </div>
-        </label>
-      </div>
-    </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <aside class="lg:col-span-1">
-          <h3 class="text-lg font-bold text-brand-navy dark:text-white mb-4 px-4">Policy Categories</h3>
-          <nav class="flex flex-col space-y-1">
-            <a class="flex items-center px-4 py-2 text-sm font-medium text-white bg-brand-teal rounded-lg" href="#">Academic Policies</a>
-            <a class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-brand-gray dark:hover:bg-gray-800 rounded-lg" href="#">Student Conduct &amp; Rights</a>
-            <a class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-brand-gray dark:hover:bg-gray-800 rounded-lg" href="#">Administrative &amp; Financial</a>
-            <a class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-brand-gray dark:hover:bg-gray-800 rounded-lg" href="#">Health &amp; Safety</a>
-            <a class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-brand-gray dark:hover:bg-gray-800 rounded-lg" href="#">Information Technology</a>
-            <a class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-brand-gray dark:hover:bg-gray-800 rounded-lg" href="#">Faculty &amp; Staff Handbook</a>
-          </nav>
-        </aside>
-        <div class="lg:col-span-3">
-          <section id="frequently-accessed">
-            <h2 class="text-brand-navy dark:text-white text-2xl font-bold leading-tight tracking-tight mb-6">Frequently Accessed Policies</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="flex flex-col justify-between gap-4 rounded-xl bg-white dark:bg-gray-800/50 p-6 border border-gray-200 dark:border-gray-700/50 shadow-sm hover:shadow-lg transition-shadow">
-                <div class="flex flex-col gap-2">
-                  <p class="text-brand-navy dark:text-white text-lg font-bold">Academic Integrity Policy</p>
-                  <p class="text-gray-600 dark:text-gray-300 text-sm">Outlines the standards for honest academic work and consequences for plagiarism.</p>
-                </div>
-                <button class="flex items-center justify-center gap-2 w-fit px-4 h-9 rounded-full bg-brand-gray dark:bg-gray-700 text-brand-navy dark:text-white text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                  <span class="material-symbols-outlined !text-[18px]">arrow_forward</span>
-                  <span>Read More</span>
-                </button>
-              </div>
-              <div class="flex flex-col justify-between gap-4 rounded-xl bg-white dark:bg-gray-800/50 p-6 border border-gray-200 dark:border-gray-700/50 shadow-sm hover:shadow-lg transition-shadow">
-                <div class="flex flex-col gap-2">
-                  <p class="text-brand-navy dark:text-white text-lg font-bold">Code of Student Conduct</p>
-                  <p class="text-gray-600 dark:text-gray-300 text-sm">Defines the expectations for student behavior and the disciplinary process.</p>
-                </div>
-                <button class="flex items-center justify-center gap-2 w-fit px-4 h-9 rounded-full bg-brand-gray dark:bg-gray-700 text-brand-navy dark:text-white text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                  <span class="material-symbols-outlined !text-[18px]">arrow_forward</span>
-                  <span>Read More</span>
-                </button>
-              </div>
-            </div>
-          </section>
-          <div class="border-t border-gray-200 dark:border-gray-700 my-10"></div>
-          <section id="all-policies">
-            <h2 class="text-brand-navy dark:text-white text-2xl font-bold leading-tight tracking-tight mb-6">Academic Policies</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="flex flex-col justify-between gap-4 rounded-xl bg-white dark:bg-gray-800/50 p-6 border border-gray-200 dark:border-gray-700/50 shadow-sm hover:shadow-lg transition-shadow">
-                <div class="flex flex-col gap-2">
-                  <div class="flex items-center justify-between">
-                    <p class="text-brand-navy dark:text-white text-lg font-bold">Grading Policies</p>
-                    <div class="h-6 shrink-0 items-center justify-center gap-x-2 rounded-full bg-brand-teal/10 px-3 flex">
-                      <p class="text-brand-teal text-xs font-medium">Academic</p>
-                    </div>
-                  </div>
-                  <p class="text-gray-600 dark:text-gray-300 text-sm">Details on the university's grading system, including pass/fail options and GPA calculation.</p>
-                </div>
-                <button class="flex items-center justify-center gap-2 w-fit px-4 h-9 rounded-full bg-brand-gray dark:bg-gray-700 text-brand-navy dark:text-white text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                  <span class="material-symbols-outlined !text-[18px]">download</span>
-                  <span>View Details</span>
-                </button>
-              </div>
-              <div class="flex flex-col justify-between gap-4 rounded-xl bg-white dark:bg-gray-800/50 p-6 border border-gray-200 dark:border-gray-700/50 shadow-sm hover:shadow-lg transition-shadow">
-                <div class="flex flex-col gap-2">
-                  <div class="flex items-center justify-between">
-                    <p class="text-brand-navy dark:text-white text-lg font-bold">Course Registration</p>
-                    <div class="h-6 shrink-0 items-center justify-center gap-x-2 rounded-full bg-brand-teal/10 px-3 flex">
-                      <p class="text-brand-teal text-xs font-medium">Academic</p>
-                    </div>
-                  </div>
-                  <p class="text-gray-600 dark:text-gray-300 text-sm">Procedures for adding, dropping, and withdrawing from courses each semester.</p>
-                </div>
-                <button class="flex items-center justify-center gap-2 w-fit px-4 h-9 rounded-full bg-brand-gray dark:bg-gray-700 text-brand-navy dark:text-white text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                  <span class="material-symbols-outlined !text-[18px]">download</span>
-                  <span>View Details</span>
-                </button>
-              </div>
-              <div class="flex flex-col justify-between gap-4 rounded-xl bg-white dark:bg-gray-800/50 p-6 border border-gray-200 dark:border-gray-700/50 shadow-sm hover:shadow-lg transition-shadow">
-                <div class="flex flex-col gap-2">
-                  <div class="flex items-center justify-between">
-                    <p class="text-brand-navy dark:text-white text-lg font-bold">Degree Requirements</p>
-                    <div class="h-6 shrink-0 items-center justify-center gap-x-2 rounded-full bg-brand-teal/10 px-3 flex">
-                      <p class="text-brand-teal text-xs font-medium">Academic</p>
-                    </div>
-                  </div>
-                  <p class="text-gray-600 dark:text-gray-300 text-sm">Information on credit requirements, major/minor declarations, and graduation criteria.</p>
-                </div>
-                <button class="flex items-center justify-center gap-2 w-fit px-4 h-9 rounded-full bg-brand-gray dark:bg-gray-700 text-brand-navy dark:text-white text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                  <span class="material-symbols-outlined !text-[18px]">download</span>
-                  <span>View Details</span>
-                </button>
-              </div>
-              <div class="flex flex-col justify-between gap-4 rounded-xl bg-white dark:bg-gray-800/50 p-6 border border-gray-200 dark:border-gray-700/50 shadow-sm hover:shadow-lg transition-shadow">
-                <div class="flex flex-col gap-2">
-                  <div class="flex items-center justify-between">
-                    <p class="text-brand-navy dark:text-white text-lg font-bold">Transfer Credit Policy</p>
-                    <div class="h-6 shrink-0 items-center justify-center gap-x-2 rounded-full bg-brand-teal/10 px-3 flex">
-                      <p class="text-brand-teal text-xs font-medium">Academic</p>
-                    </div>
-                  </div>
-                  <p class="text-gray-600 dark:text-gray-300 text-sm">Guidelines for the acceptance of academic credits from other institutions.</p>
-                </div>
-                <button class="flex items-center justify-center gap-2 w-fit px-4 h-9 rounded-full bg-brand-gray dark:bg-gray-700 text-brand-navy dark:text-white text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                  <span class="material-symbols-outlined !text-[18px]">download</span>
-                  <span>View Details</span>
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </div>
-  </main>
-  <footer class="bg-brand-navy text-white">
-    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-        <div class="space-y-4">
-          <h4 class="font-bold tracking-wider uppercase">Contact</h4>
-          <ul class="space-y-2 text-sm text-gray-300">
-            <li>123 University Drive</li>
-            <li>Valley View, ST 12345</li>
-            <li>(123) 456-7890</li>
-            <li>contact@vvu.edu</li>
-          </ul>
-        </div>
-        <div class="space-y-4">
-          <h4 class="font-bold tracking-wider uppercase">Quick Links</h4>
-          <ul class="space-y-2 text-sm">
-            <li><a class="text-gray-300 hover:text-brand-gold" href="#">Campus Map</a></li>
-            <li><a class="text-gray-300 hover:text-brand-gold" href="#">Directory</a></li>
-            <li><a class="text-gray-300 hover:text-brand-gold" href="#">Library</a></li>
-            <li><a class="text-gray-300 hover:text-brand-gold" href="#">Bookstore</a></li>
-          </ul>
-        </div>
-        <div class="space-y-4">
-          <h4 class="font-bold tracking-wider uppercase">Resources</h4>
-          <ul class="space-y-2 text-sm">
-            <li><a class="text-gray-300 hover:text-brand-gold" href="#">Accessibility Statement</a></li>
-            <li><a class="text-gray-300 hover:text-brand-gold" href="#">Privacy Policy</a></li>
-            <li><a class="text-gray-300 hover:text-brand-gold" href="#">For The Media</a></li>
-            <li><a class="text-gray-300 hover:text-brand-gold" href="#">Careers</a></li>
-          </ul>
-        </div>
-        <div class="space-y-4">
-          <h4 class="font-bold tracking-wider uppercase">Connect</h4>
-          <div class="flex space-x-4">
-          </div>
-        </div>
-      </div>
-      <div class="mt-8 pt-8 border-t border-gray-700 text-center text-sm text-gray-400">
-        © 2024 Valley View University. All Rights Reserved.
-      </div>
-    </div>
-  </footer>
-</div>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .policy-card {
+        transition: all 0.3s ease;
+    }
+    .policy-card:hover {
+        transform: translateY(-10px);
+    }
+</style>
 
-<?php
-include 'includes/footer.php';
-?>
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section class="relative min-h-[65vh] flex items-center overflow-hidden bg-gray-900">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags($hero['hero_image'] ?? 'uploads/strategy/img_1770600004_69893644a6dec.jpg'); ?>" 
+                 alt="University Policies" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
+        </div>
+        
+        <div class="container relative z-10 py-24">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-10 py-4 mb-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-xl md:text-2xl font-black tracking-widest uppercase text-yellow-400"><?php echo strip_tags($hero['hero_badge'] ?? 'Governance & Standards'); ?></span>
+                </div>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-10 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo strip_tags($hero['hero_title'] ?? 'University'); ?> <br>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-4"><?php echo strip_tags($hero['hero_subtitle'] ?? 'Policies'); ?></span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    <?php echo strip_tags($hero['hero_description'] ?? '"A comprehensive guide to the principles, regulations, and procedures that govern Valley View University. We ensure transparency and fairness in all our operations."'); ?>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Policy Categories Section -->
+    <?php 
+    $framework_section = array_values(array_filter($sections, fn($s) => $s['section_key'] === 'framework'))[0] ?? null;
+    if ($framework_section): 
+    ?>
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container text-center">
+            <div class="max-w-4xl mx-auto mb-20">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($framework_section['section_title']); ?></h2>
+                <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
+                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($framework_section['section_subtitle']); ?></p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+                <?php foreach ($grouped_items['framework'] ?? [] as $category): ?>
+                <div class="policy-card relative group">
+                    <div class="relative h-full glass p-10 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($category['item_color']); ?> flex flex-col text-left">
+                        <div class="w-24 h-24 rounded-3xl bg-<?php echo strip_tags($category['item_color']); ?> flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($category['item_icon']); ?></span>
+                        </div>
+                        <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($category['item_title']); ?></h3>
+                        <p class="text-3xl text-gray-700 dark:text-gray-300 mb-8 flex-grow leading-relaxed">
+                            <?php echo strip_tags($category['item_description']); ?>
+                        </p>
+                        <div class="space-y-4">
+                            <?php if (!empty($category['documents'])): ?>
+                                <?php foreach ($category['documents'] as $doc): ?>
+                                <a href="<?php echo strip_tags($doc['url']); ?>" download class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group/link">
+                                    <span class="material-symbols-outlined text-<?php echo strip_tags($doc['color'] ?? 'blue-600'); ?> text-4xl"><?php echo strip_tags($doc['icon'] ?? 'picture_as_pdf'); ?></span>
+                                    <span class="text-2xl text-gray-700 dark:text-gray-300 font-bold"><?php echo strip_tags($doc['title']); ?></span>
+                                    <span class="ml-auto text-sm bg-<?php echo strip_tags($category['item_color']); ?> text-white px-3 py-1 rounded-full opacity-0 group-hover/link:opacity-100 transition-opacity">Download PDF</span>
+                                </a>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Search & Quick Access Section -->
+    <?php 
+    $links_section = array_values(array_filter($sections, fn($s) => $s['section_key'] === 'quick_links'))[0] ?? null;
+    if ($links_section): 
+    ?>
+    <section class="py-24 bg-gray-50 dark:bg-gray-950">
+        <div class="container text-center">
+            <div class="max-w-4xl mx-auto mb-16">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($links_section['section_title']); ?></h2>
+                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($links_section['section_subtitle']); ?></p>
+            </div>
+
+            <div class="max-w-4xl mx-auto">
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative flex items-center bg-white dark:bg-gray-900 rounded-full p-2 shadow-2xl">
+                        <div class="pl-6 text-gray-400">
+                            <span class="material-symbols-outlined text-4xl">search</span>
+                        </div>
+                        <input type="text" placeholder="Search for policies (e.g., Admissions, Conduct, Finance)..." 
+                               class="w-full bg-transparent border-none focus:ring-0 text-2xl py-6 px-6 text-gray-900 dark:text-white placeholder-gray-400">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-full text-2xl font-bold transition-all transform hover:scale-105 shadow-lg">
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20 text-left">
+                <?php foreach ($grouped_items['quick_links'] ?? [] as $link): ?>
+                <div class="group p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-2xl bg-<?php echo strip_tags($link['item_color']); ?> flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-3xl text-white"><?php echo strip_tags($link['item_icon']); ?></span>
+                    </div>
+                    <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($link['item_title']); ?></h4>
+                    <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed mb-6">
+                        <?php echo strip_tags($link['item_description']); ?>
+                    </p>
+                    <a href="<?php echo strip_tags($link['item_link']); ?>" class="text-<?php echo strip_tags($link['item_color']); ?> font-bold text-xl flex items-center gap-2 hover:gap-4 transition-all">
+                        <?php echo strip_tags($link['item_subtitle']); ?> <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- CTA Section -->
+    <section class="relative py-24 overflow-hidden">
+        <div class="absolute inset-0 bg-blue-900"></div>
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[150px] -mr-72 -mt-72"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -ml-72 -mb-72"></div>
+        
+        <div class="container relative z-10 text-center">
+            <div class="max-w-5xl mx-auto">
+                <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight tracking-tight">
+                    <?php echo strip_tags($hero['cta_title'] ?? 'Committed to'); ?> <br><span class="text-yellow-400 text-6xl sm:text-7xl md:text-8xl lg:text-6xl block mt-2"><?php echo strip_tags($hero['cta_subtitle'] ?? 'Integrity & Transparency'); ?></span>
+                </h2>
+                <p class="text-2xl sm:text-3xl md:text-4xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
+                    Our policies are designed to protect and empower every member of the Valley View University family.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                    <a href="mission_and_vision.php" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">visibility</span>
+                        <?php echo strip_tags($hero['cta_button_text'] ?? 'Our Mission'); ?>
+                    </a>
+                    <a href="core_values.php" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">verified</span>
+                        Our Values
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<?php include 'includes/footer.php'; ?>

@@ -1,177 +1,245 @@
 <?php
-$pageTitle = "Strategic Plan - Valley View University";
-$activePage = "about";
+$page_title = "Strategic Plan - Valley View University";
+$active_page = "about";
+require_once 'includes/db_connect.php';
+
+// Fetch data from database
+$hero = $pdo->query("SELECT * FROM strategic_plan_hero WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetch();
+$president = $pdo->query("SELECT * FROM strategic_plan_president_message WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetch();
+$pillars = $pdo->query("SELECT * FROM strategic_plan_pillars WHERE is_active=1 ORDER BY display_order ASC")->fetchAll();
+$timeline = $pdo->query("SELECT * FROM strategic_plan_timeline WHERE is_active=1 ORDER BY display_order ASC")->fetchAll();
+$stats = $pdo->query("SELECT * FROM strategic_plan_stats WHERE is_active=1 ORDER BY display_order ASC")->fetchAll();
+$cta = $pdo->query("SELECT * FROM strategic_plan_cta WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetch();
+
 include 'includes/header.php';
 ?>
 
-<main class="flex flex-col items-center w-full">
-<div class="w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-<!-- HeroSection -->
-<section class="my-10 md:my-16">
-<div class="flex min-h-[480px] flex-col gap-8 rounded-xl items-center justify-center p-8 text-center bg-cover bg-center bg-no-repeat" data-alt="A modern, sunlit university campus building with students walking by." style='background-image: linear-gradient(rgba(16, 16, 34, 0.4) 0%, rgba(16, 16, 34, 0.7) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAUvUfhIZVhbLlcWbvh2K0tcDjyOiDtIu3B2vfPeBtSHv8AacdtYQQdtHrHVAopeOlhPyc4b9yXYTLBQE4vfvaalzQF-NCOHT6bwryFrbQZiyGoFMKQnkurMJ2l-1d7UKMk4e9u6woXkdkq4SkyrSC7tgZrdEFcXbaizT5320z06QTYFgdXStkPEpReAmCxeZXC95kcAxnPqnmj-3VMQC38wSxZto4dDPaG4aVczHcIp3oDGQCF2SfW1_Fj8blUd12xZgSoD_d1W6TE");'>
-<div class="flex flex-col gap-4">
-<h1 class="text-white text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-[-0.033em]">Vision 2030: Shaping the Future</h1>
-<p class="text-gray-200 text-base sm:text-lg font-normal leading-normal max-w-3xl mx-auto">Discover Valley View University's roadmap for innovation, excellence, and community impact over the next decade.</p>
-</div>
-<a class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors" href="#vision">
-<span class="truncate">Explore Our Vision</span>
-</a>
-</div>
-</section>
-<!-- Sticky Sub-Navigation (Chips) -->
-<nav class="sticky top-[65px] z-40 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm py-4 mb-10 md:mb-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 border-b border-gray-200/50 dark:border-white/10">
-<div class="max-w-6xl mx-auto flex gap-2 sm:gap-3 overflow-x-auto pb-2 -mb-2">
-<a class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-white/10 px-4 hover:bg-gray-300 dark:hover:bg-white/20 transition-colors" href="#vision">
-<p class="text-sm font-medium leading-normal text-gray-800 dark:text-gray-200 whitespace-nowrap">Our Vision</p>
-</a>
-<a class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-white/10 px-4 hover:bg-gray-300 dark:hover:bg-white/20 transition-colors" href="#pillars">
-<p class="text-sm font-medium leading-normal text-gray-800 dark:text-gray-200 whitespace-nowrap">Strategic Pillars</p>
-</a>
-<a class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-white/10 px-4 hover:bg-gray-300 dark:hover:bg-white/20 transition-colors" href="#timeline">
-<p class="text-sm font-medium leading-normal text-gray-800 dark:text-gray-200 whitespace-nowrap">Timeline</p>
-</a>
-<a class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-white/10 px-4 hover:bg-gray-300 dark:hover:bg-white/20 transition-colors" href="#progress">
-<p class="text-sm font-medium leading-normal text-gray-800 dark:text-gray-200 whitespace-nowrap">Our Progress</p>
-</a>
-</div>
-</nav>
-<!-- PageHeading (President's Message) -->
-<section class="mb-16 md:mb-24 scroll-mt-24" id="vision">
-<div class="flex flex-wrap justify-between items-center gap-8 p-4">
-<div class="flex flex-col gap-4 max-w-3xl">
-<p class="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white">A Message From Our President</p>
-<p class="text-base font-normal leading-relaxed text-gray-600 dark:text-gray-400">Together, we embark on a journey to redefine higher education. This plan is our commitment to fostering an environment where every student can thrive, our research can break new ground, and our community can flourish. Join us as we build the future of Valley View.</p>
-</div>
-<div class="shrink-0">
-<img class="h-32 w-32 rounded-full object-cover" data-alt="Portrait of the University President, a smiling woman in professional attire." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkKeRPDBxhuQm5UZNxRE2coeRYfht7h-6lKFypxlTlppHFWH6bTPw10XqoWhMO1H0cSnqmIZLsldIPfTbRv4T-HnwbCcJyukLrLVj0EWB_HbBZRbpR3PsNISUgSd4IpBDzKX4t65jeueWusxVNs6HQ32WNZi5sOEhmJ8hdsNNbcFgkhoz-k3_kuJHRbGuXxoaLdr2cruXuayz1-FI6UL3NlcwPHqFc-YD6afOPonMFUabtgoQQNnJUaleJxPXbXqJFCFF-3WVbqHuM"/>
-</div>
-</div>
-</section>
-<!-- SectionHeader + Pillar/Goal Cards -->
-<section class="mb-16 md:mb-24 scroll-mt-24" id="pillars">
-<h2 class="text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-6 pt-5 text-gray-900 dark:text-white">Our Strategic Pillars</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-<!-- Card 1 -->
-<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
-<div class="flex items-center justify-center h-12 w-12 rounded-lg bg-primary/10 text-primary">
-<span class="material-symbols-outlined !text-3xl">school</span>
-</div>
-<h3 class="text-xl font-bold text-gray-900 dark:text-white">Academic Excellence</h3>
-<p class="text-gray-600 dark:text-gray-400">Pioneering innovative curricula and research to create the leaders of tomorrow.</p>
-</div>
-<!-- Card 2 -->
-<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
-<div class="flex items-center justify-center h-12 w-12 rounded-lg bg-teal-500/10 text-teal-500">
-<span class="material-symbols-outlined !text-3xl">sentiment_satisfied</span>
-</div>
-<h3 class="text-xl font-bold text-gray-900 dark:text-white">Student Success</h3>
-<p class="text-gray-600 dark:text-gray-400">Fostering a supportive and inclusive environment for holistic student development.</p>
-</div>
-<!-- Card 3 -->
-<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
-<div class="flex items-center justify-center h-12 w-12 rounded-lg bg-amber-500/10 text-amber-500">
-<span class="material-symbols-outlined !text-3xl">public</span>
-</div>
-<h3 class="text-xl font-bold text-gray-900 dark:text-white">Community Impact</h3>
-<p class="text-gray-600 dark:text-gray-400">Engaging with local and global partners to address societal challenges.</p>
-</div>
-</div>
-</section>
-<!-- Interactive Timeline -->
-<section class="mb-16 md:mb-24 scroll-mt-24" id="timeline">
-<h2 class="text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-8 pt-5 text-center text-gray-900 dark:text-white">Implementation Timeline</h2>
-<div class="relative flex flex-col gap-12 py-4">
-<div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-white/10 hidden md:block"></div>
-<!-- Timeline Item 1 -->
-<div class="relative flex items-center md:justify-start">
-<div class="absolute left-1/2 -translate-x-1/2 h-4 w-4 rounded-full bg-primary ring-4 ring-background-light dark:ring-background-dark hidden md:block"></div>
-<div class="w-full md:w-[calc(50%-2rem)] p-6 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5">
-<p class="text-sm font-bold text-primary">Phase 1 (2024-2026)</p>
-<h4 class="text-lg font-bold mt-1 text-gray-900 dark:text-white">Foundation &amp; Growth</h4>
-<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Launch new interdisciplinary programs and expand our digital infrastructure.</p>
-</div>
-</div>
-<!-- Timeline Item 2 -->
-<div class="relative flex items-center md:justify-end">
-<div class="absolute left-1/2 -translate-x-1/2 h-4 w-4 rounded-full bg-primary ring-4 ring-background-light dark:ring-background-dark hidden md:block"></div>
-<div class="w-full md:w-[calc(50%-2rem)] p-6 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5">
-<p class="text-sm font-bold text-primary">Phase 2 (2027-2028)</p>
-<h4 class="text-lg font-bold mt-1 text-gray-900 dark:text-white">Innovation &amp; Expansion</h4>
-<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Establish global research partnerships and construct the new STEM complex.</p>
-</div>
-</div>
-<!-- Timeline Item 3 -->
-<div class="relative flex items-center md:justify-start">
-<div class="absolute left-1/2 -translate-x-1/2 h-4 w-4 rounded-full bg-primary ring-4 ring-background-light dark:ring-background-dark hidden md:block"></div>
-<div class="w-full md:w-[calc(50%-2rem)] p-6 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5">
-<p class="text-sm font-bold text-primary">Phase 3 (2029-2030)</p>
-<h4 class="text-lg font-bold mt-1 text-gray-900 dark:text-white">Leadership &amp; Legacy</h4>
-<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Achieve carbon neutrality and celebrate the culmination of our Vision 2030 goals.</p>
-</div>
-</div>
-</div>
-</section>
-<!-- Progress Tracking Section -->
-<section class="mb-16 md:mb-24 scroll-mt-24" id="progress">
-<h2 class="text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-8 pt-5 text-center text-gray-900 dark:text-white">Measuring Our Success</h2>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-<div class="flex flex-col items-center gap-4 p-6 rounded-xl bg-gray-100 dark:bg-white/5 text-center">
-<h4 class="font-bold text-gray-900 dark:text-white">Research Funding</h4>
-<div class="relative h-32 w-32">
-<svg class="h-full w-full" height="36" viewbox="0 0 36 36" width="36" xmlns="http://www.w3.org/2000/svg">
-<circle class="stroke-current text-gray-200 dark:text-white/10" cx="18" cy="18" fill="none" r="16" stroke-width="2"></circle>
-<circle class="stroke-current text-primary" cx="18" cy="18" fill="none" r="16" stroke-dasharray="100.53" stroke-dashoffset="35.1855" stroke-width="2"></circle>
-</svg>
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-3xl font-bold text-gray-900 dark:text-white">65%</span>
-</div>
-</div>
-<p class="text-sm text-gray-600 dark:text-gray-400">of $50M goal achieved</p>
-</div>
-<div class="flex flex-col items-center gap-4 p-6 rounded-xl bg-gray-100 dark:bg-white/5 text-center">
-<h4 class="font-bold text-gray-900 dark:text-white">Graduation Rate</h4>
-<div class="relative h-32 w-32">
-<svg class="h-full w-full" height="36" viewbox="0 0 36 36" width="36" xmlns="http://www.w3.org/2000/svg">
-<circle class="stroke-current text-gray-200 dark:text-white/10" cx="18" cy="18" fill="none" r="16" stroke-width="2"></circle>
-<circle class="stroke-current text-teal-500" cx="18" cy="18" fill="none" r="16" stroke-dasharray="100.53" stroke-dashoffset="15.0795" stroke-width="2"></circle>
-</svg>
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-3xl font-bold text-gray-900 dark:text-white">85%</span>
-</div>
-</div>
-<p class="text-sm text-gray-600 dark:text-gray-400">target of 90%</p>
-</div>
-<div class="flex flex-col items-center gap-4 p-6 rounded-xl bg-gray-100 dark:bg-white/5 text-center">
-<h4 class="font-bold text-gray-900 dark:text-white">Community Engagement</h4>
-<div class="relative h-32 w-32">
-<svg class="h-full w-full" height="36" viewbox="0 0 36 36" width="36" xmlns="http://www.w3.org/2000/svg">
-<circle class="stroke-current text-gray-200 dark:text-white/10" cx="18" cy="18" fill="none" r="16" stroke-width="2"></circle>
-<circle class="stroke-current text-amber-500" cx="18" cy="18" fill="none" r="16" stroke-dasharray="100.53" stroke-dashoffset="10.053" stroke-width="2"></circle>
-</svg>
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-3xl font-bold text-gray-900 dark:text-white">90%</span>
-</div>
-</div>
-<p class="text-sm text-gray-600 dark:text-gray-400">of 10,000 volunteer hours</p>
-</div>
-</div>
-</section>
-<!-- Call-to-Action Block -->
-<section class="mb-16 md:mb-24">
-<div class="rounded-xl bg-primary/10 dark:bg-white/5 p-8 md:p-12 text-center">
-<h2 class="text-3xl font-bold text-gray-900 dark:text-white">Join Us on Our Journey</h2>
-<p class="max-w-2xl mx-auto mt-4 text-gray-600 dark:text-gray-400">Be a part of our future. Explore the full strategic plan, see our impact, and discover how you can get involved.</p>
-<div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-<button class="flex w-full sm:w-auto min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
-<span class="truncate">Download Full Plan (PDF)</span>
-</button>
-<button class="flex w-full sm:w-auto min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-300 dark:hover:bg-white/20 transition-colors">
-<span class="truncate">Read Impact Report</span>
-</button>
-</div>
-</div>
-</section>
-</div>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .pillar-card {
+        transition: all 0.3s ease;
+    }
+    .pillar-card:hover {
+        transform: translateY(-10px);
+    }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section class="relative min-h-[65vh] flex items-center overflow-hidden bg-gray-900">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags($hero['hero_image_url'] ?? ''); ?>" 
+                 alt="VVU Strategic Vision" class="w-full h-full object-cover animate-slow-zoom opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
+        </div>
+        
+        <div class="container relative z-10 py-24">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-10 py-4 mb-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-lg md:text-xl font-black tracking-widest uppercase text-yellow-400"><?php echo strip_tags($hero['page_subtitle'] ?? 'Vision 2026 & Beyond'); ?></span>
+                </div>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-10 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
+                    <?php echo strip_tags($hero['hero_title_1'] ?? 'Strategic Plan'); ?> <br>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-4"><?php echo strip_tags($hero['hero_title_2'] ?? 'Shaping Our Future'); ?></span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    "<?php echo strip_tags($hero['hero_description'] ?? ''); ?>"
+                </p>
+
+                <div class="mt-12 animate-fadeInUp" style="animation-delay: 0.3s;">
+                    <a href="<?php echo strip_tags($hero['download_pdf_url'] ?? 'uploads/VISION 2025.pdf'); ?>" download class="inline-flex items-center gap-3 px-8 py-4 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-lg font-bold rounded-2xl transition-all transform hover:scale-105 shadow-xl">
+                        <span class="material-symbols-outlined text-3xl">download</span>
+                        <?php echo strip_tags($hero['download_button_text'] ?? 'Download Vision 2025 (PDF)'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- President's Message Section -->
+    <?php if ($president): ?>
+    <section class="py-24 bg-white dark:bg-gray-900">
+        <div class="container">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col lg:flex-row items-center gap-16">
+                    <div class="lg:w-1/3 relative">
+                        <div class="absolute -inset-4 bg-blue-600/20 rounded-full blur-2xl"></div>
+                        <img src="<?php echo strip_tags($president['president_image_url']); ?>" 
+                             alt="University President" class="relative z-10 w-64 h-64 md:w-80 md:h-80 rounded-full object-cover border-8 border-white dark:border-gray-800 shadow-2xl">
+                    </div>
+                    <div class="lg:w-2/3 text-center lg:text-left">
+                        <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-8"><?php echo strip_tags($president['section_title']); ?></h2>
+                        <div class="h-2 w-24 bg-blue-600 mb-8 mx-auto lg:mx-0 rounded-full"></div>
+                        <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed italic mb-8">
+                            "<?php echo strip_tags($president['message_quote']); ?>"
+                        </p>
+                        <p class="text-xl text-gray-500 dark:text-gray-500 font-bold">
+                            <?php echo strip_tags($president['message_author']); ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Strategic Pillars Section -->
+    <section class="py-24 bg-gray-50 dark:bg-gray-950">
+        <div class="container">
+            <div class="max-w-4xl mx-auto text-center mb-20">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-6">Our Strategic Pillars</h2>
+                <div class="h-2 w-40 bg-yellow-500 mx-auto rounded-full mb-8"></div>
+                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">The core areas of focus that will drive our growth and success through 2025.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+                <?php foreach ($pillars as $pillar): ?>
+                <div class="pillar-card relative group">
+                    <div class="relative h-full glass p-10 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($pillar['border_color']); ?> flex flex-col">
+                        <div class="w-24 h-24 rounded-3xl bg-<?php echo strip_tags($pillar['border_color']); ?> flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($pillar['icon']); ?></span>
+                        </div>
+                        <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($pillar['title']); ?></h3>
+                        <p class="text-2xl text-gray-700 dark:text-gray-300 mb-8 flex-grow leading-relaxed">
+                            <?php echo strip_tags($pillar['description']); ?>
+                        </p>
+                        <?php if ($pillar['feature_1'] || $pillar['feature_2']): ?>
+                        <ul class="space-y-4 mb-8">
+                            <?php if ($pillar['feature_1']): ?>
+                            <li class="flex items-center gap-4">
+                                <span class="material-symbols-outlined text-<?php echo strip_tags($pillar['border_color']); ?> text-3xl">check_circle</span>
+                                <span class="text-2xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags($pillar['feature_1']); ?></span>
+                            </li>
+                            <?php endif; ?>
+                            <?php if ($pillar['feature_2']): ?>
+                            <li class="flex items-center gap-4">
+                                <span class="material-symbols-outlined text-<?php echo strip_tags($pillar['border_color']); ?> text-3xl">check_circle</span>
+                                <span class="text-2xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags($pillar['feature_2']); ?></span>
+                            </li>
+                            <?php endif; ?>
+                        </ul>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Implementation Timeline Section -->
+    <section class="py-24 bg-white dark:bg-gray-900 overflow-hidden">
+        <div class="container">
+            <div class="max-w-4xl mx-auto text-center mb-16">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-6">Implementation Timeline</h2>
+                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Our journey towards achieving Vision 2026.</p>
+            </div>
+
+            <div class="relative max-w-5xl mx-auto">
+                <!-- Vertical Line -->
+                <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-blue-100 dark:bg-gray-800 -translate-x-1/2 hidden md:block"></div>
+
+                <div class="space-y-16">
+                    <?php 
+                    $timeline_count = count($timeline);
+                    foreach ($timeline as $index => $phase): 
+                        $is_odd = ($index % 2 == 0);
+                        $align_class = $is_odd ? 'md:flex-row' : 'md:flex-row-reverse';
+                        $text_align = $is_odd ? 'md:text-right' : 'md:text-left';
+                        $border_class = $is_odd ? 'border-r-8' : 'border-l-8';
+                    ?>
+                    <div class="relative flex flex-col <?php echo $align_class; ?> items-center gap-8">
+                        <div class="md:w-1/2 <?php echo $text_align; ?>">
+                            <div class="p-8 glass rounded-3xl shadow-xl <?php echo $border_class; ?> border-<?php echo strip_tags($phase['border_color']); ?>">
+                                <span class="text-xl font-black text-<?php echo strip_tags($phase['border_color']); ?> uppercase tracking-widest"><?php echo strip_tags($phase['phase_badge']); ?></span>
+                                <h4 class="text-3xl font-black text-gray-900 dark:text-white mt-2 mb-4"><?php echo strip_tags($phase['phase_title']); ?></h4>
+                                <p class="text-xl text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo strip_tags($phase['phase_description']); ?></p>
+                            </div>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-10 h-10 bg-<?php echo strip_tags($phase['dot_color']); ?> rounded-full border-4 border-white dark:border-gray-900 z-10 hidden md:block"></div>
+                        <div class="md:w-1/2"></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Stats Section -->
+    <section class="py-24 bg-blue-900 text-white overflow-hidden relative">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="container relative z-10">
+            <div class="max-w-5xl mx-auto text-center">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mb-16">Measuring Our Success</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-<?php echo min(count($stats), 3); ?> gap-12">
+                    <?php foreach ($stats as $index => $stat): ?>
+                    <div class="animate-fadeInUp" style="animation-delay: <?php echo ($index * 0.1); ?>s;">
+                        <div class="text-6xl md:text-7xl font-black text-yellow-400 mb-4"><?php echo strip_tags($stat['stat_value']); ?></div>
+                        <div class="text-xl md:text-2xl uppercase tracking-widest font-black text-blue-100"><?php echo strip_tags($stat['stat_label']); ?></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <?php if ($cta): ?>
+    <section class="relative py-24 overflow-hidden">
+        <div class="absolute inset-0 bg-gray-900"></div>
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -mr-72 -mt-72"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[150px] -ml-72 -mb-72"></div>
+        
+        <div class="container relative z-10">
+            <div class="max-w-5xl mx-auto text-center">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-8 leading-tight tracking-tight">
+                    <?php echo strip_tags($cta['cta_title_1']); ?> <br><span class="text-yellow-400 text-5xl sm:text-6xl md:text-7xl lg:text-5xl block mt-2"><?php echo strip_tags($cta['cta_title_2']); ?></span>
+                </h2>
+                <p class="text-lg sm:text-xl md:text-2xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
+                    <?php echo strip_tags($cta['cta_description']); ?>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                    <a href="<?php echo strip_tags($cta['button_1_url']); ?>" download class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-lg font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">download</span>
+                        <?php echo strip_tags($cta['button_1_text']); ?>
+                    </a>
+                    <a href="<?php echo strip_tags($cta['button_2_url']); ?>" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-lg font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">mail</span>
+                        <?php echo strip_tags($cta['button_2_text']); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
 </main>
 
 <?php

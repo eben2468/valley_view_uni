@@ -2,134 +2,789 @@
 $page_title = "Academic Programs Overview - Valley View University";
 $active_page = "academics";
 include 'includes/header.php';
+require_once('includes/db_connect.php');
+
+// Fetch Page Content from new centralized table
+$content_stmt = $pdo->prepare("SELECT * FROM academic_pages_content WHERE page_key = 'academic_programs'");
+$content_stmt->execute();
+$page_data = $content_stmt->fetch();
+
+// Fetch Categories with program counts
+$categories_stmt = $pdo->query("
+    SELECT pc.*, (SELECT COUNT(*) FROM academic_programs ap WHERE ap.category_id = pc.id AND ap.is_active = 1) as program_count 
+    FROM program_categories pc 
+    ORDER BY pc.display_order ASC
+");
+$db_categories = $categories_stmt->fetchAll();
+
+// Fetch All Programs
+$programs_stmt = $pdo->query("
+    SELECT ap.*, pc.name as category_name, pc.color_1, pc.color_2 
+    FROM academic_programs ap 
+    JOIN program_categories pc ON ap.category_id = pc.id 
+    WHERE ap.is_active = 1 
+    ORDER BY ap.display_order ASC, ap.title ASC
+");
+$db_programs = $programs_stmt->fetchAll();
+
+// Fetch Stats
+$stats_stmt = $pdo->query("SELECT * FROM academic_programs_stats ORDER BY display_order ASC");
+$db_stats = $stats_stmt->fetchAll();
+
+// Map for quick access
+$category_colors = [];
+foreach ($db_categories as $cat) {
+    $category_colors[$cat['name']] = [$cat['color_1'], $cat['color_2']];
+}
 ?>
 
-<main class="flex-grow">
-<!-- HeroSection -->
-<section class="w-full">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-<div class="@container">
-<div class="@[480px]:p-4">
-<div class="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 rounded-xl items-center justify-center p-4 text-center" data-alt="Diverse group of university students collaborating on a project outdoors on a sunny campus lawn." style='background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCWrNDvh520EcOlfRTqWrFrn-2m2biRgNfIei4OfCLvQ0ylNEqDalMNhl3wX1z6HPpTW6Rj-V-hIbEmyKgSUix0Sx5r61CeXNDQoJMz-LRU_ogKC8kEFaYFQDKYT33E5asmJFEeLE4E8LYSIZoZLX18ol2Xp3JHMnDk7xPwaxBtYOmefzEUyeSinWFOHm6azpGdfVs0ma5H2-9_xSeplbGgowmgKEC404cfwyXf2OhOm6hvX7Pk3Qq3VeG4v7-hPtDxpZGiJrloawii");'>
-<div class="flex flex-col gap-4 max-w-3xl">
-<h1 class="text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-6xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
-                                    Find Your Path at Valley View
-                                </h1>
-<p class="text-white text-lg font-normal leading-normal @[480px]:text-xl @[480px]:font-normal @[480px]:leading-normal">
-                                    Discover a world of opportunity and unlock your potential with our diverse range of innovative programs.
-                                </p>
-</div>
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 @[480px]:h-14 @[480px]:px-8 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-colors">
-<span class="truncate">Explore All Programs</span>
-</button>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- Search/Filter Bar -->
-<section class="w-full py-8 bg-background-light dark:bg-background-dark">
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-4">
-<div class="relative flex-grow w-full">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">search</span>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 pl-12 pr-4 text-base font-normal leading-normal" placeholder="Search for programs..." value=""/>
-</div>
-<div class="flex gap-3 flex-wrap justify-center">
-<div class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-primary/10 dark:bg-primary/20 pl-4 pr-4 border border-primary text-primary dark:text-white">
-<p class="text-sm font-medium leading-normal">Undergraduate</p>
-</div>
-<div class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-700 pl-4 pr-4 hover:bg-gray-300 dark:hover:bg-gray-600">
-<p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Graduate</p>
-</div>
-<div class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-700 pl-4 pr-4 hover:bg-gray-300 dark:hover:bg-gray-600">
-<p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Doctoral</p>
-</div>
-</div>
-</div>
-</section>
-<!-- School/Faculty Grid -->
-<section class="w-full py-16">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="text-center mb-12">
-<h2 class="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl">Our Schools and Faculties</h2>
-<p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">Explore our academic divisions, each a hub of innovation, research, and collaborative learning.</p>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-<a class="group block overflow-hidden rounded-xl" data-alt="Modern glass building of the School of Business at sunset." href="#">
-<div class="relative bg-cover bg-center flex flex-col justify-end p-6 aspect-[4/3] transition-transform duration-300 group-hover:scale-105" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjngHZn0Y_ezHY-eaUeSH67alFxDpwCN3nilEk3oZu7Z8nlbJG05KVhmlcnf8LkgeVZNNgaCW8ZDNkMh2Or9oGVK8c1oqxfqIDyKzxkgskgAMRtDWUp0XJp5pjM2rT2raY_XbkQ5uYF865CW_iNjXp2mwGQ6P4LBS9IMU3fhxLGoESCiTLjgA5XGae9zAbQPU4kn7xPLq5AY5mZC5LTpMS0iZKHbW4-BGUJenssD-dp2n7S9UeJ39EzN6x7FpY-jRCNmzJ0OVB79VV");'>
-<h3 class="text-white text-xl font-bold leading-tight">School of Business</h3>
-<p class="text-white/80 text-sm mt-1">Fostering tomorrow's leaders and innovators.</p>
-</div>
-</a>
-<a class="group block overflow-hidden rounded-xl" data-alt="A library interior with students studying among bookshelves." href="#">
-<div class="relative bg-cover bg-center flex flex-col justify-end p-6 aspect-[4/3] transition-transform duration-300 group-hover:scale-105" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjngHZn0Y_ezHY-eaUeSH67alFxDpwCN3nilEk3oZu7Z8nlbJG05KVhmlcnf8LkgeVZNNgaCW8ZDNkMh2Or9oGVK8c1oqxfqIDyKzxkgskgAMRtDWUp0XJp5pjM2rT2raY_XbkQ5uYF865CW_iNjXp2mwGQ6P4LBS9IMU3fhxLGoESCiTLjgA5XGae9zAbQPU4kn7xPLq5AY5mZC5LTpMS0iZKHbW4-BGUJenssD-dp2n7S9UeJ39EzN6x7FpY-jRCNmzJ0OVB79VV");'>
-<h3 class="text-white text-xl font-bold leading-tight">Faculty of Arts &amp; Sciences</h3>
-<p class="text-white/80 text-sm mt-1">Exploring the depths of human knowledge.</p>
-</div>
-</a>
-<a class="group block overflow-hidden rounded-xl" data-alt="Stained glass window in a quiet, contemplative university chapel." href="#">
-<div class="relative bg-cover bg-center flex flex-col justify-end p-6 aspect-[4/3] transition-transform duration-300 group-hover:scale-105" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjngHZn0Y_ezHY-eaUeSH67alFxDpwCN3nilEk3oZu7Z8nlbJG05KVhmlcnf8LkgeVZNNgaCW8ZDNkMh2Or9oGVK8c1oqxfqIDyKzxkgskgAMRtDWUp0XJp5pjM2rT2raY_XbkQ5uYF865CW_iNjXp2mwGQ6P4LBS9IMU3fhxLGoESCiTLjgA5XGae9zAbQPU4kn7xPLq5AY5mZC5LTpMS0iZKHbW4-BGUJenssD-dp2n7S9UeJ39EzN6x7FpY-jRCNmzJ0OVB79VV");'>
-<h3 class="text-white text-xl font-bold leading-tight">School of Theology &amp; Missions</h3>
-<p class="text-white/80 text-sm mt-1">Guiding spiritual and community leaders.</p>
-</div>
-</a>
-<a class="group block overflow-hidden rounded-xl" data-alt="A scientist in a lab coat looking at a beaker with blue liquid." href="#">
-<div class="relative bg-cover bg-center flex flex-col justify-end p-6 aspect-[4/3] transition-transform duration-300 group-hover:scale-105" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 60%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjngHZn0Y_ezHY-eaUeSH67alFxDpwCN3nilEk3oZu7Z8nlbJG05KVhmlcnf8LkgeVZNNgaCW8ZDNkMh2Or9oGVK8c1oqxfqIDyKzxkgskgAMRtDWUp0XJp5pjM2rT2raY_XbkQ5uYF865CW_iNjXp2mwGQ6P4LBS9IMU3fhxLGoESCiTLjgA5XGae9zAbQPU4kn7xPLq5AY5mZC5LTpMS0iZKHbW4-BGUJenssD-dp2n7S9UeJ39EzN6x7FpY-jRCNmzJ0OVB79VV");'>
-<h3 class="text-white text-xl font-bold leading-tight">Faculty of Science</h3>
-<p class="text-white/80 text-sm mt-1">Advancing discovery and scientific frontiers.</p>
-</div>
-</a>
-</div>
-</div>
-</section>
-<!-- "Why Valley View?" Section -->
-<section class="w-full py-16 bg-gray-50 dark:bg-gray-900">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="text-center mb-12">
-<h2 class="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl">Why Valley View?</h2>
-<p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">We provide an education that transcends the classroom, preparing you for a life of impact and success.</p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-<div class="flex flex-col items-center p-6">
-<div class="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 dark:bg-primary/20 text-primary mb-4">
-<span class="material-symbols-outlined text-4xl">biotech</span>
-</div>
-<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Innovative Research</h3>
-<p class="text-gray-600 dark:text-gray-400">Engage in groundbreaking research with state-of-the-art facilities and world-class faculty mentors.</p>
-</div>
-<div class="flex flex-col items-center p-6">
-<div class="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 dark:bg-primary/20 text-primary mb-4">
-<span class="material-symbols-outlined text-4xl">public</span>
-</div>
-<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Global Community</h3>
-<p class="text-gray-600 dark:text-gray-400">Join a diverse and vibrant community of scholars from across the globe, broadening your perspective.</p>
-</div>
-<div class="flex flex-col items-center p-6">
-<div class="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 dark:bg-primary/20 text-primary mb-4">
-<span class="material-symbols-outlined text-4xl">work</span>
-</div>
-<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Career-Focused Learning</h3>
-<p class="text-gray-600 dark:text-gray-400">Benefit from internships, co-op programs, and hands-on projects that prepare you for a successful career.</p>
-</div>
-</div>
-</div>
-</section>
-<!-- CTA Section -->
-<section class="w-full py-20 bg-primary">
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-<h2 class="text-white text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl">Ready to Take the Next Step?</h2>
-<p class="mt-4 text-lg text-white/80">Your journey towards a brighter future starts here. Explore your options, connect with us, and begin your application today.</p>
-<div class="mt-8 flex justify-center gap-4 flex-wrap">
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-white dark:bg-gray-100 text-primary dark:text-primary font-bold leading-normal tracking-[0.015em] hover:bg-gray-200 transition-colors">
-<span class="truncate">Request Information</span>
-</button>
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-secondary text-gray-900 font-bold leading-normal tracking-[0.015em] hover:bg-yellow-400 transition-colors">
-<span class="truncate">Plan a Visit</span>
-</button>
-</div>
-</div>
-</section>
+
+<style>
+    /* ========================================
+       ANIMATIONS
+       ======================================== */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.15); }
+    }
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    
+    .animate-slow-zoom { animation: slowZoom 25s linear infinite alternate; }
+    .animate-fadeInUp { animation: fadeInUp 0.7s ease-out forwards; }
+    .animate-fadeInDown { animation: fadeInDown 0.7s ease-out forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    
+    /* ========================================
+       GLASSMORPHISM & EFFECTS
+       ======================================== */
+    .glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+    .dark .glass {
+        background: rgba(17, 24, 39, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* ========================================
+       HERO SECTION
+       ======================================== */
+    .hero-gradient {
+        background: linear-gradient(135deg, 
+            rgba(0, 33, 71, 0.9) 0%, 
+            rgba(30, 64, 175, 0.7) 50%,
+            rgba(17, 24, 39, 0.9) 100%);
+    }
+    
+    .hero-h1 span {
+        font-size: 0.6em;
+        font-weight: bold;
+        display: block;
+        margin-top: 1rem;
+        text-transform: none;
+        letter-spacing: -0.05em;
+        color: #fbbf24; /* Yellow-400 */
+        background: linear-gradient(to right, #fbbf24, #f59e0b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+    }
+    
+    /* ========================================
+       SEARCH SECTION
+       ======================================== */
+    .search-container {
+        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 2rem;
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.15),
+            0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    }
+    .dark .search-container {
+        background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+    
+    .search-input {
+        background: linear-gradient(145deg, #f8fafc 0%, #ffffff 100%);
+        border: 2px solid #e2e8f0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .search-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
+    .dark .search-input {
+        background: linear-gradient(145deg, #1f2937 0%, #0f172a 100%);
+        border-color: #374151;
+        color: #fff;
+    }
+    .dark .search-input:focus {
+        border-color: #3b82f6;
+    }
+    
+    /* ========================================
+       CATEGORY CARDS
+       ======================================== */
+    .category-card {
+        position: relative;
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        border: 2px solid transparent;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+    .dark .category-card {
+        background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+    }
+    .category-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 1.5rem;
+        padding: 2px;
+        background: linear-gradient(135deg, var(--cat-color-1), var(--cat-color-2));
+        -webkit-mask: 
+            linear-gradient(#fff 0 0) content-box, 
+            linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+    .category-card:hover::before,
+    .category-card.active::before {
+        opacity: 1;
+    }
+    .category-card:hover,
+    .category-card.active {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    .category-card.active {
+        background: linear-gradient(135deg, var(--cat-color-1), var(--cat-color-2));
+    }
+    .category-card.active .cat-icon,
+    .category-card.active .cat-name,
+    .category-card.active .cat-count {
+        color: #fff !important;
+    }
+    
+    .cat-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--cat-color-1), var(--cat-color-2));
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    .category-card:hover .cat-icon-wrapper {
+        transform: scale(1.1) rotate(-5deg);
+    }
+    .category-card.active .cat-icon-wrapper {
+        background: rgba(255, 255, 255, 0.25);
+    }
+    
+    .cat-icon {
+        font-size: 2.5rem;
+        color: #fff;
+    }
+    
+    .cat-name {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+    }
+    .dark .cat-name {
+        color: #f1f5f9;
+    }
+    
+    .cat-count {
+        font-size: 1.25rem;
+        color: #64748b;
+        font-weight: 700;
+    }
+    .dark .cat-count {
+        color: #94a3b8;
+    }
+    
+    /* ========================================
+       PROGRAM CARDS
+       ======================================== */
+    /* ========================================
+       PROGRAM CARDS (PREMIUM REDESIGN)
+       ======================================== */
+    .program-card {
+        background: #ffffff;
+        border-radius: 2rem;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+        position: relative;
+        z-index: 1;
+    }
+    .dark .program-card {
+        background: #1e293b;
+        border-color: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+    }
+    .program-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(135deg, var(--cat-color-1), var(--cat-color-2));
+        opacity: 0.03;
+        border-radius: 0 0 0 100%;
+        z-index: -1;
+        transition: all 0.5s ease;
+    }
+    .program-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.12);
+        border-color: var(--cat-color-1);
+    }
+    .program-card:hover::after {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        opacity: 0.05;
+    }
+    
+    .program-card-header {
+        position: relative;
+        padding-bottom: 0;
+    }
+
+    .program-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.75rem;
+        border-radius: 1.25rem;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        background: linear-gradient(135deg, var(--cat-color-1), var(--cat-color-2));
+        color: #fff;
+        margin-bottom: 2rem;
+    }
+    
+    .program-title {
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: #0f172a;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        transition: color 0.3s ease;
+        letter-spacing: -0.02em;
+    }
+    .dark .program-title {
+        color: #f1f5f9;
+    }
+    
+    .program-desc {
+        font-size: 1.4rem;
+        color: #64748b;
+        line-height: 1.6;
+        font-weight: 500;
+        margin-bottom: 2rem;
+    }
+    .dark .program-desc {
+        color: #94a3b8;
+    }
+
+    .program-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    .dark .program-meta {
+        border-top-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #475569;
+    }
+    .dark .meta-item {
+        color: #cbd5e1;
+    }
+    .meta-item i {
+        font-size: 1.6rem;
+        color: var(--cat-color-1);
+    }
+    
+    .btn-view {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        width: 100%;
+        padding: 1.5rem;
+        background: #f1f5f9;
+        color: #0f172a;
+        font-weight: 800;
+        font-size: 1.25rem;
+        border-radius: 1.5rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-decoration: none;
+        border: 1px solid transparent;
+    }
+    .dark .btn-view {
+        background: #334155;
+        color: #f8fafc;
+    }
+    .program-card:hover .btn-view {
+        background: linear-gradient(135deg, var(--cat-color-1), var(--cat-color-2));
+        color: #fff;
+        transform: scale(1.02);
+        box-shadow: 0 15px 30px -10px var(--cat-color-1);
+    }
+    .btn-view span {
+        transition: transform 0.4s ease;
+    }
+    .btn-view:hover span {
+        transform: translateX(5px);
+    }
+    
+    /* ========================================
+       SECTION HEADERS
+       ======================================== */
+    .section-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .section-badge span {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #2563eb;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+    .dark .section-badge {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.15));
+    }
+    .dark .section-badge span {
+        color: #60a5fa;
+    }
+    
+    .section-title {
+        font-size: 4rem;
+        font-weight: 900;
+        color: #0f172a;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+    }
+    .dark .section-title {
+        color: #f1f5f9;
+    }
+    
+    .section-subtitle {
+        font-size: 1.8rem;
+        color: #64748b;
+        font-weight: 500;
+        max-width: 800px;
+    }
+    .dark .section-subtitle {
+        color: #94a3b8;
+    }
+    
+    /* ========================================
+       RESPONSIVE ADJUSTMENTS
+       ======================================== */
+    @media (max-width: 768px) {
+        .section-title {
+            font-size: 1.75rem;
+        }
+        .category-card {
+            padding: 1rem;
+        }
+        .cat-icon-wrapper {
+            width: 48px;
+            height: 48px;
+        }
+        .cat-icon {
+            font-size: 1.5rem;
+        }
+        .cat-name {
+            font-size: 0.85rem;
+        }
+        .program-title {
+            font-size: 1.1rem;
+        }
+    }
+    
+    /* View All Button */
+    .btn-view-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        background: transparent;
+        border: 2px solid #2563eb;
+        color: #2563eb;
+        font-weight: 700;
+        font-size: 1.15rem;
+        border-radius: 3rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .btn-view-all:hover {
+        background: #2563eb;
+        color: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+    }
+    .dark .btn-view-all {
+        border-color: #60a5fa;
+        color: #60a5fa;
+    }
+    .dark .btn-view-all:hover {
+        background: #3b82f6;
+        color: #fff;
+    }
+    
+    /* Stats Section */
+    .stat-card {
+        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.4s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    .dark .stat-card {
+        background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    .stat-number {
+        font-size: 5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .stat-label {
+        font-size: 1.5rem;
+        color: #64748b;
+        font-weight: 700;
+        margin-top: 1rem;
+    }
+    .dark .stat-label {
+        color: #94a3b8;
+    }
+</style>
+
+<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section class="relative min-h-[75vh] flex items-center overflow-hidden bg-gray-900">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="<?php echo strip_tags($page_data['hero_image'] ?: 'images/home-2.jpg'); ?>" 
+                 alt="VVU Academic Programs" class="w-full h-full object-cover animate-slow-zoom opacity-70">
+            <div class="absolute inset-0 hero-gradient"></div>
+        </div>
+        
+        <!-- Floating Shapes -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-1/4 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl animate-float"></div>
+            <div class="absolute bottom-1/3 right-20 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl animate-float" style="animation-delay: 1s;"></div>
+            <div class="absolute top-1/2 left-1/3 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl animate-float" style="animation-delay: 2s;"></div>
+        </div>
+        
+        <div class="container relative z-10 py-24">
+            <div class="max-w-5xl mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-10 py-4 mb-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-xl md:text-2xl font-black tracking-widest uppercase text-yellow-400"><?php echo strip_tags($page_data['hero_badge'] ?: 'Academic Excellence'); ?></span>
+                </div>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-10 animate-fadeInUp drop-shadow-2xl hero-h1" style="animation-delay: 0.1s;">
+                    <?php echo $page_data['hero_title']; ?>
+                </h1>
+                
+                <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
+                    "<?php echo strip_tags($page_data['hero_subtitle']); ?>"
+                </p>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Popular Categories Section -->
+    <section class="py-16 px-4">
+        <div class="container max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="section-badge mx-auto inline-flex">
+                    <span class="material-symbols-outlined text-blue-500 text-lg">category</span>
+                    <span>Popular Categories</span>
+                </div>
+                <h2 class="section-title">Browse By Category</h2>
+                <p class="section-subtitle mx-auto">Click on any category to explore programs of your choice</p>
+            </div>
+            
+            <div id="categoryGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                <!-- All Categories Card -->
+                <div class="category-card active" data-category="" 
+                     style="--cat-color-1: #2563eb; --cat-color-2: #1d4ed8;">
+                    <div class="cat-icon-wrapper">
+                        <span class="material-symbols-outlined cat-icon">apps</span>
+                    </div>
+                    <h3 class="cat-name">All Programs</h3>
+                    <p class="cat-count"><?php echo count($db_programs); ?> Programs</p>
+                </div>
+                
+                <?php foreach ($db_categories as $cat): ?>
+                <div class="category-card" data-category="<?php echo strip_tags($cat['name']); ?>"
+                     style="--cat-color-1: <?php echo $cat['color_1']; ?>; --cat-color-2: <?php echo $cat['color_2']; ?>;">
+                    <div class="cat-icon-wrapper">
+                        <span class="material-symbols-outlined cat-icon"><?php echo $cat['icon']; ?></span>
+                    </div>
+                    <h3 class="cat-name"><?php echo strip_tags($cat['name']); ?></h3>
+                    <p class="cat-count"><?php echo $cat['program_count']; ?> Programs</p>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-12 px-4 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800">
+        <div class="container max-w-6xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <?php foreach ($db_stats as $stat): ?>
+                <div class="text-center">
+                    <div class="text-4xl md:text-5xl font-black text-white mb-2"><?php echo strip_tags($stat['stat_value']); ?></div>
+                    <div class="text-lg text-blue-200 font-semibold"><?php echo strip_tags($stat['stat_label']); ?></div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Programs Grid Section -->
+    <section class="py-16 px-4">
+        <div class="container max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+                <div>
+                    <div class="section-badge inline-flex">
+                        <span class="material-symbols-outlined text-blue-500 text-lg">school</span>
+                        <span>Our Programs</span>
+                    </div>
+                    <h2 class="section-title" id="programsTitle">All Programs</h2>
+                    <p class="section-subtitle" id="programsCount">Showing <?php echo count($db_programs); ?> programs</p>
+                </div>
+            </div>
+            
+            <div id="programsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <?php foreach ($db_programs as $program): ?>
+                <div class="program-card flex flex-col h-full" 
+                     data-title="<?php echo strtolower(strip_tags($program['title'])); ?>" 
+                     data-category="<?php echo strip_tags($program['category_name']); ?>"
+                     style="--cat-color-1: <?php echo $program['color_1']; ?>; --cat-color-2: <?php echo $program['color_2']; ?>;">
+                    <div class="p-8 flex-grow">
+                        <div class="program-card-header">
+                            <span class="program-badge">
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">school</span>
+                                <?php echo strip_tags($program['category_name']); ?>
+                            </span>
+                        </div>
+                        <h3 class="program-title"><?php echo strip_tags($program['title']); ?></h3>
+                        <p class="program-desc line-clamp-3"><?php echo strip_tags($program['description']); ?></p>
+                        
+                        <div class="program-meta">
+                            <div class="meta-item">
+                                <i class="material-symbols-outlined">schedule</i>
+                                <?php echo strip_tags($program['duration']); ?>
+                            </div>
+                            <div class="meta-item">
+                                <i class="material-symbols-outlined">layers</i>
+                                <?php echo strip_tags($program['level']); ?>
+                            </div>
+                            <div class="meta-item">
+                                <i class="material-symbols-outlined">location_on</i>
+                                <?php echo strip_tags(explode(',', $program['campus'])[0]); ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-8 pt-0">
+                        <a href="course_details.php?id=<?php echo $program['id']; ?>" class="btn-view">
+                            Explore Program
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- No Results Message -->
+            <div id="noResults" class="hidden py-20 text-center">
+                <div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="material-symbols-outlined text-5xl text-gray-400">search_off</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">No programs found</h3>
+                <p class="text-xl text-gray-500 font-medium mb-6">Try adjusting your search or filter criteria.</p>
+                <button onclick="resetAllFilters()" class="btn-view-all">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                    Reset Filters
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-4 bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"1\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+        </div>
+        
+        <div class="container max-w-4xl mx-auto relative z-10 text-center">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6">
+                <?php echo strip_tags($page_data['cta_title'] ?? 'Ready to Shape Your Future?'); ?>
+            </h2>
+            <p class="text-xl text-blue-200 mb-10 max-w-2xl mx-auto">
+                <?php echo strip_tags($page_data['cta_subtitle'] ?? 'Join thousands of successful graduates who started their journey at Valley View University.'); ?>
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="<?php echo strip_tags($page_data['cta_button_link'] ?? 'admissions.php'); ?>" class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-full transition-all hover:transform hover:-translate-y-1 hover:shadow-lg hover:shadow-yellow-500/30">
+                    <span class="material-symbols-outlined">edit_note</span>
+                    <?php echo strip_tags($page_data['cta_button_text'] ?? 'Apply Now'); ?>
+                </a>
+                <a href="contact.php" class="inline-flex items-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/30 transition-all hover:bg-white/20 hover:transform hover:-translate-y-1">
+                    <span class="material-symbols-outlined">mail</span>
+                    Contact Us
+                </a>
+            </div>
+        </div>
+    </section>
 </main>
+
+<script>
+    const categoryCards = document.querySelectorAll('.category-card');
+    const programsGrid = document.getElementById('programsGrid');
+    const programCards = programsGrid.querySelectorAll('.program-card');
+    const noResults = document.getElementById('noResults');
+    const programsTitle = document.getElementById('programsTitle');
+    const programsCount = document.getElementById('programsCount');
+
+    let selectedCategory = '';
+
+    function filterPrograms() {
+        let visibleCount = 0;
+
+        programCards.forEach(card => {
+            const title = card.getAttribute('data-title');
+            const category = card.getAttribute('data-category');
+            
+            const matchesCategory = selectedCategory === '' || category === selectedCategory;
+
+            if (matchesCategory) {
+                card.style.display = 'flex';
+                card.style.animation = 'fadeInUp 0.5s ease forwards';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        programsGrid.style.display = visibleCount === 0 ? 'none' : 'grid';
+        
+        // Update title and count
+        if (selectedCategory) {
+            programsTitle.textContent = selectedCategory;
+        } else {
+            programsTitle.textContent = 'All Programs';
+        }
+        programsCount.textContent = `Showing ${visibleCount} program${visibleCount !== 1 ? 's' : ''}`;
+    }
+
+    function resetAllFilters() {
+        selectedCategory = '';
+        categoryCards.forEach(card => {
+            card.classList.remove('active');
+            if (card.getAttribute('data-category') === '') {
+                card.classList.add('active');
+            }
+        });
+        filterPrograms();
+    }
+
+    // Category card click handler
+    categoryCards.forEach(card => {
+        card.addEventListener('click', () => {
+            categoryCards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            selectedCategory = card.getAttribute('data-category');
+            filterPrograms();
+            
+            // Smooth scroll to programs section
+            document.getElementById('programsGrid').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        });
+    });
+
+
+</script>
 
 <?php
 include 'includes/footer.php';

@@ -12,7 +12,7 @@ include 'includes/header.php';
 <p class="text-base font-normal leading-normal text-gray-200 md:text-lg">Everything you need, all in one place. Access essential resources to support your academic journey.</p>
 </div>
 </div>
-<div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+<div class="container py-12 lg:py-16">
 <!-- Quick Access Cards -->
 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 <div class="group flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:hover:border-accent">

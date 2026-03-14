@@ -5,10 +5,10 @@ include 'includes/db_connect.php';
 // Check if form was submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get form data and sanitize
-    $name = htmlspecialchars(trim($_POST['name']));
-    $email = htmlspecialchars(trim($_POST['email']));
-    $inquiry_type = htmlspecialchars(trim($_POST['inquiry-type']));
-    $message = htmlspecialchars(trim($_POST['message']));
+    $name = strip_tags(trim($_POST['name']));
+    $email = strip_tags(trim($_POST['email']));
+    $inquiry_type = strip_tags(trim($_POST['inquiry-type']));
+    $message = strip_tags(trim($_POST['message']));
     
     // Validate required fields
     if (!empty($name) && !empty($email) && !empty($message)) {
@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 <nav class="hidden md:flex items-center gap-8">
                     <a class="text-sm font-medium hover:text-primary dark:hover:text-secondary" href="homepage.php">Home</a>
-                    <a class="text-sm font-medium hover:text-primary dark:hover:text-secondary" href="academics.php">Academics</a>
+                    <a class="text-sm font-medium hover:text-primary dark:hover:text-secondary" href="academic_programs_overview.php">Academics</a>
                     <a class="text-sm font-medium hover:text-primary dark:hover:text-secondary" href="admissions.php">Admissions</a>
                     <a class="text-sm font-medium hover:text-primary dark:hover:text-secondary" href="about_us.php">About Us</a>
                     <a class="text-sm font-medium text-primary dark:text-secondary" href="contact_us.php">Contact Us</a>

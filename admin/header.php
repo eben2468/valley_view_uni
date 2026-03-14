@@ -1,0 +1,99 @@
+<?php
+ob_start();
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Include database connection
+require_once('../includes/db_connect.php');
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Panel - Valley View University</title>
+    <!-- META TAGS -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- FAV ICON(BROWSER TAB ICON) -->
+    <link rel="shortcut icon" href="../images/fav.ico" type="image/x-icon">
+    <!-- GOOGLE FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FONTAWESOME ICONS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- BOOTSTRAP CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- jQuery (Required for Bootstrap and Summernote) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- CUSTOM ADMIN CSS -->
+    <link href="admin-styles.css?v=1.2" rel="stylesheet" />
+    <link href="admin-modern.css?v=1.2" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="admin-wrapper">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search or enter website name">
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="header-icon">
+                    <i class="far fa-bell"></i>
+                    <span class="badge badge-danger">5</span>
+                </button>
+                <button class="header-icon">
+                    <i class="far fa-envelope"></i>
+                    <span class="badge badge-success">3</span>
+                </button>
+                <div class="user-profile dropdown">
+                    <button class="dropdown-toggle border-0 bg-transparent p-0 d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <?php 
+                        // Fetch admin profile picture
+                        $profile_pic_query = $pdo->prepare("SELECT profile_picture FROM admin_users WHERE id = ?");
+                        $profile_pic_query->execute([$_SESSION['admin_id']]);
+                        $admin_data = $profile_pic_query->fetch();
+                        $header_profile_pic = !empty($admin_data['profile_picture']) && file_exists('../' . $admin_data['profile_picture']) 
+                            ? '../' . $admin_data['profile_picture'] 
+                            : '../Education-Website-and-AdminPanel/images/user/6.png';
+                        ?>
+                        <img src="<?php echo $header_profile_pic; ?>" alt="User" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                        <span class="user-name d-none d-md-inline"><?php echo $_SESSION['admin_name']; ?></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li>
+                            <a class="dropdown-item" href="profile.php">
+                                <i class="fas fa-user-circle"></i> My Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="settings.php">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="logout.php">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>

@@ -1,0 +1,1987 @@
+﻿/* CUSTOM FIXES VER 2.0 - MOBILE HERO FIX INCLUDED */
+/* Custom fixes for Valley View University homepage */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Merriweather', serif !important;
+}
+
+/* Make all icons white */
+.icon-white {
+    color: white !important;
+}
+
+/* 1. Fix logo stretching - maintain aspect ratio */
+.wed-logo {
+    display: flex;
+    align-items: center;
+}
+
+.wed-logo img {
+    max-height: 50px;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #002147;
+    margin-left: 15px;
+    font-family: 'Merriweather', serif;
+    line-height: 1.2;
+    display: inline-block;
+}
+
+.ed-mob-menu .wed-logo img {
+    max-height: 50px;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+}
+
+.top-logo {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    margin: 0 !important;
+}
+
+/* 2. Top bar text and content sizes */
+.ed-top {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin: 0 !important;
+}
+
+.ed-top .ed-com-t1-left ul li a,
+.ed-top .ed-com-t1-right ul li a {
+    font-size: 11px !important;
+    font-weight: 600;
+    color: #fff !important;
+    padding: 3px 8px !important;
+}
+
+.ed-top .ed-com-t1-social ul li a i {
+    font-size: 14px !important;
+}
+
+.ed-top .ed-com-t1-social ul li a {
+    padding: 4px 8px !important;
+    display: block;
+}
+
+.main-menu ul li a {
+    font-size: 15px !important;
+    font-weight: 600;
+    color: #333 !important;
+    cursor: default;
+}
+
+/* Make Home clickable cursor */
+.main-menu ul li:first-child a {
+    cursor: pointer !important;
+}
+
+/* Ensure all dropdown links and internal menu links are pointer */
+.m-menu a,
+.m-menu-inn a,
+.mm-pos a {
+    cursor: pointer !important;
+}
+
+/* Mobile menu bolding */
+.mm-main-list li a {
+    font-weight: 500 !important;
+}
+
+.main-menu ul {
+    margin-top: 5px;
+}
+
+.main-menu ul li a:hover,
+.main-menu ul li a.active {
+    color: #ff5722 !important;
+}
+
+/* 3. Slider height - Responsive for mobile */
+/* Legacy slider heights removed - handled in section 10 */
+
+/* 4. Slider Content Positioning */
+#myCarousel .item {
+    position: relative;
+    overflow: hidden;
+}
+
+#myCarousel .slider-con {
+    position: absolute !important;
+    width: 65% !important;
+    padding: 20px !important;
+    z-index: 10 !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Position overrides based on chosen value */
+.pos-top-left .slider-con {
+    top: 15% !important;
+    left: 10% !important;
+    text-align: left !important;
+}
+
+.pos-top-center .slider-con {
+    top: 15% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center !important;
+}
+
+.pos-top-right .slider-con {
+    top: 15% !important;
+    right: 10% !important;
+    text-align: right !important;
+}
+
+.pos-middle-left .slider-con {
+    top: 50% !important;
+    left: 10% !important;
+    transform: translateY(-50%) !important;
+    text-align: left !important;
+}
+
+.pos-middle-center .slider-con {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    text-align: center !important;
+}
+
+.pos-middle-right .slider-con {
+    top: 50% !important;
+    right: 10% !important;
+    transform: translateY(-50%) !important;
+    text-align: right !important;
+}
+
+.pos-bottom-left .slider-con {
+    bottom: 15% !important;
+    left: 10% !important;
+    text-align: left !important;
+}
+
+.pos-bottom-center .slider-con {
+    bottom: 15% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center !important;
+}
+
+.pos-bottom-right .slider-con {
+    bottom: 15% !important;
+    right: 10% !important;
+    text-align: right !important;
+}
+
+/* Ensure buttons within aligned captions don't have strange margins and are visible on mobile */
+.slider-con a {
+    display: inline-block !important;
+    margin: 10px 5px !important;
+    padding: 12px 30px !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+    border-radius: 5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+}
+
+/* Premium Simple Button Styles */
+.bann-btn-1 {
+    background-color: #ff5722 !important;
+    color: #fff !important;
+    border: none !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.bann-btn-1:hover {
+    background-color: #e64a19 !important;
+    transform: translateY(-2px) !important;
+    color: #fff !important;
+}
+
+.bann-btn-2 {
+    background-color: #002147 !important;
+    color: #fff !important;
+    border: none !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.bann-btn-2:hover {
+    background-color: #001a3a !important;
+    transform: translateY(-2px) !important;
+    color: #fff !important;
+}
+
+.pos-top-left .slider-con a,
+.pos-middle-left .slider-con a,
+.pos-bottom-left .slider-con a {
+    margin-left: 0 !important;
+}
+
+.pos-top-right .slider-con a,
+.pos-middle-right .slider-con a,
+.pos-bottom-right .slider-con a {
+    margin-right: 0 !important;
+}
+
+/* Mobile override: force center on small screens for better readability */
+@media screen and (max-width: 767px) {
+    #myCarousel .slider-con {
+        width: 90% !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        text-align: center !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    .slider-caption,
+    .slider-con {
+        left: 5% !important;
+        right: 5% !important;
+        width: 90% !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    /* Force buttons to show on mobile and make them significantly smaller */
+    .slider-con a,
+    .slider-con .bann-btn-1,
+    .slider-con .bann-btn-2,
+    .slider-con .bann-btn-3 {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        font-size: 10px !important;
+        /* Extra small font */
+        padding: 5px 12px !important;
+        /* Minimal padding */
+        margin: 4px !important;
+        z-index: 999 !important;
+        min-width: auto !important;
+        width: auto !important;
+        border-radius: 30px !important;
+        /* Keep rounded look */
+        text-transform: uppercase !important;
+        font-weight: 800 !important;
+    }
+}
+
+
+
+/* 4. Full width layout with small margins */
+.container {
+    width: 96% !important;
+    max-width: 100% !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+.ed-top .container,
+.top-logo .container,
+.wed-hom-ser,
+.com-sp {
+    width: 96% !important;
+    max-width: 100% !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+/* Ensure container is centered */
+.container {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.row {
+    margin-left: -10px !important;
+    margin-right: -10px !important;
+}
+
+.col-md-3,
+.col-md-4,
+.col-md-6,
+.col-sm-4,
+.col-xs-12 {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+/* 5. Equal card sizing in Discover More section */
+.ed-course-in {
+    height: 180px;
+    overflow: hidden;
+    position: relative;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.ed-course-in img {
+    width: 100%;
+    height: 180px !important;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Reduce image height in mega menu to save vertical space */
+.m-menu .ed-course-in,
+.m-menu .ed-course-in img {
+    height: 160px !important;
+}
+
+/* 6. Fix dropdown menu positioning and z-index issues */
+.main-menu ul li {
+    position: relative;
+    z-index: auto;
+}
+
+.main-menu ul li.cour-menu,
+.main-menu ul li.about-menu,
+.main-menu ul li.admi-menu {
+    position: relative;
+}
+
+/* Ensure each dropdown appears on top when hovered */
+.main-menu ul li:hover {
+    z-index: 999;
+}
+
+.mm-pos {
+    z-index: 998;
+    display: none;
+}
+
+/* Show dropdown on hover */
+.main-menu ul li:hover .mm-pos {
+    display: block;
+}
+
+/* Prevent overlapping dropdowns */
+.main-menu ul li .mm-pos {
+    position: absolute;
+    top: 100%;
+    left: 0;
+}
+
+/* Ensure proper stacking context for nested menus */
+.m-menu {
+    position: relative;
+    z-index: 1;
+    background: #fff !important;
+    padding: 15px 20px !important;
+    box-shadow: 0px 7px 12px -4px rgba(0, 0, 0, 0.45) !important;
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
+}
+
+/* Fix mega menu width and positioning */
+.about-mm,
+.admi-mm {
+    width: 950px !important;
+    max-width: 95vw !important;
+}
+
+.cour-mm {
+    width: auto;
+    min-width: 650px !important;
+    max-width: 95vw !important;
+}
+
+/* Improve column spacing and layout */
+.mm1-com {
+    padding: 10px 15px !important;
+    min-height: 100px;
+    box-sizing: border-box !important;
+    border-right: 1px solid #f0f0f0 !important;
+}
+
+.mm1-com:last-child {
+    border-right: none !important;
+}
+
+/* Better column balance */
+.mm1-s1 {
+    width: 22% !important;
+    border-right: none !important;
+}
+
+.mm1-s2 {
+    width: 18% !important;
+    padding-left: 5px !important;
+}
+
+.mm1-s3 {
+    width: 30% !important;
+}
+
+.mm1-s4 {
+    width: 30% !important;
+}
+
+@media screen and (max-width: 1200px) {
+
+    .mm1-s1,
+    .mm1-s2,
+    .mm1-s3,
+    .mm1-s4 {
+        width: 25% !important;
+    }
+}
+
+/* Specific styling for course menu columns */
+.mm1-cour-com {
+    padding: 15px 20px !important;
+}
+
+.mm1-com h4 {
+    color: #002147 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    margin-bottom: 12px !important;
+    margin-top: 0px !important;
+    padding-bottom: 5px !important;
+    border-bottom: 2px solid #f26838 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block !important;
+    width: 100% !important;
+    clear: both !important;
+}
+
+.mm1-com h4.mt-15 {
+    margin-top: 20px !important;
+}
+
+.mm1-com ul {
+    padding: 0 !important;
+    margin: 0 0 15px 0 !important;
+    list-style: none !important;
+    display: block !important;
+    width: 100% !important;
+    clear: both !important;
+}
+
+.mm1-com ul li {
+    margin-bottom: 2px;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    position: relative !important;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    display: block !important;
+    width: 100% !important;
+    clear: both !important;
+}
+
+.mm1-com ul li:hover {
+    background: rgba(242, 104, 56, 0.08);
+}
+
+/* Fix arrow duplication and style the single arrow */
+.m-menu-inn ul li:before,
+.mm1-com ul li:before {
+    content: "\f105" !important;
+    color: #f26838 !important;
+    font-size: 11px !important;
+    font-family: FontAwesome !important;
+    position: absolute !important;
+    left: 0px !important;
+    top: 6px !important;
+    transform: none !important;
+    padding-right: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    z-index: 2;
+}
+
+/* Ensure no trailing/misplaced arrows */
+.mm1-com ul li a:after,
+.mm1-com ul li a:before {
+    display: none !important;
+    content: "" !important;
+}
+
+.mm1-com ul li a {
+    color: #002147 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    transition: all 0.3s ease;
+    display: block !important;
+    width: 100% !important;
+    padding: 4px 5px 4px 15px !important;
+    /* 15px left padding to make room for arrow */
+    text-align: left !important;
+}
+
+.mm1-com ul li a:hover {
+    color: #f26838 !important;
+    padding-left: 20px !important;
+    text-decoration: none !important;
+}
+
+/* Fix dropdown arrow indicator */
+.mm-arr:after {
+    content: "\f107";
+    font-family: FontAwesome;
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+/* Resources menu - 4 columns */
+.cour-mm .m-menu-inn {
+    display: block;
+    overflow: hidden;
+    width: 100%;
+}
+
+.cour-mm .mm1-cour-com {
+    width: 25% !important;
+    float: left;
+    border-right: 1px solid #eaeaea;
+    box-sizing: border-box;
+    padding: 15px !important;
+}
+
+.cour-mm .mm1-cour-com.mm1-s4 {
+    border-right: none;
+}
+
+/* Clear float after columns */
+.cour-mm .m-menu-inn:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Image Card Mega Menu Styles (mm2-com) */
+.mm2-com {
+    width: 25% !important;
+    float: left;
+    padding: 15px !important;
+    box-sizing: border-box;
+    border-right: 1px solid #eaeaea;
+}
+
+.mm2-com:last-child {
+    border-right: none;
+}
+
+.mm2-com p {
+    font-size: 13px;
+    color: #252424;
+    margin-top: 10px;
+    line-height: 20px;
+    height: 60px;
+    overflow: hidden;
+}
+
+/* Mega Menu Button Styling - More specific selector to override style.css */
+.main-menu .m-menu-inn .mm-r-m-btn {
+    background: #f26838 !important;
+    color: #fff !important;
+    padding: 10px 22px !important;
+    border-radius: 4px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    margin-top: 10px !important;
+    display: inline-block !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    line-height: 1 !important;
+    height: auto !important;
+    text-align: center !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.main-menu .m-menu-inn .mm-r-m-btn:hover {
+    background: #002147 !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Single column dropdowns override */
+.cour-mm .m-menu-inn>.mm1-com:only-child,
+.cour-mm .m-menu-inn .mm1-cour-com:only-child {
+    width: 100% !important;
+    border-right: none;
+    min-width: 220px;
+    float: none;
+}
+
+.ed-course-in .course-overlay {
+    display: block;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    background: rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.ed-course-in:hover .course-overlay {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.ed-course-in .course-overlay span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85%;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(0, 33, 71, 0.75);
+    padding: 10px 8px;
+    border-radius: 6px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    line-height: 1.2;
+}
+
+.ed-course-in:hover .course-overlay span {
+    background: #f26838;
+    width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Improve carousel caption positioning */
+.carousel-caption {
+    bottom: 30% !important;
+}
+
+/* Better spacing for sections */
+.com-sp {
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+.pad-bot-70 {
+    padding-bottom: 50px !important;
+}
+
+/* 7. Footer Improvements */
+.wed-hom-footer {
+    background-color: #002147;
+    padding: 40px 0px 30px 0px !important;
+}
+
+.wed-foot-link {
+    padding: 20px 0px !important;
+}
+
+.wed-foot-link-1 {
+    padding-top: 15px !important;
+}
+
+.wed-hom-footer h4 {
+    color: #f26838 !important;
+    font-size: 18px !important;
+    font-weight: 700;
+    margin-bottom: 15px !important;
+}
+
+.wed-hom-footer ul li a {
+    color: #fff !important;
+    font-size: 15px !important;
+    line-height: 28px;
+    opacity: 0.9;
+}
+
+.wed-hom-footer ul li a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.wed-hom-footer p {
+    color: #fff !important;
+    font-size: 15px !important;
+    line-height: 26px;
+    opacity: 0.9;
+}
+
+.wed-hom-footer p a {
+    color: #fff !important;
+    text-decoration: underline;
+}
+
+.wed-rights p {
+    padding: 4px !important;
+}
+
+/* 8. General Content Font Size Increase */
+body,
+p,
+ul li,
+span,
+a {
+    font-size: 15px;
+}
+
+.m-menu p {
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    margin-bottom: 8px !important;
+    color: #555 !important;
+    font-weight: 500 !important;
+}
+
+.con-title p {
+    font-size: 16px !important;
+}
+
+.home-top-cour-desc p {
+    font-size: 15px !important;
+}
+
+.ho-ev-link p {
+    font-size: 15px !important;
+}
+
+.bot-gal p {
+    font-size: 15px !important;
+}
+
+/* ==========================================================================
+   FINAL MEGA MENU ALIGNMENT FIXES
+   ========================================================================== */
+
+/* 1. Ensure list items are relative so dropdowns anchor to them */
+.main-menu ul li {
+    position: relative !important;
+}
+
+/* 2. Reset dropdown wrapper to default behavior */
+.mm-pos {
+    position: absolute !important;
+    top: 100% !important;
+    width: auto !important;
+    text-align: left !important;
+}
+
+/* 3. Reset menu box margins */
+.m-menu {
+    margin: 0 !important;
+    display: block !important;
+    border-top: 2px solid #f26838;
+}
+
+/* 4. Default Alignment (Items 1-4: Home, About, Academics, Admissions)
+   Align to LEFT edge of menu item, grow RIGHT. */
+.main-menu ul li .mm-pos {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+}
+
+/* 5. Item 5 (Life @ VVU)
+   Center Align to prevent clipping on both sides. */
+.main-menu ul li:nth-child(5) .mm-pos {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+}
+
+/* 6. Items 6, 7, 8 (Stories, Resources, Ventures)
+   Align to RIGHT edge of menu item, grow LEFT. */
+.main-menu ul li:nth-child(n+6) .mm-pos {
+    left: auto !important;
+    right: 0 !important;
+    transform: none !important;
+}
+
+/* ==========================================================================
+   FIXED/STICKY NAVBAR ON DESKTOP
+   ========================================================================== */
+
+/* Desktop sticky header - 1024px and above */
+@media screen and (min-width: 1024px) {
+
+    /* Make the entire header section fixed */
+    #main-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important;
+        background: #fff !important;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1) !important;
+        transition: all 0.3s ease !important;
+        will-change: transform !important;
+        margin: 0 !important;
+    }
+
+    /* Add padding to body to prevent content jump when header becomes fixed */
+    body {
+        padding-top: 92px !important;
+        /* Matches actual header height for zero gap */
+    }
+
+    /* Ensure header sections stack properly */
+    .ed-top,
+    .top-logo {
+        position: relative !important;
+        width: 100% !important;
+    }
+
+    /* Maintain container widths */
+    #main-header .container {
+        width: 96% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+    }
+
+    /* Ensure dropdown menus appear above fixed header */
+    .mm-pos {
+        z-index: 10000 !important;
+    }
+
+    /* Adjust logo size for fixed header */
+    .top-logo .wed-logo img {
+        max-height: 50px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    /* Adjust menu spacing for fixed header */
+    .main-menu ul {
+        margin-top: 5px !important;
+    }
+
+    /* Remove bottom padding from logo container to eliminate gap with slider */
+    .top-logo {
+        padding-bottom: 0 !important;
+    }
+}
+
+/* Tablet and mobile - keep header static */
+@media screen and (max-width: 1023px) {
+
+    #main-header,
+    .ed-top,
+    .top-logo,
+    .wed-top {
+        position: static !important;
+        transform: none !important;
+        transition: none !important;
+        will-change: auto !important;
+    }
+
+    body {
+        padding-top: 0 !important;
+    }
+}
+
+/* ==========================================================================
+   MOBILE FIXES (Logo, Top Bar, Submenus)
+   ========================================================================== */
+
+@media screen and (max-width: 992px) {
+
+    /* 1. Show Top Bar on Mobile */
+    .ed-top {
+        display: block !important;
+        background: #002147 !important;
+        padding: 8px 0 !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 55px !important;
+    }
+
+    .ed-top .container {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 10px !important;
+    }
+
+    .ed-top .container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .ed-top .container {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .ed-top .row .col-md-12 {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 20px !important;
+        width: max-content !important;
+        padding: 0 15px !important;
+    }
+
+    .ed-com-t1-left,
+    .ed-com-t1-right,
+    .ed-com-t1-social {
+        display: block !important;
+        float: none !important;
+        width: auto !important;
+        text-align: left !important;
+    }
+
+    .ed-com-t1-left ul,
+    .ed-com-t1-right ul,
+    .ed-com-t1-social ul {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 15px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .ed-com-t1-left ul li,
+    .ed-com-t1-right ul li,
+    .ed-com-t1-social ul li {
+        display: block !important;
+        float: none !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
+    }
+
+    .ed-com-t1-left ul li a,
+    .ed-com-t1-right ul li a {
+        padding: 4px 0 !important;
+        border: none !important;
+        font-size: 13px !important;
+    }
+
+    /* 2. Logo and Text on Mobile */
+    .ed-mob-menu {
+        display: block !important;
+        background: #fff !important;
+        border-bottom: 1px solid #eee;
+        z-index: 9999 !important;
+    }
+
+    .ed-mob-menu .wed-logo {
+        width: auto !important;
+    }
+
+    .ed-mob-menu .wed-logo img {
+        max-height: 55px !important;
+        width: auto !important;
+    }
+
+    .ed-mob-menu .logo-text {
+        display: inline-block !important;
+        font-size: 15px !important;
+        color: #002147 !important;
+        font-weight: 700 !important;
+        margin-left: 8px !important;
+        vertical-align: middle !important;
+        max-width: 180px;
+        line-height: 1.2;
+    }
+
+    /* 3. Mobile Menu Submenus Styling */
+    .ed-mm-inn {
+        width: 85% !important;
+        right: -100% !important;
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    .ed-mm-inn.ed-mm-act {
+        right: 0 !important;
+        visibility: visible;
+        opacity: 1;
+    }
+
+    /* Prevent horizontal overflow on mobile */
+    html,
+    body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        position: relative !important;
+    }
+
+    .mm-main-list li {
+        position: relative;
+        border-bottom: 1px solid #eee;
+    }
+
+    .mm-main-list li a {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 20px !important;
+        font-weight: 600 !important;
+        color: #333 !important;
+    }
+
+    .mm-main-list li a i {
+        font-size: 18px;
+        transition: transform 0.3s ease;
+    }
+
+    .mm-main-list li.active>a i {
+        transform: rotate(180deg);
+    }
+
+    .mm-sub {
+        display: none;
+        background: #f9f9f9;
+        padding-left: 15px;
+    }
+
+    .mm-sub li a {
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        padding: 10px 20px !important;
+        border-bottom: none !important;
+    }
+}
+
+/* ==========================================================================
+   9. SLIDER GRADIENT OVERLAY AND TEXT READABILITY
+   ========================================================================== */
+
+#myCarousel .carousel-inner .item {
+    position: relative;
+}
+
+#myCarousel .carousel-inner .item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    /* Removed dark gradient */
+    z-index: 1;
+}
+
+/* Disable gradient overlay for image-only slides (no title, description, or buttons) */
+#myCarousel .carousel-inner .item.no-overlay::after {
+    display: none;
+}
+
+/* 9.5 Slider Navigation Controls (Arrows/Toggles) */
+.slider-arr {
+    width: 55px !important;
+    height: 55px !important;
+    font-size: 18px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(4px);
+    border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 50% !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    top: 50% !important;
+    margin: 0 !important;
+    position: absolute !important;
+}
+
+.carousel-control {
+    width: 80px !important;
+    background-image: none !important;
+    opacity: 0.8 !important;
+    transition: all 0.3s ease !important;
+}
+
+.carousel-control:hover {
+    opacity: 1 !important;
+}
+
+.carousel-control:hover .slider-arr {
+    background: #ff5722 !important;
+    border-color: #ff5722 !important;
+    transform: scale(1.1) !important;
+    color: #fff !important;
+}
+
+.carousel-control.left .slider-arr {
+    left: 20px !important;
+}
+
+.carousel-control.right .slider-arr {
+    right: 20px !important;
+}
+
+/* Mobile & Tablet Slider Controls Override */
+@media screen and (max-width: 991px) {
+    .slider-arr {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 14px !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        border-width: 1px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .carousel-control {
+        width: 50px !important;
+    }
+
+    .carousel-control.left .slider-arr {
+        left: 10px !important;
+    }
+
+    .carousel-control.right .slider-arr {
+        right: 10px !important;
+    }
+}
+
+#myCarousel .carousel-inner .item img {
+    position: relative;
+    z-index: 0;
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+}
+
+/* Ensure a clean background and auto-height to prevent empty spaces */
+.home-slider-section,
+#myCarousel,
+#myCarousel .carousel-inner,
+#myCarousel .carousel-inner .item {
+    height: auto !important;
+    min-height: auto !important;
+    background: #000 !important;
+}
+
+.carousel-caption.slider-con {
+    z-index: 2;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+    bottom: 35% !important;
+}
+
+.slider-con h2 {
+    font-size: 65px !important;
+    font-weight: 900 !important;
+    color: #fff !important;
+    margin-bottom: 20px !important;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+}
+
+.slider-con h2 span {
+    color: #ff5722 !important;
+    font-weight: 900 !important;
+}
+
+.slider-con p {
+    font-size: 24px !important;
+    color: #fff !important;
+    font-weight: 500 !important;
+    max-width: 900px;
+    margin: 0 auto 40px auto !important;
+    line-height: 1.4 !important;
+    opacity: 1 !important;
+}
+
+.slider-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 30px;
+    z-index: 5;
+}
+
+.item.pos-middle-center .slider-btn-group,
+.item.pos-top-center .slider-btn-group,
+.item.pos-bottom-center .slider-btn-group {
+    justify-content: center;
+}
+
+.item.pos-middle-right .slider-btn-group,
+.item.pos-top-right .slider-btn-group,
+.item.pos-bottom-right .slider-btn-group {
+    justify-content: flex-end;
+}
+
+.slider-con .bann-btn-1,
+.slider-con .bann-btn-2,
+.slider-con .bann-btn-3 {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    padding: 14px 40px !important;
+    border-radius: 50px !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    height: auto !important;
+    line-height: 1.2 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-shadow: none !important;
+}
+
+.slider-con .bann-btn-1 {
+    background: #ff5722 !important;
+    border: 2px solid #ff5722 !important;
+    color: #fff !important;
+}
+
+.slider-con .bann-btn-2 {
+    background: transparent !important;
+    border: 2px solid #fff !important;
+    color: #fff !important;
+}
+
+.slider-con .bann-btn-3 {
+    background: #002147 !important;
+    border: 2px solid #002147 !important;
+    color: #fff !important;
+}
+
+.slider-con .bann-btn-1:hover {
+    background: #fff !important;
+    color: #ff5722 !important;
+    border-color: #fff !important;
+    transform: translateY(-3px);
+}
+
+.slider-con .bann-btn-2:hover {
+    background: #fff !important;
+    color: #333 !important;
+    transform: translateY(-3px);
+}
+
+.slider-con .bann-btn-3:hover {
+    background: #fff !important;
+    color: #002147 !important;
+    border-color: #fff !important;
+    transform: translateY(-3px);
+}
+
+/* Slider Content Animation - Removed */
+/* .carousel-inner .item.active .slider-con h2 {
+    animation: sliderFadeInUp 0.8s ease-out both;
+}
+
+.carousel-inner .item.active .slider-con p {
+    animation: sliderFadeInUp 0.8s ease-out 0.2s both;
+}
+
+.carousel-inner .item.active .slider-con a {
+    animation: sliderFadeInUp 0.8s ease-out 0.4s both;
+} */
+
+@keyframes sliderFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slider Image Slow Zoom - Removed */
+/* .carousel-inner .item img {
+    animation: sliderSlowZoom 20s linear infinite alternate;
+} */
+
+@keyframes sliderSlowZoom {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.1);
+    }
+}
+
+/* ==========================================================================
+   10. QUICK LINKS - MINIMAL TRANSPARENT DESIGN
+   ========================================================================== */
+
+.wed-hom-ser {
+    margin-top: -90px;
+    position: relative;
+    z-index: 10;
+    padding: 0 20px;
+}
+
+.wed-hom-ser ul {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 0;
+    margin: 0 auto;
+    list-style: none;
+    background: transparent;
+    max-width: 600px;
+}
+
+.wed-hom-ser ul li {
+    margin: 0 !important;
+}
+
+.quick-link-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    text-decoration: none !important;
+    transition: all 0.3s ease;
+    position: relative;
+    background: transparent;
+}
+
+.quick-link-card::after {
+    display: none;
+}
+
+.quick-link-card:hover {
+    transform: translateY(-8px);
+}
+
+.ql-icon-box {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ff5722 0%, #f44336 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    box-shadow: 0 10px 30px rgba(255, 87, 34, 0.4);
+    transition: all 0.3s ease;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.quick-link-card:hover .ql-icon-box {
+    transform: scale(1.1);
+    box-shadow: 0 15px 40px rgba(255, 87, 34, 0.6);
+}
+
+.ql-icon-box span.material-symbols-outlined {
+    font-size: 36px !important;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.quick-link-card>span:not(.material-symbols-outlined) {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+/* Responsive Quick Links */
+@media (max-width: 992px) {
+    .wed-hom-ser {
+        margin-top: -70px;
+    }
+
+    .wed-hom-ser ul {
+        gap: 8px;
+    }
+
+    .ql-icon-box {
+        width: 65px;
+        height: 65px;
+    }
+
+    .ql-icon-box span.material-symbols-outlined {
+        font-size: 28px !important;
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .quick-link-card>span:not(.material-symbols-outlined) {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 768px) {
+    .wed-hom-ser {
+        margin-top: -50px;
+        padding: 0 10px;
+    }
+
+    .wed-hom-ser ul {
+        gap: 5px;
+        max-width: 100%;
+    }
+
+    .ql-icon-box {
+        width: 55px;
+        height: 55px;
+        border-width: 3px;
+    }
+
+    .ql-icon-box span.material-symbols-outlined {
+        font-size: 24px !important;
+    }
+
+    .quick-link-card>span:not(.material-symbols-outlined) {
+        font-size: 10px;
+        letter-spacing: 0.5px;
+    }
+}
+
+/* ==========================================================================
+   10. FULL SCREEN HERO SLIDER FOR DESKTOP
+   ========================================================================== */
+@media screen and (min-width: 992px) {
+    .home-slider-section {
+        height: auto !important;
+        overflow: visible !important;
+        /* Changed from hidden to ensure nothing is clipped */
+        position: relative !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    #myCarousel,
+    #myCarousel .carousel-inner,
+    #myCarousel .carousel-inner .item {
+        height: 100% !important;
+        min-height: 100% !important;
+        overflow: visible !important;
+    }
+
+    #myCarousel .carousel-inner .item img {
+        width: 100% !important;
+        height: auto !important;
+        object-fit: contain !important;
+        object-position: center !important;
+    }
+
+    .carousel-caption.slider-con {
+        bottom: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 40px 12% !important;
+        box-sizing: border-box !important;
+        background: transparent !important;
+        z-index: 1000 !important;
+        height: 100% !important;
+        overflow: visible !important;
+    }
+
+    /* Position based alignment for desktop */
+    .item.pos-middle-center .slider-con {
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    .item.pos-middle-left .slider-con {
+        justify-content: center !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+    }
+
+    .item.pos-middle-right .slider-con {
+        justify-content: center !important;
+        align-items: flex-end !important;
+        text-align: right !important;
+    }
+
+    .item.pos-top-center .slider-con {
+        justify-content: flex-start !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    .item.pos-top-left .slider-con {
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+    }
+
+    .item.pos-top-right .slider-con {
+        justify-content: flex-start !important;
+        align-items: flex-end !important;
+        text-align: right !important;
+    }
+
+    .item.pos-bottom-center .slider-con {
+        justify-content: flex-end !important;
+        align-items: center !important;
+        text-align: center !important;
+        padding-bottom: 350px !important;
+    }
+
+    .item.pos-bottom-left .slider-con {
+        justify-content: flex-end !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding-bottom: 750px !important;
+    }
+
+    .item.pos-bottom-right .slider-con {
+        justify-content: flex-end !important;
+        align-items: flex-end !important;
+        text-align: right !important;
+        padding-bottom: 750px !important;
+    }
+
+    /* Adjust text sizes for full screen */
+    .slider-con h2 {
+        font-size: 60px !important;
+        line-height: 1.1 !important;
+        margin-bottom: 20px !important;
+        text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .slider-con p {
+        font-size: 22px !important;
+        max-width: 850px !important;
+        margin-bottom: 30px !important;
+        text-shadow: 1px 2px 5px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .slider-btn-group {
+        display: flex !important;
+        gap: 15px !important;
+        margin-top: 50px !important;
+        margin-bottom: 200px !important;
+    }
+
+    .item.pos-middle-right .slider-btn-group,
+    .item.pos-top-right .slider-btn-group,
+    .item.pos-bottom-right .slider-btn-group {
+        justify-content: flex-end !important;
+    }
+
+    .item.pos-middle-center .slider-btn-group,
+    .item.pos-top-center .slider-btn-group,
+    .item.pos-bottom-center .slider-btn-group {
+        justify-content: center !important;
+    }
+}
+
+/* ==========================================================================
+   11. MODERN CARD SYSTEM FOR NEWS, EVENTS & NOTICES
+   ========================================================================== */
+
+.modern-news-column {
+    margin-bottom: 40px;
+}
+
+.modern-news-column h4 {
+    color: #002147 !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    margin-bottom: 25px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 3px solid #f26838 !important;
+    display: inline-block !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.modern-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modern-news-card {
+    display: flex;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    text-decoration: none !important;
+    border: 1px solid #f0f0f0;
+    height: 140px;
+}
+
+.modern-news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+    border-color: #f26838;
+}
+
+.card-img-box {
+    width: 140px;
+    min-width: 140px;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.modern-news-card:hover .card-img-box img {
+    transform: scale(1.1);
+}
+
+.card-body-box {
+    padding: 15px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.card-category-badge {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #f26838;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.card-title-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: #002147;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 0.3s ease;
+}
+
+.modern-news-card:hover .card-title-text {
+    color: #f26838;
+}
+
+.card-meta-info {
+    font-size: 12px;
+    color: #777;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.card-meta-info i {
+    color: #f26838;
+    font-size: 13px;
+}
+
+/* Event Specific Style */
+.event-date-box {
+    width: 140px;
+    min-width: 140px;
+    height: 100%;
+    background: #002147;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+}
+
+.event-day {
+    font-size: 38px;
+    font-weight: 900;
+    line-height: 1;
+    color: #ffffff !important;
+    display: block;
+    opacity: 1 !important;
+}
+
+.event-month {
+    font-size: 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-top: 5px;
+    color: #ffffff !important;
+    display: block;
+    letter-spacing: 1px;
+    opacity: 1 !important;
+}
+
+/* Photo Gallery & Video Section Redesign */
+.modern-media-section {
+    padding: 60px 0;
+    background: #f8fafc;
+    border-top: 1px solid #edf2f7;
+}
+
+.media-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.modern-gallery-box h4,
+.modern-video-box h4 {
+    color: #002147 !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    margin-bottom: 30px !important;
+    text-align: center;
+}
+
+.modern-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.modern-gallery-item {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: visible !important;
+    /* MUST be visible for materialbox to expand */
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: #e2e8f0;
+}
+
+.modern-gallery-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: 12px;
+    /* Set radius here since container overflow is visible */
+    transition: transform 0.3s ease, border-radius 0.2s ease;
+}
+
+.modern-gallery-item img.active {
+    border-radius: 0 !important;
+    /* Square corners when zoomed */
+    z-index: 10002 !important;
+}
+
+.modern-gallery-item:hover img {
+    transform: scale(1.15) !important;
+}
+
+.modern-video-wrapper {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.video-info {
+    margin-top: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 0 0 15px 15px;
+    border: 1px solid #edf2f7;
+    border-top: none;
+}
+
+.video-info h5 {
+    color: #002147;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.video-info p {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+@media screen and (max-width: 991px) {
+    .media-container {
+        grid-template-columns: 1fr;
+    }
+
+    .modern-news-card {
+        height: auto;
+    }
+
+    .card-img-box,
+    .event-date-box {
+        width: 120px;
+        min-width: 120px;
+    }
+
+    .modern-gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+}
+
+/* Mobile Slider Button Reduction */
+@media screen and (max-width: 767px) {
+    .slider-con .slider-btn-group {
+        margin-top: 10px !important;
+        gap: 8px !important;
+        justify-content: center !important;
+    }
+
+    .slider-con .bann-btn-1,
+    .slider-con .bann-btn-2,
+    .slider-con .bann-btn-3 {
+        padding: 6px 14px !important;
+        font-size: 10px !important;
+        min-height: auto !important;
+        height: auto !important;
+        line-height: 1.2 !important;
+        border-radius: 10px !important;
+        letter-spacing: 0.5px !important;
+        width: auto !important;
+        display: inline-flex !important;
+    }
+
+    /* Shrink Discover More cards on mobile */
+    .ed-course-in {
+        height: 120px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .ed-course-in img {
+        height: 120px !important;
+    }
+
+    .ed-course-in .course-overlay span {
+        font-size: 11px !important;
+        padding: 6px 4px !important;
+        width: 90% !important;
+    }
+
+    /* Shrink Popular Programs on mobile */
+    .home-top-cour {
+        padding: 10px !important;
+        margin-bottom: 15px !important;
+        display: block !important;
+        overflow: hidden !important;
+    }
+
+    .home-top-cour .col-md-3 {
+        width: 30% !important;
+        float: left !important;
+        padding: 0 !important;
+    }
+
+    .home-top-cour .col-md-9 {
+        width: 70% !important;
+        float: left !important;
+        padding-left: 10px !important;
+    }
+
+    .home-top-cour img {
+        height: 70px !important;
+        width: 100% !important;
+        object-fit: cover !important;
+        border-radius: 4px;
+    }
+
+    .home-top-cour-desc h3 {
+        font-size: 14px !important;
+        padding-bottom: 4px !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+
+    .home-top-cour-desc h4 {
+        font-size: 11px !important;
+        padding-bottom: 4px !important;
+        margin: 0 !important;
+        color: #f26838 !important;
+    }
+
+    .home-top-cour-desc p {
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        margin-bottom: 5px !important;
+    }
+
+    .home-top-cour-rat {
+        font-size: 10px !important;
+        padding: 1px 4px !important;
+        top: 5px !important;
+        right: 5px !important;
+    }
+
+    .hom-list-share {
+        padding-top: 5px !important;
+        clear: both;
+    }
+
+    .hom-list-share ul li a {
+        font-size: 9px !important;
+        padding: 3px 4px !important;
+        margin: 1px !important;
+    }
+
+    .hom-list-share ul li a i {
+        padding-right: 2px !important;
+        font-size: 9px !important;
+    }
+}
+
+/* Materialbox Zoom Fix */
+#materialbox-overlay {
+    z-index: 10001 !important;
+}
+
+.materialboxed.active {
+    z-index: 10002 !important;
+}

@@ -14,7 +14,7 @@ include 'includes/header.php';
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <a href="homepage.php" class="bg-primary text-white py-3 px-4 rounded-lg font-medium text-center hover:bg-primary/90 transition-colors">Go to Homepage</a>
 <a href="contact_us.php" class="bg-white dark:bg-gray-700 text-primary dark:text-white border border-primary py-3 px-4 rounded-lg font-medium text-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">Contact Us</a>
-<a href="academics.php" class="bg-white dark:bg-gray-700 text-primary dark:text-white border border-primary py-3 px-4 rounded-lg font-medium text-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">Explore Academics</a>
+<a href="academic_programs_overview.php" class="bg-white dark:bg-gray-700 text-primary dark:text-white border border-primary py-3 px-4 rounded-lg font-medium text-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">Explore Academics</a>
 <a href="admissions.php" class="bg-white dark:bg-gray-700 text-primary dark:text-white border border-primary py-3 px-4 rounded-lg font-medium text-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">Learn About Admissions</a>
 </div>
 </div>

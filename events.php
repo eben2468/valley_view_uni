@@ -1,161 +1,353 @@
 <?php
+/**
+ * Valley View University - Events Portal
+ * Modern, responsive events page with database integration
+ */
+
+require_once('includes/db_connect.php');
+
 $page_title = "University Events - Valley View University";
 $active_page = "events";
+
+// Pagination settings
+$items_per_page = 9;
+$current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$offset = ($current_page - 1) * $items_per_page;
+
+// Search settings
+$search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+// Build query focusing on 'events' category
+$where_clauses = ["status = 'published'", "category = 'events'"];
+$params = [];
+
+if (!empty($search_query)) {
+    $where_clauses[] = "(title LIKE ? OR excerpt LIKE ? OR content LIKE ? OR event_location LIKE ?)";
+    $search_param = '%' . $search_query . '%';
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $params[] = $search_param;
+}
+
+$where_sql = implode(' AND ', $where_clauses);
+
+// Get total count for pagination
+try {
+    $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM news_articles WHERE $where_sql");
+    $count_stmt->execute($params);
+    $total_items = $count_stmt->fetchColumn();
+    $total_pages = ceil($total_items / $items_per_page);
+} catch (PDOException $e) {
+    $total_items = 0;
+    $total_pages = 1;
+}
+
+// Fetch events
+try {
+    $sql = "
+        SELECT id, title, slug, excerpt, featured_image, category, author, publish_date, event_date, event_time, event_location, is_featured
+        FROM news_articles 
+        WHERE $where_sql 
+        ORDER BY is_featured DESC, event_date DESC, publish_date DESC 
+        LIMIT " . intval($items_per_page) . " OFFSET " . intval($offset);
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $events = [];
+}
+
+// Get featured event for hero section
+$featured_event = null;
+if ($current_page === 1 && empty($search_query)) {
+    try {
+        $featured_stmt = $pdo->prepare("
+            SELECT id, title, slug, excerpt, featured_image, event_date, event_time, event_location
+            FROM news_articles 
+            WHERE status = 'published' AND category = 'events' AND is_featured = 1
+            ORDER BY event_date DESC, publish_date DESC 
+            LIMIT 1
+        ");
+        $featured_stmt->execute();
+        $featured_event = $featured_stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $featured_event = null;
+    }
+}
+
+// Helper function to format date
+function formatEventDate($date) {
+    if (!$date) return '';
+    return date('M j, Y', strtotime($date));
+}
+
+function formatEventTime($time) {
+    if (!$time) return '';
+    return date('g:i A', strtotime($time));
+}
+
+// Get default image for events without images
+function getEventImage($image) {
+    if (!empty($image) && (file_exists($image) || strpos($image, 'http') === 0)) {
+        return $image;
+    }
+    return 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80';
+}
+
 include 'includes/header.php';
 ?>
 
-<main class="flex-grow">
-<div class="flex justify-center w-full px-4 sm:px-6 lg:px-8">
-<div class="flex flex-col w-full max-w-7xl">
-<!-- HeroSection -->
-<div class="w-full py-10 md:py-16">
-<div class="relative flex min-h-[480px] w-full flex-col gap-6 rounded-xl bg-cover bg-center bg-no-repeat items-start justify-end p-6 md:p-10" data-alt="Students cheering at a university sports event, with vibrant stadium lights in the background." style='background-image: linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBP97N6O9w82UWGGNb4aiISBC9HzXHeci23rHPtwJtPQfW5oGaRGgb_KgizzgC8cCcWE_Tw1bZXLs4NKM2G5Ce-KOIlInMG5oddMiPlyhq0LJ6TuRA_C4nS5O9xM-Dnv4C_x53ZV_4NzKcGBRssacOiJHh7XMrG7K2pKEryk36dXfwGX0lPCEfdXYhDVhTmN1vwkCiduHQhcQfMVisB1yKBrSLFFNsP4oQBhCkjEicGA0ViwdcySfE80v53JYWN9pqrCktB9DLAaOpz");'>
-<div class="flex flex-col gap-4 text-left max-w-2xl">
-<h1 class="text-white text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em]">
-                                    Homecoming Weekend 2024
-                                </h1>
-<h2 class="text-gray-200 text-base md:text-lg font-normal leading-normal">
-                                    Join alumni, students, and faculty for a weekend full of tradition, reunion, and celebration. Experience the spirit of Valley View like never before!
-                                </h2>
-</div>
-<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-accent-gold text-primary text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-opacity">
-<span class="truncate">See The Schedule</span>
-</button>
-</div>
-</div>
-<!-- PageHeading -->
-<div class="flex flex-wrap justify-between items-center gap-4 py-6">
-<p class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">University Events</p>
-</div>
-<!-- SearchBar & Chips -->
-<div class="flex flex-col md:flex-row gap-4 py-4 border-y border-gray-200/80 dark:border-gray-700/50">
-<div class="flex-grow">
-<label class="flex flex-col min-w-40 h-12 w-full">
-<div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-gray-200/60 dark:bg-gray-800/60">
-<div class="text-text-light/60 dark:text-text-dark/60 flex items-center justify-center pl-4">
-<span class="material-symbols-outlined">search</span>
-</div>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-transparent h-full placeholder:text-text-light/60 dark:placeholder:text-text-dark/60 px-2 text-base font-normal leading-normal" placeholder="Search events by name or keyword" value=""/>
-</div>
-</label>
-</div>
-<div class="flex gap-2 overflow-x-auto pb-2">
-<button class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200/60 dark:bg-gray-800/60 px-4 hover:bg-gray-300/60 dark:hover:bg-gray-700/60 transition-colors">
-<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Category</p>
-<span class="material-symbols-outlined text-text-light dark:text-text-dark text-xl">expand_more</span>
-</button>
-<button class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200/60 dark:bg-gray-800/60 px-4 hover:bg-gray-300/60 dark:hover:bg-gray-700/60 transition-colors">
-<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Date Range</p>
-<span class="material-symbols-outlined text-text-light dark:text-text-dark text-xl">expand_more</span>
-</button>
-<button class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200/60 dark:bg-gray-800/60 px-4 hover:bg-gray-300/60 dark:hover:bg-gray-700/60 transition-colors">
-<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Campus</p>
-<span class="material-symbols-outlined text-text-light dark:text-text-dark text-xl">expand_more</span>
-</button>
-</div>
-</div>
-<!-- Event Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-10">
-<!-- Event Card 1 -->
-<div class="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
-<img class="h-48 w-full object-cover" data-alt="A group of professionals in a modern conference room listening to a speaker." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxn4dOpN9Zcew3w8-eCPRxeQEXBC1qcoU-d9ssCmyMcG8aDzlOB0q6cQaEULwmBeEbWJSWZwlLUHVwH_4xN0hBEtGjdnxCJW9RbFsCz8detiDR0y_loIJYKg7VUcqdmOKZXP7oQtxxjqHv3P2By1sJHyxN99sFTLSMbyS0BvONJkkeajB9B2DcG7S9CjUinYv828r-8asb9V9BOftqmPfiwpGXj1hPKWME-i7FqUe1L1Gv2lq4fvrqFrIP3UTVdiJIFQaweB4sS-Bb"/>
-<div class="p-5 flex flex-col flex-grow">
-<span class="text-xs font-semibold uppercase tracking-wider text-accent-teal">Academics</span>
-<h3 class="mt-2 text-xl font-bold text-text-light dark:text-text-dark">Innovations in Tech Symposium</h3>
-<p class="mt-2 text-sm text-text-light/80 dark:text-text-dark/80">Oct 25, 2024 - 9:00 AM</p>
-<p class="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">North Campus, Science Hall</p>
-<div class="mt-auto pt-4">
-<button class="w-full flex items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary dark:bg-accent-gold/20 dark:text-accent-gold text-sm font-bold leading-normal tracking-[0.015em] group-hover:bg-primary group-hover:text-white dark:group-hover:bg-accent-gold dark:group-hover:text-primary transition-colors">
-                                        Details
-                                    </button>
-</div>
-</div>
-</div>
-<!-- Event Card 2 -->
-<div class="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
-<img class="h-48 w-full object-cover" data-alt="A diverse group of smiling alumni networking at an evening event." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8tQ6CIFyEo5bepxFvrnQVzhYUHvRMx2kBkh5H6oFH4J3yEUQDguXubqDegdf4E8ZsOwQf7FLFivTf5qI-l2PCklJYBUDy6kea1OyJyedSUMBBlYhscCJhjt8diE3CdMzOdEMID61THHpA_Nn9u965_sOYSkr0ijF5dXQnV8WK4D8ifKpabs0hNp5OjTjIS_ZVcJiLRkdKldGdaNoeWTf59lPsU8sKPGbRe9Bo1xSP-NcZpz3jIWrI1pmnKp1P0su1X2z1L6T0qVbw"/>
-<div class="p-5 flex flex-col flex-grow">
-<span class="text-xs font-semibold uppercase tracking-wider text-accent-teal">Alumni</span>
-<h3 class="mt-2 text-xl font-bold text-text-light dark:text-text-dark">Alumni Homecoming Mixer</h3>
-<p class="mt-2 text-sm text-text-light/80 dark:text-text-dark/80">Nov 12, 2024 - 6:00 PM</p>
-<p class="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">University Club Ballroom</p>
-<div class="mt-auto pt-4">
-<button class="w-full flex items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary dark:bg-accent-gold/20 dark:text-accent-gold text-sm font-bold leading-normal tracking-[0.015em] group-hover:bg-primary group-hover:text-white dark:group-hover:bg-accent-gold dark:group-hover:text-primary transition-colors">
-                                        Register
-                                    </button>
-</div>
-</div>
-</div>
-<!-- Event Card 3 -->
-<div class="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
-<img class="h-48 w-full object-cover" data-alt="University football players in a huddle on a brightly lit field." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA79skOI0qX2kl-bzn3IApN2EsFDKyCpedkfIsJRK5RERQTMD-k3cK80Q0qdOmES2-taT0dKnIZCGh5Qh5bLmT7XzaMuk89U2OteUDoUv-h31d_7FMh0cdis73BQn2GAJu6Y08_aVG4A9Y4ky2sFY6tI1nUqFJ_0M1PMG-XJ4eZY95cy518xulbZVnRLWtAIC9w0P-rrLs3CDFw0q6iJBDPPRjA2Z7FXZg8GZyDrYsWzz1bldeOrIc2JKUuNanp3LqJTBI0E0p6nJOx"/>
-<div class="p-5 flex flex-col flex-grow">
-<span class="text-xs font-semibold uppercase tracking-wider text-accent-teal">Sports</span>
-<h3 class="mt-2 text-xl font-bold text-text-light dark:text-text-dark">Championship Game: Vipers vs Bears</h3>
-<p class="mt-2 text-sm text-text-light/80 dark:text-text-dark/80">Nov 18, 2024 - 1:00 PM</p>
-<p class="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">Viper Stadium</p>
-<div class="mt-auto pt-4">
-<button class="w-full flex items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary dark:bg-accent-gold/20 dark:text-accent-gold text-sm font-bold leading-normal tracking-[0.015em] group-hover:bg-primary group-hover:text-white dark:group-hover:bg-accent-gold dark:group-hover:text-primary transition-colors">
-                                        Get Tickets
-                                    </button>
-</div>
-</div>
-</div>
-<!-- Event Card 4 -->
-<div class="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
-<img class="h-48 w-full object-cover" data-alt="A crowd of people at an outdoor music festival at night." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByg1SmatZKzp2VzLa7ls3iF8yGsSyHIvhNVWHOT1M1b11ClOon0kiceZ9R0BGyEaJPu2rE9ouUuvUUHBxeI8lFZ6Y83zt4AWsSCg87Sp2o9JhrBfElHsNMr2ug17yrzifDneqMb8RjnJcLZAyLQEk8_RhBIz6q_bL10N54_J0viW-8Yu0_8HU0H3SaSM02ZC6YtYfMbwyDUi5xDcLapz3KzshaTdWqG8Gd1BOqR80h-UULWeAjQqkFXapZqe_QFY_lp0lhxagWytDA"/>
-<div class="p-5 flex flex-col flex-grow">
-<span class="text-xs font-semibold uppercase tracking-wider text-accent-teal">Arts &amp; Culture</span>
-<h3 class="mt-2 text-xl font-bold text-text-light dark:text-text-dark">Annual Fall Music Fest</h3>
-<p class="mt-2 text-sm text-text-light/80 dark:text-text-dark/80">Nov 22, 2024 - 4:00 PM</p>
-<p class="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">Campus Quad</p>
-<div class="mt-auto pt-4">
-<button class="w-full flex items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary dark:bg-accent-gold/20 dark:text-accent-gold text-sm font-bold leading-normal tracking-[0.015em] group-hover:bg-primary group-hover:text-white dark:group-hover:bg-accent-gold dark:group-hover:text-primary transition-colors">
-                                        Details
-                                    </button>
-</div>
-</div>
-</div>
-<!-- Event Card 5 -->
-<div class="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
-<img class="h-48 w-full object-cover" data-alt="Students sitting in a large lecture hall listening to a guest speaker." src="https://lh3.googleusercontent.com/aida-public/AB6AXuClBJogOn-7vt6N1AY3wlNYkLODCDgzQBFUf--Y2IvlmV2lJ2KwdPSvLsEteofnnZ0RqsD0niRiLEgMuaZ_MAULKFTErRxdoFQAVb7RD4DsTuItGxxO1Jhas10gT4GrIXqIy4qWliPs9Ddvxu6-5j2CyJ7i7vKWHPauLKriTRPHFR7Ghfrm77cxmKaZrtKIXl3K4SPazy2X43T9oef5b_vtSUiOleQpbqvWaNsiXeLOireolFB-Hf06XW7NFMEgCrYYvOL8H7mLyEoo"/>
-<div class="p-5 flex flex-col flex-grow">
-<span class="text-xs font-semibold uppercase tracking-wider text-accent-teal">Academics</span>
-<h3 class="mt-2 text-xl font-bold text-text-light dark:text-text-dark">Guest Lecture: The Future of AI</h3>
-<p class="mt-2 text-sm text-text-light/80 dark:text-text-dark/80">Dec 02, 2024 - 3:00 PM</p>
-<p class="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">Grand Auditorium (Virtual Option)</p>
-<div class="mt-auto pt-4">
-<button class="w-full flex items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary dark:bg-accent-gold/20 dark:text-accent-gold text-sm font-bold leading-normal tracking-[0.015em] group-hover:bg-primary group-hover:text-white dark:group-hover:bg-accent-gold dark:group-hover:text-primary transition-colors">
-                                        Register
-                                    </button>
-</div>
-</div>
-</div>
-<!-- Event Card 6 -->
-<div class="group flex flex-col overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
-<img class="h-48 w-full object-cover" data-alt="A workshop session with people collaborating around a table with sticky notes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpqOEC74oDLTPMg8t-a4iQk7O-7tgtlZwm606um-1Z0GJGUuGM9HWlI0WxtjR5EvyRi1tFl1bsfTbn7ffoAI4-F8CTgJlCuacvLI2ThzA29ppWDBMvpAwbaKiC9ccK-8ESN1sI9oMi60WxXRaXLb0g9zK7iNHtVN1_rfoxPDIbWRyIAKvIlKV_fxz0SHkm0D5qS9PpeQqPuDsfZ1TEce31ulgdpc_wPnVNXgiIiINLlRbfQ4iY6E4Z4-rcNewt3hylLDQYupwOj_Ok"/>
-<div class="p-5 flex flex-col flex-grow">
-<span class="text-xs font-semibold uppercase tracking-wider text-accent-teal">Student Life</span>
-<h3 class="mt-2 text-xl font-bold text-text-light dark:text-text-dark">Leadership Development Workshop</h3>
-<p class="mt-2 text-sm text-text-light/80 dark:text-text-dark/80">Dec 05, 2024 - 10:00 AM</p>
-<p class="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">Student Union, Room 201</p>
-<div class="mt-auto pt-4">
-<button class="w-full flex items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary dark:bg-accent-gold/20 dark:text-accent-gold text-sm font-bold leading-normal tracking-[0.015em] group-hover:bg-primary group-hover:text-white dark:group-hover:bg-accent-gold dark:group-hover:text-primary transition-colors">
-                                        Details
-                                    </button>
-</div>
-</div>
-</div>
-</div>
-<!-- Load More Button -->
-<div class="py-10 flex justify-center">
-<button class="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 border border-primary/20 dark:border-accent-gold/20 text-primary dark:text-accent-gold text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 dark:hover:bg-accent-gold/10 transition-colors">
-<span class="truncate">Load More Events</span>
-</button>
-</div>
-</div>
-</div>
+<!-- News/Events Portal CSS -->
+<link rel="stylesheet" href="css/news-portal.css">
+
+<main class="news-portal">
+    
+    <?php if ($featured_event): ?>
+    <!-- Hero Section with Featured Event -->
+    <section class="news-hero">
+        <div class="news-hero-bg" style="background-image: url('<?php echo strip_tags(getEventImage($featured_event['featured_image'])); ?>');"></div>
+        <div class="news-hero-overlay"></div>
+        <div class="news-hero-content">
+            <div class="container">
+                <div class="hero-badge" style="color: white !important;">
+                    <span class="badge-icon text-white" style="color: white !important;">
+                        <i class="fa fa-star text-white" style="color: white !important;"></i>
+                    </span>
+                    <span class="text-white" style="color: white !important;">Ongoing / Upcoming Event</span>
+                </div>
+                <h1 class="hero-title"><?php echo strip_tags($featured_event['title']); ?></h1>
+                <p class="hero-excerpt"><?php echo strip_tags($featured_event['excerpt']); ?></p>
+                <div class="hero-meta text-white" style="color: white !important;">
+                    <span class="hero-date text-white" style="color: white !important;">
+                        <i class="fa fa-calendar" style="color: white !important;"></i>
+                        <?php echo formatEventDate($featured_event['event_date']); ?>
+                    </span>
+                    <?php if (!empty($featured_event['event_time'])): ?>
+                    <span class="hero-time text-white" style="color: white !important;">
+                        <i class="fa fa-clock-o" style="color: white !important;"></i>
+                        <?php echo formatEventTime($featured_event['event_time']); ?>
+                    </span>
+                    <?php endif; ?>
+                    <?php if (!empty($featured_event['event_location'])): ?>
+                    <span class="hero-location text-white" style="color: white !important;">
+                        <i class="fa fa-map-marker" style="color: white !important;"></i>
+                        <?php echo strip_tags($featured_event['event_location']); ?>
+                    </span>
+                    <?php endif; ?>
+                </div>
+                <a href="event_detail.php?slug=<?php echo urlencode($featured_event['slug']); ?>" class="hero-btn text-white" style="color: white !important;">
+                    <span class="text-white" style="color: white !important;">View Event Details</span>
+                    <i class="fa fa-arrow-right text-white" style="color: white !important;"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+    <?php else: ?>
+    <!-- Alternative Hero when no featured event -->
+    <section class="news-hero news-hero-default">
+        <div class="news-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&q=80');"></div>
+        <div class="news-hero-overlay"></div>
+        <div class="news-hero-content">
+            <div class="container text-center" style="max-width: 100%;">
+                <h1 class="hero-title">University Events</h1>
+                <p class="hero-excerpt">Connect, learn, and grow through our diverse range of university events. From academic symposiums to campus festivals, there's always something happening at VVU.</p>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Search Section -->
+    <section class="news-filters" style="top: 80px;"> <!-- Adjusted for potential sticky header height -->
+        <div class="container">
+            <div class="filters-wrapper" style="justify-content: center;">
+                <div class="filters-search" style="width: 100%; max-width: 600px;">
+                    <form action="" method="GET" class="search-form">
+                        <div class="search-input-wrapper" style="flex: 1;">
+                            <i class="fa fa-search"></i>
+                            <input type="text" name="search" placeholder="Search events by name, location or keyword..." value="<?php echo strip_tags($search_query); ?>" style="width: 100%;">
+                            <?php if (!empty($search_query)): ?>
+                            <a href="events.php" class="search-clear">
+                                <i class="fa fa-times"></i>
+                            </a>
+                            <?php endif; ?>
+                        </div>
+                        <button type="submit" class="search-btn">Search</button>
+                    </form>
+                </div>
+            </div>
+            
+            <?php if (!empty($search_query)): ?>
+            <div class="search-results-info text-center">
+                <p>Showing results for "<strong><?php echo strip_tags($search_query); ?></strong>" — <?php echo $total_items; ?> event<?php echo $total_items !== 1 ? 's' : ''; ?> found</p>
+            </div>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- Events Grid -->
+    <section class="news-grid-section">
+        <div class="container">
+            <?php if (empty($events)): ?>
+            <div class="no-articles">
+                <div class="no-articles-icon">
+                    <i class="fa fa-calendar-times-o"></i>
+                </div>
+                <h3>No Events Found</h3>
+                <p>We couldn't find any upcoming events matching your criteria. Please check back later or try a different search.</p>
+                <a href="events.php" class="btn-primary">View All Events</a>
+            </div>
+            <?php else: ?>
+            <div class="news-grid">
+                <?php foreach ($events as $event): ?>
+                <article class="news-card">
+                    <a href="event_detail.php?slug=<?php echo urlencode($event['slug']); ?>" class="news-card-link">
+                        <div class="news-card-image">
+                            <img src="<?php echo strip_tags(getEventImage($event['featured_image'])); ?>" 
+                                 alt="<?php echo strip_tags($event['title']); ?>"
+                                 loading="lazy">
+                            <div class="news-card-overlay"></div>
+                            <?php if ($event['is_featured']): ?>
+                            <span class="featured-badge">
+                                <i class="fa fa-star"></i> Featured
+                            </span>
+                            <?php endif; ?>
+                            <div class="event-date-badge">
+                                <span class="month"><?php echo date('M', strtotime($event['event_date'] ?? $event['publish_date'])); ?></span>
+                                <span class="day"><?php echo date('d', strtotime($event['event_date'] ?? $event['publish_date'])); ?></span>
+                            </div>
+                        </div>
+                        <div class="news-card-content">
+                            <h3 class="news-card-title"><?php echo strip_tags($event['title']); ?></h3>
+                            <p class="news-card-excerpt"><?php echo strip_tags($event['excerpt']); ?></p>
+                            <div class="news-card-meta">
+                                <?php if (!empty($event['event_time'])): ?>
+                                <span class="news-card-date">
+                                    <i class="fa fa-clock-o"></i>
+                                    <?php echo formatEventTime($event['event_time']); ?>
+                                </span>
+                                <?php endif; ?>
+                                <?php if (!empty($event['event_location'])): ?>
+                                <span class="news-card-location">
+                                    <i class="fa fa-map-marker"></i>
+                                    <?php echo strip_tags($event['event_location']); ?>
+                                </span>
+                                <?php endif; ?>
+                            </div>
+                            <span class="read-more">
+                                Event Details <i class="fa fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </a>
+                </article>
+                <?php endforeach; ?>
+            </div>
+            
+            <?php if ($total_pages > 1): ?>
+            <!-- Pagination -->
+            <nav class="news-pagination" aria-label="Events pagination">
+                <?php
+                $base_url = 'events.php?';
+                $url_params = [];
+                if (!empty($search_query)) $url_params[] = 'search=' . urlencode($search_query);
+                $base_url .= implode('&', $url_params) . (count($url_params) > 0 ? '&' : '');
+                ?>
+                
+                <?php if ($current_page > 1): ?>
+                <a href="<?php echo $base_url . 'page=' . ($current_page - 1); ?>" class="pagination-btn pagination-prev">
+                    <i class="fa fa-chevron-left"></i>
+                    <span>Previous</span>
+                </a>
+                <?php endif; ?>
+                
+                <div class="pagination-numbers">
+                    <?php
+                    $start_page = max(1, $current_page - 2);
+                    $end_page = min($total_pages, $current_page + 2);
+                    
+                    if ($start_page > 1): ?>
+                    <a href="<?php echo $base_url . 'page=1'; ?>" class="pagination-num">1</a>
+                    <?php if ($start_page > 2): ?>
+                    <span class="pagination-ellipsis">...</span>
+                    <?php endif; ?>
+                    <?php endif; ?>
+                    
+                    <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <a href="<?php echo $base_url . 'page=' . $i; ?>" class="pagination-num <?php echo $i === $current_page ? 'active' : ''; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                    <?php endfor; ?>
+                    
+                    <?php if ($end_page < $total_pages): ?>
+                    <?php if ($end_page < $total_pages - 1): ?>
+                    <span class="pagination-ellipsis">...</span>
+                    <?php endif; ?>
+                    <a href="<?php echo $base_url . 'page=' . $total_pages; ?>" class="pagination-num"><?php echo $total_pages; ?></a>
+                    <?php endif; ?>
+                </div>
+                
+                <?php if ($current_page < $total_pages): ?>
+                <a href="<?php echo $base_url . 'page=' . ($current_page + 1); ?>" class="pagination-btn pagination-next">
+                    <span>Next</span>
+                    <i class="fa fa-chevron-right"></i>
+                </a>
+                <?php endif; ?>
+            </nav>
+            <?php endif; ?>
+            
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="news-newsletter">
+        <div class="container">
+            <div class="newsletter-wrapper">
+                <div class="newsletter-content">
+                    <div class="newsletter-icon">
+                        <i class="fa fa-calendar-check-o"></i>
+                    </div>
+                    <h2>Don't Miss Out</h2>
+                    <p>Subscribe to our events newsletter to receive updates about upcoming campus activities, workshops, and ceremonies directly in your inbox.</p>
+                </div>
+                <form class="newsletter-form" action="#" method="POST">
+                    <input type="email" name="email" placeholder="Enter your email address" required>
+                    <button type="submit">
+                        <span>Subscribe</span>
+                        <i class="fa fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
 </main>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" title="Go to top">
+    <i class="fa fa-arrow-up"></i>
+</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const backToTop = document.getElementById('backToTop');
+    
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTop.classList.add('visible');
+        } else {
+            backToTop.classList.remove('visible');
+        }
+    });
+    
+    backToTop.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
 
 <?php
 include 'includes/footer.php';
