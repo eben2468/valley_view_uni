@@ -91,7 +91,7 @@ INSERT INTO graduate_page_content (
     'Explore our comprehensive range of master''s and doctoral programs across multiple disciplines.',
     'Begin Your Graduate Journey Today',
     'Take the next step in your academic and professional career. Apply to one of our graduate programs and join a community of scholars dedicated to excellence.',
-    'Apply Now', 'https://apply.vvu.edu.gh/',
+    'Apply Now', 'https://admissions.vvu.edu.gh/admissions/website',
     'Request Info', 'contact_us.php',
     'Graduate School Office',
     '+233 307 011 832', 'graduateschool@vvu.edu.gh',

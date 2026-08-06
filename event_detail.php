@@ -123,11 +123,15 @@ $word_count = str_word_count(strip_tags($article['content']));
 $read_time = ceil($word_count / 200); 
 if ($read_time < 1) $read_time = 1;
 
+require_once 'includes/news_helpers.php';
 include 'includes/header.php';
 ?>
 
 <!-- News Portal CSS -->
 <link rel="stylesheet" href="css/news-portal.css">
+<link rel="stylesheet" href="css/news-modern.css">
+<link rel="stylesheet" href="css/news-editorial.css">
+<script src="js/news-modern.js" defer></script>
 
 <!-- SEO Meta Tags -->
 <meta name="description" content="<?php echo strip_tags($meta_description); ?>">
@@ -137,46 +141,82 @@ include 'includes/header.php';
 <meta property="og:type" content="article">
 <meta property="article:published_time" content="<?php echo date('c', strtotime($article['publish_date'])); ?>">
 
-<main class="news-detail-page">
+<main class="news-detail-page ed-article">
     
-    <!-- Article Header -->
-    <header class="article-header">
-        <div class="article-header-bg" style="background-image: url('<?php echo strip_tags(getArticleImage($article['featured_image'], $article['category'])); ?>');"></div>
-        <div class="article-header-overlay"></div>
-        <div class="article-header-content">
-            <div class="container">
+    <!-- ============ EVENT HEAD ============ -->
+    <header class="ed-article-head">
+        <div class="container">
+            <div class="ed-crumbs" role="navigation" aria-label="Breadcrumb">
+                <a href="index.php">Home</a>
+                <i class="fa fa-angle-right sep"></i>
+                <a href="events.php">Events</a>
+                <i class="fa fa-angle-right sep"></i>
+                <span class="current"><?php echo strip_tags($article['title']); ?></span>
+            </div>
 
-                <span class="article-category <?php echo getCategoryColor($article['category']); ?>">
-                    <?php echo strip_tags($category_labels[$article['category']] ?? $article['category']); ?>
-                </span>
-                <h1 class="article-title"><?php echo strip_tags($article['title']); ?></h1>
-                <div class="article-meta">
-                    <div class="meta-item author">
-                        <div class="author-avatar">
-                            <i class="fa fa-user"></i>
-                        </div>
-                        <span>By <?php echo strip_tags($article['author']); ?></span>
-                    </div>
-                    <?php if (!empty($article['event_date'])): ?>
-                    <div class="meta-item">
-                        <i class="fa fa-calendar-check-o"></i>
-                        <span>Event: <?php echo formatDate($article['event_date']); ?></span>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($article['event_location'])): ?>
-                    <div class="meta-item">
-                        <i class="fa fa-map-marker"></i>
-                        <span><?php echo strip_tags($article['event_location']); ?></span>
-                    </div>
-                    <?php endif; ?>
-                    <div class="meta-item">
-                        <i class="fa fa-eye"></i>
-                        <span><?php echo number_format($article['views_count']); ?> views</span>
-                    </div>
+            <div class="ed-kicker">
+                <span class="dot" style="background:<?php echo vvu_kicker_tone('events'); ?>"></span>
+                <strong>Campus Event</strong>
+                <?php if (!empty($article['event_date'])): ?>
+                <span class="sep">/</span>
+                <?php echo vvu_relative_date($article['event_date']); ?>
+                <?php endif; ?>
+            </div>
+
+            <h1 class="ed-headline"><?php echo strip_tags($article['title']); ?></h1>
+
+            <?php if (!empty($article['excerpt'])): ?>
+            <p class="ed-standfirst"><?php echo strip_tags($article['excerpt']); ?></p>
+            <?php endif; ?>
+
+            <?php if (!empty($article['event_date']) || !empty($article['event_time']) || !empty($article['event_location'])): ?>
+            <div class="ed-facts">
+                <?php if (!empty($article['event_date'])): ?>
+                <div class="ed-fact">
+                    <span>Date</span>
+                    <strong><?php echo date('l, j F Y', strtotime($article['event_date'])); ?></strong>
+                </div>
+                <?php endif; ?>
+                <?php if (!empty($article['event_time'])): ?>
+                <div class="ed-fact">
+                    <span>Time</span>
+                    <strong><?php echo date('g:i A', strtotime($article['event_time'])); ?></strong>
+                </div>
+                <?php endif; ?>
+                <?php if (!empty($article['event_location'])): ?>
+                <div class="ed-fact">
+                    <span>Venue</span>
+                    <strong><?php echo strip_tags($article['event_location']); ?></strong>
+                </div>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+
+            <div class="ed-article-byline">
+                <div class="ed-byline">
+                    <span class="ed-avatar" style="background:<?php echo vvu_avatar_tone($article['author']); ?>">
+                        <?php echo vvu_initials($article['author']); ?>
+                    </span>
+                    <span class="ed-byline-text">
+                        <span class="ed-byline-name">Posted by <?php echo strip_tags($article['author']); ?></span>
+                        <span class="ed-byline-meta"><?php echo date('j F Y', strtotime($article['publish_date'])); ?></span>
+                    </span>
+                </div>
+                <div class="ed-stats">
+                    <span><i class="fa fa-eye"></i> <?php echo number_format($article['views_count']); ?> views</span>
                 </div>
             </div>
         </div>
     </header>
+
+    <figure class="ed-article-figure">
+        <div class="container">
+            <div class="ed-figure-frame">
+                <img src="<?php echo strip_tags(getArticleImage($article['featured_image'], $article['category'])); ?>"
+                     alt="<?php echo htmlspecialchars($article['title'], ENT_QUOTES); ?>">
+            </div>
+        </div>
+    </figure>
 
     <!-- Article Content -->
     <section class="article-content-section">
@@ -184,19 +224,6 @@ include 'includes/header.php';
             <div class="article-wrapper">
                 <!-- Main Content -->
                 <article class="article-main">
-                    <!-- Featured Image -->
-                    <figure class="article-featured-image">
-                        <img src="<?php echo strip_tags(getArticleImage($article['featured_image'], $article['category'])); ?>" 
-                             alt="<?php echo strip_tags($article['title']); ?>">
-                    </figure>
-                    
-                    <!-- Excerpt/Lead -->
-                    <?php if (!empty($article['excerpt'])): ?>
-                    <div class="article-lead">
-                        <?php echo strip_tags($article['excerpt']); ?>
-                    </div>
-                    <?php endif; ?>
-                    
                     <!-- Article Body -->
                     <div class="article-body">
                         <?php echo $article['content']; ?>

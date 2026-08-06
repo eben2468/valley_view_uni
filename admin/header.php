@@ -22,7 +22,10 @@ require_once('../includes/db_connect.php');
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- FAV ICON(BROWSER TAB ICON) -->
-    <link rel="shortcut icon" href="../images/fav.ico" type="image/x-icon">
+    <link rel="icon" href="../favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
     <!-- GOOGLE FONT -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- FONTAWESOME ICONS -->
@@ -36,8 +39,8 @@ require_once('../includes/db_connect.php');
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- CUSTOM ADMIN CSS -->
-    <link href="admin-styles.css?v=1.2" rel="stylesheet" />
-    <link href="admin-modern.css?v=1.2" rel="stylesheet" />
+    <link href="admin-styles.css?v=1.3" rel="stylesheet" />
+    <link href="admin-modern.css?v=1.3" rel="stylesheet" />
 </head>
 
 <body>

@@ -5,6 +5,7 @@
  */
 
 require_once('../includes/db_connect.php');
+require_once('../includes/news_helpers.php');
 session_start();
 
 // Check if user is logged in
@@ -19,6 +20,141 @@ $error_message = '';
 // Determine action mode
 $action = isset($_GET['action']) ? $_GET['action'] : 'edit';
 $article_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+// Ensure the gallery table exists (see sql/news_article_images_migration.sql)
+try {
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS news_article_images (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            article_id INT NOT NULL,
+            image_path VARCHAR(1000) NOT NULL,
+            caption VARCHAR(500) DEFAULT NULL,
+            display_order INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_article (article_id),
+            INDEX idx_article_order (article_id, display_order),
+            CONSTRAINT fk_news_article_images_article
+                FOREIGN KEY (article_id) REFERENCES news_articles(id)
+                ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+} catch (PDOException $e) {
+    // Table creation failure is reported when the gallery is actually used
+}
+
+$allowed_image_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+$gallery_images = [];
+
+/**
+ * Save newly uploaded gallery images for an article.
+ * Returns an array of human-readable errors (empty on success).
+ */
+function saveGalleryUploads($pdo, $article_id, $slug, $allowed_extensions) {
+    $errors = [];
+    if (empty($_FILES['gallery_images']['name'][0])) {
+        return $errors;
+    }
+
+    $upload_dir = '../uploads/news/gallery/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+
+    // Continue numbering after the images already attached to this article
+    $order_stmt = $pdo->prepare("SELECT COALESCE(MAX(display_order), 0) FROM news_article_images WHERE article_id = ?");
+    $order_stmt->execute([$article_id]);
+    $next_order = (int)$order_stmt->fetchColumn();
+
+    $captions = isset($_POST['new_gallery_caption']) ? $_POST['new_gallery_caption'] : [];
+    $files = $_FILES['gallery_images'];
+    $count = count($files['name']);
+
+    $insert = $pdo->prepare("
+        INSERT INTO news_article_images (article_id, image_path, caption, display_order)
+        VALUES (?, ?, ?, ?)
+    ");
+
+    for ($i = 0; $i < $count; $i++) {
+        if ($files['error'][$i] === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+        $original = $files['name'][$i];
+
+        if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+            $errors[] = "Could not upload \"" . $original . "\".";
+            continue;
+        }
+
+        $ext = strtolower(pathinfo($original, PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowed_extensions)) {
+            $errors[] = "\"" . $original . "\" was skipped (allowed: JPG, PNG, GIF, WEBP).";
+            continue;
+        }
+        if (@getimagesize($files['tmp_name'][$i]) === false) {
+            $errors[] = "\"" . $original . "\" is not a valid image file.";
+            continue;
+        }
+
+        $new_filename = $slug . '-gallery-' . time() . '-' . ($i + 1) . '.' . $ext;
+        if (move_uploaded_file($files['tmp_name'][$i], $upload_dir . $new_filename)) {
+            $next_order++;
+            $caption = isset($captions[$i]) ? trim($captions[$i]) : '';
+            $insert->execute([
+                $article_id,
+                'uploads/news/gallery/' . $new_filename,
+                $caption !== '' ? $caption : null,
+                $next_order
+            ]);
+        } else {
+            $errors[] = "Could not save \"" . $original . "\" to the server.";
+        }
+    }
+
+    return $errors;
+}
+
+/**
+ * Apply caption/order edits and deletions to existing gallery images.
+ */
+function updateExistingGalleryImages($pdo, $article_id) {
+    // Deletions
+    $to_delete = isset($_POST['delete_gallery_image']) ? array_map('intval', (array)$_POST['delete_gallery_image']) : [];
+    if (!empty($to_delete)) {
+        $placeholders = implode(',', array_fill(0, count($to_delete), '?'));
+        $params = array_merge($to_delete, [$article_id]);
+
+        $fetch = $pdo->prepare("SELECT id, image_path FROM news_article_images WHERE id IN ($placeholders) AND article_id = ?");
+        $fetch->execute($params);
+        $rows = $fetch->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($rows) {
+            $ids = array_column($rows, 'id');
+            $del_placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $delete = $pdo->prepare("DELETE FROM news_article_images WHERE id IN ($del_placeholders) AND article_id = ?");
+            $delete->execute(array_merge($ids, [$article_id]));
+
+            foreach ($rows as $row) {
+                if (!empty($row['image_path']) && file_exists('../' . $row['image_path'])) {
+                    unlink('../' . $row['image_path']);
+                }
+            }
+        }
+    }
+
+    // Caption + order updates for the images that remain
+    if (!empty($_POST['gallery_caption']) && is_array($_POST['gallery_caption'])) {
+        $update = $pdo->prepare("UPDATE news_article_images SET caption = ?, display_order = ? WHERE id = ? AND article_id = ?");
+        foreach ($_POST['gallery_caption'] as $img_id => $caption) {
+            $img_id = intval($img_id);
+            if ($img_id <= 0 || in_array($img_id, $to_delete)) {
+                continue;
+            }
+            $caption = trim($caption);
+            $order = isset($_POST['gallery_order'][$img_id]) ? intval($_POST['gallery_order'][$img_id]) : 0;
+            $update->execute([$caption !== '' ? $caption : null, $order, $img_id, $article_id]);
+        }
+    }
+}
 
 // Initialize article data
 $article = [
@@ -77,7 +213,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $article['event_date'] = !empty($_POST['event_date']) ? $_POST['event_date'] : null;
     $article['event_time'] = !empty($_POST['event_time']) ? $_POST['event_time'] : null;
     $article['event_location'] = trim($_POST['event_location'] ?? '');
-    
+
+    // Safety net: if the summary was left blank, build one from the article
+    // body. The editor normally fills this in live, but this covers pasted
+    // content, a disabled browser script, or a straight form post.
+    if ($article['excerpt'] === '' && trim(strip_tags($article['content'])) !== '') {
+        $article['excerpt'] = vvu_auto_excerpt($article['content'], 200);
+        $excerpt_was_generated = true;
+    }
+
     // Validate required fields
     if (empty($article['title'])) {
         $error_message = "Title is required.";
@@ -142,9 +286,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $article['meta_title'], $article['meta_description'], $article['publish_date'],
                         $article['event_date'], $article['event_time'], $article['event_location']
                     ]);
-                    $success_message = "Article created successfully!";
                     $article_id = $pdo->lastInsertId();
                     $article['id'] = $article_id;
+
+                    // Attach any gallery images that were uploaded with the new article
+                    $gallery_errors = saveGalleryUploads($pdo, $article_id, $article['slug'], $allowed_image_extensions);
+
+                    // Reload in edit mode so the gallery can be managed and
+                    // re-submitting the form does not create a duplicate article
+                    $redirect = "edit_news_article.php?id=" . $article_id . "&created=1";
+                    if (!empty($gallery_errors)) {
+                        $redirect .= "&gallery_error=" . urlencode(implode(' ', $gallery_errors));
+                    }
+                    header("Location: " . $redirect);
+                    exit();
                 } else {
                     // Update existing article
                     $stmt = $pdo->prepare("
@@ -164,11 +319,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $article_id
                     ]);
                     $success_message = "Article updated successfully!";
+
+                    // Gallery: apply deletions / caption & order edits, then new uploads
+                    updateExistingGalleryImages($pdo, $article_id);
+                    $gallery_errors = saveGalleryUploads($pdo, $article_id, $article['slug'], $allowed_image_extensions);
+                    if (!empty($gallery_errors)) {
+                        $error_message = implode(' ', $gallery_errors);
+                    }
                 }
             } catch (PDOException $e) {
                 $error_message = "Database error: " . $e->getMessage();
             }
         }
+    }
+}
+
+// Flash messages coming back from the post-create redirect
+if (isset($_GET['created'])) {
+    $success_message = "Article created successfully! You can now add more gallery images below.";
+}
+if (isset($_GET['gallery_error'])) {
+    $error_message = strip_tags($_GET['gallery_error']);
+}
+
+// Load gallery images for this article
+if ($article_id > 0) {
+    try {
+        $g_stmt = $pdo->prepare("SELECT * FROM news_article_images WHERE article_id = ? ORDER BY display_order ASC, id ASC");
+        $g_stmt->execute([$article_id]);
+        $gallery_images = $g_stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $gallery_images = [];
     }
 }
 
@@ -192,23 +373,24 @@ include 'sidebar.php';
 
 <style>
 /* Article Editor Styles */
+/* minmax(0, …) is what stops the grid from being forced wider than the
+   viewport by its own content (the Summernote toolbar is the usual culprit).
+   Without it the page grows, gains a horizontal scrollbar, and the content
+   slides underneath the fixed sidebar. */
 .editor-container {
     display: grid;
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: minmax(0, 1fr) 360px;
     gap: 30px;
     margin-top: 24px;
+    max-width: 100%;
 }
 
-.editor-main {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
+.editor-main,
 .editor-sidebar {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    min-width: 0;
 }
 
 .editor-card {
@@ -216,6 +398,42 @@ include 'sidebar.php';
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.05);
     overflow: hidden;
+    max-width: 100%;
+}
+
+/* Summernote must wrap and stay inside its column */
+.note-editor.note-frame,
+.note-editor .note-toolbar,
+.note-editor .note-editing-area,
+.note-editor .note-editable {
+    max-width: 100%;
+}
+
+.note-editor .note-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+
+.note-editor .note-editable {
+    overflow-x: auto;
+}
+
+.note-editor .note-editable img {
+    max-width: 100%;
+    height: auto;
+}
+
+.note-editor .note-editable table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* Long unbroken strings (URLs, slugs) must not stretch the layout */
+.slug-preview {
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 .card-header {
@@ -386,6 +604,221 @@ textarea.form-control {
 .remove-image:hover {
     background: #dc3545;
     transform: scale(1.1);
+}
+
+/* Excerpt auto-generation */
+.form-group label.label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.btn-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid #e9ecef;
+    border-radius: 20px;
+    background: white;
+    color: #f26838;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-inline:hover {
+    background: #f26838;
+    border-color: #f26838;
+    color: white;
+}
+
+.btn-inline:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.excerpt-footer {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.excerpt-footer .form-hint {
+    margin-top: 6px;
+}
+
+.char-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.char-count.over {
+    color: #dc3545;
+}
+
+.excerpt-auto {
+    color: #28a745 !important;
+}
+
+.excerpt-auto i {
+    margin-right: 4px;
+}
+
+/* Article Gallery */
+.gallery-count {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+    background: #e9ecef;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.gallery-grid:empty {
+    display: none;
+}
+
+.gallery-item {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 10px;
+    background: #fbfcfd;
+    transition: all 0.25s ease;
+}
+
+.gallery-item.marked-delete {
+    opacity: 0.55;
+    border-color: #dc3545;
+    background: rgba(220,53,69,0.05);
+}
+
+.gallery-thumb {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.gallery-thumb img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.25s ease;
+}
+
+.gallery-delete:hover {
+    background: #dc3545;
+    transform: scale(1.1);
+}
+
+.gallery-delete input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    margin: 0;
+}
+
+.gallery-delete-flag {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(220,53,69,0.9);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    padding: 4px;
+}
+
+.gallery-item.marked-delete .gallery-delete-flag {
+    display: block;
+}
+
+.gallery-caption {
+    padding: 8px 10px;
+    font-size: 12.5px;
+    border-width: 1px;
+}
+
+.gallery-order {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.gallery-order label {
+    margin: 0;
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.gallery-order input {
+    padding: 6px 8px;
+    font-size: 12.5px;
+    border-width: 1px;
+    width: 80px;
+}
+
+.gallery-dropzone {
+    padding: 24px;
+}
+
+.gallery-dropzone .upload-placeholder i {
+    font-size: 36px;
+}
+
+.gallery-new .gallery-item {
+    border-style: dashed;
+    border-color: #f26838;
+    background: rgba(242,104,56,0.03);
+}
+
+.gallery-new-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #f26838;
+    margin-bottom: 6px;
 }
 
 /* Status & Category Selects */
@@ -653,10 +1086,19 @@ select.form-control {
                             <p class="form-hint">Auto-generated from title. Leave empty for automatic slug generation.</p>
                         </div>
                         <div class="form-group">
-                            <label>Excerpt / Summary</label>
-                            <textarea name="excerpt" class="form-control" rows="3" 
-                                      placeholder="Brief summary of the article (appears in news listings)..."><?php echo htmlspecialchars($article['excerpt']); ?></textarea>
-                            <p class="form-hint">Keep it under 200 characters for best display in news cards.</p>
+                            <label class="label-row">
+                                <span>Excerpt / Summary</span>
+                                <button type="button" class="btn-inline" id="generateExcerpt" title="Write a summary from the article content">
+                                    <i class="fas fa-magic"></i> Generate from article
+                                </button>
+                            </label>
+                            <textarea name="excerpt" id="excerptField" class="form-control" rows="3"
+                                      maxlength="300"
+                                      placeholder="Leave this empty and it will be written from your article content automatically…"><?php echo htmlspecialchars($article['excerpt']); ?></textarea>
+                            <div class="excerpt-footer">
+                                <p class="form-hint" id="excerptHint">Keep it under 200 characters for best display in news cards.</p>
+                                <span class="char-count" id="excerptCount">0 / 200</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -669,6 +1111,67 @@ select.form-control {
                     </div>
                     <div class="card-body">
                         <textarea name="content" id="contentEditor"><?php echo htmlspecialchars($article['content']); ?></textarea>
+                    </div>
+                </div>
+
+                <!-- Article Gallery Card -->
+                <div class="editor-card">
+                    <div class="card-header">
+                        <i class="fas fa-images"></i>
+                        <h5>Article Gallery</h5>
+                        <span class="gallery-count"><?php echo count($gallery_images); ?> image<?php echo count($gallery_images) === 1 ? '' : 's'; ?></span>
+                    </div>
+                    <div class="card-body">
+                        <p class="form-hint" style="margin-top:0; margin-bottom:14px;">
+                            Extra photos for this story. They appear as a gallery at the end of the article,
+                            below the main content. The featured image is managed separately in the sidebar.
+                        </p>
+
+                        <?php if (!empty($gallery_images)): ?>
+                        <div class="gallery-grid">
+                            <?php foreach ($gallery_images as $img): ?>
+                            <div class="gallery-item" data-image-id="<?php echo (int)$img['id']; ?>">
+                                <div class="gallery-thumb">
+                                    <img src="../<?php echo htmlspecialchars($img['image_path']); ?>" alt="">
+                                    <label class="gallery-delete" title="Remove this image">
+                                        <input type="checkbox" name="delete_gallery_image[]" value="<?php echo (int)$img['id']; ?>">
+                                        <i class="fas fa-trash"></i>
+                                    </label>
+                                    <span class="gallery-delete-flag">Will be deleted on save</span>
+                                </div>
+                                <input type="text" class="form-control gallery-caption"
+                                       name="gallery_caption[<?php echo (int)$img['id']; ?>]"
+                                       value="<?php echo htmlspecialchars($img['caption'] ?? ''); ?>"
+                                       placeholder="Caption (optional)">
+                                <div class="gallery-order">
+                                    <label>Order</label>
+                                    <input type="number" class="form-control"
+                                           name="gallery_order[<?php echo (int)$img['id']; ?>]"
+                                           value="<?php echo (int)$img['display_order']; ?>" min="0">
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="image-upload-wrapper gallery-dropzone" id="galleryDropzone">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-images"></i>
+                                <p><strong>Click to add images</strong> or drag and drop</p>
+                                <p>You can select several at once — PNG, JPG, GIF, WEBP</p>
+                            </div>
+                            <input type="file" name="gallery_images[]" accept="image/*" multiple
+                                   class="image-input" id="galleryInput">
+                        </div>
+
+                        <div class="gallery-grid gallery-new" id="galleryPreview"></div>
+
+                        <?php if ($article_id === 0): ?>
+                        <p class="form-hint" style="margin-top:12px;">
+                            <i class="fas fa-info-circle"></i>
+                            Images selected here are uploaded as soon as the article is created.
+                        </p>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -1016,6 +1519,217 @@ if (imageWrapper && imageInput) {
             }
         });
     }
+}
+
+// ── Excerpt auto-generation ──────────────────────────────────
+// Mirrors vvu_auto_excerpt() in includes/news_helpers.php: prefer whole
+// sentences, fall back to a word-boundary cut.
+(function () {
+    var field = document.getElementById('excerptField');
+    var button = document.getElementById('generateExcerpt');
+    var counter = document.getElementById('excerptCount');
+    var hint = document.getElementById('excerptHint');
+    if (!field) return;
+
+    var LIMIT = 200;
+    // If the author already wrote a summary, never overwrite it silently
+    var authorEdited = field.value.trim() !== '';
+
+    function articleText() {
+        var html = '';
+        try {
+            html = $('#contentEditor').summernote('code') || '';
+        } catch (e) {
+            html = document.getElementById('contentEditor').value || '';
+        }
+        html = html.replace(/<(script|style|figure|figcaption|table)[^>]*>[\s\S]*?<\/\1>/gi, ' ');
+        var tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function summarise(text) {
+        if (!text) return '';
+        if (text.length <= LIMIT) return text;
+
+        var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [];
+        var summary = '';
+        for (var i = 0; i < sentences.length; i++) {
+            var candidate = (summary ? summary + ' ' : '') + sentences[i].trim();
+            if (candidate.length > LIMIT) break;
+            summary = candidate;
+        }
+        if (summary) return summary;
+
+        var cut = text.slice(0, LIMIT);
+        var space = cut.lastIndexOf(' ');
+        if (space > LIMIT * 0.5) cut = cut.slice(0, space);
+        return cut.replace(/[ ,;:\-]+$/, '') + '…';
+    }
+
+    function updateCounter(generated) {
+        var len = field.value.trim().length;
+        counter.textContent = len + ' / ' + LIMIT;
+        counter.classList.toggle('over', len > LIMIT);
+
+        if (generated) {
+            hint.innerHTML = '<i class="fas fa-check-circle"></i> Written from your article content — edit it if you like.';
+            hint.classList.add('excerpt-auto');
+        } else if (!hint.dataset.reset && authorEdited) {
+            hint.textContent = 'Keep it under 200 characters for best display in news cards.';
+            hint.classList.remove('excerpt-auto');
+        }
+    }
+
+    function generate(force) {
+        var text = articleText();
+        if (!text) {
+            if (force) {
+                hint.textContent = 'Write the article first — there is no content to summarise yet.';
+                hint.classList.remove('excerpt-auto');
+            }
+            return;
+        }
+        field.value = summarise(text);
+        updateCounter(true);
+    }
+
+    // Manual trigger
+    if (button) {
+        button.addEventListener('click', function () {
+            generate(true);
+            authorEdited = true; // treat an explicit click as the author's choice
+        });
+    }
+
+    // Typing in the box marks it as hand-written
+    field.addEventListener('input', function () {
+        authorEdited = field.value.trim() !== '';
+        hint.classList.remove('excerpt-auto');
+        updateCounter(false);
+    });
+
+    // Auto-fill while the article is being written, as long as the author
+    // has not typed their own summary
+    $(document).on('summernote.blur summernote.change', function () {
+        if (!authorEdited) generate(false);
+    });
+
+    // Final catch on submit
+    var form = document.getElementById('articleForm');
+    if (form) {
+        form.addEventListener('submit', function () {
+            if (field.value.trim() === '') generate(false);
+        });
+    }
+
+    updateCounter(false);
+    // Seed a summary as soon as the page loads with content but no excerpt
+    if (!authorEdited) {
+        setTimeout(function () { generate(false); }, 400);
+    }
+})();
+
+// ── Article Gallery ──────────────────────────────────────────
+// Mark existing gallery images for deletion
+document.querySelectorAll('.gallery-delete input[type="checkbox"]').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+        this.closest('.gallery-item').classList.toggle('marked-delete', this.checked);
+    });
+});
+
+const galleryDropzone = document.getElementById('galleryDropzone');
+const galleryInput = document.getElementById('galleryInput');
+const galleryPreview = document.getElementById('galleryPreview');
+
+if (galleryDropzone && galleryInput && galleryPreview) {
+    // Keep captions typed by the user while files are added/removed
+    let captionValues = [];
+
+    function renderGalleryPreview() {
+        const files = Array.from(galleryInput.files || []);
+        galleryPreview.innerHTML = '';
+
+        files.forEach(function (file, index) {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML =
+                '<span class="gallery-new-badge">New</span>' +
+                '<div class="gallery-thumb">' +
+                    '<img alt="">' +
+                    '<span class="gallery-delete" title="Remove"><i class="fas fa-times"></i></span>' +
+                '</div>' +
+                '<input type="text" class="form-control gallery-caption" ' +
+                       'name="new_gallery_caption[' + index + ']" placeholder="Caption (optional)">';
+
+            const img = item.querySelector('img');
+            const reader = new FileReader();
+            reader.onload = function (e) { img.src = e.target.result; };
+            reader.readAsDataURL(file);
+
+            const caption = item.querySelector('.gallery-caption');
+            caption.value = captionValues[index] || '';
+            caption.addEventListener('input', function () {
+                captionValues[index] = this.value;
+            });
+
+            item.querySelector('.gallery-delete').addEventListener('click', function (e) {
+                e.stopPropagation();
+                removeGalleryFile(index);
+            });
+
+            galleryPreview.appendChild(item);
+        });
+    }
+
+    function setGalleryFiles(fileList) {
+        const dt = new DataTransfer();
+        fileList.forEach(function (f) { dt.items.add(f); });
+        galleryInput.files = dt.files;
+        renderGalleryPreview();
+    }
+
+    function removeGalleryFile(index) {
+        const files = Array.from(galleryInput.files || []);
+        files.splice(index, 1);
+        captionValues.splice(index, 1);
+        setGalleryFiles(files);
+    }
+
+    // Picking files through the file dialog replaces the current selection
+    galleryInput.addEventListener('change', function () {
+        captionValues = [];
+        renderGalleryPreview();
+    });
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function (name) {
+        galleryDropzone.addEventListener(name, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(function (name) {
+        galleryDropzone.addEventListener(name, function () {
+            galleryDropzone.style.borderColor = '#f26838';
+            galleryDropzone.style.backgroundColor = 'rgba(242,104,56,0.05)';
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(function (name) {
+        galleryDropzone.addEventListener(name, function () {
+            galleryDropzone.style.borderColor = '';
+            galleryDropzone.style.backgroundColor = '';
+        }, false);
+    });
+
+    galleryDropzone.addEventListener('drop', function (e) {
+        const dropped = Array.from(e.dataTransfer.files || []).filter(function (f) {
+            return f.type.indexOf('image/') === 0;
+        });
+        if (!dropped.length) return;
+        setGalleryFiles(Array.from(galleryInput.files || []).concat(dropped));
+    }, false);
 }
 
 // Form submission - Summernote content is auto-synced

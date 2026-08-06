@@ -2,6 +2,11 @@
 $page_title = "Valley View University";
 $active_page = "home";
 require_once 'includes/db_connect.php';
+require_once 'includes/slider_settings.php';
+
+// Hero slider timing (admin-controlled, see Manage Homepage → Hero Sliders)
+$slider_timing = vvu_slider_settings($pdo);
+$slider_default_ms = $slider_timing['interval_seconds'] * 1000;
 
 // Fetch CMS homepage content
 $cms_content = [];
@@ -50,7 +55,10 @@ include 'includes/header.php';
 
 <!-- SLIDER -->
 <section class="home-slider-section">
-    <div id="myCarousel" class="carousel" data-ride="carousel">
+    <div id="myCarousel" class="carousel" data-ride="carousel"
+         data-interval="<?php echo $slider_timing['autoplay'] ? (int)$slider_default_ms : 'false'; ?>"
+         data-pause="<?php echo $slider_timing['pause_on_hover'] ? 'hover' : 'false'; ?>"
+         data-wrap="true">
         <!-- Wrapper for slides -->
         <div class="carousel-inner">
             <?php 
@@ -64,7 +72,8 @@ include 'includes/header.php';
                 $hasButton3 = !empty($slider['button3_text']);
                 $hasContent = $hasTitle || $hasDescription || $hasButton1 || $hasButton2 || $hasButton3;
             ?>
-            <div class="item <?php echo $first ? 'active' : ''; ?><?php echo !$hasContent ? ' no-overlay' : ''; ?> pos-<?php echo strip_tags(!empty($slider['content_position']) ? $slider['content_position'] : 'middle-center'); ?>">
+            <div class="item <?php echo $first ? 'active' : ''; ?><?php echo !$hasContent ? ' no-overlay' : ''; ?> pos-<?php echo strip_tags(!empty($slider['content_position']) ? $slider['content_position'] : 'middle-center'); ?>"
+                 <?php if ($slider_timing['autoplay'] && !empty($slider['slide_interval'])): ?>data-interval="<?php echo (int)$slider['slide_interval'] * 1000; ?>"<?php endif; ?>>
                 <img src="<?php echo strip_tags($slider['image_url']); ?>" alt="">
                 <?php if ($hasContent): ?>
                 <div class="carousel-caption slider-con">
@@ -109,7 +118,32 @@ include 'includes/header.php';
 </section>
 
 <!-- DISCOVER MORE -->
-<section>
+<?php
+// Pick a contextual icon for each discover card based on its title
+function vvuDiscoverIcon($title) {
+    $map = [
+        'admission'  => 'fa-graduation-cap',
+        'academic'   => 'fa-book',
+        'student'    => 'fa-users',
+        'research'   => 'fa-flask',
+        'faculty'    => 'fa-user-circle',
+        'library'    => 'fa-university',
+        'campus'     => 'fa-map-marker',
+        'facilit'    => 'fa-map-marker',
+        'event'      => 'fa-calendar',
+        'news'       => 'fa-calendar',
+        'sport'      => 'fa-trophy',
+        'alumni'     => 'fa-handshake-o',
+        'contact'    => 'fa-envelope',
+    ];
+    $t = strtolower($title);
+    foreach ($map as $needle => $icon) {
+        if (strpos($t, $needle) !== false) return $icon;
+    }
+    return 'fa-compass';
+}
+?>
+<section class="vvu-discover">
     <div class="container com-sp pad-bot-70">
         <div class="row">
             <div class="con-title">
@@ -117,22 +151,255 @@ include 'includes/header.php';
                 <p><?php echo isset($sections['discover_more']) ? strip_tags($sections['discover_more']['section_subtitle']) : 'Explore Valley View University\'s comprehensive academic programs, vibrant student life, and cutting-edge research opportunities.'; ?></p>
             </div>
         </div>
-        <div class="row">
-            <div class="ed-course">
-                <?php foreach ($discover_cards as $card): ?>
-                <div class="col-md-3 col-sm-4 col-xs-12">
-                    <div class="ed-course-in">
-                        <a class="course-overlay" href="<?php echo strip_tags($card['link_url']); ?>">
-                            <img src="<?php echo strip_tags($card['image_url']); ?>" alt="">
-                            <span><?php echo strip_tags($card['title']); ?></span>
-                        </a>
-                    </div>
+        <div class="vvu-discover-grid">
+            <?php $d_i = 0; foreach ($discover_cards as $card): $d_i++; ?>
+            <a class="vvu-dcard" href="<?php echo strip_tags($card['link_url']); ?>" style="--d:<?php echo ($d_i % 4) * 90 + intval(($d_i - 1) / 4) * 60; ?>ms">
+                <div class="vvu-dcard-media">
+                    <img src="<?php echo strip_tags($card['image_url']); ?>" alt="<?php echo htmlspecialchars(strip_tags($card['title']), ENT_QUOTES); ?>" loading="lazy">
+                    <span class="vvu-dcard-scrim"></span>
+                    <span class="vvu-dcard-sheen"></span>
                 </div>
-                <?php endforeach; ?>
-            </div>
+                <div class="vvu-dcard-body">
+                    <span class="vvu-dcard-icon"><i class="fa <?php echo vvuDiscoverIcon($card['title']); ?>"></i></span>
+                    <h3 class="vvu-dcard-title"><?php echo strip_tags($card['title']); ?></h3>
+                    <span class="vvu-dcard-cta">Explore <i class="fa fa-long-arrow-right"></i></span>
+                </div>
+                <span class="vvu-dcard-ring"></span>
+            </a>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
+
+<style>
+/* ── Discover More (modern cards) ── */
+.vvu-discover {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 55%, #ffffff 100%);
+}
+.vvu-discover .con-title { margin-bottom: 45px; }
+
+.vvu-discover-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.vvu-dcard {
+    position: relative;
+    display: block;
+    height: 260px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #0b1c3a;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(12, 26, 60, 0.10);
+    transform: translateY(28px);
+    opacity: 0;
+    transition: transform .55s cubic-bezier(.2,.7,.3,1),
+                opacity .55s ease,
+                box-shadow .45s ease;
+    will-change: transform, opacity;
+}
+.vvu-dcard:hover,
+.vvu-dcard:focus { text-decoration: none; }
+
+/* Scroll reveal */
+.vvu-dcard.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: var(--d, 0ms);
+}
+
+.vvu-dcard-media {
+    position: absolute;
+    inset: 0;
+}
+.vvu-dcard-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transform: scale(1.02);
+    transition: transform 1.1s cubic-bezier(.2,.7,.3,1), filter .5s ease;
+}
+.vvu-dcard-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(4, 16, 40, 0) 30%, rgba(4, 16, 40, .55) 62%, rgba(3, 12, 32, .92) 100%),
+        linear-gradient(135deg, rgba(31, 44, 115, .45) 0%, rgba(31, 44, 115, 0) 60%);
+    transition: opacity .4s ease;
+}
+/* Diagonal light sweep on hover */
+.vvu-dcard-sheen {
+    position: absolute;
+    top: -60%;
+    left: -75%;
+    width: 45%;
+    height: 220%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.28) 50%, rgba(255,255,255,0) 100%);
+    transform: rotate(18deg);
+    opacity: 0;
+    pointer-events: none;
+}
+.vvu-dcard:hover .vvu-dcard-sheen {
+    opacity: 1;
+    animation: vvuSheen .9s ease forwards;
+}
+@keyframes vvuSheen {
+    from { left: -75%; }
+    to   { left: 130%; }
+}
+
+.vvu-dcard-body {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 22px 20px 20px;
+    z-index: 2;
+}
+.vvu-dcard-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .28);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 17px;
+    transform: translateY(6px);
+    opacity: .92;
+    transition: background .35s ease, transform .45s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease;
+}
+.vvu-dcard-title {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .3px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .35);
+}
+.vvu-dcard-cta {
+    display: block;
+    margin-top: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: #ffb692;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateY(8px);
+    transition: max-height .4s ease, opacity .35s ease, transform .45s cubic-bezier(.2,.7,.3,1);
+}
+.vvu-dcard-cta .fa { margin-left: 6px; transition: transform .35s ease; }
+
+/* Animated border ring */
+.vvu-dcard-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    border: 2px solid transparent;
+    pointer-events: none;
+    z-index: 3;
+    transition: border-color .4s ease, box-shadow .4s ease;
+}
+
+/* Hover / focus state */
+.vvu-dcard:hover,
+.vvu-dcard:focus-visible {
+    transform: translateY(-10px);
+    box-shadow: 0 22px 46px rgba(12, 26, 60, .28);
+}
+.vvu-dcard:hover .vvu-dcard-media img,
+.vvu-dcard:focus-visible .vvu-dcard-media img { transform: scale(1.12); }
+.vvu-dcard:hover .vvu-dcard-scrim,
+.vvu-dcard:focus-visible .vvu-dcard-scrim { opacity: .95; }
+.vvu-dcard:hover .vvu-dcard-icon,
+.vvu-dcard:focus-visible .vvu-dcard-icon {
+    background: #f26838;
+    border-color: #f26838;
+    transform: translateY(0);
+    box-shadow: 0 8px 20px rgba(242, 104, 56, .45);
+}
+.vvu-dcard:hover .vvu-dcard-cta,
+.vvu-dcard:focus-visible .vvu-dcard-cta {
+    max-height: 30px;
+    opacity: 1;
+    transform: translateY(0);
+}
+.vvu-dcard:hover .vvu-dcard-cta .fa { transform: translateX(5px); }
+.vvu-dcard:hover .vvu-dcard-ring,
+.vvu-dcard:focus-visible .vvu-dcard-ring {
+    border-color: rgba(242, 104, 56, .85);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12);
+}
+.vvu-dcard:focus-visible { outline: none; }
+
+/* Make the first card a wide feature tile on large screens */
+@media (min-width: 1200px) {
+    .vvu-dcard:first-child { grid-column: span 2; }
+    .vvu-dcard:first-child .vvu-dcard-title { font-size: 24px; }
+    .vvu-dcard:first-child .vvu-dcard-icon { width: 48px; height: 48px; font-size: 19px; }
+}
+
+@media (max-width: 1199px) {
+    .vvu-discover-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+    .vvu-discover-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .vvu-dcard { height: 210px; }
+}
+@media (max-width: 480px) {
+    .vvu-discover-grid { gap: 14px; }
+    .vvu-dcard { height: 170px; border-radius: 14px; }
+    .vvu-dcard-body { padding: 14px 13px 13px; }
+    .vvu-dcard-icon { width: 34px; height: 34px; font-size: 14px; margin-bottom: 8px; border-radius: 10px; }
+    .vvu-dcard-title { font-size: 14px; }
+    .vvu-dcard-cta { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vvu-dcard,
+    .vvu-dcard-media img,
+    .vvu-dcard-icon,
+    .vvu-dcard-cta { transition: none !important; }
+    .vvu-dcard { opacity: 1; transform: none; }
+    .vvu-dcard:hover { transform: none; }
+    .vvu-dcard-sheen { display: none; }
+}
+</style>
+
+<script>
+// Staggered scroll reveal for the Discover More cards
+document.addEventListener('DOMContentLoaded', function () {
+    var cards = document.querySelectorAll('.vvu-dcard');
+    if (!cards.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+        cards.forEach(function (c) { c.classList.add('is-visible'); });
+        return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                io.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+    cards.forEach(function (c) { io.observe(c); });
+});
+</script>
 
 <!-- STATS BANNER -->
 <?php if ($stats_banner): ?>

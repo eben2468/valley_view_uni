@@ -83,6 +83,219 @@ include 'includes/header.php';
     .pdf-icon-bg {
         background: linear-gradient(135deg, #ef4444, #b91c1c);
     }
+
+    /* ======================================================================
+       OFFICIAL ADMISSION LISTS — section redesign
+       Scoped under .pal-scope. Note: bootstrap.css sets html{font-size:10px},
+       so this block uses px throughout rather than rem.
+       ====================================================================== */
+    .pal-scope {
+        --pal-ink:       #0f172a;
+        --pal-ink-soft:  #475569;
+        --pal-ink-muted: #64748b;
+        --pal-surface:   #ffffff;
+        --pal-canvas:    #f6f8fb;
+        --pal-line:      #e2e8f0;
+        --pal-brand:     #1d4ed8;
+        --pal-brand-ink: #ffffff;
+        --pal-pdf:       #c02626;
+        --pal-pdf-tint:  #fdeceb;
+        --pal-shadow:    0 1px 2px rgba(15, 23, 42, .04), 0 14px 30px -18px rgba(15, 23, 42, .3);
+        --pal-shadow-lg: 0 2px 4px rgba(15, 23, 42, .04), 0 34px 64px -30px rgba(15, 23, 42, .36);
+        font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: var(--pal-ink);
+    }
+    /* The global stylesheet hard-codes 15px/#636363 on p, li, a and span.
+       :where() keeps this reset at zero specificity so every rule below wins. */
+    .pal-scope :where(p, li, a, span, dt, dd) {
+        font-size: inherit; line-height: inherit; color: inherit; font-weight: inherit;
+    }
+    .dark .pal-scope {
+        --pal-ink:       #f1f5f9;
+        --pal-ink-soft:  #cbd5e1;
+        --pal-ink-muted: #94a3b8;
+        --pal-surface:   #111a2e;
+        --pal-canvas:    #0b1220;
+        --pal-line:      #23304a;
+        --pal-brand:     #93b4fd;
+        --pal-brand-ink: #0b1220;
+        --pal-pdf:       #fca5a5;
+        --pal-pdf-tint:  rgba(252, 165, 165, .14);
+        --pal-shadow:    0 1px 2px rgba(0, 0, 0, .4), 0 14px 30px -18px rgba(0, 0, 0, .7);
+        --pal-shadow-lg: 0 2px 4px rgba(0, 0, 0, .4), 0 34px 64px -30px rgba(0, 0, 0, .8);
+    }
+    @media (prefers-color-scheme: dark) {
+        html:not(.light) .pal-scope {
+            --pal-ink:       #f1f5f9;
+            --pal-ink-soft:  #cbd5e1;
+            --pal-ink-muted: #94a3b8;
+            --pal-surface:   #111a2e;
+            --pal-canvas:    #0b1220;
+            --pal-line:      #23304a;
+            --pal-brand:     #93b4fd;
+            --pal-brand-ink: #0b1220;
+            --pal-pdf:       #fca5a5;
+            --pal-pdf-tint:  rgba(252, 165, 165, .14);
+        }
+    }
+
+    .pal-shell {
+        width: 100%;
+        /* 100vw guard: the legacy layout can be wider than the viewport on
+           small screens — this section must not follow it. */
+        max-width: min(1240px, 100vw);
+        margin-inline: auto;
+        padding-inline: clamp(16px, 4vw, 40px);
+    }
+    /* The section is a full-bleed band that follows the hero — no overlapping
+       floating panel, so nothing sits on top of the hero image. */
+    .pal-band {
+        background: var(--pal-canvas);
+        border-bottom: 1px solid var(--pal-line);
+        padding-block: clamp(56px, 8vw, 104px);
+    }
+
+    /* ---------- Section header ---------- */
+    .pal-head {
+        display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+        gap: 24px;
+        padding-bottom: 28px;
+        margin-bottom: clamp(28px, 4vw, 44px);
+        border-bottom: 1px solid var(--pal-line);
+    }
+    .pal-head-text { flex: 1 1 420px; min-width: 0; max-width: 720px; }
+    .pal-eyebrow {
+        display: inline-flex; align-items: center; gap: 9px;
+        font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+        color: var(--pal-brand);
+        padding: 7px 14px; border-radius: 999px;
+        background: color-mix(in srgb, var(--pal-brand) 10%, transparent);
+        border: 1px solid color-mix(in srgb, var(--pal-brand) 22%, transparent);
+    }
+    .pal-eyebrow .material-symbols-outlined { font-size: 17px; }
+    .pal-scope .pal-head-text h2 {
+        margin: 20px 0 0;
+        font-size: clamp(21px, 2.4vw, 30px);
+        line-height: 1.25; letter-spacing: -.015em; font-weight: 600;
+        color: var(--pal-ink);
+    }
+    .pal-head-meta {
+        flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px;
+        text-align: right; font-size: 14px; color: var(--pal-ink-muted);
+    }
+    .pal-head-meta strong { color: var(--pal-ink); font-weight: 700; }
+    @media (max-width: 640px) { .pal-head-meta { text-align: left; } }
+
+    /* ---------- Grid ---------- */
+    .pal-grid { display: grid; gap: 24px; grid-template-columns: 1fr; }
+    @media (min-width: 700px) {
+        .pal-grid.pal-cols-2, .pal-grid.pal-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1100px) {
+        .pal-grid.pal-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    /* ---------- List card ---------- */
+    .pal-card {
+        display: flex; flex-direction: column;
+        padding: clamp(22px, 2.4vw, 30px);
+        background: var(--pal-surface);
+        border: 1px solid var(--pal-line);
+        border-radius: 22px;
+        box-shadow: var(--pal-shadow);
+        transition: transform .28s cubic-bezier(.4,0,.2,1), box-shadow .28s ease, border-color .28s ease;
+    }
+    .pal-card:hover, .pal-card:focus-within {
+        transform: translateY(-4px);
+        border-color: color-mix(in srgb, var(--pal-brand) 35%, transparent);
+        box-shadow: var(--pal-shadow-lg);
+    }
+    .pal-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    .pal-filetype {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 7px 12px 7px 8px; border-radius: 12px;
+        background: var(--pal-pdf-tint); color: var(--pal-pdf);
+        font-size: 12px; font-weight: 800; letter-spacing: .1em;
+    }
+    .pal-filetype .material-symbols-outlined { font-size: 20px; }
+    .pal-tag {
+        padding: 6px 12px; border-radius: 999px;
+        background: color-mix(in srgb, var(--pal-brand) 10%, transparent);
+        color: var(--pal-brand);
+        font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    }
+    .pal-scope .pal-card h3 {
+        margin: 0;
+        font-size: clamp(19px, 1.6vw, 22px);
+        line-height: 1.3; letter-spacing: -.02em; font-weight: 700;
+        color: var(--pal-ink);
+    }
+    .pal-scope .pal-card p {
+        margin: 10px 0 0;
+        font-size: 15px; line-height: 1.65; color: var(--pal-ink-soft);
+    }
+    .pal-meta {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+        margin: 18px 0 0;
+        font-size: 13px; color: var(--pal-ink-muted);
+    }
+    .pal-meta .sep { opacity: .5; }
+
+    /* ---------- Actions ---------- */
+    .pal-actions {
+        margin-top: auto; padding-top: 22px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .pal-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        height: 44px; padding: 0 18px; border-radius: 12px;
+        font-size: 15px; font-weight: 700; letter-spacing: -.01em;
+        text-decoration: none; white-space: nowrap;
+        transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+    }
+    .pal-btn .material-symbols-outlined { font-size: 20px; }
+    .pal-btn-primary { flex: 1 1 auto; background: var(--pal-brand); color: var(--pal-brand-ink); }
+    .pal-btn-primary:hover, .pal-btn-primary:focus-visible {
+        background: color-mix(in srgb, var(--pal-brand) 84%, #000);
+        color: var(--pal-brand-ink);
+    }
+    .pal-btn-ghost {
+        width: 44px; padding: 0;
+        background: var(--pal-canvas); color: var(--pal-ink-soft);
+        border: 1px solid var(--pal-line);
+    }
+    .pal-btn-ghost:hover, .pal-btn-ghost:focus-visible {
+        color: var(--pal-brand);
+        border-color: color-mix(in srgb, var(--pal-brand) 40%, transparent);
+    }
+    .pal-pending {
+        margin-top: auto; padding-top: 22px;
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: 14px; font-weight: 600; color: var(--pal-ink-muted);
+    }
+    .pal-pending .material-symbols-outlined { font-size: 19px; }
+
+    /* ---------- Empty state ---------- */
+    .pal-empty {
+        grid-column: 1 / -1;
+        display: flex; flex-direction: column; align-items: center; text-align: center;
+        padding: clamp(40px, 6vw, 72px) 24px;
+        border: 1px dashed var(--pal-line); border-radius: 22px;
+        background: var(--pal-surface);
+    }
+    .pal-empty .material-symbols-outlined { font-size: 44px; color: var(--pal-ink-muted); margin-bottom: 14px; }
+    .pal-scope .pal-empty h3 { margin: 0; font-size: 19px; font-weight: 700; color: var(--pal-ink); }
+    .pal-scope .pal-empty p { margin: 8px 0 0; font-size: 15px; color: var(--pal-ink-soft); }
+
+    /* ---------- Shared a11y ---------- */
+    .pal-scope a:focus-visible {
+        outline: 2px solid var(--pal-brand);
+        outline-offset: 3px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .pal-scope * { transition: none !important; animation: none !important; }
+        .pal-card:hover { transform: none; }
+    }
 </style>
 
 <main class="flex-grow bg-gray-50 dark:bg-gray-900">
@@ -120,60 +333,110 @@ include 'includes/header.php';
     <!-- Content Sections -->
     <?php foreach ($page_sections as $section): ?>
     <?php if ($section['section_key'] === 'official_lists'): ?>
-        <section class="py-24 relative z-20 -mt-16">
-            <div class="container">
-                <div class="bg-white dark:bg-gray-800 rounded-[3rem] shadow-2xl overflow-hidden p-10 md:p-16 border border-gray-100 dark:border-gray-700">
-                    <div class="max-w-4xl mx-auto text-center mb-16 px-4">
-                        <div class="inline-flex items-center gap-4 px-6 py-2.5 mb-8 rounded-2xl bg-gradient-to-r from-blue-700 to-blue-500 shadow-xl text-white mx-auto">
-                            <span class="material-symbols-outlined text-2xl text-white">description</span>
-                            <span class="text-base font-black uppercase tracking-[0.2em] text-white"><?php echo strip_tags($section['section_title']); ?></span>
-                        </div>
-                        <h2 class="text-4xl md:text-6xl font-black text-gray-900 dark:text-white mb-8 tracking-tight">
-                            <?php echo strip_tags($section['section_subtitle'] ?? 'Admission Documents'); ?>
-                        </h2>
-                        <div class="h-2 w-24 bg-blue-600 mx-auto rounded-full mb-8"></div>
-                    </div>
+        <?php
+        $list_items = $items_map['official_lists'] ?? [];
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        <?php 
-                        $list_items = $items_map['official_lists'] ?? [];
-                        if (empty($list_items)):
-                        ?>
-                            <div class="col-span-full text-center py-20 bg-gray-50 dark:bg-gray-900/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-                                <span class="material-symbols-outlined text-7xl text-gray-300 dark:text-gray-600 mb-6">description</span>
-                                <h3 class="text-2xl font-bold text-gray-500 dark:text-gray-400"><?php echo strip_tags($page_data['empty_list_message'] ?: 'No admission lists published yet.'); ?></h3>
-                            </div>
-                        <?php else: ?>
-                            <?php foreach ($list_items as $item): ?>
-                                <div class="list-card group bg-gray-50 dark:bg-gray-900 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800">
-                                    <div class="flex flex-col h-full">
-                                        <div class="w-16 h-16 rounded-2xl pdf-icon-bg flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform">
-                                            <span class="material-symbols-outlined text-3xl text-white" style="color: white !important;">picture_as_pdf</span>
-                                        </div>
-                                        <div class="mb-4">
-                                            <span class="px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-bold uppercase tracking-wider mb-3 inline-block">
-                                                <?php echo strip_tags($item['item_stat_value'] ?? 'PDF'); ?>
-                                            </span>
-                                            <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 transition-colors">
-                                                <?php echo strip_tags($item['item_title']); ?>
-                                            </h3>
-                                            <p class="text-lg text-gray-600 dark:text-gray-400 font-medium leading-relaxed line-clamp-3">
-                                                <?php echo strip_tags($item['item_description']); ?>
-                                            </p>
-                                        </div>
-                                        <div class="mt-auto pt-6 border-t border-gray-200 dark:border-gray-800">
-                                            <a href="<?php echo strip_tags($item['item_link']); ?>" target="_blank" class="flex items-center justify-between w-full group/btn">
-                                                <span class="text-lg font-bold text-blue-600 dark:text-blue-400">View List</span>
-                                                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white group-hover/btn:translate-x-2 transition-transform shadow-md">
-                                                    <span class="material-symbols-outlined text-xl">arrow_forward</span>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
+        /** Human-readable file size, or null when the file isn't on disk. */
+        $pal_filesize = function ($path) {
+            $path = ltrim((string)$path, '/');
+            if ($path === '' || !is_file(__DIR__ . '/' . $path)) return null;
+            $bytes = filesize(__DIR__ . '/' . $path);
+            if ($bytes === false) return null;
+            $units = ['B', 'KB', 'MB', 'GB'];
+            $i = 0;
+            while ($bytes >= 1024 && $i < count($units) - 1) { $bytes /= 1024; $i++; }
+            return round($bytes, ($i > 0 && $bytes < 100) ? 1 : 0) . ' ' . $units[$i];
+        };
+
+        // Most recently updated list — shown as the section's freshness stamp.
+        $pal_latest = null;
+        foreach ($list_items as $it) {
+            $ts = strtotime((string)($it['updated_at'] ?? ''));
+            if ($ts && (!$pal_latest || $ts > $pal_latest)) $pal_latest = $ts;
+        }
+        $pal_cols = max(1, min(count($list_items), 3));
+        ?>
+        <section class="pal-scope pal-band">
+            <div class="pal-shell">
+                <header class="pal-head">
+                    <div class="pal-head-text">
+                        <span class="pal-eyebrow">
+                            <span class="material-symbols-outlined" aria-hidden="true">description</span>
+                            <?php echo strip_tags($section['section_title']); ?>
+                        </span>
+                        <h2><?php echo strip_tags($section['section_subtitle'] ?? 'Admission Documents'); ?></h2>
+                    </div>
+                    <?php if ($list_items): ?>
+                    <div class="pal-head-meta">
+                        <span><strong><?php echo count($list_items); ?></strong> <?php echo count($list_items) === 1 ? 'list' : 'lists'; ?> published</span>
+                        <?php if ($pal_latest): ?>
+                        <span>Last updated <?php echo date('j M Y', $pal_latest); ?></span>
                         <?php endif; ?>
                     </div>
+                    <?php endif; ?>
+                </header>
+
+                <div class="pal-grid pal-cols-<?php echo $pal_cols; ?>">
+                    <?php if (empty($list_items)): ?>
+                        <div class="pal-empty">
+                            <span class="material-symbols-outlined" aria-hidden="true">description</span>
+                            <h3><?php echo strip_tags($page_data['empty_list_message'] ?: 'No admission lists published yet.'); ?></h3>
+                            <p>Please check back here once results have been released.</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($list_items as $item): ?>
+                        <?php
+                            $link  = trim(strip_tags((string)($item['item_link'] ?? '')));
+                            $href  = str_replace(' ', '%20', $link);
+                            $size  = $pal_filesize($link);
+                            $ready = $link !== '' && $size !== null;   // file actually on disk
+                            $when  = strtotime((string)($item['updated_at'] ?? ''));
+                            $tag   = trim(strip_tags((string)($item['item_stat_value'] ?? '')));
+                        ?>
+                        <article class="pal-card">
+                            <div class="pal-card-top">
+                                <span class="pal-filetype">
+                                    <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                                    PDF
+                                </span>
+                                <?php if ($tag !== ''): ?>
+                                <span class="pal-tag"><?php echo $tag; ?></span>
+                                <?php endif; ?>
+                            </div>
+
+                            <h3><?php echo strip_tags($item['item_title']); ?></h3>
+                            <p><?php echo strip_tags($item['item_description']); ?></p>
+
+                            <p class="pal-meta">
+                                <?php if ($size !== null): ?>
+                                <span><?php echo $size; ?></span>
+                                <?php endif; ?>
+                                <?php if ($size !== null && $when): ?><span class="sep" aria-hidden="true">·</span><?php endif; ?>
+                                <?php if ($when): ?>
+                                <span>Updated <?php echo date('j M Y', $when); ?></span>
+                                <?php endif; ?>
+                            </p>
+
+                            <?php if ($ready): ?>
+                            <div class="pal-actions">
+                                <a class="pal-btn pal-btn-primary" href="<?php echo htmlspecialchars($href, ENT_QUOTES); ?>" target="_blank" rel="noopener">
+                                    View list
+                                    <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                                </a>
+                                <a class="pal-btn pal-btn-ghost" href="<?php echo htmlspecialchars($href, ENT_QUOTES); ?>" download
+                                   aria-label="Download <?php echo htmlspecialchars(strip_tags($item['item_title']), ENT_QUOTES); ?> (PDF<?php echo $size !== null ? ', ' . $size : ''; ?>)">
+                                    <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                                </a>
+                            </div>
+                            <?php else: ?>
+                            <p class="pal-pending">
+                                <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+                                Not yet available
+                            </p>
+                            <?php endif; ?>
+                        </article>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>

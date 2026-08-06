@@ -26,10 +26,27 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
         $img_stmt->execute([$delete_id]);
         $article = $img_stmt->fetch();
         
+        // Get gallery image paths before deleting (rows cascade with the article)
+        $gallery_files = [];
+        try {
+            $g_stmt = $pdo->prepare("SELECT image_path FROM news_article_images WHERE article_id = ?");
+            $g_stmt->execute([$delete_id]);
+            $gallery_files = $g_stmt->fetchAll(PDO::FETCH_COLUMN);
+        } catch (PDOException $e) {
+            // Gallery table may not exist yet
+        }
+
         // Delete the article
         $stmt = $pdo->prepare("DELETE FROM news_articles WHERE id = ?");
         $stmt->execute([$delete_id]);
-        
+
+        // Delete associated gallery images from disk
+        foreach ($gallery_files as $gallery_file) {
+            if (!empty($gallery_file) && file_exists('../' . $gallery_file)) {
+                unlink('../' . $gallery_file);
+            }
+        }
+
         // Delete associated image if it exists
         if ($article && !empty($article['featured_image']) && file_exists('../' . $article['featured_image'])) {
             unlink('../' . $article['featured_image']);

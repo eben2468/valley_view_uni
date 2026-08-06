@@ -1,11 +1,15 @@
 <?php
 require_once('../includes/db_connect.php');
+require_once('../includes/slider_settings.php');
 session_start();
 
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
     exit();
 }
+
+vvu_slider_install($pdo);
+$slider_timing = vvu_slider_settings($pdo);
 
 $action = $_GET['action'] ?? 'edit';
 $id = $_GET['id'] ?? null;
@@ -36,6 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $button3_link = $_POST['button3_link'] ?? '';
         $content_position = $_POST['content_position'] ?? 'middle-center';
         $display_order = $_POST['display_order'];
+        // Blank / 0 means "use the site-wide timing"
+        $slide_interval = trim($_POST['slide_interval'] ?? '');
+        $slide_interval = ($slide_interval === '' || (int)$slide_interval < 1)
+            ? null
+            : vvu_slider_clamp($slide_interval, 5);
         $is_active = isset($_POST['is_active']) ? 1 : 0;
         
         $image_url = $_POST['current_image'] ?? '';
@@ -75,11 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         if ($action === 'add') {
-            $stmt = $pdo->prepare("INSERT INTO homepage_sliders (image_url, title, highlight_text, description, button1_text, button1_link, button2_text, button2_link, button3_text, button3_link, content_position, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$image_url, $title, $highlight_text, $description, $button1_text, $button1_link, $button2_text, $button2_link, $button3_text, $button3_link, $content_position, $display_order, $is_active]);
+            $stmt = $pdo->prepare("INSERT INTO homepage_sliders (image_url, title, highlight_text, description, button1_text, button1_link, button2_text, button2_link, button3_text, button3_link, content_position, display_order, is_active, slide_interval) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$image_url, $title, $highlight_text, $description, $button1_text, $button1_link, $button2_text, $button2_link, $button3_text, $button3_link, $content_position, $display_order, $is_active, $slide_interval]);
         } else {
-            $stmt = $pdo->prepare("UPDATE homepage_sliders SET image_url=?, title=?, highlight_text=?, description=?, button1_text=?, button1_link=?, button2_text=?, button2_link=?, button3_text=?, button3_link=?, content_position=?, display_order=?, is_active=? WHERE id=?");
-            $stmt->execute([$image_url, $title, $highlight_text, $description, $button1_text, $button1_link, $button2_text, $button2_link, $button3_text, $button3_link, $content_position, $display_order, $is_active, $id]);
+            $stmt = $pdo->prepare("UPDATE homepage_sliders SET image_url=?, title=?, highlight_text=?, description=?, button1_text=?, button1_link=?, button2_text=?, button2_link=?, button3_text=?, button3_link=?, content_position=?, display_order=?, is_active=?, slide_interval=? WHERE id=?");
+            $stmt->execute([$image_url, $title, $highlight_text, $description, $button1_text, $button1_link, $button2_text, $button2_link, $button3_text, $button3_link, $content_position, $display_order, $is_active, $slide_interval, $id]);
         }
         
         header("Location: manage_homepage_content.php?tab=sliders&saved=1");
@@ -214,12 +223,27 @@ include 'sidebar.php';
                                 </div>
                                 
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label class="form-label">Display Order *</label>
-                                        <input type="number" name="display_order" class="form-control" 
+                                        <input type="number" name="display_order" class="form-control"
                                                value="<?php echo htmlspecialchars($slider['display_order'] ?? '1'); ?>" required>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Display Time</label>
+                                        <div class="input-group">
+                                            <input type="number" name="slide_interval" class="form-control"
+                                                   min="1" max="60" step="1"
+                                                   placeholder="<?php echo (int)$slider_timing['interval_seconds']; ?>"
+                                                   value="<?php echo !empty($slider['slide_interval']) ? (int)$slider['slide_interval'] : ''; ?>">
+                                            <span class="input-group-text">seconds</span>
+                                        </div>
+                                        <small class="text-muted">
+                                            Leave empty to use the site default
+                                            (<?php echo (int)$slider_timing['interval_seconds']; ?>s).
+                                            <a href="manage_homepage_content.php?tab=sliders">Change default</a>
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
                                         <label class="form-label">Status</label>
                                         <div class="form-check form-switch" style="padding-top: 8px;">
                                             <input class="form-check-input" type="checkbox" name="is_active" 

@@ -1,7 +1,30 @@
 <?php
+require_once('../includes/db_connect.php');
+require_once('../includes/slider_settings.php');
+
+// Make sure the slider timing table/column exist, then handle a save
+vvu_slider_install($pdo);
+$slider_timing_saved = false;
+$slider_timing_error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_slider_timing'])) {
+    try {
+        vvu_slider_save(
+            $pdo,
+            $_POST['interval_seconds'] ?? 5,
+            isset($_POST['pause_on_hover']),
+            isset($_POST['autoplay'])
+        );
+        $slider_timing_saved = true;
+    } catch (PDOException $e) {
+        $slider_timing_error = 'Could not save slider timing: ' . $e->getMessage();
+    }
+}
+
+$slider_timing = vvu_slider_settings($pdo);
+
 include 'header.php';
 include 'sidebar.php';
-require_once('../includes/db_connect.php');
 
 // Fetch all existing homepage content
 $sliders = $pdo->query("SELECT * FROM homepage_sliders ORDER BY display_order ASC")->fetchAll();
@@ -117,6 +140,84 @@ $stats = [
                             <div class="tab-content mt-4" id="contentTabContent">
                                 <!-- HERO SLIDERS TAB -->
                                 <div class="tab-pane fade show active" id="sliders" role="tabpanel">
+
+                                    <!-- ===== Slide timing ===== -->
+                                    <?php if ($slider_timing_saved): ?>
+                                    <div class="alert alert-success py-2">
+                                        <i class="fas fa-check-circle"></i> Slider timing saved &mdash; the homepage now changes slide every
+                                        <strong><?php echo (int)$slider_timing['interval_seconds']; ?> second<?php echo $slider_timing['interval_seconds'] == 1 ? '' : 's'; ?></strong>.
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($slider_timing_error): ?>
+                                    <div class="alert alert-danger py-2"><?php echo htmlspecialchars($slider_timing_error); ?></div>
+                                    <?php endif; ?>
+
+                                    <div class="slider-timing-panel mb-4">
+                                        <form method="POST" class="slider-timing-form">
+                                            <input type="hidden" name="save_slider_timing" value="1">
+
+                                            <div class="timing-head">
+                                                <div>
+                                                    <h6 class="mb-1"><i class="fas fa-stopwatch"></i> Slide Timing</h6>
+                                                    <p class="text-muted mb-0" style="font-size:13px;">
+                                                        How long each hero image stays on screen before the next one slides in.
+                                                    </p>
+                                                </div>
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-save"></i> Save timing
+                                                </button>
+                                            </div>
+
+                                            <div class="timing-body">
+                                                <div class="timing-control">
+                                                    <label for="intervalRange">Time per slide</label>
+                                                    <div class="timing-slider">
+                                                        <input type="range" id="intervalRange" min="2" max="30" step="1"
+                                                               value="<?php echo (int)$slider_timing['interval_seconds']; ?>">
+                                                        <div class="timing-value">
+                                                            <input type="number" name="interval_seconds" id="intervalNumber"
+                                                                   min="1" max="60" step="1"
+                                                                   value="<?php echo (int)$slider_timing['interval_seconds']; ?>">
+                                                            <span>seconds</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="timing-presets">
+                                                        <span>Quick set:</span>
+                                                        <button type="button" class="preset" data-seconds="3">3s</button>
+                                                        <button type="button" class="preset" data-seconds="5">5s</button>
+                                                        <button type="button" class="preset" data-seconds="8">8s</button>
+                                                        <button type="button" class="preset" data-seconds="12">12s</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="timing-toggles">
+                                                    <label class="timing-check">
+                                                        <input type="checkbox" name="autoplay" id="autoplayToggle"
+                                                               <?php echo $slider_timing['autoplay'] ? 'checked' : ''; ?>>
+                                                        <span>
+                                                            <strong>Change slides automatically</strong>
+                                                            <small>Turn off to let visitors move through the slides themselves.</small>
+                                                        </span>
+                                                    </label>
+                                                    <label class="timing-check">
+                                                        <input type="checkbox" name="pause_on_hover"
+                                                               <?php echo $slider_timing['pause_on_hover'] ? 'checked' : ''; ?>>
+                                                        <span>
+                                                            <strong>Pause while the mouse is over the slider</strong>
+                                                            <small>Gives people time to read a slide they stopped on.</small>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <p class="timing-note">
+                                                <i class="fas fa-info-circle"></i>
+                                                This is the default for every slide. To give one slide its own timing,
+                                                set <strong>Display time</strong> when editing that slide.
+                                            </p>
+                                        </form>
+                                    </div>
+
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h6>Hero Sliders</h6>
                                         <a href="edit_slider.php?action=add" class="btn btn-sm btn-primary">
@@ -131,6 +232,7 @@ $stats = [
                                                     <th>Title</th>
                                                     <th>Description</th>
                                                     <th>Position</th>
+                                                    <th>Display time</th>
                                                     <th>Status</th>
                                                     <th>Actions</th>
                                                 </tr>
@@ -142,6 +244,14 @@ $stats = [
                                                     <td><strong><?php echo htmlspecialchars($slider['title']); ?></strong></td>
                                                     <td><?php echo htmlspecialchars(substr($slider['description'], 0, 50)) . '...'; ?></td>
                                                     <td><span class="badge" style="background: #6f42c1;"><?php echo htmlspecialchars($slider['content_position'] ?? 'middle-center'); ?></span></td>
+                                                    <td>
+                                                        <?php $own = isset($slider['slide_interval']) ? (int)$slider['slide_interval'] : 0; ?>
+                                                        <?php if ($own > 0): ?>
+                                                            <span class="badge" style="background:#0d6efd;"><?php echo $own; ?>s</span>
+                                                        <?php else: ?>
+                                                            <span class="text-muted" style="font-size:12px;"><?php echo (int)$slider_timing['interval_seconds']; ?>s (default)</span>
+                                                        <?php endif; ?>
+                                                    </td>
                                                     <td>
                                                         <?php if ($slider['is_active']): ?>
                                                             <span class="badge badge-success">Active</span>
@@ -498,6 +608,182 @@ $stats = [
     </div>
 
     <style>
+    /* ===== Slide timing panel ===== */
+    .slider-timing-panel {
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+        border: 1px solid #e3e9f0;
+        border-radius: 12px;
+        padding: 20px 22px;
+    }
+
+    .timing-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding-bottom: 16px;
+        margin-bottom: 18px;
+        border-bottom: 1px solid #e3e9f0;
+    }
+
+    .timing-head h6 {
+        font-weight: 700;
+        color: #002147;
+    }
+
+    .timing-head h6 i {
+        color: #f26838;
+        margin-right: 6px;
+    }
+
+    .timing-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 26px;
+    }
+
+    .timing-control > label {
+        display: block;
+        font-weight: 600;
+        font-size: 13px;
+        color: #002147;
+        margin-bottom: 10px;
+    }
+
+    .timing-slider {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .timing-slider input[type="range"] {
+        flex: 1;
+        min-width: 0;
+        accent-color: #f26838;
+        height: 6px;
+        cursor: pointer;
+    }
+
+    .timing-value {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff;
+        border: 1px solid #d8e0ea;
+        border-radius: 8px;
+        padding: 6px 10px;
+        white-space: nowrap;
+    }
+
+    .timing-value input {
+        width: 52px;
+        border: none;
+        outline: none;
+        font-size: 18px;
+        font-weight: 700;
+        color: #002147;
+        text-align: center;
+    }
+
+    .timing-value span {
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+    .timing-presets {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+    .timing-presets .preset {
+        border: 1px solid #d8e0ea;
+        background: #fff;
+        border-radius: 20px;
+        padding: 3px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #002147;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+    .timing-presets .preset:hover,
+    .timing-presets .preset.is-current {
+        background: #f26838;
+        border-color: #f26838;
+        color: #fff;
+    }
+
+    .timing-toggles {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .timing-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        background: #fff;
+        border: 1px solid #e3e9f0;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .timing-check input {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        accent-color: #f26838;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .timing-check strong {
+        display: block;
+        font-size: 13.5px;
+        color: #002147;
+        font-weight: 600;
+    }
+
+    .timing-check small {
+        display: block;
+        font-size: 12px;
+        color: #6c757d;
+        line-height: 1.5;
+    }
+
+    .timing-note {
+        margin: 16px 0 0;
+        padding-top: 14px;
+        border-top: 1px dashed #dbe3ec;
+        font-size: 12.5px;
+        color: #6c757d;
+    }
+
+    .timing-note i {
+        color: #0d6efd;
+    }
+
+    .slider-timing-panel.is-off .timing-control {
+        opacity: .45;
+        pointer-events: none;
+    }
+
+    @media (max-width: 992px) {
+        .timing-body {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+    }
+
     .nav-tabs {
         border-bottom: 2px solid #e0e0e0;
     }
@@ -538,6 +824,48 @@ $stats = [
     </style>
 
     <script>
+    // ===== Slide timing: keep range, number box and presets in sync =====
+    document.addEventListener('DOMContentLoaded', function () {
+        var range = document.getElementById('intervalRange');
+        var number = document.getElementById('intervalNumber');
+        var autoplay = document.getElementById('autoplayToggle');
+        var panel = document.querySelector('.slider-timing-panel');
+        if (!range || !number) return;
+
+        function markPreset(value) {
+            document.querySelectorAll('.timing-presets .preset').forEach(function (b) {
+                b.classList.toggle('is-current', parseInt(b.dataset.seconds, 10) === value);
+            });
+        }
+
+        function apply(value, from) {
+            value = parseInt(value, 10);
+            if (isNaN(value)) return;
+            value = Math.min(60, Math.max(1, value));
+            if (from !== 'number') number.value = value;
+            // The range only covers 2–30; keep it at the nearest end otherwise
+            if (from !== 'range') range.value = Math.min(30, Math.max(2, value));
+            markPreset(value);
+        }
+
+        range.addEventListener('input', function () { apply(this.value, 'range'); });
+        number.addEventListener('input', function () { apply(this.value, 'number'); });
+
+        document.querySelectorAll('.timing-presets .preset').forEach(function (btn) {
+            btn.addEventListener('click', function () { apply(this.dataset.seconds, 'preset'); });
+        });
+
+        if (autoplay && panel) {
+            var reflectAutoplay = function () {
+                panel.classList.toggle('is-off', !autoplay.checked);
+            };
+            autoplay.addEventListener('change', reflectAutoplay);
+            reflectAutoplay();
+        }
+
+        markPreset(parseInt(number.value, 10));
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const activeTab = urlParams.get('tab');

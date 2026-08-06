@@ -51,8 +51,8 @@ try {
 // Fetch news articles
 try {
     $sql = "
-        SELECT id, title, slug, excerpt, featured_image, category, author, publish_date, event_date, event_time, event_location, is_featured
-        FROM news_articles 
+        SELECT id, title, slug, excerpt, featured_image, category, author, author_image, publish_date, event_date, event_time, event_location, is_featured
+        FROM news_articles
         WHERE $where_sql 
         ORDER BY is_featured DESC, publish_date DESC 
         LIMIT " . intval($items_per_page) . " OFFSET " . intval($offset);
@@ -69,10 +69,10 @@ $featured_article = null;
 if ($current_page === 1 && $category_filter === 'all' && empty($search_query)) {
     try {
         $featured_stmt = $pdo->prepare("
-            SELECT id, title, slug, excerpt, featured_image, category, publish_date
-            FROM news_articles 
+            SELECT id, title, slug, excerpt, content, featured_image, category, author, author_image, publish_date
+            FROM news_articles
             WHERE status = 'published' AND is_featured = 1
-            ORDER BY publish_date DESC 
+            ORDER BY publish_date DESC
             LIMIT 1
         ");
         $featured_stmt->execute();
@@ -129,252 +129,290 @@ function getArticleImage($image, $category) {
     return $defaults[$category] ?? $defaults['news'];
 }
 
+require_once 'includes/news_helpers.php';
 include 'includes/header.php';
 ?>
 
-<!-- News Portal CSS -->
-<link rel="stylesheet" href="css/news-portal.css">
+<!-- Newsroom styles -->
+<link rel="stylesheet" href="css/news-editorial.css">
+<script src="js/news-modern.js" defer></script>
 
 <!-- Main Content -->
-<main class="news-portal">
-    
-    <?php if ($featured_article): ?>
-    <!-- Hero Section with Featured Article -->
-    <section class="news-hero">
-        <div class="news-hero-bg" style="background-image: url('<?php echo strip_tags(getArticleImage($featured_article['featured_image'], $featured_article['category'])); ?>');"></div>
-        <div class="news-hero-overlay"></div>
-        <div class="news-hero-content">
-            <div class="container">
-                <div class="hero-badge" style="color: white !important;">
-                    <span class="badge-icon text-white" style="color: white !important;">
-                        <i class="fa fa-star text-white" style="color: white !important;"></i>
-                    </span>
-                    <span class="text-white" style="color: white !important;">Featured Story</span>
+<main class="ed-news">
+
+    <!-- ============ MASTHEAD ============ -->
+    <section class="ed-masthead">
+        <div class="container">
+            <div class="ed-masthead-inner">
+                <div>
+                    <span class="ed-eyebrow">VVU Newsroom</span>
+                    <h1>News &amp; Events</h1>
+                    <p>Stories from across the Valley View community &mdash; what we are learning,
+                       celebrating and building together.</p>
                 </div>
-                <span class="hero-category <?php echo getCategoryColor($featured_article['category']); ?>">
-                    <?php echo strip_tags($category_labels[$featured_article['category']] ?? $featured_article['category']); ?>
-                </span>
-                <h1 class="hero-title"><?php echo strip_tags($featured_article['title']); ?></h1>
-                <p class="hero-excerpt"><?php echo strip_tags($featured_article['excerpt']); ?></p>
-                <div class="hero-meta text-white" style="color: white !important;">
-                    <span class="hero-date text-white" style="color: white !important;">
-                        <i class="fa fa-calendar" style="color: white !important;"></i>
-                        <?php echo formatNewsDate($featured_article['publish_date']); ?>
-                    </span>
+                <div class="ed-masthead-stat">
+                    <strong><?php echo number_format($total_items); ?></strong>
+                    <span><?php echo ($category_filter !== 'all' || !empty($search_query)) ? 'Matching stories' : 'Stories published'; ?></span>
                 </div>
-                <a href="news_detail.php?slug=<?php echo urlencode($featured_article['slug']); ?>" class="hero-btn text-white" style="color: white !important;">
-                    <span class="text-white" style="color: white !important;">Read Full Story</span>
-                    <i class="fa fa-arrow-right text-white" style="color: white !important;"></i>
-                </a>
             </div>
         </div>
     </section>
-    <?php else: ?>
-    <!-- Alternative Hero when no featured article -->
-    <section class="news-hero news-hero-default">
-        <div class="news-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&q=80');"></div>
-        <div class="news-hero-overlay"></div>
-        <div class="news-hero-content">
-            <div class="container">
-                <h1 class="hero-title">News & Events</h1>
-                <p class="hero-excerpt">Stay updated with the latest happenings at Valley View University. Discover news, events, and announcements from across our campus community.</p>
+
+    <!-- ============ FEATURED STORY ============ -->
+    <?php if ($featured_article): ?>
+    <?php
+        $f_url = 'news_detail.php?slug=' . urlencode($featured_article['slug']);
+        $f_author = $featured_article['author'] ?: 'VVU Communications';
+    ?>
+    <section class="ed-featured">
+        <div class="container">
+            <div class="ed-featured-panel ed-rise">
+                <a class="ed-featured-media" href="<?php echo $f_url; ?>"
+                   aria-label="<?php echo htmlspecialchars($featured_article['title'], ENT_QUOTES); ?>">
+                    <img src="<?php echo strip_tags(getArticleImage($featured_article['featured_image'], $featured_article['category'])); ?>"
+                         alt="<?php echo htmlspecialchars($featured_article['title'], ENT_QUOTES); ?>">
+                    <span class="ed-flag"><i class="fa fa-star"></i> Featured</span>
+                </a>
+                <div class="ed-featured-body">
+                    <div class="ed-kicker">
+                        <span class="dot" style="background:<?php echo vvu_kicker_tone($featured_article['category']); ?>"></span>
+                        <strong><?php echo strip_tags($category_labels[$featured_article['category']] ?? $featured_article['category']); ?></strong>
+                        <span class="sep">/</span>
+                        <?php echo vvu_relative_date($featured_article['publish_date']); ?>
+                    </div>
+
+                    <h2 class="ed-featured-title">
+                        <a href="<?php echo $f_url; ?>"><?php echo strip_tags($featured_article['title']); ?></a>
+                    </h2>
+
+                    <p class="ed-featured-excerpt">
+                        <?php echo vvu_excerpt($featured_article['excerpt'], $featured_article['content'], 240); ?>
+                    </p>
+
+                    <div class="ed-featured-foot">
+                        <div class="ed-byline">
+                            <span class="ed-avatar" style="background:<?php echo vvu_avatar_tone($f_author); ?>">
+                                <?php if (!empty($featured_article['author_image'])): ?>
+                                <img src="<?php echo strip_tags($featured_article['author_image']); ?>" alt="">
+                                <?php else: ?>
+                                <?php echo vvu_initials($f_author); ?>
+                                <?php endif; ?>
+                            </span>
+                            <span class="ed-byline-text">
+                                <span class="ed-byline-name"><?php echo strip_tags($f_author); ?></span>
+                                <span class="ed-byline-meta">
+                                    <?php echo date('j F Y', strtotime($featured_article['publish_date'])); ?>
+                                    <span class="sep">&middot;</span>
+                                    <?php echo vvu_read_time($featured_article['content']); ?> min read
+                                </span>
+                            </span>
+                        </div>
+                        <a href="<?php echo $f_url; ?>" class="ed-btn">
+                            Read the full story <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
     <?php endif; ?>
 
-    <!-- Filters Section -->
-    <section class="news-filters">
+    <!-- ============ FILTER RAIL ============ -->
+    <section class="ed-rail">
         <div class="container">
-            <div class="filters-wrapper">
-                <div class="filters-categories">
-                    <a href="news_&_events.php" class="filter-btn <?php echo $category_filter === 'all' ? 'active' : ''; ?>">
-                        <i class="fa fa-th-large"></i>
-                        <span>All</span>
+            <div class="ed-rail-inner">
+                <div class="ed-tabs">
+                    <?php
+                    $tabs = ['all' => 'All Stories'] + $category_labels;
+                    foreach ($tabs as $key => $label):
+                        $href = $key === 'all' ? 'news_&_events.php' : '?category=' . urlencode($key);
+                    ?>
+                    <a href="<?php echo $href; ?>" class="ed-tab <?php echo $category_filter === $key ? 'is-active' : ''; ?>">
+                        <?php echo $label; ?>
                     </a>
-                    <a href="?category=news" class="filter-btn <?php echo $category_filter === 'news' ? 'active' : ''; ?>">
-                        <i class="fa fa-newspaper-o"></i>
-                        <span>News</span>
-                    </a>
-                    <a href="?category=events" class="filter-btn <?php echo $category_filter === 'events' ? 'active' : ''; ?>">
-                        <i class="fa fa-calendar"></i>
-                        <span>Events</span>
-                    </a>
-                    <a href="?category=announcements" class="filter-btn <?php echo $category_filter === 'announcements' ? 'active' : ''; ?>">
-                        <i class="fa fa-bullhorn"></i>
-                        <span>Announcements</span>
-                    </a>
-                    <a href="?category=press_releases" class="filter-btn <?php echo $category_filter === 'press_releases' ? 'active' : ''; ?>">
-                        <i class="fa fa-building"></i>
-                        <span>Press</span>
-                    </a>
-                    <a href="?category=academic" class="filter-btn <?php echo $category_filter === 'academic' ? 'active' : ''; ?>">
-                        <i class="fa fa-graduation-cap"></i>
-                        <span>Academic</span>
-                    </a>
+                    <?php endforeach; ?>
                 </div>
-                <div class="filters-search">
-                    <form action="" method="GET" class="search-form">
-                        <?php if ($category_filter !== 'all'): ?>
-                        <input type="hidden" name="category" value="<?php echo strip_tags($category_filter); ?>">
+
+                <form action="" method="GET" class="ed-search">
+                    <?php if ($category_filter !== 'all'): ?>
+                    <input type="hidden" name="category" value="<?php echo strip_tags($category_filter); ?>">
+                    <?php endif; ?>
+                    <div class="ed-search-field">
+                        <i class="fa fa-search"></i>
+                        <input type="text" name="search" placeholder="Search stories"
+                               value="<?php echo htmlspecialchars($search_query, ENT_QUOTES); ?>">
+                        <?php if (!empty($search_query)): ?>
+                        <a href="?<?php echo $category_filter !== 'all' ? 'category=' . urlencode($category_filter) : ''; ?>" class="ed-search-clear">
+                            <i class="fa fa-times"></i>
+                        </a>
                         <?php endif; ?>
-                        <div class="search-input-wrapper">
-                            <i class="fa fa-search"></i>
-                            <input type="text" name="search" placeholder="Search articles..." value="<?php echo strip_tags($search_query); ?>">
-                            <?php if (!empty($search_query)): ?>
-                            <a href="?<?php echo $category_filter !== 'all' ? 'category=' . urlencode($category_filter) : ''; ?>" class="search-clear">
-                                <i class="fa fa-times"></i>
-                            </a>
-                            <?php endif; ?>
-                        </div>
-                        <button type="submit" class="search-btn">Search</button>
-                    </form>
-                </div>
+                    </div>
+                    <button type="submit">Search</button>
+                </form>
             </div>
-            
-            <?php if (!empty($search_query)): ?>
-            <div class="search-results-info">
-                <p>Showing results for "<strong><?php echo strip_tags($search_query); ?></strong>" — <?php echo $total_items; ?> article<?php echo $total_items !== 1 ? 's' : ''; ?> found</p>
-            </div>
-            <?php endif; ?>
         </div>
     </section>
 
-    <!-- News Grid -->
-    <section class="news-grid-section">
+    <!-- ============ STORIES ============ -->
+    <section class="ed-section">
         <div class="container">
+            <?php if (!empty($search_query)): ?>
+            <p class="ed-result-note">
+                <?php echo $total_items; ?> result<?php echo $total_items !== 1 ? 's' : ''; ?>
+                for &ldquo;<strong><?php echo strip_tags($search_query); ?></strong>&rdquo;
+            </p>
+            <?php endif; ?>
+
             <?php if (empty($articles)): ?>
-            <div class="no-articles">
-                <div class="no-articles-icon">
-                    <i class="fa fa-newspaper-o"></i>
-                </div>
-                <h3>No Articles Found</h3>
-                <p>We couldn't find any articles matching your criteria. Try adjusting your filters or search terms.</p>
-                <a href="news_&_events.php" class="btn-primary">View All Articles</a>
+            <div class="ed-empty">
+                <i class="fa fa-newspaper-o"></i>
+                <h3>Nothing here yet</h3>
+                <p>We couldn&rsquo;t find any stories matching what you&rsquo;re looking for.
+                   Try a different category, or browse everything we&rsquo;ve published.</p>
+                <a href="news_&_events.php" class="ed-btn">Browse all stories</a>
             </div>
             <?php else: ?>
-            <div class="news-grid">
-                <?php foreach ($articles as $article): ?>
-                <article class="news-card">
-                    <a href="news_detail.php?slug=<?php echo urlencode($article['slug']); ?>" class="news-card-link">
-                        <div class="news-card-image">
-                            <img src="<?php echo strip_tags(getArticleImage($article['featured_image'], $article['category'])); ?>" 
-                                 alt="<?php echo strip_tags($article['title']); ?>"
-                                 loading="lazy">
-                            <div class="news-card-overlay"></div>
-                            <?php if ($article['is_featured']): ?>
-                            <span class="featured-badge">
-                                <i class="fa fa-star"></i> Featured
-                            </span>
+
+            <div class="ed-section-head">
+                <h2><?php
+                    if (!empty($search_query)) {
+                        echo 'Search Results';
+                    } elseif ($category_filter !== 'all') {
+                        echo strip_tags($category_labels[$category_filter] ?? 'Stories');
+                    } else {
+                        echo 'Latest Stories';
+                    }
+                ?></h2>
+                <span class="ed-count">Page <?php echo $current_page; ?> of <?php echo max(1, $total_pages); ?></span>
+            </div>
+
+            <div class="ed-grid">
+                <?php foreach ($articles as $index => $article): ?>
+                <?php
+                    $a_url = 'news_detail.php?slug=' . urlencode($article['slug']);
+                    $a_author = $article['author'] ?: 'VVU Communications';
+                    $is_event = ($article['category'] === 'events' || !empty($article['event_date']));
+                    $tile_date = !empty($article['event_date']) ? $article['event_date'] : $article['publish_date'];
+                    // First card runs full width when there is no featured panel above
+                    $wide = (!$featured_article && $index === 0);
+                ?>
+                <article class="ed-card ed-rise <?php echo $wide ? 'is-wide' : ''; ?>">
+                    <a class="ed-card-media" href="<?php echo $a_url; ?>" tabindex="-1" aria-hidden="true">
+                        <img src="<?php echo strip_tags(getArticleImage($article['featured_image'], $article['category'])); ?>"
+                             alt="" loading="lazy">
+                        <?php if ($is_event): ?>
+                        <span class="ed-datetile">
+                            <span class="m"><?php echo date('M', strtotime($tile_date)); ?></span>
+                            <span class="d"><?php echo date('j', strtotime($tile_date)); ?></span>
+                        </span>
+                        <?php elseif ($article['is_featured']): ?>
+                        <span class="ed-flag"><i class="fa fa-star"></i> Featured</span>
+                        <?php endif; ?>
+                    </a>
+
+                    <div class="ed-card-body">
+                        <div class="ed-kicker">
+                            <span class="dot" style="background:<?php echo vvu_kicker_tone($article['category']); ?>"></span>
+                            <strong><?php echo strip_tags($category_labels[$article['category']] ?? $article['category']); ?></strong>
+                            <span class="sep">/</span>
+                            <?php echo vvu_relative_date($article['publish_date']); ?>
+                        </div>
+
+                        <h3 class="ed-card-title">
+                            <a href="<?php echo $a_url; ?>"><?php echo strip_tags($article['title']); ?></a>
+                        </h3>
+
+                        <?php if ($is_event && !empty($article['event_location'])): ?>
+                        <div class="ed-card-where">
+                            <i class="fa fa-map-marker"></i>
+                            <?php echo strip_tags($article['event_location']); ?>
+                            <?php if (!empty($article['event_time'])): ?>
+                            <span class="sep">&middot;</span> <?php echo date('g:i A', strtotime($article['event_time'])); ?>
                             <?php endif; ?>
                         </div>
-                        <div class="news-card-content">
-                            <span class="news-card-category <?php echo getCategoryColor($article['category']); ?>">
-                                <?php echo strip_tags($category_labels[$article['category']] ?? $article['category']); ?>
-                            </span>
-                            <h3 class="news-card-title"><?php echo strip_tags($article['title']); ?></h3>
-                            <p class="news-card-excerpt"><?php echo strip_tags($article['excerpt']); ?></p>
-                            <div class="news-card-meta">
-                                <span class="news-card-date">
-                                    <i class="fa fa-calendar-o"></i>
-                                    <?php echo formatNewsDate($article['event_date'] ?? $article['publish_date'], $article['event_time']); ?>
-                                </span>
-                                <?php if (!empty($article['event_location'])): ?>
-                                <span class="news-card-location">
-                                    <i class="fa fa-map-marker"></i>
-                                    <?php echo strip_tags($article['event_location']); ?>
-                                </span>
+                        <?php endif; ?>
+
+                        <p class="ed-card-excerpt"><?php echo vvu_excerpt($article['excerpt'], '', $wide ? 220 : 130); ?></p>
+
+                        <div class="ed-card-foot">
+                            <span class="ed-avatar sm" style="background:<?php echo vvu_avatar_tone($a_author); ?>">
+                                <?php if (!empty($article['author_image'])): ?>
+                                <img src="<?php echo strip_tags($article['author_image']); ?>" alt="">
+                                <?php else: ?>
+                                <?php echo vvu_initials($a_author); ?>
                                 <?php endif; ?>
-                            </div>
-                            <span class="read-more">
-                                Read More <i class="fa fa-arrow-right"></i>
                             </span>
+                            <span class="ed-byline-meta"><?php echo strip_tags($a_author); ?></span>
                         </div>
-                    </a>
+                    </div>
                 </article>
                 <?php endforeach; ?>
             </div>
-            
+
             <?php if ($total_pages > 1): ?>
-            <!-- Pagination -->
-            <nav class="news-pagination" aria-label="News pagination">
-                <?php
-                $base_url = 'news_&_events.php?';
-                $url_params = [];
-                if ($category_filter !== 'all') $url_params[] = 'category=' . urlencode($category_filter);
-                if (!empty($search_query)) $url_params[] = 'search=' . urlencode($search_query);
-                $base_url .= implode('&', $url_params) . (count($url_params) > 0 ? '&' : '');
-                ?>
-                
+            <?php
+            $base_url = 'news_&_events.php?';
+            $url_params = [];
+            if ($category_filter !== 'all') $url_params[] = 'category=' . urlencode($category_filter);
+            if (!empty($search_query)) $url_params[] = 'search=' . urlencode($search_query);
+            $base_url .= implode('&', $url_params) . (count($url_params) > 0 ? '&' : '');
+            $start_page = max(1, $current_page - 2);
+            $end_page = min($total_pages, $current_page + 2);
+            ?>
+            <div class="ed-pagination">
                 <?php if ($current_page > 1): ?>
-                <a href="<?php echo $base_url . 'page=' . ($current_page - 1); ?>" class="pagination-btn pagination-prev">
-                    <i class="fa fa-chevron-left"></i>
-                    <span>Previous</span>
+                <a href="<?php echo $base_url . 'page=' . ($current_page - 1); ?>" class="ed-page-arrow">
+                    <i class="fa fa-chevron-left"></i> Previous
                 </a>
                 <?php endif; ?>
-                
-                <div class="pagination-numbers">
-                    <?php
-                    $start_page = max(1, $current_page - 2);
-                    $end_page = min($total_pages, $current_page + 2);
-                    
-                    if ($start_page > 1): ?>
-                    <a href="<?php echo $base_url . 'page=1'; ?>" class="pagination-num">1</a>
-                    <?php if ($start_page > 2): ?>
-                    <span class="pagination-ellipsis">...</span>
-                    <?php endif; ?>
-                    <?php endif; ?>
-                    
-                    <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
-                    <a href="<?php echo $base_url . 'page=' . $i; ?>" class="pagination-num <?php echo $i === $current_page ? 'active' : ''; ?>">
-                        <?php echo $i; ?>
-                    </a>
-                    <?php endfor; ?>
-                    
-                    <?php if ($end_page < $total_pages): ?>
-                    <?php if ($end_page < $total_pages - 1): ?>
-                    <span class="pagination-ellipsis">...</span>
-                    <?php endif; ?>
-                    <a href="<?php echo $base_url . 'page=' . $total_pages; ?>" class="pagination-num"><?php echo $total_pages; ?></a>
-                    <?php endif; ?>
-                </div>
-                
+
+                <?php if ($start_page > 1): ?>
+                <a href="<?php echo $base_url; ?>page=1" class="ed-page">1</a>
+                <?php if ($start_page > 2): ?><span class="ed-page-gap">&hellip;</span><?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                <a href="<?php echo $base_url . 'page=' . $i; ?>" class="ed-page <?php echo $i === $current_page ? 'is-active' : ''; ?>">
+                    <?php echo $i; ?>
+                </a>
+                <?php endfor; ?>
+
+                <?php if ($end_page < $total_pages): ?>
+                <?php if ($end_page < $total_pages - 1): ?><span class="ed-page-gap">&hellip;</span><?php endif; ?>
+                <a href="<?php echo $base_url . 'page=' . $total_pages; ?>" class="ed-page"><?php echo $total_pages; ?></a>
+                <?php endif; ?>
+
                 <?php if ($current_page < $total_pages): ?>
-                <a href="<?php echo $base_url . 'page=' . ($current_page + 1); ?>" class="pagination-btn pagination-next">
-                    <span>Next</span>
-                    <i class="fa fa-chevron-right"></i>
+                <a href="<?php echo $base_url . 'page=' . ($current_page + 1); ?>" class="ed-page-arrow">
+                    Next <i class="fa fa-chevron-right"></i>
                 </a>
                 <?php endif; ?>
-            </nav>
+            </div>
             <?php endif; ?>
-            
+
             <?php endif; ?>
         </div>
     </section>
 
-    <!-- Newsletter Section -->
-    <section class="news-newsletter">
+    <!-- ============ SUBSCRIBE ============ -->
+    <section class="ed-subscribe">
         <div class="container">
-            <div class="newsletter-wrapper">
-                <div class="newsletter-content">
-                    <div class="newsletter-icon">
-                        <i class="fa fa-envelope-open"></i>
-                    </div>
-                    <h2>Stay Informed</h2>
-                    <p>Subscribe to our newsletter to receive the latest news and updates from Valley View University directly in your inbox.</p>
+            <div class="ed-subscribe-inner">
+                <div>
+                    <h2>Get the newsroom in your inbox</h2>
+                    <p>A short note each month with the stories, events and milestones
+                       from around campus. No noise &mdash; just what matters.</p>
                 </div>
-                <form class="newsletter-form" action="#" method="POST">
-                    <input type="email" name="email" placeholder="Enter your email address" required>
-                    <button type="submit">
-                        <span>Subscribe</span>
-                        <i class="fa fa-paper-plane"></i>
-                    </button>
+                <form action="#" method="POST">
+                    <input type="email" name="email" placeholder="your.name@email.com" required>
+                    <button type="submit">Subscribe</button>
                 </form>
             </div>
         </div>
     </section>
 
 </main>
+
 
 <!-- Back to Top -->
 <button class="back-to-top" id="backToTop" title="Go to top">

@@ -14,7 +14,15 @@ $quick_access_nav = getNavItems($pdo, 'quickaccess');
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title><?php echo isset($page_title) ? $page_title : "Valley View University"; ?></title>
-    
+
+    <!-- FAVICON (VVU mark, cropped tight so it fills the tab tile) -->
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <meta name="theme-color" content="#002147">
+
     <!-- GOOGLE FONT -->
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Inter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <!-- FONTAWESOME ICONS -->
