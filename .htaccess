@@ -1,0 +1,42 @@
+# Valley View University — upload limits
+#
+# Raises the request-size limits that cause "413 Request Entity Too Large"
+# when uploading images through the admin panel.
+#
+# The php_value blocks are wrapped in <IfModule> guards on purpose: on hosts
+# running PHP as CGI/FastCGI, an unguarded php_value in .htaccess causes an
+# immediate HTTP 500 for the whole site. The guards make this file safe to
+# deploy anywhere — where the directives don't apply, .user.ini covers it.
+
+# --- PHP limits (only when PHP runs as an Apache module) ---
+<IfModule mod_php.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 72M
+    php_value memory_limit 256M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 72M
+    php_value memory_limit 256M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
+<IfModule mod_php5.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 72M
+    php_value memory_limit 256M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
+# --- Apache's own request body cap ---
+# Apache defaults to unlimited, so this is rarely the cause. Uncomment ONLY if
+# uploads still fail after the above. <IfModule> cannot guard it: if the host's
+# AllowOverride excludes "Limit", Apache returns HTTP 500 for the entire site,
+# so test immediately after enabling it.
+#
+# LimitRequestBody 78643200

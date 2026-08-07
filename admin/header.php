@@ -41,6 +41,9 @@ require_once('../includes/db_connect.php');
     <!-- CUSTOM ADMIN CSS -->
     <link href="admin-styles.css?v=1.3" rel="stylesheet" />
     <link href="admin-modern.css?v=1.3" rel="stylesheet" />
+    <!-- Shrinks oversized photos in the browser so uploads can't trip the
+         server's request-size limit (HTTP 413) -->
+    <script src="js/upload-guard.js?v=1.0" defer></script>
 </head>
 
 <body>
