@@ -1,6 +1,7 @@
 <?php
 require_once('../includes/db_connect.php');
 require_once('../includes/slider_settings.php');
+require_once('../includes/video_helper.php');
 
 // Make sure the slider timing table/column exist, then handle a save
 vvu_slider_install($pdo);
@@ -22,6 +23,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_slider_timing'])
 }
 
 $slider_timing = vvu_slider_settings($pdo);
+
+// ---- Campus video save ----------------------------------------------------
+// Whatever YouTube link shape the editor pastes is normalised to a playable
+// /embed/ URL before it hits the database.
+$video_saved   = false;
+$video_error   = '';
+$video_warning = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_video'])) {
+    try {
+        $video_url = vvu_video_embed($_POST['video_url'] ?? '');
+
+        if (trim($video_url) === '') {
+            $video_error = 'Please paste a YouTube link.';
+        } else {
+            $stmt = $pdo->prepare(
+                "UPDATE homepage_video SET video_url=?, title=?, description=?, is_active=? WHERE id=?"
+            );
+            $stmt->execute([
+                $video_url,
+                trim($_POST['video_title'] ?? ''),
+                trim($_POST['video_description'] ?? ''),
+                isset($_POST['video_is_active']) ? 1 : 0,
+                (int) ($_POST['video_id'] ?? 1),
+            ]);
+            $video_saved = true;
+
+            if (vvu_youtube_id($video_url) === null) {
+                $video_warning = "That doesn't look like a YouTube link. It was saved as-is — check the homepage to confirm it plays.";
+            }
+        }
+    } catch (PDOException $e) {
+        $video_error = 'Could not save the video: ' . $e->getMessage();
+    }
+}
 
 include 'header.php';
 include 'sidebar.php';
@@ -128,6 +164,9 @@ $stats = [
                                 </button>
                                 <button class="nav-link" id="gallery-tab" data-bs-toggle="tab" data-bs-target="#gallery-content" type="button">
                                     <i class="fas fa-image"></i> Gallery
+                                </button>
+                                <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-content" type="button">
+                                    <i class="fas fa-video"></i> Campus Video
                                 </button>
                                 <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats-content" type="button">
                                     <i class="fas fa-chart-line"></i> Stats Banner
@@ -473,6 +512,94 @@ $stats = [
                                         </div>
                                         <?php endforeach; ?>
                                     </div>
+                                </div>
+
+                                <!-- CAMPUS VIDEO TAB -->
+                                <div class="tab-pane fade" id="video-content" role="tabpanel">
+                                    <?php if ($video_saved): ?>
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle me-1"></i> Campus video updated.
+                                            <?php if ($video_warning): ?>
+                                                <div class="mt-1"><small><?php echo htmlspecialchars($video_warning); ?></small></div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if ($video_error): ?>
+                                        <div class="alert alert-danger">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            <?php echo htmlspecialchars($video_error); ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0"><i class="fas fa-video me-2"></i>Latest Campus Video</h6>
+                                        <span class="badge <?php echo ($video['is_active'] ?? 1) ? 'bg-success' : 'bg-secondary'; ?>">
+                                            <?php echo ($video['is_active'] ?? 1) ? 'Visible on homepage' : 'Hidden'; ?>
+                                        </span>
+                                    </div>
+
+                                    <!-- ?tab=video so the existing tab-restore script reopens this
+                                         panel after the POST, keeping the result message visible -->
+                                    <form method="POST" action="manage_homepage_content.php?tab=video">
+                                        <input type="hidden" name="save_video" value="1">
+                                        <input type="hidden" name="video_id" value="<?php echo (int) ($video['id'] ?? 1); ?>">
+
+                                        <div class="row">
+                                            <div class="col-lg-7">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold" for="video_url">YouTube Link</label>
+                                                    <input type="text" class="form-control" id="video_url" name="video_url"
+                                                           value="<?php echo htmlspecialchars($video['video_url'] ?? ''); ?>"
+                                                           placeholder="https://youtu.be/..." required>
+                                                    <div class="form-text">
+                                                        Paste any YouTube link &mdash; the Share link (<code>youtu.be/…</code>),
+                                                        the browser address bar (<code>youtube.com/watch?v=…</code>), a Short,
+                                                        or an embed URL. It is converted automatically when you save.
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold" for="video_title">Title</label>
+                                                    <input type="text" class="form-control" id="video_title" name="video_title"
+                                                           value="<?php echo htmlspecialchars($video['title'] ?? ''); ?>" required>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold" for="video_description">Description</label>
+                                                    <textarea class="form-control" id="video_description" name="video_description"
+                                                              rows="5"><?php echo htmlspecialchars($video['description'] ?? ''); ?></textarea>
+                                                </div>
+
+                                                <div class="form-check form-switch mb-4">
+                                                    <input class="form-check-input" type="checkbox" role="switch"
+                                                           id="video_is_active" name="video_is_active" value="1"
+                                                           <?php echo ($video['is_active'] ?? 1) ? 'checked' : ''; ?>>
+                                                    <label class="form-check-label" for="video_is_active">
+                                                        Show this video on the homepage
+                                                    </label>
+                                                </div>
+
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-save me-1"></i> Save Video
+                                                </button>
+                                            </div>
+
+                                            <!-- Live preview: confirms the link plays before saving -->
+                                            <div class="col-lg-5">
+                                                <label class="form-label fw-semibold">Preview</label>
+                                                <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden;">
+                                                    <iframe id="video_preview" src="" allowfullscreen
+                                                            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"></iframe>
+                                                </div>
+                                                <p id="video_preview_msg" class="text-danger small mt-2 mb-0"></p>
+                                                <p class="text-muted small mt-2 mb-0">
+                                                    Press play here to make sure the video works before saving.
+                                                    If it says the video is unavailable, the link is wrong or the
+                                                    YouTube account was removed.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
 
                                 <!-- STATS BANNER TAB -->
@@ -869,7 +996,7 @@ $stats = [
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const activeTab = urlParams.get('tab');
-        
+
         if (activeTab) {
             const tabEl = document.querySelector(`#${activeTab}-tab`);
             if (tabEl) {
@@ -878,6 +1005,53 @@ $stats = [
             }
         }
     });
+
+    /* ===== Campus video: live preview =====
+       Mirrors vvu_youtube_id() in includes/video_helper.php so the editor can
+       confirm the link plays before saving. */
+    (function () {
+        const input   = document.getElementById('video_url');
+        const frame   = document.getElementById('video_preview');
+        const message = document.getElementById('video_preview_msg');
+        if (!input || !frame) return;
+
+        const patterns = [
+            /youtube\.com\/watch\?(?:.*&)?v=([A-Za-z0-9_-]{11})/i,
+            /youtu\.be\/([A-Za-z0-9_-]{11})/i,
+            /youtube\.com\/embed\/([A-Za-z0-9_-]{11})/i,
+            /youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/i,
+            /youtube\.com\/live\/([A-Za-z0-9_-]{11})/i,
+            /youtube\.com\/v\/([A-Za-z0-9_-]{11})/i
+        ];
+
+        function youtubeId(url) {
+            url = (url || '').trim();
+            if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) return match[1];
+            }
+            return null;
+        }
+
+        function refresh() {
+            const id = youtubeId(input.value);
+            if (id) {
+                const next = 'https://www.youtube.com/embed/' + id;
+                if (frame.src !== next) frame.src = next;   // don't reload while typing
+                message.textContent = '';
+            } else {
+                frame.removeAttribute('src');
+                message.textContent = input.value.trim()
+                    ? "Couldn't read a YouTube video ID from that link. Check it before saving."
+                    : '';
+            }
+        }
+
+        input.addEventListener('input', refresh);
+        input.addEventListener('change', refresh);
+        refresh();
+    })();
     </script>
 
 <?php include 'footer.php'; ?>

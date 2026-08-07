@@ -91,7 +91,7 @@ $quick_access_nav = getNavItems($pdo, 'quickaccess');
                             <h4>Quick Access</h4>
                             <ul>
                                 <?php foreach ($quick_access_nav as $item): ?>
-                                    <li><a href="<?php echo htmlspecialchars($item['url']); ?>"><?php echo htmlspecialchars($item['title']); ?></a></li>
+                                    <li><a href="<?php echo htmlspecialchars($item['url']); ?>" target="<?php echo htmlspecialchars($item['target'] ?? '_self'); ?>" rel="noopener"><?php echo htmlspecialchars($item['title']); ?></a></li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>
@@ -117,7 +117,7 @@ $quick_access_nav = getNavItems($pdo, 'quickaccess');
                         <div class="ed-com-t1-right">
                             <ul>
                                 <?php foreach ($topbar_nav as $item): ?>
-                                    <li><a href="<?php echo htmlspecialchars($item['url']); ?>"><?php echo htmlspecialchars($item['title']); ?></a></li>
+                                    <li><a href="<?php echo htmlspecialchars($item['url']); ?>" target="<?php echo htmlspecialchars($item['target'] ?? '_self'); ?>" rel="noopener"><?php echo htmlspecialchars($item['title']); ?></a></li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>

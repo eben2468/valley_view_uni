@@ -144,6 +144,29 @@ include 'includes/header.php';
                     </a>
                 </div>
             </div>
+
+            <!-- Graduation Status Checker -->
+            <div class="mt-16 max-w-6xl mx-auto">
+                <a href="https://status.vvu.edu.gh/" target="_blank" rel="noopener"
+                   class="group flex flex-col md:flex-row items-center gap-10 p-10 md:p-14 rounded-[2.5rem] bg-gradient-to-br from-emerald-600 to-emerald-800 shadow-2xl transition-all hover:shadow-emerald-900/40 hover:-translate-y-1">
+                    <div class="flex-shrink-0 w-28 h-28 rounded-[2rem] bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white" style="font-size: 4rem;">verified</span>
+                    </div>
+                    <div class="flex-grow text-center md:text-left">
+                        <span class="inline-block px-5 py-2 mb-4 rounded-full bg-white/20 text-white text-lg font-black uppercase tracking-widest">Graduating Students</span>
+                        <h3 class="text-4xl md:text-5xl font-black text-white mb-4">Graduation Status Checker</h3>
+                        <p class="text-2xl md:text-3xl text-emerald-50 font-medium leading-relaxed">
+                            Search with any of your names or your student ID number to confirm whether you have qualified to graduate.
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="inline-flex items-center gap-3 px-10 py-6 bg-white text-emerald-800 text-2xl font-black rounded-2xl shadow-lg transition-transform group-hover:scale-105">
+                            Check Status
+                            <span class="material-symbols-outlined text-3xl">open_in_new</span>
+                        </span>
+                    </div>
+                </a>
+            </div>
         </div>
     </section>
 

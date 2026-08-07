@@ -617,6 +617,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="row">
             <?php
+            require_once 'includes/image_helper.php';
             $half = ceil(count($programs) / 2);
             $first_column = array_slice($programs, 0, $half);
             $second_column = array_slice($programs, $half);
@@ -627,7 +628,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <!--POPULAR PROGRAMS-->
                     <div class="home-top-cour">
                         <!--POPULAR PROGRAMS IMAGE-->
-                        <div class="col-md-3"> <img src="<?php echo strip_tags($prog['image_url']); ?>" alt=""> </div>
+                        <div class="col-md-3"> <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($prog['image_url']), 400, 450)); ?>" width="400" height="450" loading="lazy" decoding="async" alt="<?php echo htmlspecialchars(strip_tags($prog['title'])); ?>"> </div>
                         <!--POPULAR PROGRAMS: CONTENT-->
                         <div class="col-md-9 home-top-cour-desc">
                             <a href="<?php echo strip_tags($prog['link_url']); ?>">
@@ -653,7 +654,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <!--POPULAR PROGRAMS-->
                     <div class="home-top-cour">
                         <!--POPULAR PROGRAMS IMAGE-->
-                        <div class="col-md-3"> <img src="<?php echo strip_tags($prog['image_url']); ?>" alt=""> </div>
+                        <div class="col-md-3"> <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($prog['image_url']), 400, 450)); ?>" width="400" height="450" loading="lazy" decoding="async" alt="<?php echo htmlspecialchars(strip_tags($prog['title'])); ?>"> </div>
                         <!--POPULAR PROGRAMS: CONTENT-->
                         <div class="col-md-9 home-top-cour-desc">
                             <a href="<?php echo strip_tags($prog['link_url']); ?>">
@@ -788,39 +789,177 @@ function getHImg($path, $cat) {
 </section>
 
 <!-- MODERN MEDIA SECTION (GALLERY & VIDEO) -->
+<?php
+require_once 'includes/image_helper.php';
+require_once 'includes/video_helper.php';
+?>
 <section class="modern-media-section">
     <div class="container">
         <div class="media-container">
             <!-- PHOTO GALLERY -->
             <div class="modern-gallery-box">
-                <h4>Campus Photo Gallery</h4>
-                <div class="modern-gallery-grid">
-                    <?php foreach ($gallery as $img): ?>
-                        <div class="modern-gallery-item">
-                            <img class="materialboxed" data-caption="<?php echo strip_tags($img['caption']); ?>" src="<?php echo strip_tags($img['image_url']); ?>" alt="">
-                        </div>
+                <div class="media-head">
+                    <h4>Campus Photo Gallery</h4>
+                    <p>Moments from life on the Oyibi campus</p>
+                </div>
+                <div class="modern-gallery-grid" id="vvuGallery">
+                    <?php foreach ($gallery as $i => $img):
+                        $full    = strip_tags($img['image_url']);
+                        $caption = strip_tags($img['caption']);
+                    ?>
+                        <button type="button" class="modern-gallery-item"
+                                data-index="<?php echo $i; ?>"
+                                data-full="<?php echo htmlspecialchars($full); ?>"
+                                data-caption="<?php echo htmlspecialchars($caption); ?>"
+                                aria-label="View photo: <?php echo htmlspecialchars($caption); ?>">
+                            <img src="<?php echo htmlspecialchars(vvu_thumb($full, 500, 500)); ?>"
+                                 alt="<?php echo htmlspecialchars($caption); ?>"
+                                 width="500" height="500" loading="lazy" decoding="async">
+                            <span class="gallery-item-overlay">
+                                <i class="fa fa-search-plus" aria-hidden="true"></i>
+                                <span class="gallery-item-caption"><?php echo htmlspecialchars($caption); ?></span>
+                            </span>
+                        </button>
                     <?php endforeach; ?>
                 </div>
             </div>
-            
+
             <!-- CAMPUS VIDEO -->
             <div class="modern-video-box">
-                <h4>Latest Campus Video</h4>
-                <div class="modern-video-wrapper">
-                    <?php if ($video): ?>
-                        <iframe src="<?php echo strip_tags($video['video_url']); ?>" width="100%" height="315" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <div class="media-head">
+                    <h4>Latest Campus Video</h4>
+                    <p>See the university through our lens</p>
+                </div>
+                <?php if ($video): ?>
+                    <div class="modern-video-wrapper">
+                        <div class="video-frame">
+                            <iframe src="<?php echo htmlspecialchars(vvu_video_embed(strip_tags($video['video_url']))); ?>"
+                                    title="<?php echo htmlspecialchars(strip_tags($video['title'])); ?>"
+                                    frameborder="0" loading="lazy"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+                        </div>
                         <div class="video-info">
                             <h5><?php echo strip_tags($video['title']); ?></h5>
                             <p><?php echo nl2br(strip_tags($video['description'])); ?></p>
                         </div>
-                    <?php else: ?>
+                    </div>
+                <?php else: ?>
+                    <div class="modern-video-wrapper media-empty">
+                        <i class="fa fa-video-camera" aria-hidden="true"></i>
                         <p>No video available at this time.</p>
-                    <?php endif; ?>
-                </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
+
+    <!-- LIGHTBOX -->
+    <div class="vvu-lightbox" id="vvuLightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" hidden>
+        <button type="button" class="vvu-lb-btn vvu-lb-close" data-lb="close" aria-label="Close viewer">
+            <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="vvu-lb-btn vvu-lb-nav vvu-lb-prev" data-lb="prev" aria-label="Previous photo">
+            <i class="fa fa-angle-left" aria-hidden="true"></i>
+        </button>
+        <figure class="vvu-lb-stage">
+            <div class="vvu-lb-imgwrap">
+                <div class="vvu-lb-spinner" aria-hidden="true"></div>
+                <img id="vvuLbImg" src="" alt="">
+            </div>
+            <figcaption>
+                <span id="vvuLbCaption"></span>
+                <span id="vvuLbCounter" class="vvu-lb-counter"></span>
+            </figcaption>
+        </figure>
+        <button type="button" class="vvu-lb-btn vvu-lb-nav vvu-lb-next" data-lb="next" aria-label="Next photo">
+            <i class="fa fa-angle-right" aria-hidden="true"></i>
+        </button>
+    </div>
 </section>
+
+<script>
+(function () {
+    var grid = document.getElementById('vvuGallery');
+    var box  = document.getElementById('vvuLightbox');
+    if (!grid || !box) return;
+
+    var items    = [].slice.call(grid.querySelectorAll('.modern-gallery-item'));
+    var img      = document.getElementById('vvuLbImg');
+    var caption  = document.getElementById('vvuLbCaption');
+    var counter  = document.getElementById('vvuLbCounter');
+    var wrap     = box.querySelector('.vvu-lb-imgwrap');
+    var current  = 0;
+    var lastFocus = null;
+
+    function show(i) {
+        current = (i + items.length) % items.length;
+        var el = items[current];
+        wrap.classList.add('is-loading');
+        img.src = el.getAttribute('data-full');
+        img.alt = el.getAttribute('data-caption') || '';
+        caption.textContent = el.getAttribute('data-caption') || '';
+        counter.textContent = (current + 1) + ' / ' + items.length;
+    }
+
+    img.addEventListener('load', function () { wrap.classList.remove('is-loading'); });
+    img.addEventListener('error', function () { wrap.classList.remove('is-loading'); });
+
+    function open(i) {
+        lastFocus = document.activeElement;
+        box.hidden = false;
+        document.body.classList.add('vvu-lb-open');
+        show(i);
+        // let the [hidden] removal paint before transitioning in
+        requestAnimationFrame(function () { box.classList.add('is-open'); });
+        box.querySelector('.vvu-lb-close').focus();
+    }
+
+    function close() {
+        box.classList.remove('is-open');
+        document.body.classList.remove('vvu-lb-open');
+        window.setTimeout(function () {
+            box.hidden = true;
+            img.src = '';
+        }, 200);
+        if (lastFocus) lastFocus.focus();
+    }
+
+    items.forEach(function (el, i) {
+        el.addEventListener('click', function () { open(i); });
+    });
+
+    box.addEventListener('click', function (e) {
+        var action = e.target.closest('[data-lb]');
+        if (action) {
+            var what = action.getAttribute('data-lb');
+            if (what === 'close') close();
+            if (what === 'prev')  show(current - 1);
+            if (what === 'next')  show(current + 1);
+            return;
+        }
+        // click on the backdrop (not the photo itself) closes
+        if (!e.target.closest('.vvu-lb-imgwrap')) close();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (box.hidden) return;
+        if (e.key === 'Escape')     close();
+        if (e.key === 'ArrowLeft')  show(current - 1);
+        if (e.key === 'ArrowRight') show(current + 1);
+    });
+
+    // Swipe between photos on touch devices
+    var startX = null;
+    box.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; }, { passive: true });
+    box.addEventListener('touchend', function (e) {
+        if (startX === null) return;
+        var dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
+        startX = null;
+    }, { passive: true });
+})();
+</script>
 
 <?php
 include 'includes/footer.php';

@@ -3,6 +3,7 @@ include 'header.php';
 include 'sidebar.php';
 require_once('../includes/db_connect.php');
 require_once('../includes/upload_helper.php');
+require_once('../includes/video_helper.php');
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -123,9 +124,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // VIDEO ACTIONS
         elseif ($action === 'edit_video') {
+            // Accept any YouTube link shape and store a playable embed URL
+            $video_url = vvu_video_embed($_POST['video_url'] ?? '');
             $stmt = $pdo->prepare("UPDATE homepage_video SET video_url=?, title=?, description=?, is_active=? WHERE id=?");
-            $stmt->execute([$_POST['video_url'], $_POST['title'], $_POST['description'], $_POST['is_active'] ?? 1, $_POST['id']]);
+            $stmt->execute([$video_url, $_POST['title'], $_POST['description'], $_POST['is_active'] ?? 1, $_POST['id']]);
+
             $success = "Video updated successfully!";
+            if (vvu_youtube_id($video_url) === null && trim($video_url) !== '') {
+                $success .= " (Note: this doesn't look like a YouTube link — check the homepage to confirm it plays.)";
+            }
         }
         
         // SECTION ACTIONS
@@ -852,24 +859,45 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                     <div class="tab-inn">
                         <form method="POST" class="s12">
                             <input type="hidden" name="action" value="edit_video">
-                            <input type="hidden" name="id" value="<?php echo $video['id'] ?? 1; ?>">
-                            
+                            <input type="hidden" name="id" value="<?php echo (int) ($video['id'] ?? 1); ?>">
+
                             <div class="row">
                                 <div class="input-field col s12">
-                                    <input type="text" name="video_url" value="<?php echo $video['video_url'] ?? ''; ?>" required>
-                                    <label>Video URL (YouTube Embed)</label>
+                                    <input type="text" id="video_url" name="video_url"
+                                           value="<?php echo htmlspecialchars($video['video_url'] ?? ''); ?>" required>
+                                    <label class="active" for="video_url">YouTube Link</label>
+                                    <span class="helper-text" style="color:#777; font-size:12px;">
+                                        Paste any YouTube link &mdash; the Share link (<code>youtu.be/…</code>),
+                                        the address bar (<code>youtube.com/watch?v=…</code>), Shorts, or an embed URL.
+                                        It is converted automatically on save.
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Live preview: confirms the link actually plays before saving -->
+                            <div class="row">
+                                <div class="col s12">
+                                    <p style="margin:0 0 8px; font-weight:600; color:#333;">Preview</p>
+                                    <div id="video_preview_wrap"
+                                         style="position:relative; width:100%; max-width:520px; aspect-ratio:16/9; background:#000; border-radius:8px; overflow:hidden;">
+                                        <iframe id="video_preview" src="" allowfullscreen
+                                                style="position:absolute; inset:0; width:100%; height:100%; border:0;"></iframe>
+                                    </div>
+                                    <p id="video_preview_msg" style="margin-top:8px; font-size:13px; color:#c0392b;"></p>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="input-field col s12">
+                                    <input type="text" id="video_title" name="title"
+                                           value="<?php echo htmlspecialchars($video['title'] ?? ''); ?>" required>
+                                    <label class="active" for="video_title">Title</label>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="input-field col s12">
-                                    <input type="text" name="title" value="<?php echo $video['title'] ?? ''; ?>" required>
-                                    <label>Title</label>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="input-field col s12">
-                                    <textarea name="description" class="materialize-textarea"><?php echo $video['description'] ?? ''; ?></textarea>
-                                    <label>Description</label>
+                                    <textarea id="video_description" name="description" class="materialize-textarea"><?php echo htmlspecialchars($video['description'] ?? ''); ?></textarea>
+                                    <label class="active" for="video_description">Description</label>
                                 </div>
                             </div>
                             <div class="row">
@@ -886,6 +914,51 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                                 </div>
                             </div>
                         </form>
+
+                        <script>
+                        (function () {
+                            var input   = document.getElementById('video_url');
+                            var frame   = document.getElementById('video_preview');
+                            var message = document.getElementById('video_preview_msg');
+                            if (!input || !frame) return;
+
+                            // Mirrors vvu_youtube_id() in includes/video_helper.php
+                            function youtubeId(url) {
+                                url = (url || '').trim();
+                                if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
+                                var patterns = [
+                                    /youtube\.com\/watch\?(?:.*&)?v=([A-Za-z0-9_-]{11})/i,
+                                    /youtu\.be\/([A-Za-z0-9_-]{11})/i,
+                                    /youtube\.com\/embed\/([A-Za-z0-9_-]{11})/i,
+                                    /youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/i,
+                                    /youtube\.com\/live\/([A-Za-z0-9_-]{11})/i,
+                                    /youtube\.com\/v\/([A-Za-z0-9_-]{11})/i
+                                ];
+                                for (var i = 0; i < patterns.length; i++) {
+                                    var m = url.match(patterns[i]);
+                                    if (m) return m[1];
+                                }
+                                return null;
+                            }
+
+                            function refresh() {
+                                var id = youtubeId(input.value);
+                                if (id) {
+                                    frame.src = 'https://www.youtube.com/embed/' + id;
+                                    message.textContent = '';
+                                } else {
+                                    frame.removeAttribute('src');
+                                    message.textContent = input.value.trim()
+                                        ? "Couldn't read a YouTube video ID from that link. Double-check it before saving."
+                                        : '';
+                                }
+                            }
+
+                            input.addEventListener('input', refresh);
+                            input.addEventListener('change', refresh);
+                            refresh();
+                        })();
+                        </script>
                     </div>
                 </div>
             </div>

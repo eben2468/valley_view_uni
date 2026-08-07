@@ -103,6 +103,10 @@ include 'includes/header.php';
 <h2 class="border-b border-gray-200 pb-3 text-[22px] font-bold leading-tight tracking-[-0.015em] text-gray-900 dark:border-gray-700 dark:text-white">More Resources</h2>
 <div class="mt-6 flow-root">
 <div class="-my-4 divide-y divide-gray-200 dark:divide-gray-700">
+<a class="flex items-center justify-between py-4 text-gray-700 transition-colors hover:text-primary dark:text-gray-300 dark:hover:text-secondary" href="https://status.vvu.edu.gh/" target="_blank" rel="noopener">
+<span class="font-medium">Graduation Status Checker</span>
+<span class="material-symbols-outlined text-xl">open_in_new</span>
+</a>
 <a class="flex items-center justify-between py-4 text-gray-700 transition-colors hover:text-primary dark:text-gray-300 dark:hover:text-secondary" href="#">
 <span class="font-medium">Academic Calendar</span>
 <span class="material-symbols-outlined text-xl">chevron_right</span>
