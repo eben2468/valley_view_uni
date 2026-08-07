@@ -9,6 +9,24 @@ $cards = $pdo->query("SELECT * FROM mission_vision_cards WHERE is_active=1 ORDER
 $pillars = $pdo->query("SELECT * FROM mission_vision_pillars WHERE is_active=1 ORDER BY display_order ASC")->fetchAll();
 $environment = $pdo->query("SELECT * FROM mission_vision_environment WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetch();
 
+// Bottom call-to-action block. Falls back to the previous hard-coded copy if
+// install_mission_vision_cta.php has not been run yet.
+try {
+    $cta = $pdo->query("SELECT * FROM mission_vision_cta WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetch();
+    $cta_links = $pdo->query("SELECT * FROM mission_vision_cta_links WHERE is_active=1 ORDER BY display_order ASC")->fetchAll();
+} catch (PDOException $e) {
+    $cta = false;
+    $cta_links = [];
+}
+
+if (!$cta_links) {
+    $cta_links = [
+        ['icon' => 'star',          'title' => 'Our Core Values',    'description' => 'The beliefs that shape how we teach, serve and live.',       'link_url' => 'core_values.php'],
+        ['icon' => 'menu_book',     'title' => 'Academic Programs',  'description' => 'Undergraduate, graduate and professional courses.',          'link_url' => 'academic_programs_overview.php'],
+        ['icon' => 'location_city', 'title' => 'Visit Our Campus',   'description' => 'See Oyibi for yourself — facilities, halls and green space.', 'link_url' => 'the_campus.php'],
+    ];
+}
+
 include 'includes/header.php';
 ?>
 
@@ -179,7 +197,9 @@ include 'includes/header.php';
     </section>
 
     <!-- Call to Action Section -->
-    <section class="relative py-32 sm:py-48 overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900">
+    <!-- Bottom padding is deliberately lighter than the top: the cards are the
+         last element, so symmetric py-48 left a large empty band of blue. -->
+    <section class="relative pt-32 sm:pt-48 pb-20 sm:pb-24 overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
         <div class="absolute top-0 right-0 w-[40rem] h-[40rem] bg-yellow-400 rounded-full opacity-10 blur-3xl"></div>
         <div class="absolute bottom-0 left-0 w-[40rem] h-[40rem] bg-blue-400 rounded-full opacity-10 blur-3xl"></div>
@@ -187,38 +207,69 @@ include 'includes/header.php';
         <div class="relative container">
             <div class="text-center">
                 <h2 class="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight mb-8 drop-shadow-2xl">
-                    Join Our Community of Excellence
+                    <?php echo htmlspecialchars($cta['heading'] ?? 'Join Our Community of Excellence'); ?>
                 </h2>
+                <?php $cta_subtitle = $cta['subtitle'] ?? 'Discover how Valley View University can help you achieve holistic development and prepare for meaningful service to God and humanity.'; ?>
+                <?php if (trim($cta_subtitle) !== ''): ?>
                 <p class="text-white/90 text-lg sm:text-xl md:text-2xl max-w-4xl mx-auto leading-relaxed mb-12 font-medium italic drop-shadow-xl">
-                    Discover how Valley View University can help you achieve holistic development and prepare for meaningful service to God and humanity.
+                    <?php echo nl2br(htmlspecialchars($cta_subtitle)); ?>
                 </p>
+                <?php endif; ?>
 
                 <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                    <a href="about_us.php" class="inline-flex items-center justify-center px-10 py-5 text-xl font-black text-blue-900 bg-yellow-400 rounded-[1.5rem] hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl">
-                        <span class="material-symbols-outlined mr-3 text-2xl">info</span>
-                        Learn More About VVU
+                    <?php $btn1_text = $cta['primary_btn_text'] ?? 'Learn More About VVU'; ?>
+                    <?php if (trim($btn1_text) !== ''): ?>
+                    <a href="<?php echo htmlspecialchars($cta['primary_btn_link'] ?? 'about_us.php'); ?>" class="inline-flex items-center justify-center px-10 py-5 text-xl font-black text-blue-900 bg-yellow-400 rounded-[1.5rem] hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl">
+                        <span class="material-symbols-outlined mr-3 text-2xl"><?php echo htmlspecialchars($cta['primary_btn_icon'] ?? 'info'); ?></span>
+                        <?php echo htmlspecialchars($btn1_text); ?>
                     </a>
-                    <a href="apply.php" class="inline-flex items-center justify-center px-10 py-5 text-xl font-black text-white bg-white/20 backdrop-blur-sm border-2 border-white rounded-[1.5rem] hover:bg-white hover:text-blue-900 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl">
-                        <span class="material-symbols-outlined mr-3 text-2xl">how_to_reg</span>
-                        Apply Now
+                    <?php endif; ?>
+
+                    <?php $btn2_text = $cta['secondary_btn_text'] ?? 'Apply Now'; ?>
+                    <?php if (trim($btn2_text) !== ''): ?>
+                    <a href="<?php echo htmlspecialchars($cta['secondary_btn_link'] ?? 'apply.php'); ?>" class="inline-flex items-center justify-center px-10 py-5 text-xl font-black text-white bg-white/20 backdrop-blur-sm border-2 border-white rounded-[1.5rem] hover:bg-white hover:text-blue-900 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl">
+                        <span class="material-symbols-outlined mr-3 text-2xl"><?php echo htmlspecialchars($cta['secondary_btn_icon'] ?? 'how_to_reg'); ?></span>
+                        <?php echo htmlspecialchars($btn2_text); ?>
                     </a>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Quick Links -->
-                <div class="mt-20 pt-20 border-t border-white/20">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-                        <a href="core_values.php" class="group flex flex-col items-center gap-6 p-10 rounded-[2rem] bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 shadow-xl">
-                            <span class="material-symbols-outlined text-white text-5xl group-hover:scale-110 transition-transform">star</span>
-                            <span class="text-white text-2xl font-black uppercase tracking-[0.2em]">Our Core Values</span>
+                <div class="mt-20 pt-16 border-t border-white/20">
+                    <?php $eyebrow = $cta['links_eyebrow'] ?? 'Explore More'; ?>
+                    <?php if (trim($eyebrow) !== ''): ?>
+                    <p class="text-yellow-400 text-base sm:text-lg font-black uppercase tracking-[0.3em] mb-12">
+                        <?php echo htmlspecialchars($eyebrow); ?>
+                    </p>
+                    <?php endif; ?>
+
+                    <?php
+                    // Columns adapt to however many cards the admin has activated
+                    $cta_col_class = (count($cta_links) % 3 === 0 || count($cta_links) > 4)
+                        ? 'sm:grid-cols-3'
+                        : 'sm:grid-cols-2';
+                    ?>
+                    <div class="grid grid-cols-1 <?php echo $cta_col_class; ?> gap-8">
+                        <?php foreach ($cta_links as $link): ?>
+                        <a href="<?php echo htmlspecialchars($link['link_url']); ?>"
+                           class="group flex h-full flex-col items-center gap-5 p-10 rounded-[2rem] bg-white/10 backdrop-blur-sm border border-white/15 shadow-xl transition-all duration-300 hover:bg-white/20 hover:border-yellow-400/60 hover:-translate-y-2 hover:shadow-2xl">
+                            <span class="flex items-center justify-center w-28 h-28 rounded-[1.5rem] bg-white/15 border border-white/25 transition-all duration-300 group-hover:bg-yellow-400 group-hover:border-yellow-400 group-hover:scale-110">
+                                <span class="material-symbols-outlined text-white text-6xl transition-colors duration-300 group-hover:text-blue-900"><?php echo htmlspecialchars($link['icon']); ?></span>
+                            </span>
+                            <span class="text-white text-2xl font-black uppercase tracking-[0.12em] leading-snug">
+                                <?php echo htmlspecialchars($link['title']); ?>
+                            </span>
+                            <?php if (trim($link['description'] ?? '') !== ''): ?>
+                            <span class="text-white/75 text-lg leading-relaxed max-w-xs">
+                                <?php echo htmlspecialchars($link['description']); ?>
+                            </span>
+                            <?php endif; ?>
+                            <span class="mt-auto pt-4 inline-flex items-center gap-2 text-yellow-400 text-base font-black uppercase tracking-widest">
+                                Explore
+                                <span class="material-symbols-outlined text-xl transition-transform duration-300 group-hover:translate-x-1">arrow_forward</span>
+                            </span>
                         </a>
-                        <a href="academic_programs_overview.php" class="group flex flex-col items-center gap-6 p-10 rounded-[2rem] bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 shadow-xl">
-                            <span class="material-symbols-outlined text-white text-5xl group-hover:scale-110 transition-transform">menu_book</span>
-                            <span class="text-white text-2xl font-black uppercase tracking-[0.2em]">Academic Programs</span>
-                        </a>
-                        <a href="the_campus.php" class="group flex flex-col items-center gap-6 p-10 rounded-[2rem] bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 shadow-xl">
-                            <span class="material-symbols-outlined text-white text-5xl group-hover:scale-110 transition-transform">location_city</span>
-                            <span class="text-white text-2xl font-black uppercase tracking-[0.2em]">Visit Our Campus</span>
-                        </a>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             </div>

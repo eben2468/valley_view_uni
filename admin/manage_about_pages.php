@@ -52,10 +52,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success = "Learning environment section updated successfully!";
         }
         
+        // ---- Bottom call-to-action block ----
+        elseif ($action === 'update_mission_vision_cta') {
+            $stmt = $pdo->prepare("UPDATE mission_vision_cta SET heading=?, subtitle=?, primary_btn_text=?, primary_btn_link=?, primary_btn_icon=?, secondary_btn_text=?, secondary_btn_link=?, secondary_btn_icon=?, links_eyebrow=?, is_active=? WHERE id=?");
+            $stmt->execute([
+                $_POST['heading'], $_POST['subtitle'],
+                $_POST['primary_btn_text'], $_POST['primary_btn_link'], $_POST['primary_btn_icon'],
+                $_POST['secondary_btn_text'], $_POST['secondary_btn_link'], $_POST['secondary_btn_icon'],
+                $_POST['links_eyebrow'], isset($_POST['is_active']) ? 1 : 0, $_POST['id']
+            ]);
+            $success = "Call-to-action section updated successfully!";
+        }
+
+        elseif ($action === 'update_mission_vision_cta_link') {
+            $stmt = $pdo->prepare("UPDATE mission_vision_cta_links SET icon=?, title=?, description=?, link_url=?, display_order=?, is_active=? WHERE id=?");
+            $stmt->execute([
+                $_POST['icon'], $_POST['title'], $_POST['description'], $_POST['link_url'],
+                (int) $_POST['display_order'], isset($_POST['is_active']) ? 1 : 0, $_POST['id']
+            ]);
+            $success = "Quick link card updated successfully!";
+        }
+
+        elseif ($action === 'add_mission_vision_cta_link') {
+            $stmt = $pdo->prepare("INSERT INTO mission_vision_cta_links (icon, title, description, link_url, display_order, is_active) VALUES (?, ?, ?, ?, (SELECT COALESCE(MAX(display_order),0)+1 FROM mission_vision_cta_links l2), 1)");
+            $stmt->execute([
+                $_POST['icon'] ?: 'star', $_POST['title'], $_POST['description'], $_POST['link_url'] ?: '#'
+            ]);
+            $success = "Quick link card added successfully!";
+        }
+
+        elseif ($action === 'delete_mission_vision_cta_link') {
+            $pdo->prepare("DELETE FROM mission_vision_cta_links WHERE id=?")->execute([$_POST['id']]);
+            $success = "Quick link card deleted successfully!";
+        }
+
         // ========================================
         // CORE VALUES ACTIONS
         // ========================================
-        
+
         elseif ($action === 'update_core_values_hero') {
             $image_url = $_POST['hero_image_url'];
             $uploaded = handleAdminFileUpload($_FILES['hero_image_file'], 'about');
@@ -194,6 +228,16 @@ $mission_vision_hero = $pdo->query("SELECT * FROM mission_vision_hero ORDER BY i
 $mission_vision_cards = $pdo->query("SELECT * FROM mission_vision_cards ORDER BY display_order ASC")->fetchAll();
 $pillars = $pdo->query("SELECT * FROM mission_vision_pillars ORDER BY display_order ASC")->fetchAll();
 $environment = $pdo->query("SELECT * FROM mission_vision_environment ORDER BY id DESC LIMIT 1")->fetch();
+
+// Bottom call-to-action block. Wrapped because the tables only exist after
+// install_mission_vision_cta.php has been run.
+try {
+    $mv_cta       = $pdo->query("SELECT * FROM mission_vision_cta ORDER BY id DESC LIMIT 1")->fetch();
+    $mv_cta_links = $pdo->query("SELECT * FROM mission_vision_cta_links ORDER BY display_order ASC")->fetchAll();
+} catch (PDOException $e) {
+    $mv_cta = null;
+    $mv_cta_links = [];
+}
 
 $core_values_hero = $pdo->query("SELECT * FROM core_values_hero ORDER BY id DESC LIMIT 1")->fetch();
 $core_values_pillars = $pdo->query("SELECT * FROM core_values_pillars ORDER BY display_order ASC")->fetchAll();
@@ -503,6 +547,167 @@ include 'sidebar.php';
         <button type="submit" class="btn btn-primary"><i class="fa fa-save me-2"></i>Update Environment Section</button>
     </div>
 </form>
+<?php endif; ?>
+
+<!-- ============================================================
+     BOTTOM CALL-TO-ACTION ("Join Our Community of Excellence")
+     ============================================================ -->
+<?php if (!$mv_cta): ?>
+    <div class="alert alert-warning" style="margin-top: 40px;">
+        <i class="fa fa-triangle-exclamation me-2"></i>
+        The call-to-action section is not installed yet. Run
+        <code>install_mission_vision_cta.php</code> once, then reload this page.
+    </div>
+<?php else: ?>
+
+<div class="inn-title" style="margin-top: 40px;">
+    <h4>Call-to-Action Section (bottom of the page)</h4>
+    <p class="text-muted mb-0">The blue "Join Our Community of Excellence" band, its two buttons, and the quick-link cards beneath it.</p>
+</div>
+
+<form method="POST" class="row p-4 bg-white border rounded shadow-sm">
+    <input type="hidden" name="action" value="update_mission_vision_cta">
+    <input type="hidden" name="id" value="<?php echo (int) $mv_cta['id']; ?>">
+
+    <div class="col-md-12 mb-3">
+        <label class="form-label fw-bold">Heading</label>
+        <input type="text" name="heading" class="form-control" value="<?php echo htmlspecialchars($mv_cta['heading']); ?>" required>
+    </div>
+
+    <div class="col-md-12 mb-3">
+        <label class="form-label fw-bold">Subtitle</label>
+        <textarea name="subtitle" class="form-control" rows="3"><?php echo htmlspecialchars($mv_cta['subtitle'] ?? ''); ?></textarea>
+    </div>
+
+    <div class="col-md-12"><hr><h6 class="fw-bold text-primary">Primary Button (yellow)</h6></div>
+    <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold">Text</label>
+        <input type="text" name="primary_btn_text" class="form-control" value="<?php echo htmlspecialchars($mv_cta['primary_btn_text'] ?? ''); ?>">
+    </div>
+    <div class="col-md-5 mb-3">
+        <label class="form-label fw-bold">Link</label>
+        <input type="text" name="primary_btn_link" class="form-control" value="<?php echo htmlspecialchars($mv_cta['primary_btn_link'] ?? ''); ?>" placeholder="about_us.php">
+    </div>
+    <div class="col-md-3 mb-3">
+        <label class="form-label fw-bold">Icon</label>
+        <input type="text" name="primary_btn_icon" class="form-control" value="<?php echo htmlspecialchars($mv_cta['primary_btn_icon'] ?? ''); ?>" placeholder="info">
+        <div class="form-text small">Material Symbols name</div>
+    </div>
+
+    <div class="col-md-12"><hr><h6 class="fw-bold text-primary">Secondary Button (outlined)</h6></div>
+    <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold">Text</label>
+        <input type="text" name="secondary_btn_text" class="form-control" value="<?php echo htmlspecialchars($mv_cta['secondary_btn_text'] ?? ''); ?>">
+    </div>
+    <div class="col-md-5 mb-3">
+        <label class="form-label fw-bold">Link</label>
+        <input type="text" name="secondary_btn_link" class="form-control" value="<?php echo htmlspecialchars($mv_cta['secondary_btn_link'] ?? ''); ?>" placeholder="apply.php">
+    </div>
+    <div class="col-md-3 mb-3">
+        <label class="form-label fw-bold">Icon</label>
+        <input type="text" name="secondary_btn_icon" class="form-control" value="<?php echo htmlspecialchars($mv_cta['secondary_btn_icon'] ?? ''); ?>" placeholder="how_to_reg">
+    </div>
+
+    <div class="col-md-12"><hr></div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-bold">Quick Links Heading</label>
+        <input type="text" name="links_eyebrow" class="form-control" value="<?php echo htmlspecialchars($mv_cta['links_eyebrow'] ?? ''); ?>" placeholder="Explore More">
+        <div class="form-text small">Small yellow label above the cards.</div>
+    </div>
+    <div class="col-md-6 mb-3 d-flex align-items-end">
+        <div class="form-check mb-2">
+            <input type="checkbox" name="is_active" value="1" class="form-check-input" id="mv_cta_active" <?php echo $mv_cta['is_active'] ? 'checked' : ''; ?>>
+            <label class="form-check-label" for="mv_cta_active">Show this section on the page</label>
+        </div>
+    </div>
+
+    <div class="col-md-12 mt-2">
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save me-2"></i>Update Call-to-Action</button>
+    </div>
+</form>
+
+<!-- Quick link cards -->
+<div class="d-flex justify-content-between align-items-center" style="margin-top: 35px;">
+    <div class="inn-title mb-0">
+        <h4>Quick Link Cards</h4>
+        <p class="text-muted mb-0">The cards under the buttons (Our Core Values, Academic Programs, Visit Our Campus).</p>
+    </div>
+</div>
+
+<?php foreach ($mv_cta_links as $cta_link): ?>
+<form method="POST" class="row p-4 bg-white border rounded shadow-sm mt-3">
+    <input type="hidden" name="action" value="update_mission_vision_cta_link">
+    <input type="hidden" name="id" value="<?php echo (int) $cta_link['id']; ?>">
+
+    <div class="col-md-5 mb-3">
+        <label class="form-label fw-bold">Title</label>
+        <input type="text" name="title" class="form-control fw-bold" value="<?php echo htmlspecialchars($cta_link['title']); ?>" required>
+    </div>
+    <div class="col-md-3 mb-3">
+        <label class="form-label fw-bold">Icon</label>
+        <input type="text" name="icon" class="form-control" value="<?php echo htmlspecialchars($cta_link['icon']); ?>" placeholder="star">
+        <div class="form-text small"><a href="https://fonts.google.com/icons" target="_blank" rel="noopener">Material Symbols</a> name</div>
+    </div>
+    <div class="col-md-2 mb-3">
+        <label class="form-label fw-bold">Order</label>
+        <input type="number" name="display_order" class="form-control" value="<?php echo (int) $cta_link['display_order']; ?>" min="0">
+    </div>
+    <div class="col-md-2 mb-3 d-flex align-items-end">
+        <div class="form-check mb-2">
+            <input type="checkbox" name="is_active" value="1" class="form-check-input" id="cta_link_active_<?php echo (int) $cta_link['id']; ?>" <?php echo $cta_link['is_active'] ? 'checked' : ''; ?>>
+            <label class="form-check-label" for="cta_link_active_<?php echo (int) $cta_link['id']; ?>">Active</label>
+        </div>
+    </div>
+
+    <div class="col-md-12 mb-3">
+        <label class="form-label fw-bold">Description</label>
+        <input type="text" name="description" class="form-control" value="<?php echo htmlspecialchars($cta_link['description'] ?? ''); ?>" placeholder="One short line explaining the link">
+    </div>
+
+    <div class="col-md-12 mb-3">
+        <label class="form-label fw-bold">Link URL</label>
+        <input type="text" name="link_url" class="form-control" value="<?php echo htmlspecialchars($cta_link['link_url']); ?>" placeholder="core_values.php">
+    </div>
+
+    <div class="col-md-12 d-flex justify-content-between border-top pt-3">
+        <button type="submit" form="delete_cta_link_<?php echo (int) $cta_link['id']; ?>" class="btn btn-outline-danger btn-sm"
+                onclick="return confirm('Delete this quick link card?');">
+            <i class="fa fa-trash me-1"></i>Delete
+        </button>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-save me-2"></i>Update Card</button>
+    </div>
+</form>
+<!-- Separate form so the delete button can't submit the edit fields -->
+<form method="POST" id="delete_cta_link_<?php echo (int) $cta_link['id']; ?>" class="d-none">
+    <input type="hidden" name="action" value="delete_mission_vision_cta_link">
+    <input type="hidden" name="id" value="<?php echo (int) $cta_link['id']; ?>">
+</form>
+<?php endforeach; ?>
+
+<form method="POST" class="row p-4 bg-light border rounded shadow-sm mt-3">
+    <input type="hidden" name="action" value="add_mission_vision_cta_link">
+    <div class="col-md-12 mb-3"><h6 class="fw-bold text-success mb-0"><i class="fa fa-plus me-2"></i>Add a Quick Link Card</h6></div>
+    <div class="col-md-5 mb-3">
+        <label class="form-label fw-bold">Title</label>
+        <input type="text" name="title" class="form-control" required placeholder="e.g. Student Life">
+    </div>
+    <div class="col-md-3 mb-3">
+        <label class="form-label fw-bold">Icon</label>
+        <input type="text" name="icon" class="form-control" placeholder="star">
+    </div>
+    <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold">Link URL</label>
+        <input type="text" name="link_url" class="form-control" placeholder="student_life.php">
+    </div>
+    <div class="col-md-12 mb-3">
+        <label class="form-label fw-bold">Description</label>
+        <input type="text" name="description" class="form-control" placeholder="One short line explaining the link">
+    </div>
+    <div class="col-md-12">
+        <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-plus me-2"></i>Add Card</button>
+    </div>
+</form>
+
 <?php endif; ?>
 </div>
 </div>
