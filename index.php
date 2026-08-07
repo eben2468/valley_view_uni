@@ -727,7 +727,9 @@ function getHImg($path, $cat) {
                     <?php else: foreach ($home_news as $item): ?>
                         <a href="news_detail.php?slug=<?php echo urlencode($item['slug']); ?>" class="modern-news-card">
                             <div class="card-img-box">
-                                <img src="<?php echo strip_tags(getHImg($item['featured_image'], 'news')); ?>" alt="">
+                                <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags(getHImg($item['featured_image'], 'news')), 300, 300)); ?>"
+                                     width="300" height="300" loading="lazy" decoding="async"
+                                     alt="<?php echo htmlspecialchars(strip_tags($item['title'])); ?>">
                             </div>
                             <div class="card-body-box">
                                 <span class="card-category-badge">University News</span>

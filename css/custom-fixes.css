@@ -1651,15 +1651,22 @@ a {
 .card-img-box {
     width: 140px;
     min-width: 140px;
-    height: 100%;
+    /* stretch, not height:100% — the card is auto-height on mobile, where
+       height:100% resolves to auto and the image shrinks to its natural size,
+       leaving gaps above and below it */
+    align-self: stretch;
     overflow: hidden;
     position: relative;
 }
 
 .card-img-box img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     transition: transform 0.5s ease;
 }
 
@@ -1721,7 +1728,7 @@ a {
 .event-date-box {
     width: 140px;
     min-width: 140px;
-    height: 100%;
+    align-self: stretch;        /* match the card height, same reason as above */
     background: #002147;
     display: flex;
     flex-direction: column;
@@ -2144,6 +2151,25 @@ body.vvu-lb-open {
 }
 
 @media screen and (max-width: 600px) {
+    /* Narrow the thumbnail and tighten the body padding so headlines get a
+       usable amount of room before the 2-line clamp bites. */
+    .card-img-box,
+    .event-date-box {
+        width: 104px;
+        min-width: 104px;
+    }
+
+    .card-body-box {
+        padding: 14px 14px !important;
+    }
+
+    .card-title-text {
+        font-size: 15px;
+    }
+
+    .event-day  { font-size: 32px; }
+    .event-month { font-size: 14px; }
+
     .modern-gallery-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 8px;
