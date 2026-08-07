@@ -405,7 +405,10 @@ include 'includes/header.php';
                     <span class="material-symbols-outlined text-2xl text-white">verified</span>
                     <span class="text-base font-black uppercase tracking-[0.2em] text-white"><?php echo strip_tags($sections_map['why_choose']['section_title'] ?? 'Why Choose VVU?'); ?></span>
                 </div>
-                <h2 class="text-4xl md:text-6xl font-black text-gray-900 dark:text-white mb-8 tracking-tight">
+                <!-- Sized just under the page's other section headings (37.5px/900).
+                     This one is a full sentence, not a short label, so it reads
+                     better a little smaller and lighter. -->
+                <h2 class="text-[20px] md:text-[30px] font-bold text-gray-900 dark:text-white mb-8 tracking-tight leading-snug">
                     <?php echo strip_tags($sections_map['why_choose']['section_subtitle'] ?? 'Our Unique Value'); ?>
                 </h2>
                 <div class="h-2 w-24 bg-blue-600 mx-auto rounded-full mb-8"></div>
@@ -450,9 +453,13 @@ include 'includes/header.php';
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                <?php foreach ($program_items as $program): 
+                <?php foreach ($program_items as $program):
                     $badge = $program['item_stat_value'] ?: 'Program';
-                    $badge_color = $badge_colors[$badge] ?? 'bg-blue-600';
+                    // Admin-set colour wins; otherwise fall back to the known
+                    // badge map, so a new badge name isn't stuck on blue.
+                    $badge_color = !empty($program['item_color'])
+                        ? 'bg-' . preg_replace('/[^a-z0-9\-]/i', '', $program['item_color'])
+                        : ($badge_colors[$badge] ?? 'bg-blue-600');
                 ?>
                 <div class="admission-card group bg-white dark:bg-gray-800 rounded-[2.5rem] overflow-hidden shadow-xl border border-gray-100 dark:border-gray-800">
                     <div class="relative h-72 overflow-hidden">

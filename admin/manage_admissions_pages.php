@@ -19,6 +19,12 @@ $current_page = 'manage_admissions_pages.php';
 
 // Define the pages we manage
 $managed_pages = [
+    'admissions' => [
+        'title' => 'Admissions (Main Page)',
+        'icon' => 'fa-graduation-cap',
+        'file' => 'admissions.php',
+        'description' => 'Manage the main admissions page: Featured Programs, Why Choose VVU, Requirements, Process, Contact and more.'
+    ],
     'provisional_admission_list' => [
         'title' => 'Provisional Admission List',
         'icon' => 'fa-list-check',
@@ -129,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     item_image = ?,
                     item_link = ?,
                     item_stat_value = ?,
+                    display_order = ?,
                     is_active = ?
                 WHERE id = ?
             ");
@@ -141,6 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $item_image,
                 $item_link,
                 $_POST['item_stat_value'] ?? '',
+                (int) ($_POST['display_order'] ?? 0),
                 isset($_POST['is_active']) ? 1 : 0,
                 $_POST['item_id']
             ]);
@@ -421,9 +429,13 @@ include 'sidebar.php';
                                 <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
                                 
                                 <div class="row g-3">
-                                    <div class="col-md-9">
+                                    <div class="col-md-7">
                                         <label class="form-label small fw-bold">Title</label>
                                         <input type="text" name="item_title" value="<?php echo htmlspecialchars($item['item_title']); ?>" class="form-control fw-bold border-2">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small fw-bold" title="Lower numbers appear first">Order</label>
+                                        <input type="number" name="display_order" value="<?php echo (int) ($item['display_order'] ?? 0); ?>" class="form-control" min="0">
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label small fw-bold">Status</label>
@@ -441,8 +453,9 @@ include 'sidebar.php';
                                         <input type="text" name="item_subtitle" value="<?php echo htmlspecialchars($item['item_subtitle'] ?? ''); ?>" class="form-control">
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold">Badge / Special Value (PDF/Batch)</label>
-                                        <input type="text" name="item_stat_value" value="<?php echo htmlspecialchars($item['item_stat_value'] ?? ''); ?>" class="form-control" placeholder="e.g. PDF or Batch 1">
+                                        <label class="form-label small fw-bold">Badge / Tag</label>
+                                        <input type="text" name="item_stat_value" value="<?php echo htmlspecialchars($item['item_stat_value'] ?? ''); ?>" class="form-control" placeholder="e.g. Business, Health, PDF, Batch 1">
+                                        <div class="form-text small">Shown as the coloured pill on the card image (Featured Programs).</div>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label small fw-bold">Icon</label>
