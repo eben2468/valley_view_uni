@@ -11,6 +11,9 @@ if (!isset($_SESSION['admin_id'])) {
 
 // Include database connection
 require_once('../includes/db_connect.php');
+// Function definitions only — needed here so the upload-error banner below can
+// render even on pages that were redirected to and don't upload anything.
+require_once('../includes/upload_helper.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -103,3 +106,18 @@ require_once('../includes/db_connect.php');
                 </div>
             </div>
         </header>
+
+        <?php
+        // Upload failures used to be swallowed: the page redirected and simply
+        // kept the old image, so a failed upload was indistinguishable from
+        // not choosing a file. Shown here so every admin page reports it.
+        if (function_exists('vvu_take_upload_error') && ($vvu_upload_error = vvu_take_upload_error())):
+        ?>
+        <div class="alert alert-danger alert-dismissible fade show" style="margin: 20px 30px 0;">
+            <i class="fas fa-triangle-exclamation me-2"></i>
+            <strong>The image was not uploaded.</strong>
+            <?php echo htmlspecialchars($vvu_upload_error); ?>
+            <br><small class="text-muted">Everything else on the form was saved. The previous image is still in place.</small>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php endif; ?>

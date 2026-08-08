@@ -11,10 +11,76 @@ if (!function_exists('vvu_set_upload_error')) {
      */
     function vvu_set_upload_error($message = null) {
         $GLOBALS['vvu_last_upload_error'] = $message;
+
+        // Also stash it in the session: most admin pages redirect straight
+        // after saving, so an in-request variable would be gone before
+        // anything could display it. admin/header.php shows and clears this.
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            if ($message === null) {
+                unset($_SESSION['vvu_upload_error']);
+            } else {
+                $_SESSION['vvu_upload_error'] = $message;
+            }
+        }
     }
 
     function vvu_last_upload_error() {
         return $GLOBALS['vvu_last_upload_error'] ?? null;
+    }
+
+    /** Returns the flashed upload error (if any) and clears it. */
+    function vvu_take_upload_error() {
+        if (session_status() !== PHP_SESSION_ACTIVE || empty($_SESSION['vvu_upload_error'])) {
+            return null;
+        }
+        $message = $_SESSION['vvu_upload_error'];
+        unset($_SESSION['vvu_upload_error']);
+        return $message;
+    }
+
+    /**
+     * Detects a file's MIME type from its contents.
+     *
+     * finfo_open() was called unguarded before. On a host without the
+     * "fileinfo" extension it returns false, and the follow-up finfo_file()
+     * call then fails — so every upload was rejected with no explanation on
+     * those servers while working perfectly on XAMPP. This falls back to
+     * getimagesize() for images, then to the file extension for documents.
+     *
+     * @return string|null MIME type, or null if it genuinely cannot be determined
+     */
+    function vvu_detect_mime($tmpPath, $originalName = '') {
+        if (function_exists('finfo_open')) {
+            $finfo = @finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo) {
+                $mime = @finfo_file($finfo, $tmpPath);
+                finfo_close($finfo);
+                if (is_string($mime) && $mime !== '') {
+                    return $mime;
+                }
+            }
+        }
+
+        // Fallback 1: images can be identified from their header bytes
+        if (function_exists('getimagesize')) {
+            $info = @getimagesize($tmpPath);
+            if (!empty($info['mime'])) {
+                return $info['mime'];
+            }
+        }
+
+        // Fallback 2: documents — trust the extension, since the allow-list
+        // below still restricts what can be stored
+        $byExtension = [
+            'pdf'  => 'application/pdf',
+            'doc'  => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls'  => 'application/vnd.ms-excel',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ];
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+        return $byExtension[$ext] ?? null;
     }
 
     function vvu_upload_error_message($code) {
@@ -66,33 +132,62 @@ if (!function_exists('handleAdminFileUpload')) {
         // Define directory relative to the file being executed (usually in admin/)
         // We want to save in ../uploads/sub-dir/
         $uploadBase = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
-        $targetDir = $uploadBase . $targetSubDir . DIRECTORY_SEPARATOR;
-        
-        // Ensure directory exists
+        $targetDir = $uploadBase . rtrim($targetSubDir, '/\\') . DIRECTORY_SEPARATOR;
+
+        // Ensure the directory exists AND is writable. These checks used to be
+        // skipped entirely, so on a server where uploads/ is not writable the
+        // upload failed silently and the old image was simply kept.
         if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0777, true);
+            if (!@mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+                vvu_set_upload_error('Could not create the upload folder (' . htmlspecialchars($targetSubDir) . '). Set uploads/ to 755 on the server.');
+                return null;
+            }
         }
-        
-        // Validate file type
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
-        
-        if (!in_array($mimeType, $allowedTypes)) {
+
+        if (!is_writable($targetDir)) {
+            vvu_set_upload_error('The upload folder is not writable (uploads/' . htmlspecialchars(rtrim($targetSubDir, '/\\')) . '). Set it to 755 on the server.');
+            return null;
+        }
+
+        // Validate file type by content
+        $allowedTypes = [
+            'image/jpeg' => 'jpg',
+            'image/png'  => 'png',
+            'image/gif'  => 'gif',
+            'image/webp' => 'webp',
+            'application/pdf' => 'pdf',
+            'application/msword' => 'doc',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+            'application/vnd.ms-excel' => 'xls',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+        ];
+
+        $mimeType = vvu_detect_mime($file['tmp_name'], $file['name']);
+
+        if ($mimeType === null) {
+            vvu_set_upload_error('The server could not determine the file type. Ask your host to enable the PHP "fileinfo" extension.');
+            return null;
+        }
+
+        if (!isset($allowedTypes[$mimeType])) {
             vvu_set_upload_error("That file type ({$mimeType}) is not allowed.");
             return null;
         }
-        
-        // Generate unique filename
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = $prefix . time() . '_' . uniqid() . '.' . $extension;
+
+        // Take the extension from the DETECTED type, never from the uploaded
+        // filename: a file called "shell.php" whose bytes look like a JPEG
+        // would otherwise be stored as an executable .php inside the web root.
+        $extension = $allowedTypes[$mimeType];
+        $filename  = $prefix . time() . '_' . uniqid() . '.' . $extension;
         $targetPath = $targetDir . $filename;
-        
+
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            @chmod($targetPath, 0644);
             // Return path relative to project root
             return 'uploads/' . rtrim($targetSubDir, '/\\') . '/' . $filename;
         }
+
+        vvu_set_upload_error('The file could not be saved to the server. Check that uploads/ is writable.');
         
         return null;
     }
