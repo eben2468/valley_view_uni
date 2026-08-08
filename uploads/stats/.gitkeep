@@ -1,0 +1,3 @@
+# Keeps this upload folder in git.
+# Git does not track empty directories, and the admin panel needs this
+# folder to exist (or to be creatable) for uploads to work.
