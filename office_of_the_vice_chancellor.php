@@ -107,19 +107,9 @@ include 'includes/header.php';
         .vc-sticky { position: sticky; top: 110px; }
     }
 
-    .vc-message p + p { margin-top: 1.5rem; }
-
-    /* On very wide screens long prose is split into two columns so the
-       measure stays readable while still filling the width. */
-    @media (min-width: 1280px) {
-        .vc-bio { columns: 2; column-gap: 3rem; }
-        .vc-bio p { break-inside: avoid; margin-top: 0; }
-        .vc-bio p + p { margin-top: 1.5rem; }
-    }
-    @media (min-width: 1536px) {
-        .vc-message { columns: 2; column-gap: 3.5rem; }
-        .vc-message p { break-inside: avoid; }
-    }
+    /* Prose flows as one continuous column at every width. */
+    .vc-message p + p,
+    .vc-bio p + p { margin-top: 1.5rem; }
 </style>
 
 <main class="flex-grow bg-gray-50 dark:bg-gray-900">

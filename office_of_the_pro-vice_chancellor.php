@@ -99,15 +99,8 @@ include 'includes/header.php';
         .pvc-sticky { position: sticky; top: 110px; }
     }
 
+    /* Prose flows as one continuous column at every width. */
     .pvc-bio p + p { margin-top: 1.5rem; }
-
-    /* On very wide screens the biography splits into two columns so the
-       measure stays readable while still filling the width. */
-    @media (min-width: 1280px) {
-        .pvc-bio { columns: 2; column-gap: 3rem; }
-        .pvc-bio p { break-inside: avoid; margin-top: 0; }
-        .pvc-bio p + p { margin-top: 1.5rem; }
-    }
 </style>
 
 <main class="flex-grow bg-gray-50 dark:bg-gray-900">
