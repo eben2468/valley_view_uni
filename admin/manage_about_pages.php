@@ -1440,6 +1440,15 @@ include 'sidebar.php';
 <!-- CAMPUS TAB -->
 <div class="tab-pane fade" id="campus" role="tabpanel">
 <div class="dashboard-card">
+<?php
+// the_campus.php reads academic_pages_content/sections/items, but everything in
+// this tab writes to campus_hero / campus_highlights / campus_features, which no
+// public page reads. Saves here succeed and change nothing.
+$legacy_page_name  = 'The Campus';
+$legacy_target_url = 'manage_academic_pages.php?page=the_campus';
+$legacy_public_url = 'the_campus.php';
+include '_legacy_editor_notice.php';
+?>
 <!-- Hero -->
 <?php if ($campus_hero): ?>
 <div class="inn-title">

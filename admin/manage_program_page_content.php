@@ -45,6 +45,16 @@ $content = $stmt->fetch();
 
     <?php echo $message; ?>
 
+    <?php
+    // academic_programs_overview.php reads academic_pages_content with
+    // page_key='academic_programs'. This page writes to the separate
+    // academic_programs_page_content table, which nothing reads.
+    $legacy_page_name  = 'Academic Programs Overview';
+    $legacy_target_url = 'manage_academic_pages.php?page=academic_programs';
+    $legacy_public_url = 'academic_programs_overview.php';
+    include '_legacy_editor_notice.php';
+    ?>
+
     <form method="POST" enctype="multipart/form-data">
         <div class="row g-4">
             <!-- Hero Section -->

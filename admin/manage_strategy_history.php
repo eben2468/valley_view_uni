@@ -690,6 +690,15 @@ include 'sidebar.php';
 <!-- POLICIES TAB -->
 <div class="tab-pane fade" id="policies" role="tabpanel">
 <div class="dashboard-card">
+<?php
+// policies.php reads academic_pages_content/sections/items; this tab writes to
+// policies_hero / policies_categories / policies_documents / policies_cta /
+// policies_quick_links, none of which any public page reads.
+$legacy_page_name  = 'Policies';
+$legacy_target_url = 'manage_departmental_resources.php?page=policies';
+$legacy_public_url = 'policies.php';
+include '_legacy_editor_notice.php';
+?>
 
 <!-- Policies Hero -->
 <div class="inn-title">
