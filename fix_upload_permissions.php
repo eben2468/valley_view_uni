@@ -36,9 +36,12 @@ $subdirs = [
     'resources', 'settings', 'sliders', 'stats', 'strategy', 'ventures',
 ];
 
-$apply = isset($_GET['apply']);
+$apply     = isset($_GET['apply']);
+$repair    = isset($_GET['repair']);
+$confirmed = isset($_GET['confirm']);
 $rows  = [];
 $stillBroken = 0;
+$repairLog = [];
 
 /** Can PHP genuinely create a file here? The only test that matters. */
 function reallyWritable($dir) {
@@ -66,6 +69,95 @@ function ownerName($path) {
 $phpUser = function_exists('posix_geteuid') && function_exists('posix_getpwuid')
     ? (@posix_getpwuid(@posix_geteuid())['name'] ?? 'unknown')
     : (get_current_user() ?: 'unknown');
+
+/**
+ * Rebuilds a folder PHP cannot chmod (because another user owns it).
+ *
+ * chmod() requires ownership, so a root-owned folder is untouchable from PHP.
+ * But creating, renaming and deleting an ENTRY inside a directory is governed
+ * by write permission on the PARENT — and uploads/ is owned by the PHP user.
+ * So: move the stubborn folder aside, make a fresh one (now owned by PHP),
+ * and copy the contents across. Nothing is ever deleted; the original is kept
+ * as <name>.old-<timestamp> for you to remove.
+ */
+function rebuildFolder($path, &$note) {
+    $parent = dirname($path);
+
+    if (!is_writable($parent)) {
+        $note = 'Parent folder is not writable — cannot rebuild.';
+        return false;
+    }
+    // Sticky bit on the parent would stop us renaming another user's entry
+    if (fileperms($parent) & 01000) {
+        $note = 'Parent has the sticky bit set — cannot rebuild.';
+        return false;
+    }
+
+    $backup = $path . '.old-' . date('YmdHis');
+    if (!@rename($path, $backup)) {
+        $note = 'Could not move the old folder aside.';
+        return false;
+    }
+
+    if (!@mkdir($path, 0755, true)) {
+        @rename($backup, $path);   // put it back
+        $note = 'Could not create the replacement folder.';
+        return false;
+    }
+
+    // Copy the old contents into the new folder
+    $copied = 0;
+    $failed = 0;
+    $items = @scandir($backup) ?: [];
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+        $from = $backup . DIRECTORY_SEPARATOR . $item;
+        $to   = $path . DIRECTORY_SEPARATOR . $item;
+        if (is_dir($from)) {
+            // Nested folders are rare here; copy one level recursively
+            @mkdir($to, 0755, true);
+            foreach ((@scandir($from) ?: []) as $sub) {
+                if ($sub === '.' || $sub === '..') continue;
+                @copy($from . DIRECTORY_SEPARATOR . $sub, $to . DIRECTORY_SEPARATOR . $sub)
+                    ? $copied++ : $failed++;
+            }
+        } else {
+            @copy($from, $to) ? $copied++ : $failed++;
+        }
+    }
+
+    if (!reallyWritable($path)) {
+        $note = 'Rebuilt, but the new folder still is not writable.';
+        return false;
+    }
+
+    // If the old folder was empty we can tidy it away completely; if it held
+    // files we cannot delete them (they belong to the other user), so it stays.
+    $leftover = true;
+    if (count(@scandir($backup) ?: []) <= 2) {
+        $leftover = !@rmdir($backup);
+    }
+
+    $note = $copied > 0 ? "Rebuilt, {$copied} file(s) copied" : 'Rebuilt (was empty)';
+    if ($failed > 0)  $note .= ", {$failed} could not be copied";
+    if ($leftover)    $note .= '. Old copy left at ' . basename($backup);
+
+    return true;
+}
+
+// ---- Optional repair pass, before the report is built ----
+if ($repair && $confirmed) {
+    foreach ($subdirs as $sub) {
+        $path = $root . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $sub;
+        if (!is_dir($path) || reallyWritable($path)) {
+            continue;
+        }
+        $note = '';
+        $ok = rebuildFolder($path, $note);
+        clearstatcache();
+        $repairLog[] = ['uploads/' . $sub, $ok, $note];
+    }
+}
 
 $targets = array_merge([''], $subdirs);   // '' = uploads/ itself
 
@@ -173,8 +265,46 @@ header('Content-Type: text/html; charset=utf-8');
     <?php endforeach; ?>
 </table>
 
-<?php if ($apply && $stillBroken > 0): ?>
-<h3>If PHP could not fix it</h3>
+<?php if ($repairLog): ?>
+<h3>Rebuild results</h3>
+<table>
+    <tr><th style="width:28%">Folder</th><th style="width:10%">Result</th><th>Detail</th></tr>
+    <?php foreach ($repairLog as $r): ?>
+    <tr class="<?php echo $r[1] ? 'good' : 'bad'; ?>">
+        <td><code><?php echo htmlspecialchars($r[0]); ?></code></td>
+        <td class="<?php echo $r[1] ? 'ok' : 'bad2'; ?>"><?php echo $r[1] ? 'FIXED' : 'FAILED'; ?></td>
+        <td><?php echo htmlspecialchars($r[2]); ?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+
+<?php if ($apply && $stillBroken > 0 && !$confirmed): ?>
+<h3>Option A — rebuild the folders from PHP (no SSH needed)</h3>
+<p>PHP cannot change the permissions of a folder another user owns. It <em>can</em>,
+however, replace it: <code>uploads/</code> belongs to
+<code><?php echo htmlspecialchars($phpUser); ?></code>, and creating or renaming
+an entry inside a folder depends on the parent folder, not on the entry.</p>
+<p>So each stubborn folder is moved aside to <code>&lt;name&gt;.old-&lt;timestamp&gt;</code>,
+recreated fresh (owned by <code><?php echo htmlspecialchars($phpUser); ?></code>),
+and its contents copied over. <strong>Nothing is deleted</strong> — the original
+is kept so you can check it and remove it later.</p>
+<p><a class="btn" href="?apply=1&amp;repair=1&amp;confirm=1"
+      onclick="return confirm('Rebuild the folders PHP cannot modify? The originals are kept as .old-... copies.');">
+   Rebuild the failed folders</a></p>
+
+<h3>Option B — fix it properly over SSH (recommended if you have access)</h3>
+<p>Root-owned folders usually mean a deploy was run with <code>sudo</code>.
+One command fixes it at the source:</p>
+<pre><code>sudo chown -R <?php echo htmlspecialchars($phpUser); ?>:<?php echo htmlspecialchars($phpUser); ?> /path/to/your/site/uploads
+sudo find /path/to/your/site/uploads -type d -exec chmod 755 {} \;
+sudo find /path/to/your/site/uploads -type f -exec chmod 644 {} \;</code></pre>
+<p>To stop it recurring, pull as your normal user rather than with
+<code>sudo</code>, or re-run the <code>chown</code> after each deploy.</p>
+<?php endif; ?>
+
+<?php if ($apply && $stillBroken > 0 && $confirmed): ?>
+<h3>Still failing?</h3>
 <p>That means the folders are owned by a different user than the one PHP runs as
 (<code><?php echo htmlspecialchars($phpUser); ?></code>), so PHP is not allowed to change them. Do it directly:</p>
 
