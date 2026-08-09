@@ -25,6 +25,48 @@ foreach ($all_items as $item) {
     $grouped_items[$item['section_key']][] = $item;
 }
 
+// ---- Policy search -------------------------------------------------------
+// The box used to be decorative markup with no form and no handler. Filtering
+// happens here so the search still works with JavaScript disabled; the script
+// at the bottom of the page layers instant filtering on top.
+$q = trim((string) ($_GET['q'] ?? ''));
+
+/** Everything about an item that a visitor might reasonably search for. */
+function vvu_policy_haystack(array $item) {
+    $parts = [
+        $item['item_title'] ?? '',
+        $item['item_subtitle'] ?? '',
+        $item['item_description'] ?? '',
+    ];
+    foreach ($item['documents'] ?? [] as $doc) {
+        $parts[] = $doc['title'] ?? '';
+    }
+    return mb_strtolower(strip_tags(implode(' ', $parts)));
+}
+
+/**
+ * Non-matching cards are HIDDEN, never removed. If PHP dropped them from the
+ * markup, clearing the box in the browser could not bring them back — they
+ * would not be in the DOM to un-hide.
+ */
+function vvu_policy_hidden(array $item, $q) {
+    if ($q === '') {
+        return false;
+    }
+    return mb_strpos(vvu_policy_haystack($item), mb_strtolower($q)) === false;
+}
+
+$search_total = 0;
+if ($q !== '') {
+    foreach (['framework', 'quick_links'] as $key) {
+        foreach ($grouped_items[$key] ?? [] as $item) {
+            if (!vvu_policy_hidden($item, $q)) {
+                $search_total++;
+            }
+        }
+    }
+}
+
 include 'includes/header.php';
 ?>
 
@@ -42,6 +84,46 @@ include 'includes/header.php';
         0% { transform: scale(1); }
         100% { transform: scale(1.1); }
     }
+    /* Materialize styles bare <input> elements with a grey bottom border and a
+       focus box-shadow, which showed as a stray line under the placeholder and
+       fought the rounded pill. Reset it just for this field. */
+    .policy-search-input,
+    .policy-search-input:focus,
+    input[type="search"].policy-search-input:focus:not([readonly]) {
+        border: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        height: auto !important;
+        margin: 0 !important;
+        background-color: transparent !important;
+        /* Materialize targets input[type=search] (specificity 0,1,1), which beats
+           a Tailwind text-* class (0,1,0) — so the size must be set here or the
+           field renders at Materialize's 1rem, which is 10px on this page. */
+        font-size: 17px !important;
+        line-height: 1.4 !important;
+        font-weight: 500;
+    }
+    .policy-search-input::placeholder { color: #94a3b8; opacity: 1; font-weight: 400; }
+    @media (max-width: 640px) {
+        .policy-search-input { font-size: 15px !important; }
+    }
+    /* Hide the browser's own clear cross — we render our own */
+    .policy-search-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+
+    /* Brief highlight on the card the search jumped to */
+    @keyframes policyHit {
+        0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.55); }
+        70%  { box-shadow: 0 0 0 14px rgba(37, 99, 235, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+    .policy-hit { animation: policyHit 1.4s ease-out; border-radius: 1.5rem; }
+
+    .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
     .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
     .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
     .animate-float { animation: float 4s ease-in-out infinite; }
@@ -107,7 +189,9 @@ include 'includes/header.php';
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
                 <?php foreach ($grouped_items['framework'] ?? [] as $category): ?>
-                <div class="policy-card relative group">
+                <div class="policy-card relative group<?php echo vvu_policy_hidden($category, $q) ? ' hidden' : ''; ?>"
+                     data-policy-searchable
+                     data-search-text="<?php echo htmlspecialchars(vvu_policy_haystack($category)); ?>">
                     <div class="relative h-full glass p-10 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($category['item_color']); ?> flex flex-col text-left">
                         <div class="w-24 h-24 rounded-3xl bg-<?php echo strip_tags($category['item_color']); ?> flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
                             <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($category['item_icon']); ?></span>
@@ -147,25 +231,58 @@ include 'includes/header.php';
                 <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($links_section['section_subtitle']); ?></p>
             </div>
 
-            <div class="max-w-4xl mx-auto">
-                <div class="relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                    <div class="relative flex items-center bg-white dark:bg-gray-900 rounded-full p-2 shadow-2xl">
-                        <div class="pl-6 text-gray-400">
-                            <span class="material-symbols-outlined text-4xl">search</span>
-                        </div>
-                        <input type="text" placeholder="Search for policies (e.g., Admissions, Conduct, Finance)..." 
-                               class="w-full bg-transparent border-none focus:ring-0 text-2xl py-6 px-6 text-gray-900 dark:text-white placeholder-gray-400">
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-full text-2xl font-bold transition-all transform hover:scale-105 shadow-lg">
+            <!-- Explicit px width: this page sets a 10px root font, so Tailwind's
+                 max-w-4xl resolves to 560px and left the bar looking pinched. -->
+            <div class="max-w-[860px] mx-auto">
+                <form method="GET" action="policies.php" id="policySearchForm" role="search" class="relative group">
+                    <label for="policySearch" class="sr-only">Search policies</label>
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-full blur opacity-25 group-focus-within:opacity-60 group-hover:opacity-50 transition duration-500"></div>
+                    <div class="relative flex items-center gap-2 bg-white dark:bg-gray-900 rounded-full p-2 pl-6 shadow-2xl">
+                        <span class="material-symbols-outlined text-3xl text-gray-400 flex-shrink-0" aria-hidden="true">search</span>
+
+                        <input type="search" id="policySearch" name="q" autocomplete="off"
+                               value="<?php echo htmlspecialchars($q); ?>"
+                               placeholder="Search policies — try Governance, Academic, Staff…"
+                               class="policy-search-input flex-grow min-w-0 bg-transparent text-xl py-4 px-3 text-gray-900 dark:text-white placeholder-gray-400">
+
+                        <!-- Clear button: only shown once there is something to clear -->
+                        <button type="button" id="policySearchClear"
+                                class="flex-shrink-0 w-10 h-10 rounded-full items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors <?php echo $q === '' ? 'hidden' : 'flex'; ?>"
+                                aria-label="Clear search">
+                            <span class="material-symbols-outlined text-2xl">close</span>
+                        </button>
+
+                        <button type="submit"
+                                class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-xl font-bold transition-all hover:scale-105 shadow-lg">
                             Search
                         </button>
                     </div>
+                </form>
+
+                <!-- Live result summary -->
+                <p id="policySearchStatus" role="status" aria-live="polite"
+                   class="mt-5 text-lg text-gray-600 dark:text-gray-400 font-medium <?php echo $q === '' ? 'hidden' : ''; ?>">
+                    <?php if ($q !== ''): ?>
+                        <?php echo $search_total; ?> result<?php echo $search_total === 1 ? '' : 's'; ?>
+                        for &ldquo;<span class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($q); ?></span>&rdquo;
+                    <?php endif; ?>
+                </p>
+
+                <!-- Empty state -->
+                <div id="policySearchEmpty" class="<?php echo ($q !== '' && $search_total === 0) ? '' : 'hidden'; ?> mt-10 p-12 rounded-3xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700">search_off</span>
+                    <h4 class="mt-4 text-3xl font-black text-gray-900 dark:text-white">No policies matched</h4>
+                    <p class="mt-3 text-xl text-gray-600 dark:text-gray-400">
+                        Try a broader word, or <button type="button" id="policySearchReset" class="text-blue-600 font-bold underline hover:text-blue-700">clear the search</button> to see everything.
+                    </p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20 text-left">
                 <?php foreach ($grouped_items['quick_links'] ?? [] as $link): ?>
-                <div class="group p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:-translate-y-2">
+                <div class="group p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:-translate-y-2<?php echo vvu_policy_hidden($link, $q) ? ' hidden' : ''; ?>"
+                     data-policy-searchable
+                     data-search-text="<?php echo htmlspecialchars(vvu_policy_haystack($link)); ?>">
                     <div class="w-16 h-16 rounded-2xl bg-<?php echo strip_tags($link['item_color']); ?> flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
                         <span class="material-symbols-outlined text-3xl text-white"><?php echo strip_tags($link['item_icon']); ?></span>
                     </div>
@@ -212,5 +329,89 @@ include 'includes/header.php';
         </div>
     </section>
 </main>
+
+<script>
+/* Policy search.
+   The form still submits normally with JavaScript off (PHP filters on ?q=).
+   This layers instant filtering on top so results update as you type. */
+(function () {
+    var form   = document.getElementById('policySearchForm');
+    var input  = document.getElementById('policySearch');
+    var clear  = document.getElementById('policySearchClear');
+    var reset  = document.getElementById('policySearchReset');
+    var status = document.getElementById('policySearchStatus');
+    var empty  = document.getElementById('policySearchEmpty');
+    if (!form || !input) return;
+
+    var cards = [].slice.call(document.querySelectorAll('[data-policy-searchable]'));
+
+    function apply(term) {
+        term = term.trim().toLowerCase();
+        var matches = 0;
+
+        cards.forEach(function (card) {
+            var hit = term === '' || (card.getAttribute('data-search-text') || '').indexOf(term) !== -1;
+            card.classList.toggle('hidden', !hit);
+            if (hit) matches++;
+        });
+
+        clear.classList.toggle('hidden', term === '');
+        clear.classList.toggle('flex', term !== '');
+
+        if (term === '') {
+            status.classList.add('hidden');
+            empty.classList.add('hidden');
+        } else {
+            status.classList.remove('hidden');
+            status.innerHTML = matches + ' result' + (matches === 1 ? '' : 's') +
+                ' for &ldquo;<span class="font-bold text-gray-900 dark:text-white"></span>&rdquo;';
+            status.querySelector('span').textContent = term;   // textContent = no HTML injection
+            empty.classList.toggle('hidden', matches !== 0);
+        }
+
+        // Keep the URL in step so results can be shared or reloaded
+        var url = new URL(window.location.href);
+        if (term === '') { url.searchParams.delete('q'); } else { url.searchParams.set('q', term); }
+        window.history.replaceState({}, '', url);
+    }
+
+    var timer = null;
+    input.addEventListener('input', function () {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(function () { apply(input.value); }, 120);
+    });
+
+    // Enter (or the Search button) filters in place and jumps to the first
+    // match — matches often sit in the section above the box, so without this
+    // you are left looking at an empty area wondering if it worked.
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        window.clearTimeout(timer);
+        apply(input.value);
+        input.blur();
+
+        if (input.value.trim() !== '') {
+            var first = cards.find(function (c) { return !c.classList.contains('hidden'); });
+            if (first) {
+                first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                first.classList.add('policy-hit');
+                window.setTimeout(function () { first.classList.remove('policy-hit'); }, 1600);
+            }
+        }
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { input.value = ''; apply(''); }
+    });
+
+    function clearAll() { input.value = ''; apply(''); input.focus(); }
+    if (clear) clear.addEventListener('click', clearAll);
+    if (reset) reset.addEventListener('click', clearAll);
+
+    // If the page arrived with ?q=, PHP already filtered — re-apply so the
+    // counter and empty state match what is on screen.
+    if (input.value.trim() !== '') apply(input.value);
+})();
+</script>
 
 <?php include 'includes/footer.php'; ?>
