@@ -116,9 +116,10 @@ function getProgramCategoryColor($category) {
     $colors = [
         'School of Business' => 'from-blue-500 to-blue-700',
         'Faculty of Arts & Social Science' => 'from-purple-500 to-purple-700',
-        'School of Nursing and Midwifery' => 'from-green-500 to-green-700',
+        'Faculty of Arts & Social Sciences' => 'from-purple-500 to-purple-700',
+        'Department of Teacher Education' => 'from-yellow-500 to-yellow-700',
+        'Faculty of Science' => 'from-green-500 to-green-700',
         'School of IT & Computing' => 'from-indigo-500 to-indigo-700',
-        'School of Education' => 'from-yellow-500 to-yellow-700',
         'School of Theology & Missions' => 'from-red-500 to-red-700',
     ];
     return $colors[$category] ?? 'from-blue-500 to-blue-700';
@@ -128,9 +129,10 @@ function getProgramBadgeColor($category) {
     $colors = [
         'School of Business' => 'bg-blue-600',
         'Faculty of Arts & Social Science' => 'bg-purple-600',
-        'School of Nursing and Midwifery' => 'bg-green-600',
+        'Faculty of Arts & Social Sciences' => 'bg-purple-600',
+        'Department of Teacher Education' => 'bg-yellow-600',
+        'Faculty of Science' => 'bg-green-600',
         'School of IT & Computing' => 'bg-indigo-600',
-        'School of Education' => 'bg-yellow-600',
         'School of Theology & Missions' => 'bg-red-600',
     ];
     return $colors[$category] ?? 'bg-blue-600';

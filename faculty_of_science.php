@@ -218,6 +218,17 @@ $activePage = "academics";
                             Bridging the gap between engineering and medicine through advanced healthcare technology.
                         </p>
                     </div>
+
+                    <!-- Nursing and Midwifery -->
+                    <div class="group p-12 bg-gray-50 dark:bg-gray-800 rounded-[3rem] hover:bg-blue-600 transition-all duration-500 hover:-translate-y-4 shadow-sm hover:shadow-2xl md:col-span-2">
+                        <div class="w-24 h-24 rounded-3xl bg-blue-600 group-hover:bg-white flex items-center justify-center mb-10 transition-colors shadow-lg">
+                            <span class="material-symbols-outlined text-5xl text-white group-hover:text-blue-600">health_and_safety</span>
+                        </div>
+                        <h4 class="text-5xl font-black text-gray-900 dark:text-white group-hover:text-white mb-6 transition-colors">Nursing and Midwifery</h4>
+                        <p class="text-2xl text-gray-600 dark:text-gray-400 group-hover:text-blue-50 font-medium transition-colors leading-relaxed">
+                            Training compassionate, clinically excellent nurses and midwives through accredited programmes recognised by the Nurses and Midwifery Council, Ghana.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -289,6 +300,18 @@ $activePage = "academics";
                             <li class="flex items-start gap-4">
                                 <span class="material-symbols-outlined text-yellow-500 mt-1">check_circle</span>
                                 <span class="text-2xl font-bold text-gray-700 dark:text-gray-300">BSc Bio-Medical Equipment Tech</span>
+                            </li>
+                            <li class="flex items-start gap-4">
+                                <span class="material-symbols-outlined text-yellow-500 mt-1">check_circle</span>
+                                <span class="text-2xl font-bold text-gray-700 dark:text-gray-300">B.Sc General Nursing</span>
+                            </li>
+                            <li class="flex items-start gap-4">
+                                <span class="material-symbols-outlined text-yellow-500 mt-1">check_circle</span>
+                                <span class="text-2xl font-bold text-gray-700 dark:text-gray-300">BSc Mental Health Nursing</span>
+                            </li>
+                            <li class="flex items-start gap-4">
+                                <span class="material-symbols-outlined text-yellow-500 mt-1">check_circle</span>
+                                <span class="text-2xl font-bold text-gray-700 dark:text-gray-300">BSc Midwifery</span>
                             </li>
                         </ul>
                     </div>

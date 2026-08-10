@@ -1,6 +1,7 @@
 <?php
 require_once 'includes/db_connect.php';
 require_once 'includes/administration_content_helper.php';
+require_once 'includes/ebook_access.php';
 if (session_status() == PHP_SESSION_NONE) session_start();
 
 // Digital Books content is stored under the Library Resources page (id=53)
@@ -25,6 +26,11 @@ $partnerLibraries = $adminContent->getSectionFields($page_id, 'db_partner_librar
 $quickLinks = $adminContent->getSectionFields($page_id, 'db_quick_links');
 
 $is_admin = isset($_SESSION['admin_id']);
+
+// E-Books collection is gated behind VVU email verification (button + QR code)
+$ebooks_gate_url = vvu_ebook_gate_url('ebooks');
+$ebooks_verified = vvu_ebook_has_access();
+$ebooks_verified_email = vvu_ebook_verified_email();
 
 include 'includes/header.php';
 ?>
@@ -121,6 +127,53 @@ include 'includes/header.php';
         height: auto;
         border-radius: 12px;
     }
+
+    /* E-Books access status */
+    .ebooks-status {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px 22px;
+        border-radius: 20px;
+        border: 1px solid transparent;
+        line-height: 1.6;
+    }
+    .ebooks-status .material-symbols-outlined { font-size: 1.8rem; flex-shrink: 0; }
+    .ebooks-status strong {
+        display: block;
+        font-size: 1.35rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+    .ebooks-status span.ebooks-note, .ebooks-status div > span { font-size: 1.2rem; }
+    .ebooks-status code {
+        padding: 2px 8px;
+        border-radius: 8px;
+        font-weight: 700;
+        background: rgba(59,130,246,0.12);
+    }
+    .ebooks-status a { font-weight: 800; text-decoration: underline; }
+    .ebooks-status-lock {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1e40af;
+    }
+    .dark .ebooks-status-lock {
+        background: rgba(59,130,246,0.12);
+        border-color: rgba(59,130,246,0.3);
+        color: #bfdbfe;
+    }
+    .ebooks-status-ok {
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+        color: #065f46;
+    }
+    .dark .ebooks-status-ok {
+        background: rgba(16,185,129,0.12);
+        border-color: rgba(16,185,129,0.3);
+        color: #a7f3d0;
+    }
+    .ebooks-status-ok code { background: rgba(16,185,129,0.15); }
 
     /* Resource Cards */
     .resource-card {
@@ -486,8 +539,8 @@ include 'includes/header.php';
                         <!-- QR Code Side -->
                         <div class="flex items-center justify-center p-8 md:p-12 lg:p-16 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
                             <div class="qr-image-container animate-float">
-                                <img src="<?php echo strip_tags($qrEbooks['qr_image'] ?? 'https://vvu.edu.gh/images/library/qr-code.png'); ?>" 
-                                     alt="VVU Library E-Books QR Code">
+                                <img src="ebooks_qr.php?r=ebooks"
+                                     alt="Scan to verify your VVU email and open the E-Books Collection">
                             </div>
                         </div>
                         <!-- Info Side -->
@@ -499,19 +552,41 @@ include 'includes/header.php';
                                 <h3 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white">E-Books Collection</h3>
                             </div>
                             <p class="text-2xl text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-                                Scan the QR code with your mobile device camera for instant access, or use the button below to open directly in your browser.
+                                Scan the QR code with your mobile device camera, or use the button below. You will be asked to confirm your VVU email address before the collection opens.
                             </p>
-                            <div class="flex items-center gap-4 text-lg text-gray-500 dark:text-gray-500 mb-10">
+                            <div class="flex items-center gap-4 text-lg text-gray-500 dark:text-gray-500 mb-6">
                                 <span class="material-symbols-outlined text-green-500" style="font-size: 1.25rem;">verified</span>
-                                <span>Hosted on Google Drive • Free Access • Updated Regularly</span>
+                                <span>Hosted on Google Drive • VVU Students &amp; Staff Only • Updated Regularly</span>
                             </div>
+
+                            <?php if ($ebooks_verified): ?>
+                                <div class="ebooks-status ebooks-status-ok mb-8">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                    <div>
+                                        <strong>Verified as <?php echo htmlspecialchars($ebooks_verified_email); ?></strong>
+                                        <span>You have access for the next few hours.
+                                            <a href="<?php echo htmlspecialchars($ebooks_gate_url . '&switch=1'); ?>">Not you?</a>
+                                        </span>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="ebooks-status ebooks-status-lock mb-8">
+                                    <span class="material-symbols-outlined">lock</span>
+                                    <div>
+                                        <strong>Verification required</strong>
+                                        <span>Sign in with an <code>@st.vvu.edu.gh</code> or <code>@vvu.edu.gh</code> email address to open this collection.</span>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
                             <div class="flex flex-wrap gap-4">
-                                <a href="<?php echo strip_tags($qrEbooks['ebooks_url'] ?? '#'); ?>" 
-                                   target="_blank"
+                                <a href="<?php echo htmlspecialchars($ebooks_gate_url); ?>"
                                    class="cta-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500"
                                    style="font-size: 1.1rem; padding: 14px 28px;">
-                                    <span class="material-symbols-outlined">open_in_new</span>
-                                    <?php echo strip_tags($qrEbooks['button_text'] ?? 'Access E-Books Collection'); ?>
+                                    <span class="material-symbols-outlined"><?php echo $ebooks_verified ? 'open_in_new' : 'lock_person'; ?></span>
+                                    <?php echo $ebooks_verified
+                                        ? strip_tags($qrEbooks['button_text'] ?? 'Access E-Books Collection')
+                                        : 'Verify Email to Access'; ?>
                                 </a>
                             </div>
                         </div>

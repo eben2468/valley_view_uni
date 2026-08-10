@@ -2,13 +2,14 @@
 require_once('includes/db_connect.php');
 
 // 1. Seed Categories
+// The School of Nursing and Midwifery now sits under the Faculty of Science, and
+// the Department of Teacher Education (formerly the School of Education) under
+// the Faculty of Arts & Social Sciences, so neither is seeded as its own category.
 $categories = [
-    'School of Nursing and Midwifery' => ['medical_services', '#ef4444', '#dc2626'],
     'Professional Courses' => ['workspace_premium', '#f59e0b', '#d97706'],
     'Center for Adult and Continuing Education' => ['school', '#10b981', '#059669'],
     'School of Business' => ['business_center', '#3b82f6', '#2563eb'],
     'Faculty of Science' => ['science', '#8b5cf6', '#7c3aed'],
-    'School of Education' => ['menu_book', '#ec4899', '#db2777'],
     'School of Graduate Studies' => ['psychology', '#06b6d4', '#0891b2'],
     'Faculty of Arts & Social Sciences' => ['palette', '#f97316', '#ea580c']
 ];

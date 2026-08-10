@@ -7,13 +7,13 @@
     },
     {
         "title": "B.Ed Mathematics",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Bachelor of Education in Mathematics",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/mathematics"
     },
     {
         "title": "B.Ed Social Studies",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Bachelor of Education in Social Studies",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/bed-social-studies"
     },
@@ -25,13 +25,13 @@
     },
     {
         "title": "B.Ed Management",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Bachelor of Education in Management",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/bed-management"
     },
     {
         "title": "B.Ed Accounting",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Bachelor of Education in Accounting",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/bed-accounting"
     },
@@ -109,13 +109,13 @@
     },
     {
         "title": "BSc Midwifery",
-        "category": "School of Nursing and Midwifery",
+        "category": "Faculty of Science",
         "description": "Bachelor of Science, Midwifery",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/bsc-midwifery"
     },
     {
         "title": "BSc Mental Health Nursing",
-        "category": "School of Nursing and Midwifery",
+        "category": "Faculty of Science",
         "description": "Bachelor of Science, Mental Health Nursing",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/bsc-mental-health-nursing"
     },
@@ -133,19 +133,19 @@
     },
     {
         "title": "B.Sc General Nursing",
-        "category": "School of Nursing and Midwifery",
+        "category": "Faculty of Science",
         "description": "Bachelor of Science in Nursing",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/b-sc-general-nursing"
     },
     {
         "title": "B.Ed Religions",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Bachelor of Education in Religious Studies",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/b-ed-religions"
     },
     {
         "title": "B.Ed information Technology",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Bachelor of Education in Information Technology",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/b-ed-information-technology"
     },
@@ -217,25 +217,25 @@
     },
     {
         "title": "Bachelor of Education in Music",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Bachelor of Education in Music",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/bachelor-of-education-in-music"
     },
     {
         "title": "Diploma in Music",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Diploma in Music",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/diploma-in-music2"
     },
     {
         "title": "Certificate in Sound Engineering",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Certificate in Sound Engineering",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/certificate-in-sound-engineering"
     },
     {
         "title": "Certificate in Early Childhood Education",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Certificate in Early Childhood Education",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/certificate-in-early-childhood-education"
     },
@@ -313,7 +313,7 @@
     },
     {
         "title": "B.Ed English Language",
-        "category": "School of Education",
+        "category": "Faculty of Arts & Social Sciences",
         "description": "Bachelor of Education in English Language",
         "link": "https://vvu.edu.gh/index.php/lms/courses/course/education"
     },

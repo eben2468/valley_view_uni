@@ -19,13 +19,52 @@ $db_categories = $categories_stmt->fetchAll();
 
 // Fetch All Programs
 $programs_stmt = $pdo->query("
-    SELECT ap.*, pc.name as category_name, pc.color_1, pc.color_2 
-    FROM academic_programs ap 
-    JOIN program_categories pc ON ap.category_id = pc.id 
-    WHERE ap.is_active = 1 
+    SELECT ap.*, pc.name as category_name, pc.color_1, pc.color_2,
+           pd.name as department_name, pd.icon as department_icon,
+           pd.display_order as department_order
+    FROM academic_programs ap
+    JOIN program_categories pc ON ap.category_id = pc.id
+    LEFT JOIN program_departments pd ON ap.department_id = pd.id AND pd.is_active = 1
+    WHERE ap.is_active = 1
     ORDER BY ap.display_order ASC, ap.title ASC
 ");
 $db_programs = $programs_stmt->fetchAll();
+
+/*
+ * Group the programmes as faculty/school -> department -> programmes so they are
+ * listed under their department rather than in one flat grid. Units without
+ * departments (e.g. the School of Graduate Studies) fall into a single
+ * unnamed group that renders without a department heading.
+ */
+$programs_by_unit = [];
+foreach ($db_programs as $program) {
+    $unit = $program['category_name'];
+    $department = $program['department_name'] ?: '';
+
+    if (!isset($programs_by_unit[$unit])) {
+        $programs_by_unit[$unit] = [
+            'color_1'     => $program['color_1'],
+            'color_2'     => $program['color_2'],
+            'departments' => [],
+        ];
+    }
+    if (!isset($programs_by_unit[$unit]['departments'][$department])) {
+        $programs_by_unit[$unit]['departments'][$department] = [
+            'icon'     => $program['department_icon'] ?: 'school',
+            'order'    => $department === '' ? PHP_INT_MAX : (int)$program['department_order'],
+            'programs' => [],
+        ];
+    }
+    $programs_by_unit[$unit]['departments'][$department]['programs'][] = $program;
+}
+
+// Keep departments in their configured order, unnamed group last.
+foreach ($programs_by_unit as &$unit_data) {
+    uasort($unit_data['departments'], function ($a, $b) {
+        return $a['order'] <=> $b['order'];
+    });
+}
+unset($unit_data);
 
 // Fetch Stats
 $stats_stmt = $pdo->query("SELECT * FROM academic_programs_stats ORDER BY display_order ASC");
@@ -240,6 +279,88 @@ foreach ($db_categories as $cat) {
         color: #94a3b8;
     }
     
+    /* ========================================
+       FACULTY / SCHOOL AND DEPARTMENT GROUPING
+       ======================================== */
+    .unit-block + .unit-block {
+        margin-top: 5rem;
+    }
+    .unit-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding-bottom: 1.25rem;
+        margin-bottom: 2.5rem;
+        border-bottom: 3px solid;
+        border-image: linear-gradient(90deg, var(--cat-color-1), var(--cat-color-2)) 1;
+    }
+    .unit-name {
+        font-size: clamp(1.75rem, 3vw, 2.5rem);
+        font-weight: 900;
+        line-height: 1.15;
+        color: #0f172a;
+        margin: 0;
+    }
+    .dark .unit-name { color: #f1f5f9; }
+    .unit-count {
+        flex-shrink: 0;
+        margin-left: auto;
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        white-space: nowrap;
+        color: #fff;
+        background: linear-gradient(135deg, var(--cat-color-1), var(--cat-color-2));
+    }
+    .department-block + .department-block {
+        margin-top: 3rem;
+    }
+    .department-header {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        margin-bottom: 1.5rem;
+    }
+    .department-icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.9rem;
+        font-size: 1.5rem;
+        color: #fff;
+        background: linear-gradient(135deg, var(--cat-color-1), var(--cat-color-2));
+    }
+    .department-name {
+        font-size: clamp(1.15rem, 2vw, 1.5rem);
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+    .dark .department-name { color: #e2e8f0; }
+    .department-count {
+        flex-shrink: 0;
+        min-width: 1.9rem;
+        padding: 0.15rem 0.6rem;
+        border-radius: 999px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #475569;
+        background: #f1f5f9;
+    }
+    .dark .department-count {
+        color: #cbd5e1;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    @media (max-width: 640px) {
+        .unit-header { flex-wrap: wrap; gap: 0.75rem; }
+        .unit-count { margin-left: 0; }
+    }
+
     /* ========================================
        PROGRAM CARDS
        ======================================== */
@@ -632,44 +753,74 @@ foreach ($db_categories as $cat) {
                 </div>
             </div>
             
-            <div id="programsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <?php foreach ($db_programs as $program): ?>
-                <div class="program-card flex flex-col h-full" 
-                     data-title="<?php echo strtolower(strip_tags($program['title'])); ?>" 
-                     data-category="<?php echo strip_tags($program['category_name']); ?>"
-                     style="--cat-color-1: <?php echo $program['color_1']; ?>; --cat-color-2: <?php echo $program['color_2']; ?>;">
-                    <div class="p-8 flex-grow">
-                        <div class="program-card-header">
-                            <span class="program-badge">
-                                <span class="material-symbols-outlined" style="font-size: 1rem;">school</span>
-                                <?php echo strip_tags($program['category_name']); ?>
-                            </span>
+            <div id="programsGrid">
+                <?php foreach ($programs_by_unit as $unit_name => $unit_data): ?>
+                <?php
+                    $unit_total = 0;
+                    foreach ($unit_data['departments'] as $d) {
+                        $unit_total += count($d['programs']);
+                    }
+                ?>
+                <section class="unit-block" data-category="<?php echo strip_tags($unit_name); ?>"
+                         style="--cat-color-1: <?php echo $unit_data['color_1']; ?>; --cat-color-2: <?php echo $unit_data['color_2']; ?>;">
+                    <div class="unit-header">
+                        <h3 class="unit-name"><?php echo strip_tags($unit_name); ?></h3>
+                        <span class="unit-count"><?php echo $unit_total; ?> Programs</span>
+                    </div>
+
+                    <?php foreach ($unit_data['departments'] as $dept_name => $dept_data): ?>
+                    <div class="department-block">
+                        <?php if ($dept_name !== ''): ?>
+                        <div class="department-header">
+                            <span class="material-symbols-outlined department-icon"><?php echo strip_tags($dept_data['icon']); ?></span>
+                            <h4 class="department-name"><?php echo strip_tags($dept_name); ?></h4>
+                            <span class="department-count"><?php echo count($dept_data['programs']); ?></span>
                         </div>
-                        <h3 class="program-title"><?php echo strip_tags($program['title']); ?></h3>
-                        <p class="program-desc line-clamp-3"><?php echo strip_tags($program['description']); ?></p>
-                        
-                        <div class="program-meta">
-                            <div class="meta-item">
-                                <i class="material-symbols-outlined">schedule</i>
-                                <?php echo strip_tags($program['duration']); ?>
+                        <?php endif; ?>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <?php foreach ($dept_data['programs'] as $program): ?>
+                            <div class="program-card flex flex-col h-full"
+                                 data-title="<?php echo strtolower(strip_tags($program['title'])); ?>"
+                                 data-category="<?php echo strip_tags($program['category_name']); ?>"
+                                 style="--cat-color-1: <?php echo $program['color_1']; ?>; --cat-color-2: <?php echo $program['color_2']; ?>;">
+                                <div class="p-8 flex-grow">
+                                    <div class="program-card-header">
+                                        <span class="program-badge">
+                                            <span class="material-symbols-outlined" style="font-size: 1rem;">school</span>
+                                            <?php echo strip_tags($program['department_name'] ?: $program['category_name']); ?>
+                                        </span>
+                                    </div>
+                                    <h3 class="program-title"><?php echo strip_tags($program['title']); ?></h3>
+                                    <p class="program-desc line-clamp-3"><?php echo strip_tags($program['description']); ?></p>
+
+                                    <div class="program-meta">
+                                        <div class="meta-item">
+                                            <i class="material-symbols-outlined">schedule</i>
+                                            <?php echo strip_tags($program['duration']); ?>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="material-symbols-outlined">layers</i>
+                                            <?php echo strip_tags($program['level']); ?>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="material-symbols-outlined">location_on</i>
+                                            <?php echo strip_tags(explode(',', $program['campus'])[0]); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-8 pt-0">
+                                    <a href="course_details.php?id=<?php echo $program['id']; ?>" class="btn-view">
+                                        Explore Program
+                                        <span class="material-symbols-outlined">arrow_forward</span>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="meta-item">
-                                <i class="material-symbols-outlined">layers</i>
-                                <?php echo strip_tags($program['level']); ?>
-                            </div>
-                            <div class="meta-item">
-                                <i class="material-symbols-outlined">location_on</i>
-                                <?php echo strip_tags(explode(',', $program['campus'])[0]); ?>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
-                    <div class="p-8 pt-0">
-                        <a href="course_details.php?id=<?php echo $program['id']; ?>" class="btn-view">
-                            Explore Program
-                            <span class="material-symbols-outlined">arrow_forward</span>
-                        </a>
-                    </div>
-                </div>
+                    <?php endforeach; ?>
+                </section>
                 <?php endforeach; ?>
             </div>
 
@@ -726,13 +877,13 @@ foreach ($db_categories as $cat) {
 
     let selectedCategory = '';
 
+    const unitBlocks = programsGrid.querySelectorAll('.unit-block');
+
     function filterPrograms() {
         let visibleCount = 0;
 
         programCards.forEach(card => {
-            const title = card.getAttribute('data-title');
             const category = card.getAttribute('data-category');
-            
             const matchesCategory = selectedCategory === '' || category === selectedCategory;
 
             if (matchesCategory) {
@@ -744,9 +895,22 @@ foreach ($db_categories as $cat) {
             }
         });
 
+        // Hide any department group or faculty/school heading left with no cards.
+        unitBlocks.forEach(unit => {
+            let unitVisible = 0;
+
+            unit.querySelectorAll('.department-block').forEach(group => {
+                const shown = group.querySelectorAll('.program-card:not([style*="display: none"])').length;
+                group.style.display = shown === 0 ? 'none' : '';
+                unitVisible += shown;
+            });
+
+            unit.style.display = unitVisible === 0 ? 'none' : '';
+        });
+
         noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-        programsGrid.style.display = visibleCount === 0 ? 'none' : 'grid';
-        
+        programsGrid.style.display = visibleCount === 0 ? 'none' : '';
+
         // Update title and count
         if (selectedCategory) {
             programsTitle.textContent = selectedCategory;
