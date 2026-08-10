@@ -4,7 +4,7 @@
  * Manages content for: admissions.php, academic_programs_overview.php, the_campus.php, learning_outcomes.php
  */
 
-session_start();
+require_once __DIR__ . '/../includes/admin_auth.php';
 require_once '../includes/db_connect.php';
 require_once '../includes/upload_helper.php';
 

@@ -1,7 +1,6 @@
 <?php
 require_once('../includes/db_connect.php');
-if (session_status() == PHP_SESSION_NONE) session_start();
-
+require_once __DIR__ . '/../includes/admin_auth.php';
 // Handle AJAX save - before any output
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
     header('Content-Type: application/json');

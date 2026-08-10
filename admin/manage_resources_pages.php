@@ -5,7 +5,7 @@
  * download-forms.php, mature-entrance.php, degree_and_diploma_in_music.php
  */
 
-session_start();
+require_once __DIR__ . '/../includes/admin_auth.php';
 require_once '../includes/db_connect.php';
 require_once '../includes/upload_helper.php';
 

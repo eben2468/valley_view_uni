@@ -6,7 +6,7 @@
 
 require_once('../includes/db_connect.php');
 require_once('../includes/news_helpers.php');
-session_start();
+require_once __DIR__ . '/../includes/admin_auth.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['admin_id'])) {

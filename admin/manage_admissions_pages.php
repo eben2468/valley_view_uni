@@ -5,7 +5,7 @@
  * caution-to-applicants.php, scholarships.php, scholarships-forms.php
  */
 
-session_start();
+require_once __DIR__ . '/../includes/admin_auth.php';
 require_once '../includes/db_connect.php';
 require_once '../includes/upload_helper.php';
 

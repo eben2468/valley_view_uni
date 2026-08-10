@@ -1,7 +1,7 @@
 <?php
 require_once('../includes/db_connect.php');
 require_once('../includes/upload_helper.php');
-session_start();
+require_once __DIR__ . '/../includes/admin_auth.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
@@ -39,9 +39,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $uploaded = handleAdminFileUpload($_FILES['president_image_file'] ?? null, 'strategy');
             if ($uploaded) $image_url = $uploaded;
 
-            $stmt = $pdo->prepare("UPDATE strategic_plan_president_message SET section_title=?, president_image_url=?, message_quote=?, message_author=?, is_active=? WHERE id=?");
-            $stmt->execute([$_POST['section_title'], $image_url, $_POST['message_quote'], $_POST['message_author'], $_POST['is_active'] ?? 1, $_POST['id']]);
-            $success = "President message updated successfully!";
+            $stmt = $pdo->prepare("UPDATE strategic_plan_president_message SET section_title=?, president_image_url=?, message_quote=?, message_author=?, author_title=?, message_paragraph_1=?, message_paragraph_2=?, message_paragraph_3=?, message_paragraph_4=?, message_paragraph_5=?, is_active=? WHERE id=?");
+            $stmt->execute([
+                $_POST['section_title'], $image_url, $_POST['message_quote'], $_POST['message_author'],
+                $_POST['author_title'] ?? '',
+                $_POST['message_paragraph_1'] ?? '', $_POST['message_paragraph_2'] ?? '',
+                $_POST['message_paragraph_3'] ?? '', $_POST['message_paragraph_4'] ?? '',
+                $_POST['message_paragraph_5'] ?? '',
+                $_POST['is_active'] ?? 1, $_POST['id']
+            ]);
+            $success = "Vice Chancellor's message updated successfully!";
+        }
+
+        elseif ($action === 'update_strategic_heading') {
+            $stmt = $pdo->prepare("UPDATE strategic_plan_section_headings SET heading=?, subheading=?, is_active=? WHERE id=?");
+            $stmt->execute([$_POST['heading'], $_POST['subheading'] ?? '', $_POST['is_active'] ?? 1, $_POST['id']]);
+            $success = "Section heading updated successfully!";
         }
         
         elseif ($action === 'update_strategic_pillar') {
@@ -199,6 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $strategic_hero = $pdo->query("SELECT * FROM strategic_plan_hero ORDER BY id DESC LIMIT 1")->fetch();
 $strategic_president = $pdo->query("SELECT * FROM strategic_plan_president_message ORDER BY id DESC LIMIT 1")->fetch();
 $strategic_pillars = $pdo->query("SELECT * FROM strategic_plan_pillars ORDER BY display_order ASC")->fetchAll();
+$strategic_headings = $pdo->query("SELECT * FROM strategic_plan_section_headings ORDER BY display_order ASC")->fetchAll();
 $strategic_timeline = $pdo->query("SELECT * FROM strategic_plan_timeline ORDER BY display_order ASC")->fetchAll();
 $strategic_stats = $pdo->query("SELECT * FROM strategic_plan_stats ORDER BY display_order ASC")->fetchAll();
 $strategic_cta = $pdo->query("SELECT * FROM strategic_plan_cta ORDER BY id DESC LIMIT 1")->fetch();
@@ -473,12 +487,22 @@ include 'sidebar.php';
 <input type="file" name="president_image_file" class="form-control" accept="image/*">
 </div>
 <div class="col-md-12 mb-3">
-<label class="form-label">Message Quote</label>
-<textarea name="message_quote" class="form-control" rows="4" required><?php echo htmlspecialchars($strategic_president['message_quote']); ?></textarea>
+<label class="form-label">Pull Quote <small style="font-weight:400;color:#64748b;">(the highlighted line above the message)</small></label>
+<textarea name="message_quote" class="form-control" rows="2"><?php echo htmlspecialchars($strategic_president['message_quote']); ?></textarea>
 </div>
+<?php for ($mp = 1; $mp <= 5; $mp++): ?>
 <div class="col-md-12 mb-3">
+<label class="form-label">Message Paragraph <?php echo $mp; ?> <small style="font-weight:400;color:#64748b;">(leave blank to hide)</small></label>
+<textarea name="message_paragraph_<?php echo $mp; ?>" class="form-control" rows="4"><?php echo htmlspecialchars($strategic_president['message_paragraph_' . $mp] ?? ''); ?></textarea>
+</div>
+<?php endfor; ?>
+<div class="col-md-6 mb-3">
 <label class="form-label">Message Author</label>
 <input type="text" name="message_author" class="form-control" value="<?php echo htmlspecialchars($strategic_president['message_author']); ?>">
+</div>
+<div class="col-md-6 mb-3">
+<label class="form-label">Author Title</label>
+<input type="text" name="author_title" class="form-control" value="<?php echo htmlspecialchars($strategic_president['author_title'] ?? ''); ?>">
 </div>
 <div class="col-md-12 mb-3">
 <div class="form-check">
@@ -487,10 +511,42 @@ include 'sidebar.php';
 </div>
 </div>
 <div class="col-md-12">
-<button type="submit" class="btn btn-primary"><i class="fa fa-save" style="margin-right: 8px;"></i>Update President Message</button>
+<button type="submit" class="btn btn-primary"><i class="fa fa-save" style="margin-right: 8px;"></i>Update Vice Chancellor's Message</button>
 </div>
 </div>
 </form>
+
+<!-- Section headings on the Strategic Plan page -->
+<h4 style="margin-top:35px;"><i class="fa fa-heading" style="margin-right: 10px;"></i>Strategic Plan Section Headings</h4>
+<p style="color:#64748b;margin-top:-6px;">The headings above the Pillars, Timeline and Milestones sections.</p>
+<?php foreach ($strategic_headings as $sh): ?>
+<form method="POST" class="mb-4" style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;">
+<input type="hidden" name="action" value="update_strategic_heading">
+<input type="hidden" name="id" value="<?php echo $sh['id']; ?>">
+<div class="row">
+<div class="col-md-12 mb-2">
+<span style="font-family:monospace;font-size:.8rem;background:#f1f5f9;color:#64748b;padding:3px 10px;border-radius:6px;"><?php echo htmlspecialchars($sh['section_key']); ?></span>
+</div>
+<div class="col-md-12 mb-3">
+<label class="form-label">Heading</label>
+<input type="text" name="heading" class="form-control" value="<?php echo htmlspecialchars($sh['heading']); ?>" required>
+</div>
+<div class="col-md-12 mb-3">
+<label class="form-label">Sub-heading <small style="font-weight:400;color:#64748b;">(leave blank to hide)</small></label>
+<textarea name="subheading" class="form-control" rows="2"><?php echo htmlspecialchars($sh['subheading'] ?? ''); ?></textarea>
+</div>
+<div class="col-md-12 mb-3">
+<div class="form-check">
+<input type="checkbox" name="is_active" value="1" class="form-check-input" id="heading_active_<?php echo $sh['id']; ?>" <?php echo $sh['is_active'] ? 'checked' : ''; ?>>
+<label class="form-check-label" for="heading_active_<?php echo $sh['id']; ?>">Active</label>
+</div>
+</div>
+<div class="col-md-12">
+<button type="submit" class="btn btn-primary"><i class="fa fa-save" style="margin-right: 8px;"></i>Update Heading</button>
+</div>
+</div>
+</form>
+<?php endforeach; ?>
 <?php endif; ?>
 
 <!-- Strategic Pillars -->

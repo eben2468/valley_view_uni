@@ -11,6 +11,17 @@ $timeline = $pdo->query("SELECT * FROM strategic_plan_timeline WHERE is_active=1
 $stats = $pdo->query("SELECT * FROM strategic_plan_stats WHERE is_active=1 ORDER BY display_order ASC")->fetchAll();
 $cta = $pdo->query("SELECT * FROM strategic_plan_cta WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetch();
 
+// Editable section headings, keyed by section
+$headings = [];
+foreach ($pdo->query("SELECT * FROM strategic_plan_section_headings WHERE is_active=1")->fetchAll(PDO::FETCH_ASSOC) as $h) {
+    $headings[$h['section_key']] = $h;
+}
+if (!function_exists('spHeading')) {
+    function spHeading($headings, $key, $field, $default = '') {
+        return htmlspecialchars($headings[$key][$field] ?? $default, ENT_QUOTES, 'UTF-8');
+    }
+}
+
 include 'includes/header.php';
 ?>
 
@@ -41,6 +52,26 @@ include 'includes/header.php';
         background: rgba(31, 41, 55, 0.7);
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
+    /* Vice Chancellor's message flows as one continuous column at every width */
+    .sp-message p + p { margin-top: 1.5rem; }
+
+    /* Wide content rail - fills the empty gutters on large screens.
+       .container is already 96% wide site-wide, so this only caps the
+       very widest displays. */
+    .sp-wrap {
+        max-width: 1720px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Portrait: keep the head high in the circular crop so the face reads
+       well, and cap how large it grows on very wide screens. */
+    .sp-portrait { object-position: center 22%; }
+    @media (min-width: 1024px) {
+        .sp-portrait { max-width: 340px; max-height: 340px; }
+        .sp-sticky { position: sticky; top: 110px; }
+    }
+
     .pillar-card {
         transition: all 0.3s ease;
     }
@@ -89,22 +120,45 @@ include 'includes/header.php';
     <?php if ($president): ?>
     <section class="py-24 bg-white dark:bg-gray-900">
         <div class="container">
-            <div class="max-w-5xl mx-auto">
-                <div class="flex flex-col lg:flex-row items-center gap-16">
-                    <div class="lg:w-1/3 relative">
-                        <div class="absolute -inset-4 bg-blue-600/20 rounded-full blur-2xl"></div>
-                        <img src="<?php echo strip_tags($president['president_image_url']); ?>" 
-                             alt="University President" class="relative z-10 w-64 h-64 md:w-80 md:h-80 rounded-full object-cover border-8 border-white dark:border-gray-800 shadow-2xl">
+            <div class="sp-wrap">
+                <div class="flex flex-col lg:flex-row items-center lg:items-stretch gap-12 lg:gap-16">
+                    <div class="lg:w-1/4 w-full flex items-start justify-center lg:justify-start shrink-0">
+                        <div class="sp-sticky relative">
+                            <div class="absolute -inset-4 bg-blue-600/20 rounded-full blur-2xl"></div>
+                            <img src="<?php echo strip_tags($president['president_image_url']); ?>"
+                                 alt="<?php echo htmlspecialchars(strip_tags((string) $president['message_author']), ENT_QUOTES, 'UTF-8'); ?>"
+                                 class="sp-portrait relative z-10 w-64 h-64 md:w-80 md:h-80 lg:w-full lg:h-auto lg:aspect-square rounded-full object-cover border-8 border-white dark:border-gray-800 shadow-2xl">
+                        </div>
                     </div>
-                    <div class="lg:w-2/3 text-center lg:text-left">
+                    <div class="lg:w-3/4 text-center lg:text-left">
                         <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-8"><?php echo strip_tags($president['section_title']); ?></h2>
                         <div class="h-2 w-24 bg-blue-600 mb-8 mx-auto lg:mx-0 rounded-full"></div>
-                        <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed italic mb-8">
+
+                        <?php if (!empty(trim(strip_tags((string) $president['message_quote'])))): ?>
+                        <p class="text-2xl sm:text-3xl text-gray-800 dark:text-gray-200 font-bold leading-relaxed italic mb-8 border-l-4 border-yellow-400 pl-6 text-left">
                             "<?php echo strip_tags($president['message_quote']); ?>"
                         </p>
-                        <p class="text-xl text-gray-500 dark:text-gray-500 font-bold">
-                            <?php echo strip_tags($president['message_author']); ?>
-                        </p>
+                        <?php endif; ?>
+
+                        <div class="sp-message text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed text-left">
+                            <?php for ($i = 1; $i <= 5; $i++):
+                                $para = trim(strip_tags((string) ($president["message_paragraph_{$i}"] ?? '')));
+                                if ($para === '') continue; ?>
+                            <p><?php echo htmlspecialchars($para, ENT_QUOTES, 'UTF-8'); ?></p>
+                            <?php endfor; ?>
+                        </div>
+
+                        <div class="mt-10 pt-8 border-t border-gray-100 dark:border-gray-800 flex items-center gap-4 justify-center lg:justify-start">
+                            <div class="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-lg">
+                                <span class="material-symbols-outlined text-3xl">draw</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white leading-tight"><?php echo strip_tags($president['message_author']); ?></p>
+                                <?php if (!empty($president['author_title'])): ?>
+                                <p class="text-sm font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest"><?php echo strip_tags($president['author_title']); ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -116,12 +170,12 @@ include 'includes/header.php';
     <section class="py-24 bg-gray-50 dark:bg-gray-950">
         <div class="container">
             <div class="max-w-4xl mx-auto text-center mb-20">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-6">Our Strategic Pillars</h2>
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-6"><?php echo spHeading($headings, 'pillars', 'heading', 'Our Strategic Pillars'); ?></h2>
                 <div class="h-2 w-40 bg-yellow-500 mx-auto rounded-full mb-8"></div>
-                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">The core areas of focus that will drive our growth and success through 2025.</p>
+                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo spHeading($headings, 'pillars', 'subheading'); ?></p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-<?php echo max(1, min(count($pillars), 4)); ?> gap-8 lg:gap-10">
                 <?php foreach ($pillars as $pillar): ?>
                 <div class="pillar-card relative group">
                     <div class="relative h-full glass p-10 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($pillar['border_color']); ?> flex flex-col">
@@ -159,8 +213,8 @@ include 'includes/header.php';
     <section class="py-24 bg-white dark:bg-gray-900 overflow-hidden">
         <div class="container">
             <div class="max-w-4xl mx-auto text-center mb-16">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-6">Implementation Timeline</h2>
-                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Our journey towards achieving Vision 2026.</p>
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-6"><?php echo spHeading($headings, 'timeline', 'heading', 'Implementation Timeline'); ?></h2>
+                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo spHeading($headings, 'timeline', 'subheading'); ?></p>
             </div>
 
             <div class="relative max-w-5xl mx-auto">
@@ -198,8 +252,12 @@ include 'includes/header.php';
         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div class="container relative z-10">
             <div class="max-w-5xl mx-auto text-center">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mb-16">Measuring Our Success</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-<?php echo min(count($stats), 3); ?> gap-12">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mb-4"><?php echo spHeading($headings, 'stats', 'heading', 'Our Foundation'); ?></h2>
+                <?php $stats_sub = spHeading($headings, 'stats', 'subheading'); ?>
+                <?php if ($stats_sub !== ''): ?>
+                <p class="text-xl sm:text-2xl text-blue-100 font-medium leading-relaxed mb-12"><?php echo $stats_sub; ?></p>
+                <?php endif; ?>
+                <div class="grid grid-cols-2 lg:grid-cols-<?php echo max(1, min(count($stats), 4)); ?> gap-10 lg:gap-12 mt-12">
                     <?php foreach ($stats as $index => $stat): ?>
                     <div class="animate-fadeInUp" style="animation-delay: <?php echo ($index * 0.1); ?>s;">
                         <div class="text-6xl md:text-7xl font-black text-yellow-400 mb-4"><?php echo strip_tags($stat['stat_value']); ?></div>

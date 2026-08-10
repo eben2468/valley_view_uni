@@ -1,6 +1,6 @@
 <?php
 require_once('../includes/db_connect.php');
-if (session_status() == PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../includes/admin_auth.php';
 if (!isset($_SESSION['admin_id'])) { header("Location: login.php"); exit(); }
 
 if (isset($_GET['delete_id'])) {

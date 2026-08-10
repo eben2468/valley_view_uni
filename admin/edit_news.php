@@ -1,6 +1,6 @@
 <?php
 require_once('../includes/db_connect.php');
-session_start();
+require_once __DIR__ . '/../includes/admin_auth.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
