@@ -1,0 +1,1921 @@
+/* ==========================================================================
+   VALLEY VIEW UNIVERSITY — MASTHEAD & NAVIGATION
+   --------------------------------------------------------------------------
+   A three-tier academic masthead (utility strip → brand band → main nav),
+   modelled on the classic Ghanaian university structure but rebuilt with a
+   modern type scale, gold ornamentation, full-bleed mega menus and a
+   condensing sticky bar.
+
+   Everything here is namespaced `vvu-` so it cannot collide with the legacy
+   Bootstrap / Materialize / theme rules that ship with the old template.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+    /* Brand palette — navy base (matches the site footer), gold ornament,
+       ember orange reserved for calls to action. */
+    --vvu-navy: #002147;
+    --vvu-navy-deep: #00152e;
+    --vvu-navy-soft: #0a3161;
+    --vvu-navy-line: rgba(255, 255, 255, .14);
+
+    --vvu-gold: #f0b429;
+    --vvu-gold-soft: #f7d67e;
+    --vvu-gold-deep: #c98a10;
+
+    --vvu-ember: #f26838;
+    --vvu-ember-deep: #e0521f;
+
+    --vvu-ink: #12233b;
+    --vvu-ink-soft: #5b6b80;
+    --vvu-hair: #e4e9f0;
+    --vvu-paper: #ffffff;
+    --vvu-paper-warm: #fbfaf7;
+
+    /* Rhythm — JS re-measures --vvu-scrolloff on load and resize. */
+    --vvu-utility-h: 76px;
+    --vvu-brand-h: 112px;
+    --vvu-nav-h: 58px;
+    --vvu-nav-h-stuck: 60px;
+    --vvu-mobilebar-h: 64px;
+    --vvu-scrolloff: 188px;
+
+    /* Minimum width of the Search pill. Row B reserves this much space on its
+       right so the contact text never runs under the button. */
+    --vvu-rail-w: 96px;
+
+    --vvu-shell: 1320px;
+    --vvu-gutter: 28px;
+
+    --vvu-ease: cubic-bezier(.4, .14, .3, 1);
+    --vvu-ease-out: cubic-bezier(.16, .84, .44, 1);
+
+    --vvu-shadow-sm: 0 2px 10px rgba(0, 33, 71, .07);
+    --vvu-shadow-md: 0 14px 34px -14px rgba(0, 33, 71, .28);
+    --vvu-shadow-lg: 0 30px 60px -24px rgba(0, 33, 71, .42), 0 4px 14px rgba(0, 33, 71, .08);
+
+    /* Woven diamond motif dusted over the dark strip. */
+    --vvu-weave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.06' stroke-width='1'%3E%3Cpath d='M28 0 56 28 28 56 0 28z'/%3E%3Cpath d='M28 18 38 28 28 38 18 28z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* --------------------------------------------------------------------------
+   2. SCAFFOLD
+   -------------------------------------------------------------------------- */
+
+/* The legacy stylesheet sets `* { font-weight: 500 }`, so every weight in the
+   masthead is declared explicitly. */
+.vvu-header,
+.vvu-header *,
+.vvu-drawer,
+.vvu-drawer * {
+    box-sizing: border-box;
+}
+
+.vvu-header {
+    position: relative;
+    z-index: 1200;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--vvu-paper);
+}
+
+/* ---------------------------------------------------------------------------
+   Framework de-fanging.
+
+   The page also loads Bootstrap 3, Materialize and the old theme stylesheet,
+   all of which style bare elements. Every reset below is wrapped in :where()
+   so it carries zero specificity — it neutralises the frameworks without ever
+   outranking the component rules further down this file.
+
+   What is being undone:
+     Materialize  nav        → salmon background, 56px line-height, and a
+                               z-depth-1 drop shadow that outlined the menu
+     Materialize  nav i      → display:block, 24px, 56px tall (broke the carets)
+     Materialize  nav ul a   → white text and a grey hover wash
+     Materialize  button:focus → teal (#2ab7a9) background
+     Theme        li         → hard-coded #203245 text
+   --------------------------------------------------------------------------- */
+:where(.vvu-header, .vvu-drawer) nav {
+    width: auto;
+    height: auto;
+    line-height: normal;
+    color: inherit;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+:where(.vvu-header, .vvu-drawer) nav i {
+    display: inline-block;
+    height: auto;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+:where(.vvu-header, .vvu-drawer) nav a,
+:where(.vvu-header, .vvu-drawer) nav ul a {
+    color: inherit;
+    background-color: transparent;
+    padding: 0;
+}
+
+:where(.vvu-header, .vvu-drawer) nav ul a:hover,
+:where(.vvu-header, .vvu-drawer) nav ul a:focus {
+    background-color: transparent;
+}
+
+:where(.vvu-header, .vvu-drawer) ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+:where(.vvu-header, .vvu-drawer) li {
+    list-style: none;
+}
+
+/* The theme hard-codes `p, li, a, span, label { color:#636363; font-size:15px;
+   font-weight:400; line-height:24px }`. Any element in the masthead that meant
+   to inherit from its component — the CTA label, the rail button labels, the
+   drawer accordion labels — was silently getting grey 15px text instead. */
+:where(.vvu-header, .vvu-drawer) :is(p, li, a, span, label) {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+:where(.vvu-header, .vvu-drawer) a,
+:where(.vvu-header, .vvu-drawer) a:hover,
+:where(.vvu-header, .vvu-drawer) a:focus {
+    text-decoration: none;
+}
+
+:where(.vvu-header, .vvu-drawer) button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+/* Materialize turns any focused button teal, so this one needs the extra
+   weight of a real pseudo-class to win. Buttons whose own :focus style is
+   declared below override it again. */
+:where(.vvu-header, .vvu-drawer) button:focus {
+    background-color: transparent;
+    outline-color: var(--vvu-gold);
+}
+
+.vvu-shell {
+    width: 100%;
+    max-width: var(--vvu-shell);
+    margin: 0 auto;
+    padding: 0 var(--vvu-gutter);
+}
+
+/* Visible focus ring for keyboard users only. */
+.vvu-header :focus-visible,
+.vvu-drawer :focus-visible {
+    outline: 2px solid var(--vvu-gold);
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+
+/* Skip link */
+.vvu-skip {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, -140%);
+    z-index: 2000;
+    padding: 12px 26px;
+    background: var(--vvu-navy);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    border-radius: 0 0 8px 8px;
+    transition: transform .22s var(--vvu-ease-out);
+}
+
+.vvu-skip:focus {
+    transform: translate(-50%, 0);
+    color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   3. TIER 1 — UTILITY STRIP
+   -------------------------------------------------------------------------- */
+/* Stacking order inside the masthead, bottom to top:
+   brand (2) < nav + its mega/search panels (4) < utility + quick links (6). */
+.vvu-utility {
+    position: relative;
+    z-index: 6;
+    height: var(--vvu-utility-h);
+    background:
+        var(--vvu-weave),
+        linear-gradient(115deg, var(--vvu-navy-deep) 0%, var(--vvu-navy) 46%, var(--vvu-navy-soft) 100%);
+    color: rgba(255, 255, 255, .82);
+    border-bottom: 1px solid rgba(240, 180, 41, .28);
+}
+
+/* The Search button is taken out of flow and pinned right, so the two content
+   rows span the full padded width. That lets Row A centre on the viewport
+   itself rather than on the space left beside the button — no dependency on
+   how wide the button happens to render. */
+.vvu-utility__inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0 var(--vvu-gutter);
+}
+
+.vvu-utility__main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    min-width: 0;
+}
+
+/* Row A — the nine service links, centred */
+.vvu-utility__links {
+    min-width: 0;
+}
+
+.vvu-utility__links ul {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.vvu-utility__links ul::-webkit-scrollbar {
+    display: none;
+}
+
+.vvu-utility__links a {
+    position: relative;
+    display: block;
+    padding: 7px 12px;
+    color: rgba(255, 255, 255, .88);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .085em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-radius: 4px;
+    transition: color .2s var(--vvu-ease), background-color .2s var(--vvu-ease);
+}
+
+.vvu-utility__links a::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 3px;
+    height: 1.5px;
+    background: var(--vvu-gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .28s var(--vvu-ease-out);
+}
+
+.vvu-utility__links a:hover,
+.vvu-utility__links a:focus {
+    color: #fff;
+    background: rgba(255, 255, 255, .07);
+}
+
+.vvu-utility__links a:hover::after,
+.vvu-utility__links a:focus::after {
+    transform: scaleX(1);
+}
+
+/* Row B — social icons hard left, phone + address hard right.
+   Right padding keeps the contact text clear of the pinned Search button. */
+.vvu-utility__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 2px;
+    padding-left: 4px;
+    padding-right: calc(var(--vvu-rail-w) + 18px);
+    min-width: 0;
+}
+
+.vvu-social {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 0 0 auto;
+}
+
+.vvu-social a {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, .78);
+    font-size: 13px;
+    border: 1px solid transparent;
+    transition: color .2s var(--vvu-ease), background-color .2s var(--vvu-ease),
+        border-color .2s var(--vvu-ease), transform .2s var(--vvu-ease-out);
+}
+
+.vvu-social a:hover,
+.vvu-social a:focus {
+    color: var(--vvu-navy-deep);
+    background: var(--vvu-gold);
+    border-color: var(--vvu-gold);
+    transform: translateY(-2px);
+}
+
+.vvu-utility__contact {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    flex: 0 1 auto;
+    min-width: 0;
+    padding-right: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: rgba(255, 255, 255, .62);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.vvu-utility__contact span,
+.vvu-utility__contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    color: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vvu-utility__contact i {
+    font-size: 10.5px;
+    color: var(--vvu-gold);
+}
+
+.vvu-utility__contact a:hover,
+.vvu-utility__contact a:focus {
+    color: #fff;
+}
+
+/* Separates the phone from the address now that the pair sits on its own at
+   the right edge — the old leading rule butted against the social icons. */
+.vvu-utility__contact a+span::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 1px;
+    height: 13px;
+    margin-right: 4px;
+    background: var(--vvu-navy-line);
+}
+
+/* Right rail — a single compact Search pill, pinned right and vertically
+   centred. Kept narrow so the nine service links get the width instead. */
+.vvu-utility__rail {
+    position: absolute;
+    top: 0;
+    right: var(--vvu-gutter);
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.vvu-rail-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: var(--vvu-rail-w);
+    padding: 7px 16px;
+    color: rgba(255, 255, 255, .92);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .09);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16);
+    transition: background-color .2s var(--vvu-ease), color .2s var(--vvu-ease),
+        box-shadow .2s var(--vvu-ease);
+}
+
+.vvu-rail-btn i {
+    font-size: 12.5px;
+    color: var(--vvu-gold);
+    transition: transform .3s var(--vvu-ease-out);
+}
+
+.vvu-rail-btn:hover,
+.vvu-rail-btn:focus,
+.vvu-rail-btn[aria-expanded="true"] {
+    color: var(--vvu-navy-deep);
+    background: var(--vvu-gold);
+    box-shadow: inset 0 0 0 1px var(--vvu-gold);
+}
+
+.vvu-rail-btn:hover i,
+.vvu-rail-btn:focus i,
+.vvu-rail-btn[aria-expanded="true"] i {
+    color: var(--vvu-navy-deep);
+    transform: scale(1.1);
+}
+
+/* --------------------------------------------------------------------------
+   4. SECTION TITLE (used by the drawer's Quick Links / Services groups)
+   -------------------------------------------------------------------------- */
+.vvu-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 18px;
+    color: var(--vvu-navy);
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.vvu-panel-title::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, var(--vvu-gold), rgba(240, 180, 41, 0));
+}
+
+/* --------------------------------------------------------------------------
+   5. TIER 2 — BRAND BAND
+   -------------------------------------------------------------------------- */
+.vvu-brand {
+    position: relative;
+    z-index: 2;
+    height: var(--vvu-brand-h);
+    background: var(--vvu-paper);
+}
+
+/* Hairline dividing the lockup band from the navigation band. Inset to the
+   page shell so it reads as a rule rather than a hard edge, and faded at both
+   ends so it resolves into the white instead of stopping abruptly. */
+.vvu-brand::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: min(calc(100% - var(--vvu-gutter) * 2), var(--vvu-shell));
+    height: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg,
+            rgba(228, 233, 240, 0) 0%,
+            var(--vvu-hair) 12%,
+            var(--vvu-hair) 88%,
+            rgba(228, 233, 240, 0) 100%);
+}
+
+.vvu-brand__inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+    height: 100%;
+    max-width: var(--vvu-shell);
+    margin: 0 auto;
+    padding: 0 var(--vvu-gutter);
+}
+
+/* Centre lockup */
+.vvu-lockup {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    justify-self: center;
+}
+
+.vvu-lockup__crest {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 86px;
+    height: 86px;
+}
+
+.vvu-lockup__crest::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240, 180, 41, .22) 0%, rgba(240, 180, 41, 0) 68%);
+    opacity: 0;
+    transform: scale(.7);
+    transition: opacity .4s var(--vvu-ease-out), transform .4s var(--vvu-ease-out);
+}
+
+.vvu-lockup:hover .vvu-lockup__crest::after {
+    opacity: 1;
+    transform: scale(1.12);
+}
+
+.vvu-lockup__crest img {
+    position: relative;
+    z-index: 1;
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+}
+
+.vvu-lockup__text {
+    display: block;
+    text-align: center;
+}
+
+.vvu-lockup__name {
+    display: block;
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+    font-size: clamp(19px, 1.55vw, 27px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: .045em;
+    color: var(--vvu-navy);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Gold rule with a diamond centre, echoing the crest */
+.vvu-rule {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 7px auto 6px;
+    width: 100%;
+}
+
+.vvu-rule::before,
+.vvu-rule::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+}
+
+.vvu-rule::before {
+    background: linear-gradient(90deg, rgba(240, 180, 41, 0), var(--vvu-gold));
+}
+
+.vvu-rule::after {
+    background: linear-gradient(90deg, var(--vvu-gold), rgba(240, 180, 41, 0));
+}
+
+.vvu-rule i {
+    flex: 0 0 auto;
+    width: 6px;
+    height: 6px;
+    background: var(--vvu-gold);
+    transform: rotate(45deg);
+}
+
+.vvu-lockup__motto {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--vvu-ink-soft);
+    white-space: nowrap;
+}
+
+/* Flanking blocks */
+.vvu-brand__aside {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.vvu-brand__aside--right {
+    justify-content: flex-end;
+}
+
+.vvu-estab {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-left: 16px;
+    border-left: 2px solid var(--vvu-gold);
+    line-height: 1.25;
+}
+
+.vvu-estab strong {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--vvu-navy);
+}
+
+.vvu-estab em {
+    font-style: normal;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--vvu-ink-soft);
+}
+
+/* --------------------------------------------------------------------------
+   PRIMARY CTA — navy pill with a gold arrow chip
+   The chip carries the crest's gold, so the button belongs to the masthead
+   palette instead of introducing a third accent colour.
+   -------------------------------------------------------------------------- */
+.vvu-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 7px 7px 7px 26px;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #06305e 0%, var(--vvu-navy) 58%, var(--vvu-navy-deep) 100%);
+    box-shadow: 0 10px 24px -12px rgba(0, 33, 71, .85);
+    transition: transform .25s var(--vvu-ease-out), box-shadow .3s var(--vvu-ease-out);
+}
+
+.vvu-cta span {
+    color: #fff;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+}
+
+.vvu-cta i {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    color: var(--vvu-navy);
+    font-size: 12px;
+    background: linear-gradient(140deg, var(--vvu-gold-soft), var(--vvu-gold));
+    transition: transform .3s var(--vvu-ease-out), box-shadow .3s var(--vvu-ease-out);
+}
+
+.vvu-cta:hover,
+.vvu-cta:focus {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow:
+        0 0 0 3px rgba(240, 180, 41, .22),
+        0 16px 30px -12px rgba(0, 33, 71, .92);
+}
+
+.vvu-cta:hover i,
+.vvu-cta:focus i {
+    transform: translateX(3px);
+    box-shadow: 0 0 14px rgba(240, 180, 41, .55);
+}
+
+/* Condensed nav bar */
+.vvu-cta--sm {
+    gap: 10px;
+    padding: 5px 5px 5px 18px;
+    font-size: 11px;
+    letter-spacing: .1em;
+}
+
+.vvu-cta--sm i {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+}
+
+/* Full-width in the drawer: label left, chip right. */
+.vvu-drawer__cta .vvu-cta {
+    justify-content: space-between;
+    padding-left: 24px;
+}
+
+/* --------------------------------------------------------------------------
+   6. TIER 3 — MAIN NAVIGATION
+   -------------------------------------------------------------------------- */
+.vvu-nav {
+    position: relative;
+    z-index: 4;
+    height: var(--vvu-nav-h);
+    background: var(--vvu-paper);
+    border-bottom: 1px solid var(--vvu-hair);
+    transition: height .3s var(--vvu-ease), box-shadow .3s var(--vvu-ease);
+}
+
+.vvu-nav__inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 100%;
+    max-width: var(--vvu-shell);
+    margin: 0 auto;
+    padding: 0 var(--vvu-gutter);
+}
+
+/* Compact lockup revealed only in the stuck state */
+.vvu-nav__mini {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    flex: 0 0 auto;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width .38s var(--vvu-ease), opacity .24s var(--vvu-ease),
+        margin-right .38s var(--vvu-ease);
+}
+
+.vvu-nav__mini img {
+    width: auto;
+    height: 38px;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+}
+
+.vvu-nav__mini span {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+    color: var(--vvu-navy);
+}
+
+/* Menu */
+/* `align-self: stretch` is what gives the items full band height — without it
+   they collapse to the text box and the hover underline lands mid-word. */
+.vvu-nav__menu {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-self: stretch;
+    justify-content: center;
+}
+
+.vvu-nav__menu>ul {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+}
+
+.vvu-nav__item {
+    display: flex;
+    align-items: stretch;
+}
+
+.vvu-nav__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 clamp(11px, 1.15vw, 20px);
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .075em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--vvu-navy);
+    transition: color .22s var(--vvu-ease);
+}
+
+/* Gold underline that grows from the centre */
+.vvu-nav__link::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    bottom: 12px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--vvu-gold-deep), var(--vvu-gold), var(--vvu-gold-deep));
+    border-radius: 2px;
+    transition: left .3s var(--vvu-ease-out), right .3s var(--vvu-ease-out);
+}
+
+.vvu-nav__link .vvu-caret {
+    font-size: 9px;
+    opacity: .55;
+    transition: transform .28s var(--vvu-ease-out), opacity .22s var(--vvu-ease);
+}
+
+.vvu-nav__item:hover>.vvu-nav__link,
+.vvu-nav__link:focus,
+.vvu-nav__item.is-open>.vvu-nav__link,
+.vvu-nav__link.is-active {
+    color: var(--vvu-ember-deep);
+}
+
+.vvu-nav__item:hover>.vvu-nav__link::after,
+.vvu-nav__link:focus::after,
+.vvu-nav__item.is-open>.vvu-nav__link::after,
+.vvu-nav__link.is-active::after {
+    left: clamp(11px, 1.15vw, 20px);
+    right: clamp(11px, 1.15vw, 20px);
+}
+
+.vvu-nav__item.is-open>.vvu-nav__link .vvu-caret {
+    transform: rotate(180deg);
+    opacity: 1;
+}
+
+/* Right-hand tools */
+.vvu-nav__tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-width .38s var(--vvu-ease), opacity .24s var(--vvu-ease);
+}
+
+.vvu-icon-btn {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    color: var(--vvu-navy);
+    font-size: 15px;
+    background: var(--vvu-paper-warm);
+    border: 1px solid var(--vvu-hair);
+    transition: color .2s var(--vvu-ease), background-color .2s var(--vvu-ease),
+        border-color .2s var(--vvu-ease), transform .2s var(--vvu-ease-out);
+}
+
+.vvu-icon-btn:hover,
+.vvu-icon-btn:focus {
+    color: var(--vvu-navy-deep);
+    background: var(--vvu-gold);
+    border-color: var(--vvu-gold);
+    transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   7. MEGA MENU
+   -------------------------------------------------------------------------- */
+.vvu-mega {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding-bottom: 22px;
+    background: linear-gradient(180deg, #fff 0%, var(--vvu-paper-warm) 100%);
+    border-top: 3px solid var(--vvu-gold);
+    box-shadow: var(--vvu-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-14px);
+    pointer-events: none;
+    transition: opacity .28s var(--vvu-ease-out), transform .28s var(--vvu-ease-out), visibility .28s;
+}
+
+.vvu-nav__item.is-open>.vvu-mega {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.vvu-mega__inner {
+    display: grid;
+    grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+    gap: 38px;
+    max-width: var(--vvu-shell);
+    margin: 0 auto;
+    padding: 30px var(--vvu-gutter) 8px;
+}
+
+/* Feature card */
+.vvu-mega__feature {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vvu-feature-card {
+    position: relative;
+    display: block;
+    height: 172px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--vvu-navy);
+    box-shadow: var(--vvu-shadow-md);
+}
+
+.vvu-feature-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.02);
+    transition: transform .6s var(--vvu-ease-out);
+}
+
+.vvu-feature-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 21, 46, 0) 34%, rgba(0, 21, 46, .86) 100%);
+}
+
+.vvu-feature-card:hover img {
+    transform: scale(1.09);
+}
+
+.vvu-feature-card__label {
+    position: absolute;
+    z-index: 2;
+    left: 18px;
+    right: 18px;
+    bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #fff;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .05em;
+}
+
+.vvu-feature-card__label::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--vvu-gold);
+    flex: 0 0 auto;
+    transition: width .3s var(--vvu-ease-out);
+}
+
+.vvu-feature-card:hover .vvu-feature-card__label::before {
+    width: 38px;
+}
+
+.vvu-mega__blurb {
+    margin: 0;
+    color: var(--vvu-ink-soft);
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.65;
+}
+
+.vvu-textlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    align-self: flex-start;
+    color: var(--vvu-navy);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--vvu-gold);
+    transition: color .2s var(--vvu-ease), gap .25s var(--vvu-ease-out);
+}
+
+.vvu-textlink:hover,
+.vvu-textlink:focus {
+    color: var(--vvu-ember-deep);
+    gap: 14px;
+}
+
+/* Link groups */
+.vvu-mega__groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(196px, 1fr));
+    gap: 26px 34px;
+    align-content: start;
+}
+
+/* Site-wide headings drop to medium (see --vvu-title-weight); these small
+   uppercase labels need the weight back or they read as washed out. */
+.vvu-mega__group h3 {
+    margin: 0 0 14px;
+    padding-bottom: 9px;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 11.5px;
+    font-weight: 700 !important;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--vvu-navy);
+    border-bottom: 1px solid var(--vvu-hair);
+}
+
+.vvu-mega__group ul {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.vvu-mega__group a {
+    position: relative;
+    display: block;
+    padding: 6px 0 6px 16px;
+    color: var(--vvu-ink);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.45;
+    border-radius: 4px;
+    transition: color .2s var(--vvu-ease), padding-left .25s var(--vvu-ease-out);
+}
+
+.vvu-mega__group a::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    margin-top: -2.5px;
+    background: var(--vvu-gold);
+    transform: rotate(45deg) scale(0);
+    transition: transform .25s var(--vvu-ease-out);
+}
+
+.vvu-mega__group a:hover,
+.vvu-mega__group a:focus {
+    color: var(--vvu-ember-deep);
+    padding-left: 22px;
+}
+
+.vvu-mega__group a:hover::before,
+.vvu-mega__group a:focus::before {
+    transform: rotate(45deg) scale(1);
+}
+
+/* --------------------------------------------------------------------------
+   8. SEARCH OVERLAY
+   -------------------------------------------------------------------------- */
+.vvu-search {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    background: linear-gradient(180deg, #fff 0%, var(--vvu-paper-warm) 100%);
+    border-top: 3px solid var(--vvu-gold);
+    box-shadow: var(--vvu-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-14px);
+    transition: opacity .28s var(--vvu-ease-out), transform .28s var(--vvu-ease-out), visibility .28s;
+}
+
+.vvu-search.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.vvu-search__inner {
+    max-width: min(880px, 100%);
+    margin: 0 auto;
+    padding: 34px var(--vvu-gutter) 32px;
+}
+
+.vvu-search__field {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 6px 6px 6px 22px;
+    background: #fff;
+    border: 1.5px solid var(--vvu-hair);
+    border-radius: 999px;
+    box-shadow: var(--vvu-shadow-sm);
+    transition: border-color .25s var(--vvu-ease), box-shadow .25s var(--vvu-ease);
+}
+
+.vvu-search__field:focus-within {
+    border-color: var(--vvu-gold);
+    box-shadow: 0 0 0 4px rgba(240, 180, 41, .18);
+}
+
+.vvu-search__field>i {
+    font-size: 17px;
+    color: var(--vvu-gold-deep);
+}
+
+/* Materialize styles bare inputs aggressively — reset everything explicitly. */
+.vvu-search__field .vvu-search__input,
+.vvu-header .vvu-search__input,
+.vvu-drawer .vvu-search__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 46px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--vvu-ink);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 46px;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none;
+}
+
+.vvu-search__field .vvu-search__input::placeholder {
+    color: #9aa7b8;
+    font-weight: 400;
+}
+
+/* Chrome's search widget adds its own clear button and inner padding. */
+.vvu-search__field .vvu-search__input::-webkit-search-decoration,
+.vvu-search__field .vvu-search__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+}
+
+.vvu-search__submit {
+    flex: 0 0 auto;
+    padding: 13px 30px;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    background: var(--vvu-navy);
+    border-radius: 999px;
+    transition: background-color .25s var(--vvu-ease), transform .2s var(--vvu-ease-out);
+}
+
+.vvu-search__submit:hover,
+.vvu-search__submit:focus {
+    background: var(--vvu-ember-deep);
+    transform: translateY(-1px);
+}
+
+.vvu-search__hints {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 20px;
+}
+
+.vvu-search__hints span {
+    margin-right: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--vvu-ink-soft);
+}
+
+.vvu-search__hints a {
+    padding: 7px 15px;
+    color: var(--vvu-navy);
+    font-size: 12.5px;
+    font-weight: 600;
+    background: #fff;
+    border: 1px solid var(--vvu-hair);
+    border-radius: 999px;
+    transition: color .2s var(--vvu-ease), border-color .2s var(--vvu-ease),
+        background-color .2s var(--vvu-ease);
+}
+
+.vvu-search__hints a:hover,
+.vvu-search__hints a:focus {
+    color: var(--vvu-navy-deep);
+    background: rgba(240, 180, 41, .18);
+    border-color: var(--vvu-gold);
+}
+
+.vvu-search__close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    color: var(--vvu-ink-soft);
+    font-size: 15px;
+    transition: color .2s var(--vvu-ease), background-color .2s var(--vvu-ease);
+}
+
+.vvu-search__close:hover,
+.vvu-search__close:focus {
+    color: var(--vvu-navy);
+    background: var(--vvu-hair);
+}
+
+/* --------------------------------------------------------------------------
+   9. STICKY / CONDENSED STATE
+   Negative sticky offset: the masthead scrolls up until only the nav band
+   remains, which then pins to the top. No JS layout maths, no content jump.
+   -------------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+    .vvu-header {
+        position: sticky;
+        top: calc(-1 * var(--vvu-scrolloff));
+    }
+
+    .vvu-header.is-stuck .vvu-nav {
+        height: var(--vvu-nav-h-stuck);
+        box-shadow: 0 10px 30px -14px rgba(0, 33, 71, .38);
+    }
+
+    /* The pinned bar drops the 1320px shell and spans the window: the menu is
+       ~1000px on its own, which leaves no room for a lockup and tools inside
+       the shell at any viewport width. */
+    .vvu-header.is-stuck .vvu-nav__inner {
+        max-width: none;
+        padding-left: clamp(20px, 3vw, 48px);
+        padding-right: clamp(20px, 3vw, 48px);
+    }
+
+    /* Condensed layout: lockup pinned left, menu + tools pinned right.
+       The menu keeps its intrinsic width (`flex: 0 0 auto`) and the lockup is
+       the only shrinkable item, so a narrow window clips the lockup instead of
+       letting the menu overrun it. */
+    .vvu-header.is-stuck .vvu-nav__mini {
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 360px;
+        opacity: 1;
+        margin-right: 8px;
+    }
+
+    .vvu-header.is-stuck .vvu-nav__menu {
+        flex: 0 0 auto;
+        margin-left: auto;
+        justify-content: flex-end;
+    }
+
+    .vvu-header.is-stuck .vvu-nav__tools {
+        max-width: 240px;
+        opacity: 1;
+    }
+}
+
+/* The wordmark only earns its place once the menu, search and Apply all fit. */
+@media (min-width: 1024px) and (max-width: 1499px) {
+    .vvu-header.is-stuck .vvu-nav__mini span {
+        display: none;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1359px) {
+    .vvu-header.is-stuck .vvu-nav__tools .vvu-cta {
+        display: none;
+    }
+}
+
+/* Narrow desktops give the menu the whole bar rather than a cropped crest. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .vvu-header.is-stuck .vvu-nav__mini {
+        display: none;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1199px) {
+    :root {
+        --vvu-gutter: 18px;
+        --vvu-brand-h: 100px;
+    }
+
+    .vvu-nav__link {
+        font-size: 12px;
+        letter-spacing: .05em;
+    }
+
+    /* Nine links plus the button no longer fit on one line, so the button
+       collapses to a circular icon and the links tighten up. */
+    :root {
+        --vvu-rail-w: 34px;
+    }
+
+    .vvu-rail-btn {
+        gap: 0;
+        min-width: 34px;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border-radius: 50%;
+    }
+
+    .vvu-rail-btn span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .vvu-utility__links a {
+        padding: 7px 8px;
+        font-size: 10.5px;
+        letter-spacing: .05em;
+    }
+
+    .vvu-utility__links ul {
+        gap: 0;
+    }
+
+    .vvu-lockup__crest {
+        width: 64px;
+        height: 64px;
+    }
+
+    .vvu-estab {
+        display: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   10. MOBILE BAR + DRAWER
+   -------------------------------------------------------------------------- */
+.vvu-mobilebar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1300;
+    height: var(--vvu-mobilebar-h);
+    background: rgba(255, 255, 255, .96);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--vvu-hair);
+    box-shadow: 0 2px 14px rgba(0, 33, 71, .07);
+}
+
+.vvu-mobilebar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--vvu-navy), var(--vvu-gold), var(--vvu-ember));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .4s var(--vvu-ease-out);
+}
+
+.vvu-mobilebar.is-stuck::after {
+    transform: scaleX(1);
+}
+
+.vvu-mobilebar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    height: 100%;
+    padding: 0 12px;
+}
+
+.vvu-burger {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    color: var(--vvu-navy);
+    background: var(--vvu-paper-warm);
+    border: 1px solid var(--vvu-hair);
+}
+
+.vvu-burger:focus,
+.vvu-burger:hover {
+    background: var(--vvu-paper-warm);
+}
+
+.vvu-burger span {
+    position: absolute;
+    left: 12px;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: transform .3s var(--vvu-ease-out), opacity .2s var(--vvu-ease), width .3s var(--vvu-ease-out);
+}
+
+.vvu-burger span:nth-child(1) {
+    transform: translateY(-6px);
+}
+
+.vvu-burger span:nth-child(3) {
+    width: 12px;
+    transform: translateY(6px);
+}
+
+/* `min-width: 0` on both the row and the label is what lets the university
+   name shrink instead of shoving the search button off the bar. */
+.vvu-mobilebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.vvu-mobilebar__brand img {
+    width: auto;
+    height: 40px;
+    flex: 0 0 auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+}
+
+.vvu-mobilebar__brand span {
+    min-width: 0;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: clamp(10.5px, 3.1vw, 15px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    color: var(--vvu-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Narrow phones: let the name take two lines rather than truncating it. */
+@media (max-width: 400px) {
+    .vvu-mobilebar__brand {
+        gap: 8px;
+    }
+
+    .vvu-mobilebar__brand img {
+        height: 34px;
+    }
+
+    .vvu-mobilebar__brand span {
+        white-space: normal;
+        font-size: 10.5px;
+        line-height: 1.12;
+    }
+}
+
+.vvu-mobilebar__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.vvu-mobilebar .vvu-icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+}
+
+/* Scrim */
+.vvu-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    background: rgba(0, 21, 46, .55);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .32s var(--vvu-ease), visibility .32s;
+}
+
+.vvu-scrim.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Drawer */
+.vvu-drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    width: min(400px, 90vw);
+    background: var(--vvu-paper);
+    box-shadow: 30px 0 60px -30px rgba(0, 21, 46, .55);
+    transform: translateX(-102%);
+    visibility: hidden;
+    transition: transform .38s var(--vvu-ease-out), visibility .38s;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.vvu-drawer.is-open {
+    transform: translateX(0);
+    visibility: visible;
+}
+
+.vvu-drawer ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.vvu-drawer li {
+    list-style: none;
+}
+
+.vvu-drawer a {
+    text-decoration: none;
+}
+
+.vvu-drawer button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.vvu-drawer__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex: 0 0 auto;
+    padding: 16px 16px 16px 20px;
+    background:
+        var(--vvu-weave),
+        linear-gradient(120deg, var(--vvu-navy-deep), var(--vvu-navy-soft));
+    color: #fff;
+}
+
+.vvu-drawer__head .vvu-drawer__lockup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.vvu-drawer__head img {
+    width: auto;
+    height: 46px;
+    flex: 0 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 3px;
+}
+
+.vvu-drawer__head strong {
+    display: block;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.vvu-drawer__head em {
+    display: block;
+    margin-top: 3px;
+    font-style: normal;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--vvu-gold-soft);
+}
+
+.vvu-drawer__close {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 16px;
+    background: rgba(255, 255, 255, .12);
+    transition: background-color .2s var(--vvu-ease);
+}
+
+.vvu-drawer__close:hover,
+.vvu-drawer__close:focus {
+    background: var(--vvu-ember);
+}
+
+.vvu-drawer__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.vvu-drawer__search {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--vvu-hair);
+    background: var(--vvu-paper-warm);
+}
+
+.vvu-drawer__search .vvu-search__field {
+    padding: 4px 4px 4px 16px;
+    gap: 10px;
+}
+
+.vvu-drawer .vvu-search__input {
+    height: 40px !important;
+    line-height: 40px;
+    font-size: 15px;
+}
+
+.vvu-drawer__search .vvu-search__submit {
+    padding: 11px 18px;
+    font-size: 11px;
+}
+
+/* Accordion nav */
+.vvu-acc>li {
+    border-bottom: 1px solid var(--vvu-hair);
+}
+
+.vvu-acc__row {
+    display: flex;
+    align-items: center;
+}
+
+.vvu-acc__row>a,
+.vvu-acc__row>button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 15px 20px;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--vvu-navy);
+    text-align: left;
+    transition: color .2s var(--vvu-ease), background-color .2s var(--vvu-ease);
+}
+
+.vvu-acc__row>a:hover,
+.vvu-acc__row>button:hover {
+    color: var(--vvu-ember-deep);
+    background: var(--vvu-paper-warm);
+}
+
+.vvu-acc__row i {
+    flex: 0 0 auto;
+    font-size: 12px;
+    color: var(--vvu-gold-deep);
+    transition: transform .3s var(--vvu-ease-out);
+}
+
+.vvu-acc>li.is-open>.vvu-acc__row>button {
+    color: var(--vvu-ember-deep);
+    background: var(--vvu-paper-warm);
+}
+
+.vvu-acc>li.is-open>.vvu-acc__row i {
+    transform: rotate(180deg);
+}
+
+.vvu-acc__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    background: var(--vvu-paper-warm);
+    transition: grid-template-rows .34s var(--vvu-ease-out);
+}
+
+.vvu-acc>li.is-open>.vvu-acc__panel {
+    grid-template-rows: 1fr;
+}
+
+.vvu-acc__panel>div {
+    overflow: hidden;
+}
+
+.vvu-acc__panel-inner {
+    padding: 4px 20px 18px;
+}
+
+.vvu-acc__group+.vvu-acc__group {
+    margin-top: 16px;
+}
+
+.vvu-acc__group h4 {
+    margin: 0 0 8px;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 10.5px;
+    font-weight: 700 !important;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--vvu-gold-deep);
+}
+
+.vvu-acc__group a {
+    display: block;
+    padding: 9px 0 9px 16px;
+    color: var(--vvu-ink);
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 2px solid var(--vvu-hair);
+    transition: color .2s var(--vvu-ease), border-color .2s var(--vvu-ease),
+        padding-left .2s var(--vvu-ease-out);
+}
+
+.vvu-acc__group a:hover {
+    color: var(--vvu-ember-deep);
+    border-color: var(--vvu-gold);
+    padding-left: 22px;
+}
+
+/* Drawer extras */
+.vvu-drawer__section {
+    padding: 20px;
+    border-bottom: 1px solid var(--vvu-hair);
+}
+
+.vvu-drawer__section .vvu-panel-title {
+    margin-bottom: 14px;
+    font-size: 11px;
+}
+
+.vvu-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vvu-chips a {
+    padding: 9px 14px;
+    color: var(--vvu-navy);
+    font-size: 12.5px;
+    font-weight: 600;
+    background: var(--vvu-paper-warm);
+    border: 1px solid var(--vvu-hair);
+    border-radius: 999px;
+    transition: color .2s var(--vvu-ease), background-color .2s var(--vvu-ease),
+        border-color .2s var(--vvu-ease);
+}
+
+.vvu-chips a:hover {
+    color: var(--vvu-navy-deep);
+    background: rgba(240, 180, 41, .2);
+    border-color: var(--vvu-gold);
+}
+
+.vvu-drawer__cta {
+    padding: 20px;
+}
+
+.vvu-drawer__cta .vvu-cta {
+    display: flex;
+    width: 100%;
+}
+
+.vvu-drawer__foot {
+    flex: 0 0 auto;
+    padding: 18px 20px;
+    background: var(--vvu-navy-deep);
+    color: rgba(255, 255, 255, .72);
+}
+
+.vvu-drawer__foot .vvu-social {
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.vvu-drawer__foot .vvu-social a {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+    background: rgba(255, 255, 255, .08);
+}
+
+.vvu-drawer__contact {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.vvu-drawer__contact a,
+.vvu-drawer__contact span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: inherit;
+}
+
+.vvu-drawer__contact i {
+    font-size: 11px;
+    color: var(--vvu-gold);
+}
+
+.vvu-drawer__contact a:hover {
+    color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   11. BREAKPOINT SWITCH
+   -------------------------------------------------------------------------- */
+@media (max-width: 1023px) {
+
+    .vvu-utility,
+    .vvu-brand,
+    .vvu-nav {
+        display: none;
+    }
+
+    .vvu-mobilebar {
+        display: block;
+    }
+
+    body {
+        padding-top: var(--vvu-mobilebar-h);
+    }
+}
+
+@media (min-width: 1024px) {
+    .vvu-drawer,
+    .vvu-scrim,
+    .vvu-mobilebar {
+        display: none;
+    }
+}
+
+/* Drawer open — freeze the page behind it. */
+html.vvu-locked,
+html.vvu-locked body {
+    overflow: hidden !important;
+}
+
+/* --------------------------------------------------------------------------
+   12. MOTION & PRINT
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+
+    .vvu-header *,
+    .vvu-drawer *,
+    .vvu-scrim {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}
+
+@media print {
+
+    .vvu-utility,
+    .vvu-nav,
+    .vvu-mobilebar,
+    .vvu-drawer,
+    .vvu-scrim,
+    .vvu-search {
+        display: none !important;
+    }
+
+    .vvu-header {
+        position: static !important;
+    }
+
+    body {
+        padding-top: 0 !important;
+    }
+}

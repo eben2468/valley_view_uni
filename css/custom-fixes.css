@@ -9,6 +9,13 @@
 :root {
     --vvu-title-font: 'Cinzel', Georgia, 'Times New Roman', serif;
     --vvu-body-font: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Headings sit at medium, not bold. Cinzel is a high-contrast display
+       serif — at 700-900 the large sizes go heavy and slab-like, which is why
+       the page markup's Tailwind `font-black` utilities are overridden here
+       rather than edited across ~100 templates. Change this one value to
+       re-weight every heading on the site. */
+    --vvu-title-weight: 500;
 }
 
 * {
@@ -26,6 +33,13 @@ h4,
 h5,
 h6 {
     font-family: var(--vvu-title-font) !important;
+    font-weight: var(--vvu-title-weight) !important;
+}
+
+/* Tailwind's weight utilities are also applied to inline elements nested
+   inside a heading — the gradient second line of a hero title, for example. */
+:is(h1, h2, h3, h4, h5, h6) :is(span, a, strong, b, em, i, small, mark) {
+    font-weight: var(--vvu-title-weight) !important;
 }
 
 /* Make all icons white */
@@ -853,85 +867,13 @@ a {
 }
 
 /* ==========================================================================
-   FIXED/STICKY NAVBAR ON DESKTOP
+   HEADER
+   The masthead now lives in css/vvu-header.css, which owns its own sticky
+   behaviour and body offset. The old `#main-header` fixed-position block and
+   its `body { padding-top }` compensation were removed from here so they can
+   no longer fight it — the `!important` on that padding overrode every
+   breakpoint the new header sets.
    ========================================================================== */
-
-/* Desktop sticky header - 1024px and above */
-@media screen and (min-width: 1024px) {
-
-    /* Make the entire header section fixed */
-    #main-header {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        z-index: 9999 !important;
-        background: #fff !important;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1) !important;
-        transition: all 0.3s ease !important;
-        will-change: transform !important;
-        margin: 0 !important;
-    }
-
-    /* Add padding to body to prevent content jump when header becomes fixed */
-    body {
-        padding-top: 92px !important;
-        /* Matches actual header height for zero gap */
-    }
-
-    /* Ensure header sections stack properly */
-    .ed-top,
-    .top-logo {
-        position: relative !important;
-        width: 100% !important;
-    }
-
-    /* Maintain container widths */
-    #main-header .container {
-        width: 96% !important;
-        max-width: 100% !important;
-        margin: 0 auto !important;
-    }
-
-    /* Ensure dropdown menus appear above fixed header */
-    .mm-pos {
-        z-index: 10000 !important;
-    }
-
-    /* Adjust logo size for fixed header */
-    .top-logo .wed-logo img {
-        max-height: 50px !important;
-        transition: all 0.3s ease !important;
-    }
-
-    /* Adjust menu spacing for fixed header */
-    .main-menu ul {
-        margin-top: 5px !important;
-    }
-
-    /* Remove bottom padding from logo container to eliminate gap with slider */
-    .top-logo {
-        padding-bottom: 0 !important;
-    }
-}
-
-/* Tablet and mobile - keep header static */
-@media screen and (max-width: 1023px) {
-
-    #main-header,
-    .ed-top,
-    .top-logo,
-    .wed-top {
-        position: static !important;
-        transform: none !important;
-        transition: none !important;
-        will-change: auto !important;
-    }
-
-    body {
-        padding-top: 0 !important;
-    }
-}
 
 /* ==========================================================================
    MOBILE FIXES (Logo, Top Bar, Submenus)
