@@ -42,6 +42,43 @@ h6 {
     font-weight: var(--vvu-title-weight) !important;
 }
 
+/* ============================================================
+   MOBILE HERO HEIGHTS
+   Page heroes are sized with Tailwind viewport-height utilities
+   (min-h-[50vh] … min-h-[75vh]) across ~70 templates. On a phone those
+   proportions eat most of the first screen before any content shows, so each
+   step is scaled back by roughly a third here rather than edited per file.
+
+   These are `min-height`, so a hero whose content needs more room still grows
+   — this only lowers the floor. `!important` is required because the Tailwind
+   CDN injects its own rules at runtime, after this stylesheet.
+   ============================================================ */
+@media screen and (max-width: 767px) {
+    .min-h-\[50vh\] {
+        min-height: 38vh !important;
+    }
+
+    .min-h-\[55vh\] {
+        min-height: 40vh !important;
+    }
+
+    .min-h-\[60vh\] {
+        min-height: 42vh !important;
+    }
+
+    .min-h-\[65vh\] {
+        min-height: 45vh !important;
+    }
+
+    .min-h-\[70vh\] {
+        min-height: 48vh !important;
+    }
+
+    .min-h-\[75vh\] {
+        min-height: 50vh !important;
+    }
+}
+
 /* Make all icons white */
 .icon-white {
     color: white !important;

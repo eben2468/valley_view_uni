@@ -10,10 +10,9 @@ require_once __DIR__ . '/image_helper.php';
    admin panel remains the single source of truth for links and mega menus.
    -------------------------------------------------------------------------- */
 
-$topbar_settings  = getTopbarSettings($pdo);
-$main_nav         = getNavItems($pdo, 'main');
-$topbar_nav       = getNavItems($pdo, 'topbar');
-$quick_access_nav = getNavItems($pdo, 'quickaccess');
+$topbar_settings = getTopbarSettings($pdo);
+$main_nav        = getNavItems($pdo, 'main');
+$topbar_nav      = getNavItems($pdo, 'topbar');
 
 // Identity: header_settings wins, topbar_settings is the fallback.
 $header_settings = [];
@@ -87,18 +86,6 @@ $vvu_address = trim(preg_replace('/^\s*contact\s*:\s*/i', '', $vvu_address));
 
 $vvu_apply_url  = $header_settings['apply_url'] ?? 'apply.php';
 $vvu_search_url = 'search.php';
-
-// The quick-access menu contains historical duplicates — collapse them.
-$vvu_quick_links = [];
-$vvu_seen_quick  = [];
-foreach ($quick_access_nav as $vvu_item) {
-    $vvu_key = strtolower(trim($vvu_item['title'])) . '|' . strtolower(trim($vvu_item['url']));
-    if (isset($vvu_seen_quick[$vvu_key])) {
-        continue;
-    }
-    $vvu_seen_quick[$vvu_key] = true;
-    $vvu_quick_links[] = $vvu_item;
-}
 
 // Shortcuts offered inside the search panel.
 $vvu_search_hints = [
@@ -503,19 +490,6 @@ if (!function_exists('vvu_split_sections')) {
                     </li>
                 <?php endforeach; ?>
             </ul>
-
-            <?php if ($vvu_quick_links): ?>
-                <div class="vvu-drawer__section">
-                    <p class="vvu-panel-title">Quick Links</p>
-                    <div class="vvu-chips">
-                        <?php foreach ($vvu_quick_links as $item): ?>
-                            <a href="<?php echo vvu_e(vvu_url($item['url'])); ?>"
-                                target="<?php echo vvu_e($item['target'] ?? '_self'); ?>"
-                                rel="noopener"><?php echo vvu_e($item['title']); ?></a>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            <?php endif; ?>
 
             <?php if ($topbar_nav): ?>
                 <div class="vvu-drawer__section">

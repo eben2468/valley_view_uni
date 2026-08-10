@@ -631,9 +631,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-md-3"> <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($prog['image_url']), 400, 450)); ?>" width="400" height="450" loading="lazy" decoding="async" alt="<?php echo htmlspecialchars(strip_tags($prog['title'])); ?>"> </div>
                         <!--POPULAR PROGRAMS: CONTENT-->
                         <div class="col-md-9 home-top-cour-desc">
-                            <a href="<?php echo strip_tags($prog['link_url']); ?>">
-                                <h3><?php echo strip_tags($prog['title']); ?></h3>
-                            </a>
+                            <h3><?php echo strip_tags($prog['title']); ?></h3>
                             <h4><?php echo strip_tags($prog['category']); ?></h4>
                             <p><?php echo strip_tags($prog['description']); ?></p> <span class="home-top-cour-rat"><?php echo $prog['rating']; ?></span>
                             <div class="hom-list-share">
@@ -657,9 +655,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-md-3"> <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($prog['image_url']), 400, 450)); ?>" width="400" height="450" loading="lazy" decoding="async" alt="<?php echo htmlspecialchars(strip_tags($prog['title'])); ?>"> </div>
                         <!--POPULAR PROGRAMS: CONTENT-->
                         <div class="col-md-9 home-top-cour-desc">
-                            <a href="<?php echo strip_tags($prog['link_url']); ?>">
-                                <h3><?php echo strip_tags($prog['title']); ?></h3>
-                            </a>
+                            <h3><?php echo strip_tags($prog['title']); ?></h3>
                             <h4><?php echo strip_tags($prog['category']); ?></h4>
                             <p><?php echo strip_tags($prog['description']); ?></p> <span class="home-top-cour-rat"><?php echo $prog['rating']; ?></span>
                             <div class="hom-list-share">
