@@ -46,7 +46,7 @@
 /* =  1.All Pages Common CSS Styles
 /*-------------------------------------------------*/
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     padding-right: 0px !important;
 }
 
@@ -67,7 +67,7 @@ a:hover {
 
 h1,
 h2 {
-    font-family: 'Merriweather', serif;
+    font-family: 'Cinzel', serif;
     font-weight: 700;
     line-height: 28px;
 }
@@ -76,7 +76,7 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: 'Merriweather', serif;
+    font-family: 'Cinzel', serif;
     font-weight: 600;
     line-height: 24px;
 }

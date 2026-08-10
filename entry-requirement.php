@@ -81,7 +81,7 @@ include 'includes/header.php';
         --acc:      #1d4ed8;
         --acc-tint: #eff6ff;
         --acc-line: #bfdbfe;
-        font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-family: 'Open Sans', system-ui, -apple-system, "Segoe UI", sans-serif;
         background: var(--er-canvas);
         color: var(--er-ink);
     }

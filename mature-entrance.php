@@ -98,7 +98,7 @@ foreach ($items_raw as $i) {
         --mte-shadow:    0 1px 2px rgba(15, 23, 42, .04), 0 14px 30px -18px rgba(15, 23, 42, .3);
         --mte-shadow-lg: 0 2px 4px rgba(15, 23, 42, .04), 0 34px 64px -30px rgba(15, 23, 42, .36);
         --acc: #1d4ed8;
-        font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-family: 'Open Sans', system-ui, -apple-system, "Segoe UI", sans-serif;
         color: var(--mte-ink);
     }
     /* The global stylesheet hard-codes 15px/#636363 on p, li, a and span.

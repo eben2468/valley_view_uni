@@ -101,7 +101,7 @@ include 'includes/header.php';
         --cau-shadow-lg: 0 2px 4px rgba(15, 23, 42, .04), 0 34px 64px -30px rgba(15, 23, 42, .36);
         /* per-card accent, set inline */
         --acc: #1d4ed8;
-        font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-family: 'Open Sans', system-ui, -apple-system, "Segoe UI", sans-serif;
         background: var(--cau-canvas);
         color: var(--cau-ink);
     }
@@ -201,7 +201,7 @@ include 'includes/header.php';
     }
     .cau-scope .cau-alert-body p {
         margin: 0;
-        font-family: 'Merriweather', Georgia, serif;
+        font-family: 'Cinzel', Georgia, serif;
         font-size: clamp(16px, 1.8vw, 21px);
         line-height: 1.6; font-weight: 400; letter-spacing: 0;
         color: var(--cau-ink);

@@ -9,7 +9,7 @@
  *     no scrim can rescue white text over an unpredictable photo.
  *  2. Warm paper canvas instead of cold blue-grey, so the pages feel
  *     printed rather than templated.
- *  3. Serif headlines (Merriweather, already loaded site-wide) with Inter
+ *  3. Serif headlines (Cinzel, already loaded site-wide) with Open Sans
  *     for interface text — the classic newsroom voice pairing.
  *  4. Human signals everywhere: author faces, relative dates, read times.
  *
@@ -42,8 +42,8 @@
     --ed-shadow: 0 8px 26px rgba(45, 32, 18, .08);
     --ed-shadow-lg: 0 26px 60px rgba(45, 32, 18, .14);
 
-    --ed-serif: 'Merriweather', Georgia, 'Times New Roman', serif;
-    --ed-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --ed-serif: 'Cinzel', Georgia, 'Times New Roman', serif;
+    --ed-sans: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
     --ed-ease: cubic-bezier(.22, .7, .28, 1);
 }

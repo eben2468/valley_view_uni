@@ -36,7 +36,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Contact Confirmation - Valley View University</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -51,12 +53,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         "text-dark": "#f8f8fc",
                     },
                     fontFamily: {
-                        "display": ["Lexend", "sans-serif"]
+                        "display": ["Open Sans", "sans-serif"],
+                        "title": ["Cinzel", "serif"]
                     },
                 },
             },
         }
     </script>
+    <style>
+        /* Match the rest of the site: Cinzel titles over Open Sans body text. */
+        h1, h2, h3, h4, h5, h6 { font-family: 'Cinzel', Georgia, serif; }
+    </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
 <div class="relative flex min-h-screen w-full flex-col">
