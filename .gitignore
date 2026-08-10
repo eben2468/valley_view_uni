@@ -1,0 +1,43 @@
+# ── Secrets ───────────────────────────────────────────────────────────────
+# Real DB credentials. Only config.example.php is tracked.
+includes/config.php
+.env
+.env.*
+!.env.example
+
+# ── Database dumps ────────────────────────────────────────────────────────
+# Structural schema/migration files stay tracked (they carry no secrets now).
+# Full dumps and exported data do not — they contain real records.
+*dump*.sql
+*backup*.sql
+*_data.sql
+sql/
+data/
+
+# ── User-uploaded content ─────────────────────────────────────────────────
+uploads/*
+!uploads/.gitkeep
+tmp/*
+!tmp/.gitkeep
+
+# ── One-off maintenance / debug scripts ───────────────────────────────────
+# These run unauthenticated SQL and must not exist on a production host.
+dev-tools/
+
+# ── Logs & caches ─────────────────────────────────────────────────────────
+*.log
+logs/
+cache/
+.cache/
+
+# ── Editor / OS noise ─────────────────────────────────────────────────────
+.vscode/
+.idea/
+.qoder/
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+*~
+*.bak
+*.orig

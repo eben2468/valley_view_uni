@@ -11,12 +11,25 @@ CREATE TABLE IF NOT EXISTS admin_users (
     password VARCHAR(255) NOT NULL,
     email VARCHAR(100) NOT NULL,
     full_name VARCHAR(100),
+    failed_attempts INT NOT NULL DEFAULT 0,
+    locked_until DATETIME NULL DEFAULT NULL,
+    last_login_at DATETIME NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert default admin user (username: admin, password: admin123)
-INSERT IGNORE INTO admin_users (username, password, email, full_name) VALUES 
-('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@vvu.edu', 'Administrator');
+-- NO DEFAULT ADMIN ACCOUNT IS SEEDED HERE, BY DESIGN.
+--
+-- This file previously inserted `admin` with the bcrypt hash of the string
+-- "password" (mis-documented in a comment as "admin123"). Because the repo was
+-- public, that was a working login for anyone who read it — the CRITICAL
+-- Finding 1 of the August 2026 penetration test.
+--
+-- Provision the first administrator out-of-band instead, from the server shell:
+--
+--     php tools/set_admin_password.php admin admin@vvu.edu.gh
+--
+-- The tool prompts for a password, enforces a minimum length, hashes it with
+-- password_hash() and never writes the plaintext to disk or shell history.
 
 -- Table for contact form messages
 CREATE TABLE IF NOT EXISTS contact_messages (

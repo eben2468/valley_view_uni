@@ -13,9 +13,8 @@ CREATE TABLE IF NOT EXISTS admin_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert default admin user (username: admin, password: admin123)
-INSERT IGNORE INTO admin_users (username, password, email, full_name) VALUES 
-('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@vvu.edu', 'Administrator');
+-- No default admin account is seeded — see the note in database_schema.sql.
+-- Provision administrators with: php tools/set_admin_password.php <username> <email>
 
 -- Table for homepage sliders
 CREATE TABLE IF NOT EXISTS homepage_sliders (

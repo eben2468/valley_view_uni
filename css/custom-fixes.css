@@ -54,6 +54,18 @@ h6 {
     font-family: var(--vvu-title-font);
     line-height: 1.2;
     display: inline-block;
+    /* Keep "Valley View University" on one line — Cinzel is wider than the
+       previous font and was wrapping it onto a second row. */
+    white-space: nowrap;
+}
+
+/* The logo cell must be allowed to size to the text rather than squeeze it. */
+.wed-logo {
+    flex-shrink: 0;
+}
+
+.wed-logo a {
+    white-space: nowrap;
 }
 
 .ed-mob-menu .wed-logo img {
@@ -1015,13 +1027,16 @@ a {
 
     .ed-mob-menu .logo-text {
         display: inline-block !important;
-        font-size: 15px !important;
+        /* Scales with the viewport so the full name stays on one line down to
+           the narrowest phones instead of wrapping or being clipped. */
+        font-size: clamp(10px, 3.4vw, 15px) !important;
         color: #002147 !important;
         font-weight: 700 !important;
         margin-left: 8px !important;
         vertical-align: middle !important;
-        max-width: 180px;
+        max-width: none;
         line-height: 1.2;
+        white-space: nowrap !important;
     }
 
     /* 3. Mobile Menu Submenus Styling */

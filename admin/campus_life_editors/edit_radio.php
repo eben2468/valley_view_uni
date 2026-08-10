@@ -1,4 +1,11 @@
 <?php
+// Direct-access guard. This file is normally include()d by
+// admin/manage_campus_life_pages.php, but it is also reachable at its own
+// URL, where it would otherwise process POSTs and uploads with no login.
+// The guard is idempotent, so it is harmless when included.
+require_once __DIR__ . "/../../includes/admin_auth.php";
+require_once __DIR__ . "/../../includes/upload_helper.php";
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_radio'])) {
     $upload_dir = '../uploads/campus_life/';
     if (!file_exists($upload_dir)) {
@@ -8,18 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_radio'])) {
     // Handle hero image upload
     $hero_image = $_POST['hero_image'];
     if (isset($_FILES['hero_image_upload']) && $_FILES['hero_image_upload']['error'] === UPLOAD_ERR_OK) {
-        $filename = uniqid('radio_hero_') . '_' . basename($_FILES['hero_image_upload']['name']);
-        if (move_uploaded_file($_FILES['hero_image_upload']['tmp_name'], $upload_dir . $filename)) {
-            $hero_image = 'uploads/campus_life/' . $filename;
+        $uploaded = handleAdminFileUpload($_FILES['hero_image_upload'], 'campus_life/', 'radio_hero_');
+        if ($uploaded !== null) {
+            $hero_image = $uploaded;
         }
     }
     
     // Handle current show image upload
     $current_show_image = $_POST['current_show_image'];
     if (isset($_FILES['current_show_image_upload']) && $_FILES['current_show_image_upload']['error'] === UPLOAD_ERR_OK) {
-        $filename = uniqid('radio_show_') . '_' . basename($_FILES['current_show_image_upload']['name']);
-        if (move_uploaded_file($_FILES['current_show_image_upload']['tmp_name'], $upload_dir . $filename)) {
-            $current_show_image = 'uploads/campus_life/' . $filename;
+        $uploaded = handleAdminFileUpload($_FILES['current_show_image_upload'], 'campus_life/', 'radio_show_');
+        if ($uploaded !== null) {
+            $current_show_image = $uploaded;
         }
     }
 
@@ -30,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_radio'])) {
         $upload_name = "about_image_{$i}_upload";
         $about_images[$i] = $_POST[$field_name];
         if (isset($_FILES[$upload_name]) && $_FILES[$upload_name]['error'] === UPLOAD_ERR_OK) {
-            $filename = uniqid("radio_about_{$i}_") . '_' . basename($_FILES[$upload_name]['name']);
-            if (move_uploaded_file($_FILES[$upload_name]['tmp_name'], $upload_dir . $filename)) {
-                $about_images[$i] = 'uploads/campus_life/' . $filename;
+            $uploaded = handleAdminFileUpload($_FILES[$upload_name], 'campus_life/', "radio_about_{$i}_");
+            if ($uploaded !== null) {
+                $about_images[$i] = $uploaded;
             }
         }
     }

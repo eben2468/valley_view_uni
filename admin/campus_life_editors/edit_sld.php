@@ -1,4 +1,11 @@
 <?php
+// Direct-access guard. This file is normally include()d by
+// admin/manage_campus_life_pages.php, but it is also reachable at its own
+// URL, where it would otherwise process POSTs and uploads with no login.
+// The guard is idempotent, so it is harmless when included.
+require_once __DIR__ . "/../../includes/admin_auth.php";
+require_once __DIR__ . "/../../includes/upload_helper.php";
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_sld'])) {
     $upload_dir = '../uploads/campus_life/';
     if (!file_exists($upload_dir)) {
@@ -8,18 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_sld'])) {
     // Handle hero image upload
     $hero_image = $_POST['hero_image'];
     if (isset($_FILES['hero_image_upload']) && $_FILES['hero_image_upload']['error'] === UPLOAD_ERR_OK) {
-        $filename = uniqid('hero_') . '_' . basename($_FILES['hero_image_upload']['name']);
-        if (move_uploaded_file($_FILES['hero_image_upload']['tmp_name'], $upload_dir . $filename)) {
-            $hero_image = 'uploads/campus_life/' . $filename;
+        $uploaded = handleAdminFileUpload($_FILES['hero_image_upload'], 'campus_life/', 'hero_');
+        if ($uploaded !== null) {
+            $hero_image = $uploaded;
         }
     }
     
     // Handle welcome image upload
     $welcome_image = $_POST['welcome_image'];
     if (isset($_FILES['welcome_image_upload']) && $_FILES['welcome_image_upload']['error'] === UPLOAD_ERR_OK) {
-        $filename = uniqid('welcome_') . '_' . basename($_FILES['welcome_image_upload']['name']);
-        if (move_uploaded_file($_FILES['welcome_image_upload']['tmp_name'], $upload_dir . $filename)) {
-            $welcome_image = 'uploads/campus_life/' . $filename;
+        $uploaded = handleAdminFileUpload($_FILES['welcome_image_upload'], 'campus_life/', 'welcome_');
+        if ($uploaded !== null) {
+            $welcome_image = $uploaded;
         }
     }
     

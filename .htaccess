@@ -1,4 +1,105 @@
-# Valley View University — upload limits
+# Valley View University — Apache configuration
+#
+# Two jobs: upload limits (original purpose) and the security hardening added
+# after the August 2026 penetration test.
+#
+# The production host runs nginx, where .htaccess is IGNORED. The equivalent
+# rules live in nginx-vvu.conf.example and MUST be applied there separately.
+
+# ══════════════════════════════════════════════════════════════════════════
+# SECURITY
+# ══════════════════════════════════════════════════════════════════════════
+
+# ── Finding 2: exposed .git directory ─────────────────────────────────────
+# Blocks .git/, .gitignore, .env, .htaccess, .user.ini and every other dotfile.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+</IfModule>
+
+# Belt and braces for hosts without mod_rewrite. <DirectoryMatch> cannot be
+# used here — it is a server-config directive and Apache returns 500 for the
+# whole site if it appears in .htaccess. <FilesMatch> is the .htaccess-legal
+# equivalent; it covers dotfiles, though not files inside a dot-directory,
+# which is what the RewriteRule above is for.
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ── Source, config and data files that must never be served ───────────────
+# (.json is deliberately NOT in this list — js/ fetches data/courses.json.)
+<FilesMatch "\.(sql|md|txt|log|ini|bak|orig|swp|dist|example|yml|yaml)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# robots.txt and the web manifest are legitimate exceptions to the rule above.
+<FilesMatch "^(robots\.txt|site\.webmanifest|manifest\.json)$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+</FilesMatch>
+
+# ── Directories that must never be reachable over HTTP ────────────────────
+# dev-tools/ and tools/ run unauthenticated SQL; includes/ holds the database
+# credentials. RewriteRule (not RedirectMatch) is used deliberately: its
+# pattern is matched relative to this directory, so the rules keep working
+# when the site is served from a subdirectory such as /valley_view_uni/.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(dev-tools|tools|includes|engagement)(/|$) - [F,L]
+</IfModule>
+
+# ── Uploads must never execute ────────────────────────────────────────────
+# If a malicious file ever lands in uploads/, this stops it being run as code.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^uploads/.*\.(php|php[0-9]|phtml|phar|pl|py|cgi|sh|asp|aspx|jsp)$ - [F,L]
+</IfModule>
+
+# A second layer belongs in uploads/.htaccess (created alongside this file):
+# <Directory> is server-config-only and cannot be used here.
+
+# ── Finding 7: HTTP security headers ──────────────────────────────────────
+# Mirrored in includes/security_headers.php so the site is covered even if this
+# file is not honoured. "always" applies them to error responses too.
+<IfModule mod_headers.c>
+    # HSTS — only meaningful over HTTPS; browsers ignore it on plain HTTP.
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+
+    # Don't advertise the PHP version.
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
+</IfModule>
+
+# ── Don't leak directory contents ─────────────────────────────────────────
+# (ServerSignature is server-config-only; set it in httpd.conf, not here.)
+Options -Indexes -MultiViews
+
+# ── Block a few noisy scanner paths outright ──────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(phpmyadmin|pma|myadmin|adminer|dbadmin)(/|$) - [F,L]
+</IfModule>
+
+# ══════════════════════════════════════════════════════════════════════════
+# UPLOAD LIMITS (original contents — unchanged)
+# ══════════════════════════════════════════════════════════════════════════
 #
 # Raises the request-size limits that cause "413 Request Entity Too Large"
 # when uploading images through the admin panel.
@@ -8,7 +109,6 @@
 # immediate HTTP 500 for the whole site. The guards make this file safe to
 # deploy anywhere — where the directives don't apply, .user.ini covers it.
 
-# --- PHP limits (only when PHP runs as an Apache module) ---
 <IfModule mod_php.c>
     php_value upload_max_filesize 64M
     php_value post_max_size 72M

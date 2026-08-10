@@ -1,13 +1,6 @@
 <?php
 ob_start();
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: login.php");
-    exit();
-}
+require_once(__DIR__ . '/../includes/admin_auth.php');
 
 // Include database connection
 require_once('../includes/db_connect.php');
@@ -38,7 +31,7 @@ require_once('../includes/upload_helper.php');
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- jQuery (Required for Bootstrap and Summernote) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/vendor/jquery-3.7.1.min.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- CUSTOM ADMIN CSS -->

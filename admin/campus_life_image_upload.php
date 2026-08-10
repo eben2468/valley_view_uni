@@ -4,7 +4,10 @@
  * Handles secure image uploads for campus life pages
  */
 
-session_start();
+// Authentication FIRST. Without this, the endpoint accepted uploads from
+// anyone on the internet (it only called session_start(), never checked the
+// session). admin_auth.php answers XHR callers with a 401 JSON body.
+require_once('../includes/admin_auth.php');
 require_once('../includes/db_connect.php');
 
 // Set JSON response header
@@ -42,13 +45,26 @@ if ($file['size'] > $max_size) {
     exit;
 }
 
-// Generate unique filename
-$extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+// Generate unique filename.
+//
+// The extension is derived from the DETECTED mime type, never from the
+// uploaded filename. Previously it was pathinfo($file['name']), so a genuine
+// GIF uploaded as "shell.php" passed the mime check above and was then written
+// into the web root as an executable .php file — remote code execution.
+$extension_for_mime = [
+    'image/jpeg' => 'jpg',
+    'image/jpg'  => 'jpg',
+    'image/png'  => 'png',
+    'image/gif'  => 'gif',
+    'image/webp' => 'webp',
+];
+$extension = $extension_for_mime[$mime_type];
 $filename = uniqid('campus_life_', true) . '.' . $extension;
 $filepath = $upload_dir . $filename;
 
 // Move uploaded file
 if (move_uploaded_file($file['tmp_name'], $filepath)) {
+    @chmod($filepath, 0644);
     // Return relative path for database storage
     $relative_path = 'uploads/campus_life/' . $filename;
     

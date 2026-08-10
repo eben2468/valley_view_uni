@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/security_headers.php';
 require_once 'db_connect.php';
 require_once 'navigation_helper.php';
 

@@ -1,0 +1,236 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Valley View University — nginx server block
+#
+# The production host runs nginx, which IGNORES .htaccess entirely. Everything
+# in this file must be applied here to take effect.
+#
+# Install:
+#   sudo cp nginx-vvu.conf.example /etc/nginx/sites-available/alpha.vvu.edu.gh
+#   sudo ln -s /etc/nginx/sites-available/alpha.vvu.edu.gh /etc/nginx/sites-enabled/
+#   sudo nginx -t          # MUST pass before reloading
+#   sudo systemctl reload nginx
+#
+# Addresses pentest findings 2, 4, 5, 6 and 7.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Rate-limit zone for the admin login endpoint (Finding 1, defence in depth
+# on top of the per-account lockout in admin/login.php).
+# This directive must sit in the http{} context — put it in nginx.conf or in
+# /etc/nginx/conf.d/vvu-limits.conf, NOT inside the server block below.
+#
+#   limit_req_zone $binary_remote_addr zone=vvu_login:10m rate=5r/m;
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name alpha.vvu.edu.gh;
+
+    # Everything goes to HTTPS. Keep the ACME path on HTTP so Let's Encrypt
+    # renewals keep working.
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name alpha.vvu.edu.gh;
+
+    root /var/www/vvu;          # <-- adjust to your document root
+    index index.php index.html;
+
+    ssl_certificate     /etc/letsencrypt/live/alpha.vvu.edu.gh/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/alpha.vvu.edu.gh/privkey.pem;
+
+    # TLS was already rated A+ by testssl.sh — these keep it there.
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+
+    # Don't advertise the nginx version in headers or error pages.
+    server_tokens off;
+
+    client_max_body_size 72M;   # matches post_max_size in .user.ini
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # FINDING 7 — security headers
+    # "always" makes them apply to 4xx/5xx responses too.
+    # ═══════════════════════════════════════════════════════════════════════
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()" always;
+
+    # CSP is emitted by includes/security_headers.php, which knows the exact
+    # origins the app uses. Setting it here as well would produce two policies,
+    # and browsers enforce the INTERSECTION — which breaks pages. Leave it to PHP.
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # FINDING 2 — .git and other dotfiles
+    #
+    # NOTE: the current live config rewrites unknown paths to index.php, which
+    # made some .git objects return HTML and look "protected". They were not.
+    # This block must come BEFORE the try_files fallback, and "^~" makes it a
+    # prefix match that wins over regex locations.
+    # ═══════════════════════════════════════════════════════════════════════
+    location ^~ /.git       { deny all; access_log off; log_not_found off; return 404; }
+    location ^~ /.svn       { deny all; return 404; }
+    location ^~ /.hg        { deny all; return 404; }
+
+    # All other dotfiles, except the ACME challenge directory.
+    location ~ /\.(?!well-known/) {
+        deny all;
+        access_log off;
+        log_not_found off;
+        return 404;
+    }
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # Source, schema and documentation files
+    # ═══════════════════════════════════════════════════════════════════════
+    location ~* \.(sql|md|log|ini|bak|orig|swp|dist|example|yml|yaml)$ {
+        deny all;
+        return 404;
+    }
+
+    # Root-level *.txt notes (QUICK_START.txt, SYSTEM_OVERVIEW.txt, ...) leak
+    # implementation detail. robots.txt is the one legitimate exception.
+    location = /robots.txt { allow all; access_log off; }
+    location ~* ^/[^/]+\.txt$ { deny all; return 404; }
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # Directories that must never be reachable over HTTP
+    # ═══════════════════════════════════════════════════════════════════════
+    location ~ ^/(dev-tools|tools|includes|sql|data/sql|engagement|\.qoder)/ {
+        deny all;
+        return 404;
+    }
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # Uploads: serve as static files, NEVER execute
+    # ═══════════════════════════════════════════════════════════════════════
+    location ^~ /uploads/ {
+        location ~* \.(php|php\d|phtml|phar|pl|py|cgi|sh|asp|aspx|jsp)$ {
+            deny all;
+            return 404;
+        }
+        # Force a download rather than inline rendering for anything unexpected.
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # FINDING 4 — phpMyAdmin
+    #
+    # Best fix: uninstall it from this host. If operations genuinely need it,
+    # delete the "return 404" below and uncomment the allow/deny list.
+    # ═══════════════════════════════════════════════════════════════════════
+    location ~ ^/(phpmyadmin|pma|myadmin|adminer|dbadmin)(/|$) {
+        return 404;
+
+        # allow 41.x.x.x;        # VVU campus egress IP
+        # allow 10.0.0.0/8;      # VPN range
+        # deny  all;
+        # auth_basic "Restricted";
+        # auth_basic_user_file /etc/nginx/.htpasswd-pma;
+    }
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # FINDING 1 — brute-force protection on the admin login
+    # Requires the limit_req_zone directive noted at the top of this file.
+    # ═══════════════════════════════════════════════════════════════════════
+    location = /admin/login.php {
+        # limit_req zone=vvu_login burst=5 nodelay;
+
+        # Strongly recommended: restrict the whole admin panel to campus/VPN.
+        # Uncomment and set your real ranges.
+        # allow 41.x.x.x;
+        # allow 10.0.0.0/8;
+        # deny  all;
+
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;   # <-- adjust version
+    }
+
+    # location ^~ /admin/ {
+    #     allow 41.x.x.x;
+    #     allow 10.0.0.0/8;
+    #     deny  all;
+    #     try_files $uri $uri/ /index.php?$query_string;
+    # }
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # PHP handling
+    # ═══════════════════════════════════════════════════════════════════════
+    location ~ \.php$ {
+        # Refuse anything that isn't a real file, so a crafted PATH_INFO cannot
+        # trick PHP-FPM into executing an uploaded image.
+        try_files $uri =404;
+
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;   # <-- adjust version
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_hide_header X-Powered-By;
+
+        # Production DB credentials, if you prefer env vars over includes/config.php.
+        # fastcgi_param DB_HOST "localhost";
+        # fastcgi_param DB_NAME "valley_view_uni";
+        # fastcgi_param DB_USER "vvu_web";
+        # fastcgi_param DB_PASS "<strong-random-password>";
+    }
+
+    location / {
+        try_files $uri $uri/ /404.php;
+    }
+
+    error_page 404 /404.php;
+
+    # Long cache for static assets.
+    location ~* \.(jpg|jpeg|png|gif|webp|svg|ico|css|js|woff2?|ttf)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FINDINGS 5 & 6 — Tomcat (8080) and DSpace (4000)
+#
+# Neither should be reachable from the internet on a raw port. Bind them to
+# localhost and reverse-proxy through nginx over TLS:
+#
+#   Tomcat  : in server.xml set  <Connector address="127.0.0.1" port="8080" .../>
+#   DSpace  : run the Node UI with  --host 127.0.0.1  (or set it in config.prod.yml)
+#
+# Then close the ports at the firewall:
+#
+#   sudo ufw deny 8080/tcp
+#   sudo ufw deny 4000/tcp
+#   sudo ufw reload
+#
+# And expose DSpace properly, on its own hostname:
+#
+# server {
+#     listen 443 ssl http2;
+#     server_name dspace.vvu.edu.gh;
+#     ssl_certificate     /etc/letsencrypt/live/dspace.vvu.edu.gh/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/dspace.vvu.edu.gh/privkey.pem;
+#     server_tokens off;
+#     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+#     location / {
+#         proxy_pass http://127.0.0.1:4000;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#     }
+# }
+# ═══════════════════════════════════════════════════════════════════════════

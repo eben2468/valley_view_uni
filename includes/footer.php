@@ -88,7 +88,11 @@ foreach ($footer_links_all as $link) {
     </section>
 
     <!--Import jQuery before materialize.js-->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Self-hosted 3.7.1. Was jQuery 3.6.0 from code.jquery.com (pentest
+         Finding 8): 3.6.0 carries known XSS issues fixed in 3.7.x, and loading
+         it from a third-party CDN gave that CDN script-execution rights on
+         every page of the site. -->
+    <script src="js/vendor/jquery-3.7.1.min.js"></script>
     <script src="Education-Website-and-AdminPanel/js/bootstrap.min.js"></script>
     <script src="Education-Website-and-AdminPanel/js/materialize.min.js"></script>
     <script src="Education-Website-and-AdminPanel/js/custom.js"></script>

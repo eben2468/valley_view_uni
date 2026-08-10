@@ -1,4 +1,10 @@
 <?php
+// Authentication must come BEFORE the POST handler below. This file's only
+// login check used to be `include 'header.php'` on what is now line 44 —
+// after the INSERT/UPDATE had already run, and the 'add' branch redirects and
+// exits before ever reaching it. An unauthenticated POST could therefore
+// create academic_programs rows.
+require_once(__DIR__ . '/../includes/admin_auth.php');
 require_once('../includes/db_connect.php');
 
 $action = $_GET['action'] ?? 'edit';
