@@ -1,0 +1,290 @@
+/*
+ * Admin page search overlay.
+ *
+ * Colours follow the existing admin palette (--primary-gradient is
+ * #002147 → #004b8d) so the dialog reads as part of the panel.
+ */
+
+.vvu-search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: none;
+    padding: 12vh 16px 16px;
+    background: rgba(0, 12, 26, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.vvu-search-overlay.is-open {
+    display: block;
+}
+
+.vvu-search-panel {
+    width: 100%;
+    max-width: 620px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    animation: vvuSearchIn 0.14s ease-out;
+}
+
+@keyframes vvuSearchIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Respect users who have asked for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .vvu-search-panel { animation: none; }
+}
+
+.vvu-search-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid #e9edf2;
+}
+
+.vvu-search-head > .fa-magnifying-glass {
+    color: #004b8d;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.vvu-search-input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    font-size: 16px;
+    color: #0f2033;
+    background: transparent;
+    font-family: inherit;
+}
+
+.vvu-search-input::placeholder {
+    color: #9aa7b5;
+}
+
+.vvu-search-close {
+    flex-shrink: 0;
+    border: 1px solid #dbe2ea;
+    background: #f5f7fa;
+    color: #64748b;
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1.6;
+}
+
+.vvu-search-close:hover {
+    background: #e9edf2;
+    color: #0f2033;
+}
+
+.vvu-search-results {
+    max-height: 52vh;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.vvu-search-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: #0f2033;
+    text-decoration: none;
+    transition: background 0.12s ease;
+}
+
+.vvu-search-item > .fas:first-child {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #eef3f9;
+    color: #004b8d;
+    font-size: 13px;
+}
+
+.vvu-search-item.is-active {
+    background: linear-gradient(135deg, #002147 0%, #004b8d 100%);
+    color: #fff;
+}
+
+.vvu-search-item.is-active > .fas:first-child {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+.vvu-search-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.vvu-search-title {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The matched substring. Inherits colour so it stays legible on the
+   dark active row, where a default yellow <mark> would not. */
+.vvu-search-mark {
+    background: rgba(242, 104, 56, 0.22);
+    color: inherit;
+    padding: 0 1px;
+    border-radius: 3px;
+    font-weight: 700;
+}
+
+.vvu-search-item.is-active .vvu-search-mark {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.vvu-search-parent {
+    font-size: 12px;
+    color: #7b8794;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vvu-search-item.is-active .vvu-search-parent {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.vvu-search-go {
+    flex-shrink: 0;
+    font-size: 12px;
+    opacity: 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.vvu-search-item.is-active .vvu-search-go {
+    opacity: 1;
+}
+
+.vvu-search-empty {
+    padding: 28px 16px;
+    text-align: center;
+    color: #7b8794;
+    font-size: 14px;
+}
+
+.vvu-search-foot {
+    display: flex;
+    gap: 18px;
+    padding: 10px 18px;
+    border-top: 1px solid #e9edf2;
+    background: #f8fafc;
+    font-size: 11px;
+    color: #7b8794;
+}
+
+.vvu-search-foot kbd {
+    display: inline-block;
+    min-width: 17px;
+    padding: 1px 5px;
+    margin-right: 3px;
+    background: #fff;
+    border: 1px solid #dbe2ea;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 10px;
+    color: #475569;
+    text-align: center;
+}
+
+/*
+ * Header trigger.
+ *
+ * The markup changed from <div><input></div> to a <button>, so these rules
+ * restore the original look. admin-styles.css positions `.search-box i`
+ * absolutely for the old input layout; flex is used here instead, and the
+ * icon's position is reset to match.
+ */
+button.search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 400px;
+    max-width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+button.search-box:hover {
+    border-color: #b9c4d0;
+}
+
+button.search-box:focus-visible {
+    outline: none;
+    border-color: #4680ff;
+    box-shadow: 0 0 0 3px rgba(70, 128, 255, 0.18);
+}
+
+button.search-box i {
+    position: static;      /* undo the absolute positioning above */
+    transform: none;
+    color: #999;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.vvu-search-placeholder {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: #9aa7b5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The Ctrl+K hint inside the header search button */
+.search-box .vvu-search-kbd {
+    flex-shrink: 0;
+    padding: 2px 6px;
+    border: 1px solid #dbe2ea;
+    border-radius: 5px;
+    background: #f8fafc;
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+    button.search-box { width: auto; }
+    .vvu-search-placeholder,
+    .search-box .vvu-search-kbd { display: none; }
+}
+
+@media (max-width: 575px) {
+    .vvu-search-overlay { padding-top: 6vh; }
+    .vvu-search-foot    { display: none; }
+}

@@ -42,28 +42,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_accommodation'
         }
     }
     
-    $stmt = $pdo->prepare("UPDATE accommodation_content SET 
-        hero_title = ?, hero_subtitle = ?, hero_image = ?,
-        intro_heading = ?, intro_text = ?, intro_image = ?,
-        facilities_description = ?, room_types_description = ?,
-        application_process = ?, rules_and_regulations = ?,
-        cta_heading = ?, cta_text = ?, status = ?,
-        off_campus_heading = ?, off_campus_text = ?,
-        dining_heading = ?, dining_subheading = ?, dining_text = ?, dining_list = ?, dining_image = ?
-        WHERE id = ?");
-    
-    $stmt->execute([
-        $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
-        $_POST['intro_heading'], $_POST['intro_text'], $intro_image,
-        $_POST['facilities_description'], $_POST['room_types_description'],
-        $_POST['application_process'], $_POST['rules_and_regulations'],
-        $_POST['cta_heading'], $_POST['cta_text'], $_POST['status'],
-        $_POST['off_campus_heading'], $_POST['off_campus_text'],
-        $_POST['dining_heading'], $_POST['dining_subheading'], $_POST['dining_text'], $_POST['dining_list'], $dining_image,
-        $id
-    ]);
-    
-    echo '<div class="alert alert-success">Content updated successfully!</div>';
+    // The save runs inside try/catch because PDO is in ERRMODE_EXCEPTION. An
+    // uncaught PDOException here (e.g. a column the schema is missing) killed
+    // the request mid-page, so with display_errors off in production the admin
+    // saw a blank panel and no explanation — an upload appeared to "do nothing"
+    // even though the file had already been written to uploads/.
+    try {
+        $stmt = $pdo->prepare("UPDATE accommodation_content SET 
+            hero_title = ?, hero_subtitle = ?, hero_image = ?,
+            intro_heading = ?, intro_text = ?, intro_image = ?,
+            facilities_description = ?, room_types_description = ?,
+            application_process = ?, rules_and_regulations = ?,
+            cta_heading = ?, cta_text = ?, status = ?,
+            off_campus_heading = ?, off_campus_text = ?,
+            dining_heading = ?, dining_subheading = ?, dining_text = ?, dining_list = ?, dining_image = ?
+            WHERE id = ?");
+        
+        $stmt->execute([
+            $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
+            $_POST['intro_heading'], $_POST['intro_text'], $intro_image,
+            $_POST['facilities_description'], $_POST['room_types_description'],
+            $_POST['application_process'], $_POST['rules_and_regulations'],
+            $_POST['cta_heading'], $_POST['cta_text'], $_POST['status'],
+            $_POST['off_campus_heading'], $_POST['off_campus_text'],
+            $_POST['dining_heading'], $_POST['dining_subheading'], $_POST['dining_text'], $_POST['dining_list'], $dining_image,
+            $id
+        ]);
+        
+        echo '<div class="alert alert-success">Content updated successfully!</div>';
+    } catch (PDOException $e) {
+        error_log('Accommodation save failed: ' . $e->getMessage());
+        echo vvu_render_save_error($e);
+    }
+
+    // An upload that failed for its own reasons (too large, unwritable folder)
+    // is reported here rather than only by admin/header.php, which has already
+    // been rendered by the time this included file runs.
+    if (function_exists('vvu_take_upload_error') && ($uploadError = vvu_take_upload_error())) {
+        echo '<div class="alert alert-warning"><strong>The image was not uploaded.</strong> '
+           . htmlspecialchars($uploadError)
+           . '<br><small>Everything else on the form was saved. The previous image is still in place.</small></div>';
+    }
 }
 
 // Fetch current content

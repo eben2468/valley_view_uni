@@ -44,37 +44,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_radio'])) {
         }
     }
     
-    $stmt = $pdo->prepare("UPDATE radio_content SET 
-        hero_title = ?, hero_subtitle = ?, hero_image = ?,
-        live_on_air_text = ?, now_playing_heading = ?,
-        current_show = ?, current_host = ?, current_show_image = ?,
-        next_show_time = ?, frequency = ?,
-        about_heading = ?, about_text = ?,
-        about_image_1 = ?, about_image_2 = ?, about_image_3 = ?, about_image_4 = ?,
-        programs_heading = ?, programs_text = ?,
-        cta_heading = ?, cta_text = ?, cta_phone = ?, cta_email = ?,
-        location_text = ?, status = ?,
-        facebook_url = ?, twitter_url = ?, instagram_url = ?,
-        hero_cta_1_text = ?, hero_cta_1_link = ?,
-        hero_cta_2_text = ?, hero_cta_2_link = ?
-        WHERE id = 1");
-    
-    $stmt->execute([
-        $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
-        $_POST['live_on_air_text'], $_POST['now_playing_heading'],
-        $_POST['current_show'], $_POST['current_host'], $current_show_image,
-        $_POST['next_show_time'], $_POST['frequency'],
-        $_POST['about_heading'], $_POST['about_text'],
-        $about_images[1], $about_images[2], $about_images[3], $about_images[4],
-        $_POST['programs_heading'], $_POST['programs_text'],
-        $_POST['cta_heading'], $_POST['cta_text'], $_POST['cta_phone'], $_POST['cta_email'],
-        $_POST['location_text'], $_POST['status'],
-        $_POST['facebook_url'], $_POST['twitter_url'], $_POST['instagram_url'],
-        $_POST['hero_cta_1_text'], $_POST['hero_cta_1_link'],
-        $_POST['hero_cta_2_text'], $_POST['hero_cta_2_link']
-    ]);
-    
-    echo '<div class="alert alert-success">Radio content updated successfully!</div>';
+    // The save runs inside try/catch because PDO is in ERRMODE_EXCEPTION. An
+    // uncaught PDOException here (e.g. a column the schema is missing) killed
+    // the request mid-page, so with display_errors off in production the admin
+    // saw a blank panel and no explanation — an upload appeared to "do nothing"
+    // even though the file had already been written to uploads/.
+    try {
+        $stmt = $pdo->prepare("UPDATE radio_content SET 
+            hero_title = ?, hero_subtitle = ?, hero_image = ?,
+            live_on_air_text = ?, now_playing_heading = ?,
+            current_show = ?, current_host = ?, current_show_image = ?,
+            next_show_time = ?, frequency = ?,
+            about_heading = ?, about_text = ?,
+            about_image_1 = ?, about_image_2 = ?, about_image_3 = ?, about_image_4 = ?,
+            programs_heading = ?, programs_text = ?,
+            cta_heading = ?, cta_text = ?, cta_phone = ?, cta_email = ?,
+            location_text = ?, status = ?,
+            facebook_url = ?, twitter_url = ?, instagram_url = ?,
+            hero_cta_1_text = ?, hero_cta_1_link = ?,
+            hero_cta_2_text = ?, hero_cta_2_link = ?
+            WHERE id = 1");
+        
+        $stmt->execute([
+            $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
+            $_POST['live_on_air_text'], $_POST['now_playing_heading'],
+            $_POST['current_show'], $_POST['current_host'], $current_show_image,
+            $_POST['next_show_time'], $_POST['frequency'],
+            $_POST['about_heading'], $_POST['about_text'],
+            $about_images[1], $about_images[2], $about_images[3], $about_images[4],
+            $_POST['programs_heading'], $_POST['programs_text'],
+            $_POST['cta_heading'], $_POST['cta_text'], $_POST['cta_phone'], $_POST['cta_email'],
+            $_POST['location_text'], $_POST['status'],
+            $_POST['facebook_url'], $_POST['twitter_url'], $_POST['instagram_url'],
+            $_POST['hero_cta_1_text'], $_POST['hero_cta_1_link'],
+            $_POST['hero_cta_2_text'], $_POST['hero_cta_2_link']
+        ]);
+        
+        echo '<div class="alert alert-success">Radio content updated successfully!</div>';
+    } catch (PDOException $e) {
+        error_log('Radio save failed: ' . $e->getMessage());
+        echo vvu_render_save_error($e);
+    }
+
+    // An upload that failed for its own reasons (too large, unwritable folder)
+    // is reported here rather than only by admin/header.php, which has already
+    // been rendered by the time this included file runs.
+    if (function_exists('vvu_take_upload_error') && ($uploadError = vvu_take_upload_error())) {
+        echo '<div class="alert alert-warning"><strong>The image was not uploaded.</strong> '
+           . htmlspecialchars($uploadError)
+           . '<br><small>Everything else on the form was saved. The previous image is still in place.</small></div>';
+    }
 }
 
 $content = $pdo->query("SELECT * FROM radio_content WHERE id = 1")->fetch(PDO::FETCH_ASSOC);

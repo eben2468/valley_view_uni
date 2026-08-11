@@ -30,24 +30,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_food'])) {
         }
     }
     
-    $stmt = $pdo->prepare("UPDATE food_services_content SET 
-        hero_title = ?, hero_subtitle = ?, hero_image = ?,
-        philosophy_heading = ?, philosophy_text = ?, philosophy_image = ?,
-        breakfast_time = ?, breakfast_desc = ?, lunch_time = ?, lunch_desc = ?, dinner_time = ?, dinner_desc = ?,
-        meal_plans_heading = ?, meal_plans_text = ?, meal_plans_reg_info = ?, meal_plans_btn_text = ?, meal_plans_btn_url = ?,
-        feedback_heading = ?, feedback_text = ?, status = ?
-        WHERE id = ?");
-    
-    $stmt->execute([
-        $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
-        $_POST['philosophy_heading'], $_POST['philosophy_text'], $philosophy_image,
-        $_POST['breakfast_time'], $_POST['breakfast_desc'], $_POST['lunch_time'], $_POST['lunch_desc'], $_POST['dinner_time'], $_POST['dinner_desc'],
-        $_POST['meal_plans_heading'], $_POST['meal_plans_text'], $_POST['meal_plans_reg_info'], $_POST['meal_plans_btn_text'], $_POST['meal_plans_btn_url'],
-        $_POST['feedback_heading'], $_POST['feedback_text'],
-        $_POST['status'], 1
-    ]);
-    
-    echo '<div class="alert alert-success">Content updated successfully!</div>';
+    // The save runs inside try/catch because PDO is in ERRMODE_EXCEPTION. An
+    // uncaught PDOException here (e.g. a column the schema is missing) killed
+    // the request mid-page, so with display_errors off in production the admin
+    // saw a blank panel and no explanation — an upload appeared to "do nothing"
+    // even though the file had already been written to uploads/.
+    try {
+        $stmt = $pdo->prepare("UPDATE food_services_content SET 
+            hero_title = ?, hero_subtitle = ?, hero_image = ?,
+            philosophy_heading = ?, philosophy_text = ?, philosophy_image = ?,
+            breakfast_time = ?, breakfast_desc = ?, lunch_time = ?, lunch_desc = ?, dinner_time = ?, dinner_desc = ?,
+            meal_plans_heading = ?, meal_plans_text = ?, meal_plans_reg_info = ?, meal_plans_btn_text = ?, meal_plans_btn_url = ?,
+            feedback_heading = ?, feedback_text = ?, status = ?
+            WHERE id = ?");
+        
+        $stmt->execute([
+            $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
+            $_POST['philosophy_heading'], $_POST['philosophy_text'], $philosophy_image,
+            $_POST['breakfast_time'], $_POST['breakfast_desc'], $_POST['lunch_time'], $_POST['lunch_desc'], $_POST['dinner_time'], $_POST['dinner_desc'],
+            $_POST['meal_plans_heading'], $_POST['meal_plans_text'], $_POST['meal_plans_reg_info'], $_POST['meal_plans_btn_text'], $_POST['meal_plans_btn_url'],
+            $_POST['feedback_heading'], $_POST['feedback_text'],
+            $_POST['status'], 1
+        ]);
+        
+        echo '<div class="alert alert-success">Content updated successfully!</div>';
+    } catch (PDOException $e) {
+        error_log('Food Services save failed: ' . $e->getMessage());
+        echo vvu_render_save_error($e);
+    }
+
+    // An upload that failed for its own reasons (too large, unwritable folder)
+    // is reported here rather than only by admin/header.php, which has already
+    // been rendered by the time this included file runs.
+    if (function_exists('vvu_take_upload_error') && ($uploadError = vvu_take_upload_error())) {
+        echo '<div class="alert alert-warning"><strong>The image was not uploaded.</strong> '
+           . htmlspecialchars($uploadError)
+           . '<br><small>Everything else on the form was saved. The previous image is still in place.</small></div>';
+    }
 }
 
 $stmt = $pdo->query("SELECT * FROM food_services_content WHERE id = 1");

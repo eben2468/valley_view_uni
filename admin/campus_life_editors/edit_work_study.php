@@ -30,29 +30,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_work_study']))
         }
     }
     
-    $stmt = $pdo->prepare("UPDATE work_study_content SET 
-        hero_title = ?, hero_subtitle = ?, hero_image = ?,
-        overview_heading = ?, overview_text = ?, overview_image = ?,
-        program_intro_heading = ?, benefits_heading = ?, benefits_text = ?,
-        opportunities_heading = ?, opportunities_text = ?,
-        info_heading = ?, info_text = ?, info_list = ?,
-        steps_heading = ?, steps_text = ?,
-        minimum_hours = ?, spouse_policy_text = ?, application_process = ?,
-        cta_heading = ?, cta_text = ?, status = ?
-        WHERE id = ?");
-    
-    $stmt->execute([
-        $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
-        $_POST['overview_heading'], $_POST['overview_text'], $overview_image,
-        $_POST['program_intro_heading'], $_POST['benefits_heading'], $_POST['benefits_text'],
-        $_POST['opportunities_heading'], $_POST['opportunities_text'],
-        $_POST['info_heading'], $_POST['info_text'], $_POST['info_list'],
-        $_POST['steps_heading'], $_POST['steps_text'],
-        $_POST['minimum_hours'], $_POST['spouse_policy_text'], $_POST['application_process'],
-        $_POST['cta_heading'], $_POST['cta_text'], $_POST['status'], 1
-    ]);
-    
-    echo '<div class="alert alert-success">Content updated successfully!</div>';
+    // The save runs inside try/catch because PDO is in ERRMODE_EXCEPTION. An
+    // uncaught PDOException here (e.g. a column the schema is missing) killed
+    // the request mid-page, so with display_errors off in production the admin
+    // saw a blank panel and no explanation — the upload appeared to "do
+    // nothing" even though the file had already been written to uploads/.
+    try {
+        $stmt = $pdo->prepare("UPDATE work_study_content SET
+            hero_title = ?, hero_subtitle = ?, hero_image = ?,
+            overview_heading = ?, overview_text = ?, overview_image = ?,
+            program_intro_heading = ?, benefits_heading = ?, benefits_text = ?,
+            opportunities_heading = ?, opportunities_text = ?,
+            info_heading = ?, info_text = ?, info_list = ?,
+            steps_heading = ?, steps_text = ?,
+            minimum_hours = ?, spouse_policy_text = ?, application_process = ?,
+            cta_heading = ?, cta_text = ?, status = ?
+            WHERE id = ?");
+
+        $stmt->execute([
+            $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
+            $_POST['overview_heading'], $_POST['overview_text'], $overview_image,
+            $_POST['program_intro_heading'], $_POST['benefits_heading'], $_POST['benefits_text'],
+            $_POST['opportunities_heading'], $_POST['opportunities_text'],
+            $_POST['info_heading'], $_POST['info_text'], $_POST['info_list'],
+            $_POST['steps_heading'], $_POST['steps_text'],
+            $_POST['minimum_hours'], $_POST['spouse_policy_text'], $_POST['application_process'],
+            $_POST['cta_heading'], $_POST['cta_text'], $_POST['status'], 1
+        ]);
+
+        echo '<div class="alert alert-success">Content updated successfully!</div>';
+    } catch (PDOException $e) {
+        error_log('Work Study save failed: ' . $e->getMessage());
+        echo vvu_render_save_error($e);
+    }
+
+    // An upload that failed for its own reasons (too large, unwritable folder)
+    // is reported here rather than only by admin/header.php, which has already
+    // been rendered by the time this included file runs.
+    if (function_exists('vvu_take_upload_error') && ($uploadError = vvu_take_upload_error())) {
+        echo '<div class="alert alert-warning"><strong>The image was not uploaded.</strong> '
+           . htmlspecialchars($uploadError)
+           . '<br><small>Everything else on the form was saved. The previous image is still in place.</small></div>';
+    }
 }
 
 $stmt = $pdo->query("SELECT * FROM work_study_content WHERE id = 1");

@@ -39,7 +39,22 @@ require_once('../includes/upload_helper.php');
     <link href="admin-modern.css?v=1.3" rel="stylesheet" />
     <!-- Shrinks oversized photos in the browser so uploads can't trip the
          server's request-size limit (HTTP 413) -->
-    <script src="js/upload-guard.js?v=1.0" defer></script>
+    <script src="js/upload-guard.js?v=1.1" defer></script>
+
+    <!-- Page search (Ctrl+K). The index is built from the manager files by
+         includes/page_index.php, so nested "?page=" editors are findable
+         without knowing which manager owns them. -->
+    <link href="page-search.css?v=1.0" rel="stylesheet" />
+    <script>
+        window.VVU_PAGE_INDEX = <?php
+            require_once __DIR__ . '/includes/page_index.php';
+            echo json_encode(
+                vvu_admin_page_index(),
+                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP
+            );
+        ?>;
+    </script>
+    <script src="js/page-search.js?v=1.0" defer></script>
 </head>
 
 <body>
@@ -50,10 +65,16 @@ require_once('../includes/upload_helper.php');
                 <button class="menu-toggle" id="menuToggle">
                     <i class="fas fa-bars"></i>
                 </button>
-                <div class="search-box">
+                <!-- Opens the page-search overlay (admin/js/page-search.js).
+                     This box was previously an inert text input that did
+                     nothing when typed into. It is now a button so it is
+                     keyboard-reachable and announces itself correctly. -->
+                <button type="button" class="search-box" data-vvu-search-trigger
+                        aria-label="Search admin pages">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search or enter website name">
-                </div>
+                    <span class="vvu-search-placeholder">Search pages…</span>
+                    <span class="vvu-search-kbd">Ctrl K</span>
+                </button>
             </div>
             <div class="header-right">
                 <button class="header-icon">

@@ -10,6 +10,10 @@ $content = getWorkStudyContent($pdo);
 // Use default values if no content found
 if (!$content) {
     $content = [
+        'info_heading' => 'Important Information',
+        'info_subtitle' => 'What every work study student should know',
+        'steps_heading' => 'How to Apply',
+        'stats_opportunities' => '50+',
         'hero_title' => 'Work Study Program',
         'hero_subtitle' => 'Learn, Work, and Grow - Experience holistic development through meaningful campus employment opportunities',
         'hero_image' => 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1920',
@@ -23,6 +27,22 @@ if (!$content) {
         'cta_text' => 'Join our work study program and experience the value of combining academic excellence with practical work experience.'
     ];
 }
+
+// Guarantee every key the markup below reads exists. Columns are added by
+// dev-tools/migrate_campus_life_v3.php, so on a server where that has not run
+// yet the row is present but short of several fields — without this, each one
+// would raise an "Undefined array key" warning on the live page.
+$content += [
+    'hero_title' => '', 'hero_subtitle' => '', 'hero_image' => '',
+    'overview_heading' => '', 'overview_text' => '', 'overview_image' => '',
+    'program_intro_heading' => '', 'benefits_heading' => '', 'benefits_text' => '',
+    'opportunities_heading' => '', 'opportunities_text' => '',
+    'info_heading' => 'Important Information', 'info_subtitle' => '',
+    'info_text' => '', 'info_list' => '',
+    'steps_heading' => 'How to Apply', 'steps_subtitle' => '', 'steps_text' => '',
+    'minimum_hours' => 12, 'spouse_policy_text' => '', 'application_process' => '',
+    'cta_heading' => '', 'cta_text' => '', 'stats_opportunities' => '50+',
+];
 ?>
 
 <style>
@@ -98,7 +118,7 @@ if (!$content) {
         <div class="container">
             <div class="max-w-6xl mx-auto">
                 <div class="text-center mb-20">
-                    <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6">Campus Employment Philosophy</h2>
+                    <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($content['overview_heading']); ?></h2>
                     <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
                 </div>
 
@@ -114,12 +134,16 @@ if (!$content) {
                     <div class="space-y-8 flex flex-col justify-center">
                         <div class="prose prose-lg dark:prose-invert max-w-none">
                             <p class="text-3xl text-gray-700 dark:text-gray-300 leading-relaxed font-medium mb-8">
-                                In keeping with the <strong class="text-blue-600 dark:text-blue-400">Seventh-day Adventist philosophy of education</strong>, which emphasizes the development of the <em>physical nature of humanity</em>, Valley View University provides varied opportunities for students to work in campus-related industries.
+                                <?php echo nl2br(strip_tags($content['overview_text'])); ?>
                             </p>
-                            
+
+                            <?php if (!empty($content['program_intro_heading'])): ?>
+                                <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($content['program_intro_heading']); ?></h3>
+                            <?php endif; ?>
+
                             <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-10 rounded-3xl border-l-8 border-blue-600 shadow-lg">
                                 <p class="text-3xl text-gray-800 dark:text-gray-200 font-bold leading-relaxed">
-                                    Students are expected to work <span class="text-blue-600 dark:text-blue-400 text-4xl">at least 12 hours per week</span>, encouraging them to appreciate the value and dignity of labour while becoming self-reliant in financial matters.
+                                    Students are expected to work <span class="text-blue-600 dark:text-blue-400 text-4xl">at least <?php echo strip_tags($content['minimum_hours']); ?> hours per week</span>, encouraging them to appreciate the value and dignity of labour while becoming self-reliant in financial matters.
                                 </p>
                             </div>
                         </div>
@@ -133,8 +157,8 @@ if (!$content) {
     <section class="py-24 bg-gray-50 dark:bg-gray-950">
         <div class="container">
             <div class="max-w-4xl mx-auto text-center mb-20">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6">Program Benefits</h2>
-                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Experience comprehensive personal and professional development through our work study program.</p>
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($content['benefits_heading'] ?: 'Program Benefits'); ?></h2>
+                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($content['benefits_text'] ?: 'Experience comprehensive personal and professional development through our work study program.'); ?></p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -161,9 +185,9 @@ if (!$content) {
     <section class="py-24 bg-white dark:bg-gray-900">
         <div class="container">
             <div class="max-w-4xl mx-auto text-center mb-20">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6">Work Opportunities</h2>
+                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($content['opportunities_heading'] ?: 'Work Opportunities'); ?></h2>
                 <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
-                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Explore diverse employment opportunities across campus departments and industries.</p>
+                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($content['opportunities_text'] ?: 'Explore diverse employment opportunities across campus departments and industries.'); ?></p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
@@ -234,6 +258,29 @@ if (!$content) {
                             <p class="text-2xl text-blue-100 leading-relaxed font-medium mb-6">
                                 <?php echo nl2br(strip_tags($content['spouse_policy_text'])); ?>
                             </p>
+
+                            <?php if (!empty($content['info_text'])): ?>
+                                <p class="text-2xl text-blue-100 leading-relaxed font-medium mb-6">
+                                    <?php echo nl2br(strip_tags($content['info_text'])); ?>
+                                </p>
+                            <?php endif; ?>
+
+                            <?php
+                            // "Info List" is entered in the admin panel as one item per
+                            // line; blank lines are dropped so a stray newline does not
+                            // render an empty bullet.
+                            $info_items = array_filter(array_map('trim', preg_split('/\R/', (string) ($content['info_list'] ?? ''))), 'strlen');
+                            ?>
+                            <?php if ($info_items): ?>
+                                <ul class="space-y-4">
+                                    <?php foreach ($info_items as $item): ?>
+                                        <li class="flex items-start gap-4">
+                                            <span class="material-symbols-outlined text-yellow-400 text-3xl mt-1">check_circle</span>
+                                            <span class="text-2xl text-blue-100 font-medium leading-relaxed"><?php echo strip_tags($item); ?></span>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -246,7 +293,11 @@ if (!$content) {
         <div class="container">
             <div class="max-w-4xl mx-auto text-center mb-20">
                 <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($content['steps_heading']); ?></h2>
-                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($content['steps_subtitle']); ?></p>
+                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php
+                    // steps_text is the field exposed in the admin panel; steps_subtitle
+                    // is the older column kept for installs that still populate it.
+                    echo strip_tags(!empty($content['steps_text']) ? $content['steps_text'] : ($content['steps_subtitle'] ?? ''));
+                ?></p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
@@ -263,6 +314,16 @@ if (!$content) {
                 </div>
                 <?php endforeach; ?>
             </div>
+
+            <?php if (!empty($content['application_process'])): ?>
+                <!-- Free-text application notes from the admin panel. Previously
+                     this field was editable but never shown anywhere. -->
+                <div class="max-w-4xl mx-auto mt-16 bg-white dark:bg-gray-900 rounded-3xl p-10 shadow-xl border-l-8 border-blue-600">
+                    <p class="text-2xl text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                        <?php echo nl2br(strip_tags($content['application_process'])); ?>
+                    </p>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -271,10 +332,10 @@ if (!$content) {
         <div class="container relative z-10">
             <div class="max-w-5xl mx-auto text-center">
                 <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-6xl font-black text-gray-900 dark:text-white mb-8 leading-tight tracking-tight">
-                    Ready to Work & Learn?
+                    <?php echo strip_tags($content['cta_heading']); ?>
                 </h2>
                 <p class="text-2xl sm:text-3xl md:text-3xl text-gray-600 dark:text-gray-400 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
-                    Join our work study program and experience the value of combining academic excellence with practical work experience.
+                    <?php echo strip_tags($content['cta_text']); ?>
                 </p>
                 <div class="flex flex-col sm:flex-row gap-6 justify-center">
                     <a href="contact_us.php" class="px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">

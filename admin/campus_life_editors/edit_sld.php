@@ -30,29 +30,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_sld'])) {
         }
     }
     
-    $stmt = $pdo->prepare("UPDATE sld_content SET 
-        hero_title = ?, hero_subtitle = ?, hero_image = ?,
-        welcome_heading = ?, welcome_text = ?, welcome_image = ?,
-        mission_statement = ?, dean_name = ?, dean_title = ?, dean_description = ?,
-        services_heading = ?, services_text = ?,
-        team_heading = ?, team_text = ?,
-        locations_heading = ?, locations_text = ?,
-        stats_staff = ?, stats_locations = ?,
-        cta_heading = ?, cta_text = ?, status = ?
-        WHERE id = ?");
-    
-    $stmt->execute([
-        $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
-        $_POST['welcome_heading'], $_POST['welcome_text'], $welcome_image,
-        $_POST['mission_statement'], $_POST['dean_name'], $_POST['dean_title'], $_POST['dean_description'],
-        $_POST['services_heading'], $_POST['services_text'],
-        $_POST['team_heading'], $_POST['team_text'],
-        $_POST['locations_heading'], $_POST['locations_text'],
-        $_POST['stats_staff'], $_POST['stats_locations'],
-        $_POST['cta_heading'], $_POST['cta_text'], $_POST['status'], 1
-    ]);
-    
-    echo '<div class="alert alert-success">Content updated successfully!</div>';
+    // The save runs inside try/catch because PDO is in ERRMODE_EXCEPTION. An
+    // uncaught PDOException here (e.g. a column the schema is missing) killed
+    // the request mid-page, so with display_errors off in production the admin
+    // saw a blank panel and no explanation — an upload appeared to "do nothing"
+    // even though the file had already been written to uploads/.
+    try {
+        $stmt = $pdo->prepare("UPDATE sld_content SET 
+            hero_title = ?, hero_subtitle = ?, hero_image = ?,
+            welcome_heading = ?, welcome_text = ?, welcome_image = ?,
+            mission_statement = ?, dean_name = ?, dean_title = ?, dean_description = ?,
+            services_heading = ?, services_text = ?,
+            team_heading = ?, team_text = ?,
+            locations_heading = ?, locations_text = ?,
+            stats_staff = ?, stats_locations = ?,
+            cta_heading = ?, cta_text = ?, status = ?
+            WHERE id = ?");
+        
+        $stmt->execute([
+            $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
+            $_POST['welcome_heading'], $_POST['welcome_text'], $welcome_image,
+            $_POST['mission_statement'], $_POST['dean_name'], $_POST['dean_title'], $_POST['dean_description'],
+            $_POST['services_heading'], $_POST['services_text'],
+            $_POST['team_heading'], $_POST['team_text'],
+            $_POST['locations_heading'], $_POST['locations_text'],
+            $_POST['stats_staff'], $_POST['stats_locations'],
+            $_POST['cta_heading'], $_POST['cta_text'], $_POST['status'], 1
+        ]);
+        
+        echo '<div class="alert alert-success">Content updated successfully!</div>';
+    } catch (PDOException $e) {
+        error_log('SLD save failed: ' . $e->getMessage());
+        echo vvu_render_save_error($e);
+    }
+
+    // An upload that failed for its own reasons (too large, unwritable folder)
+    // is reported here rather than only by admin/header.php, which has already
+    // been rendered by the time this included file runs.
+    if (function_exists('vvu_take_upload_error') && ($uploadError = vvu_take_upload_error())) {
+        echo '<div class="alert alert-warning"><strong>The image was not uploaded.</strong> '
+           . htmlspecialchars($uploadError)
+           . '<br><small>Everything else on the form was saved. The previous image is still in place.</small></div>';
+    }
 }
 
 $stmt = $pdo->query("SELECT * FROM sld_content WHERE id = 1");

@@ -132,19 +132,35 @@
         el.textContent = text;
     }
 
-    // Delegated so it also covers inputs inside modals added after page load
-    document.addEventListener('change', function (event) {
-        var input = event.target;
-        if (!input || input.tagName !== 'INPUT' || input.type !== 'file') return;
-        if (!input.files || !input.files.length) return;
+    // Tracks in-flight shrink work per form. Selecting a large photo and
+    // hitting Save straight away used to submit the ORIGINAL file: shrinking is
+    // asynchronous, and nothing stopped the form while it ran. On a slow
+    // machine that is easy to hit, and it produced exactly the failure this
+    // script exists to prevent (a 20MB upload rejected by the server).
+    var pending = new WeakMap();
 
+    function trackPending(input, promise) {
+        var form = input.form;
+        if (!form) return;
+
+        var set = pending.get(form);
+        if (!set) {
+            set = new Set();
+            pending.set(form, set);
+        }
+        set.add(promise);
+        promise.then(function () { set.delete(promise); },
+                     function () { set.delete(promise); });
+    }
+
+    function processInput(input) {
         var files = Array.prototype.slice.call(input.files);
-        if (!files.some(shouldProcess)) return;
+        if (!files.some(shouldProcess)) return null;
 
         var before = files.reduce(function (sum, f) { return sum + f.size; }, 0);
         note(input, 'Optimising image…');
 
-        Promise.all(files.map(function (f) {
+        var job = Promise.all(files.map(function (f) {
             return shouldProcess(f) ? shrink(f) : Promise.resolve(f);
         })).then(function (processed) {
             var after = processed.reduce(function (sum, f) { return sum + f.size; }, 0);
@@ -164,6 +180,41 @@
             }
         }).catch(function () {
             note(input, 'Could not optimise automatically — if the upload fails, resize the image first.', true);
+        });
+
+        trackPending(input, job);
+        return job;
+    }
+
+    // Delegated so it also covers inputs inside modals added after page load
+    document.addEventListener('change', function (event) {
+        var input = event.target;
+        if (!input || input.tagName !== 'INPUT' || input.type !== 'file') return;
+        if (!input.files || !input.files.length) return;
+        processInput(input);
+    }, false);
+
+    // Hold the submit until shrinking finishes, then submit for real.
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+        var set = pending.get(form);
+        if (!set || !set.size) return;
+
+        event.preventDefault();
+
+        var jobs = Array.prototype.slice.call(set);
+        var submitter = event.submitter;
+
+        Promise.all(jobs).then(function () {
+            // requestSubmit keeps the button's name/value in the POST, which
+            // these editors rely on (they check isset($_POST['update_*'])).
+            if (form.requestSubmit) {
+                form.requestSubmit(submitter || undefined);
+            } else if (submitter && submitter.click) {
+                submitter.click();
+            } else {
+                form.submit();
+            }
         });
     }, false);
 })();

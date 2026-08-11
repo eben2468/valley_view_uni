@@ -33,27 +33,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_philosophy']))
         }
     }
     
-    $stmt = $pdo->prepare("UPDATE philosophy_on_dress_content SET 
-        hero_title = ?, hero_subtitle = ?, hero_image = ?,
-        intro_heading = ?, intro_text = ?, intro_image = ?,
-        philosophy_statement = ?, encouraged_items = ?, discouraged_items = ?,
-        benefits_text = ?, cta_heading = ?, cta_text = ?, status = ?,
-        principles_heading = ?, principles_text = ?, benefits_heading = ?,
-        guidelines_heading = ?, guidelines_text = ?, matters_heading = ?, matters_text = ?
-        WHERE id = ?");
-    
-    $stmt->execute([
-        $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
-        $_POST['intro_heading'], $_POST['intro_text'], $intro_image,
-        $_POST['philosophy_statement'], $_POST['encouraged_items'], $_POST['discouraged_items'],
-        $_POST['benefits_text'], $_POST['cta_heading'], $_POST['cta_text'],
-        $_POST['status'],
-        $_POST['principles_heading'], $_POST['principles_text'], $_POST['benefits_heading'],
-        $_POST['guidelines_heading'], $_POST['guidelines_text'], $_POST['matters_heading'], $_POST['matters_text'],
-        $id
-    ]);
-    
-    echo '<div class="alert alert-success">Content updated successfully!</div>';
+    // The save runs inside try/catch because PDO is in ERRMODE_EXCEPTION. An
+    // uncaught PDOException here (e.g. a column the schema is missing) killed
+    // the request mid-page, so with display_errors off in production the admin
+    // saw a blank panel and no explanation — an upload appeared to "do nothing"
+    // even though the file had already been written to uploads/.
+    try {
+        $stmt = $pdo->prepare("UPDATE philosophy_on_dress_content SET 
+            hero_title = ?, hero_subtitle = ?, hero_image = ?,
+            intro_heading = ?, intro_text = ?, intro_image = ?,
+            philosophy_statement = ?, encouraged_items = ?, discouraged_items = ?,
+            benefits_text = ?, cta_heading = ?, cta_text = ?, status = ?,
+            principles_heading = ?, principles_text = ?, benefits_heading = ?,
+            guidelines_heading = ?, guidelines_text = ?, matters_heading = ?, matters_text = ?
+            WHERE id = ?");
+        
+        $stmt->execute([
+            $_POST['hero_title'], $_POST['hero_subtitle'], $hero_image,
+            $_POST['intro_heading'], $_POST['intro_text'], $intro_image,
+            $_POST['philosophy_statement'], $_POST['encouraged_items'], $_POST['discouraged_items'],
+            $_POST['benefits_text'], $_POST['cta_heading'], $_POST['cta_text'],
+            $_POST['status'],
+            $_POST['principles_heading'], $_POST['principles_text'], $_POST['benefits_heading'],
+            $_POST['guidelines_heading'], $_POST['guidelines_text'], $_POST['matters_heading'], $_POST['matters_text'],
+            $id
+        ]);
+        
+        echo '<div class="alert alert-success">Content updated successfully!</div>';
+    } catch (PDOException $e) {
+        error_log('Philosophy on Dress save failed: ' . $e->getMessage());
+        echo vvu_render_save_error($e);
+    }
+
+    // An upload that failed for its own reasons (too large, unwritable folder)
+    // is reported here rather than only by admin/header.php, which has already
+    // been rendered by the time this included file runs.
+    if (function_exists('vvu_take_upload_error') && ($uploadError = vvu_take_upload_error())) {
+        echo '<div class="alert alert-warning"><strong>The image was not uploaded.</strong> '
+           . htmlspecialchars($uploadError)
+           . '<br><small>Everything else on the form was saved. The previous image is still in place.</small></div>';
+    }
 }
 
 // Fetch current content

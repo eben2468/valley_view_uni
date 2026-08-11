@@ -102,6 +102,32 @@ if (!function_exists('vvu_set_upload_error')) {
                 return 'The file could not be uploaded (error code ' . (int) $code . ').';
         }
     }
+
+    /**
+     * Renders an admin-facing alert for a failed save.
+     *
+     * A missing column is an install/migration problem, not something the
+     * editor did wrong, so it gets its own actionable message instead of a raw
+     * SQL string. Everything else shows a generic alert; the full exception
+     * goes to the error log, never to the browser, so the schema is not
+     * disclosed to whoever can trigger the failure.
+     */
+    function vvu_render_save_error(Throwable $e) {
+        if (strpos($e->getMessage(), 'Unknown column') !== false) {
+            return '<div class="alert alert-danger">'
+                 . '<strong>Save failed — the database is out of date.</strong><br>'
+                 . 'This page stores fields that are missing from the database, so nothing was saved '
+                 . '(including any image you selected).<br>'
+                 . '<strong>Fix:</strong> run <code>dev-tools/migrate_campus_life_v3.php</code> once on this server, '
+                 . 'then save again.'
+                 . '</div>';
+        }
+
+        return '<div class="alert alert-danger">'
+             . '<strong>Save failed.</strong> The changes were not stored. '
+             . 'Please try again — if it keeps happening, check the server error log.'
+             . '</div>';
+    }
 }
 
 if (!function_exists('handleAdminFileUpload')) {
