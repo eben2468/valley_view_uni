@@ -20,75 +20,860 @@ if (!$content) {
         'room_types_description' => 'Various room types available to suit different needs and budgets.',
         'application_process' => 'Apply through the student portal during registration.',
         'rules_and_regulations' => 'All residents must adhere to university housing policies.',
+        'off_campus_heading' => 'Off-Campus Living',
+        'off_campus_text' => '',
         'cta_heading' => 'Ready to Apply?',
         'cta_text' => 'Contact the Housing Office for more information about accommodation options.'
     ];
 }
+
+$halls    = getAccommodationHalls($pdo);
+$features = getAccommodationFeatures($pdo);
+
+// Split halls by residence type so each gets its own labelled group.
+$halls_male   = array_values(array_filter($halls, fn($h) => $h['type'] === 'male'));
+$halls_female = array_values(array_filter($halls, fn($h) => $h['type'] !== 'male'));
+
+/**
+ * "At a glance" figures. Every number is counted from the halls actually in
+ * the CMS rather than hard-coded, so the strip stays true as halls are added.
+ */
+$stats = [
+    ['value' => count($halls),        'label' => 'Residence Halls', 'icon' => 'apartment'],
+    ['value' => count($halls_male),   'label' => "Men's Halls",     'icon' => 'man'],
+    ['value' => count($halls_female), 'label' => "Women's Halls",   'icon' => 'woman'],
+    ['value' => '24/7',               'label' => 'Campus Security', 'icon' => 'shield'],
+];
+
+// Housing essentials — each panel is filled from a CMS field that the admin
+// already maintains under Campus Life → Accommodation.
+$essentials = [
+    [
+        'icon'  => 'meeting_room',
+        'eyebrow' => 'Rooms',
+        'title' => 'Room Types',
+        'text'  => $content['room_types_description'] ?? '',
+    ],
+    [
+        'icon'  => 'domain',
+        'eyebrow' => 'Facilities',
+        'title' => 'Hall Facilities',
+        'text'  => $content['facilities_description'] ?? '',
+    ],
+    [
+        'icon'  => 'assignment_turned_in',
+        'eyebrow' => 'Process',
+        'title' => 'How to Apply',
+        'text'  => $content['application_process'] ?? '',
+    ],
+    [
+        'icon'  => 'gavel',
+        'eyebrow' => 'Conduct',
+        'title' => 'Rules & Regulations',
+        'text'  => $content['rules_and_regulations'] ?? '',
+    ],
+];
+$essentials = array_values(array_filter($essentials, fn($e) => trim((string) $e['text']) !== ''));
+
+// Related pages that already exist on the site.
+$related = [
+    ['href' => 'food_services.php',              'icon' => 'restaurant',   'title' => 'Food Services',      'text' => 'Cafeteria meals and dining options on campus.'],
+    ['href' => 'student_handbook.php',           'icon' => 'menu_book',    'title' => 'Student Handbook',   'text' => 'Policies and standards every resident agrees to.'],
+    ['href' => 'campus_map_&_facilities_page.php', 'icon' => 'map',        'title' => 'Campus Map',         'text' => 'Find the halls and facilities around campus.'],
+    ['href' => 'student_life.php',               'icon' => 'diversity_3',  'title' => 'Student Life',       'text' => 'Clubs, worship, sport and student associations.'],
+];
+$related = array_values(array_filter($related, fn($r) => is_file(__DIR__ . '/' . $r['href'])));
 ?>
 
 <style>
-    /* Animations from core_values.php */
+    /* ==========================================================================
+       ACCOMMODATION PAGE
+       Namespaced `acc-` so nothing here can leak into other templates.
+       ========================================================================== */
+    .acc {
+        --acc-navy: #002147;
+        --acc-navy-deep: #00152e;
+        --acc-gold: #f0b429;
+        --acc-ember: #f26838;
+        --acc-ink: #12233b;
+        --acc-muted: #5b6b80;
+        --acc-hair: #e4e9f0;
+        --acc-paper: #fbfaf7;
+        --acc-ease: cubic-bezier(.16, .84, .44, 1);
+        background: #fff;
+    }
+
+    .acc-shell {
+        width: 100%;
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 22px;
+    }
+
+    .acc-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 7px 16px;
+        border-radius: 999px;
+        background: rgba(240, 180, 41, .16);
+        color: #8a6410;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+
+    .acc-eyebrow .material-symbols-outlined {
+        font-size: 17px;
+    }
+
+    .acc-h2 {
+        margin: 18px 0 0;
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: clamp(26px, 3.4vw, 42px) !important;
+        line-height: 1.18;
+        color: var(--acc-navy) !important;
+    }
+
+    .acc-lede {
+        margin: 16px auto 0;
+        max-width: 62ch;
+        font-size: clamp(15px, 1.3vw, 17px);
+        line-height: 1.75;
+        color: var(--acc-muted);
+    }
+
+    .acc-center {
+        text-align: center;
+    }
+
+    .acc-rule {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        margin: 18px auto 0;
+        max-width: 190px;
+    }
+
+    .acc-rule::before,
+    .acc-rule::after {
+        content: "";
+        flex: 1 1 auto;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(240, 180, 41, 0), var(--acc-gold));
+    }
+
+    .acc-rule::after {
+        transform: rotate(180deg);
+    }
+
+    .acc-rule i {
+        width: 6px;
+        height: 6px;
+        background: var(--acc-gold);
+        transform: rotate(45deg);
+    }
+
+    /* ---------------------------------------------------------------- hero
+       The hero keeps its original Core Values design and Tailwind markup —
+       only the sections below it were rebuilt. */
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-    @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-    }
+
     @keyframes slowZoom {
-        0% { transform: scale(1); }
-        100% { transform: scale(1.1); }
+        0% {
+            transform: scale(1);
+        }
+
+        100% {
+            transform: scale(1.1);
+        }
     }
-    .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
-    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
-    .animate-float { animation: float 4s ease-in-out infinite; }
-    
-    .glass {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+
+    .animate-slow-zoom {
+        animation: slowZoom 20s linear infinite alternate;
     }
-    .dark .glass {
-        background: rgba(31, 41, 55, 0.9);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+
+    .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out forwards;
     }
-    
-    .hall-card {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .acc-hero__cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
     }
-    .hall-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+    .acc-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 26px;
+        border-radius: 999px;
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: .11em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: transform .22s var(--acc-ease), box-shadow .22s var(--acc-ease),
+            background-color .22s var(--acc-ease), color .22s var(--acc-ease);
     }
-    
-    .amenity-icon {
-        transition: all 0.3s ease;
+
+    .acc-btn .material-symbols-outlined {
+        font-size: 19px;
     }
-    .group:hover .amenity-icon {
-        transform: scale(1.1) rotate(5deg);
+
+    .acc-btn--gold {
+        background: linear-gradient(135deg, #f7d67e, var(--acc-gold));
+        color: var(--acc-navy-deep) !important;
+        box-shadow: 0 12px 26px -14px rgba(240, 180, 41, .95);
+    }
+
+    .acc-btn--ghost {
+        background: rgba(255, 255, 255, .1);
+        border: 1px solid rgba(255, 255, 255, .3);
+        color: #fff !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .acc-btn--navy {
+        background: var(--acc-navy);
+        color: #fff !important;
+    }
+
+    .acc-btn--outline {
+        background: transparent;
+        box-shadow: inset 0 0 0 1.5px var(--acc-navy);
+        color: var(--acc-navy) !important;
+    }
+
+    .acc-btn:hover {
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .acc-btn--ghost:hover {
+        background: rgba(255, 255, 255, .2);
+    }
+
+    .acc-btn--navy:hover {
+        background: var(--acc-navy-deep);
+    }
+
+    .acc-btn--outline:hover {
+        background: var(--acc-navy);
+        color: #fff !important;
+    }
+
+    /* --------------------------------------------------------------- stats */
+    /* Sits below the restored hero rather than overlapping it. */
+    .acc-stats {
+        position: relative;
+        z-index: 2;
+        padding-top: 46px;
+    }
+
+    .acc-stats__grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1px;
+        background: var(--acc-hair);
+        border: 1px solid var(--acc-hair);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 26px 50px -30px rgba(0, 33, 71, .45);
+    }
+
+    .acc-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 26px 14px;
+        background: #fff;
+        text-align: center;
+    }
+
+    .acc-stat .material-symbols-outlined {
+        font-size: 26px;
+        color: var(--acc-gold);
+    }
+
+    .acc-stat b {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: clamp(22px, 2.6vw, 32px);
+        font-weight: 600;
+        line-height: 1;
+        color: var(--acc-navy);
+    }
+
+    .acc-stat span.lbl {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--acc-muted);
+    }
+
+    /* ------------------------------------------------------------- section */
+    .acc-section {
+        padding: 76px 0;
+    }
+
+    .acc-section--tint {
+        background: var(--acc-paper);
+        border-top: 1px solid var(--acc-hair);
+        border-bottom: 1px solid var(--acc-hair);
+    }
+
+    /* ---------------------------------------------------------------- intro */
+    .acc-intro {
+        display: grid;
+        grid-template-columns: 1.05fr .95fr;
+        gap: 56px;
+        align-items: center;
+    }
+
+    .acc-intro__body p {
+        margin: 16px 0 0;
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--acc-muted);
+    }
+
+    .acc-intro__figure {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 30px 60px -34px rgba(0, 33, 71, .55);
+    }
+
+    .acc-intro__figure img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 320px;
+        object-fit: cover;
+    }
+
+    /* ---------------------------------------------------------------- halls */
+    .acc-group + .acc-group {
+        margin-top: 54px;
+    }
+
+    .acc-group__head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .acc-group__head h3 {
+        margin: 0;
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        letter-spacing: .17em;
+        text-transform: uppercase;
+        color: var(--acc-navy) !important;
+        white-space: nowrap;
+    }
+
+    .acc-group__head .line {
+        flex: 1 1 auto;
+        height: 1px;
+        background: linear-gradient(90deg, var(--acc-gold), rgba(240, 180, 41, 0));
+    }
+
+    .acc-group__head .count {
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(0, 33, 71, .07);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .1em;
+        color: var(--acc-muted);
+        white-space: nowrap;
+    }
+
+    .acc-halls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 26px;
+    }
+
+    .acc-hall {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid var(--acc-hair);
+        border-radius: 18px;
+        overflow: hidden;
+        transition: transform .3s var(--acc-ease), box-shadow .3s var(--acc-ease),
+            border-color .3s var(--acc-ease);
+    }
+
+    .acc-hall:hover {
+        transform: translateY(-6px);
+        border-color: rgba(240, 180, 41, .55);
+        box-shadow: 0 28px 46px -26px rgba(0, 33, 71, .5);
+    }
+
+    .acc-hall__media {
+        position: relative;
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+        background: var(--acc-navy);
+    }
+
+    .acc-hall__media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .7s var(--acc-ease);
+    }
+
+    .acc-hall:hover .acc-hall__media img {
+        transform: scale(1.07);
+    }
+
+    .acc-hall__media::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0, 21, 46, 0) 45%, rgba(0, 21, 46, .72) 100%);
+    }
+
+    .acc-tag {
+        position: absolute;
+        z-index: 2;
+        top: 14px;
+        left: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 13px;
+        border-radius: 999px;
+        background: rgba(0, 21, 46, .72);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        color: #fff;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .acc-tag .material-symbols-outlined {
+        font-size: 15px;
+        color: var(--acc-gold);
+    }
+
+    .acc-hall__body {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        padding: 22px 22px 24px;
+    }
+
+    .acc-hall__body h4 {
+        margin: 0;
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 19px !important;
+        line-height: 1.3;
+        color: var(--acc-navy) !important;
+    }
+
+    .acc-hall__body p {
+        margin: 10px 0 0;
+        font-size: 14.5px;
+        line-height: 1.65;
+        color: var(--acc-muted);
+    }
+
+    .acc-hall__foot {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--acc-hair);
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--acc-muted);
+    }
+
+    .acc-hall__foot .material-symbols-outlined {
+        font-size: 17px;
+        color: var(--acc-gold);
+    }
+
+    /* ----------------------------------------------------------- essentials */
+    .acc-essentials {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+        gap: 22px;
+        margin-top: 44px;
+    }
+
+    .acc-card {
+        position: relative;
+        padding: 30px 26px 28px;
+        background: #fff;
+        border: 1px solid var(--acc-hair);
+        border-radius: 18px;
+        overflow: hidden;
+        transition: transform .28s var(--acc-ease), box-shadow .28s var(--acc-ease),
+            border-color .28s var(--acc-ease);
+    }
+
+    .acc-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--acc-gold), rgba(240, 180, 41, 0));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform .38s var(--acc-ease);
+    }
+
+    .acc-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(240, 180, 41, .5);
+        box-shadow: 0 26px 44px -28px rgba(0, 33, 71, .45);
+    }
+
+    .acc-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .acc-card__icon {
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: rgba(0, 33, 71, .06);
+        color: var(--acc-navy);
+        margin-bottom: 18px;
+    }
+
+    .acc-card__icon .material-symbols-outlined {
+        font-size: 26px;
+    }
+
+    .acc-card small {
+        display: block;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        color: var(--acc-gold);
+    }
+
+    .acc-card h3 {
+        margin: 7px 0 0;
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 19px !important;
+        color: var(--acc-navy) !important;
+    }
+
+    .acc-card p {
+        margin: 11px 0 0;
+        font-size: 14.5px;
+        line-height: 1.7;
+        color: var(--acc-muted);
+    }
+
+    /* ------------------------------------------------------------ amenities */
+    .acc-amenities {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+        gap: 20px;
+        margin-top: 44px;
+    }
+
+    .acc-amenity {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 24px 22px;
+        background: #fff;
+        border: 1px solid var(--acc-hair);
+        border-radius: 16px;
+        transition: border-color .25s var(--acc-ease), box-shadow .25s var(--acc-ease);
+    }
+
+    .acc-amenity:hover {
+        border-color: rgba(240, 180, 41, .55);
+        box-shadow: 0 20px 36px -26px rgba(0, 33, 71, .45);
+    }
+
+    .acc-amenity__icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(240, 180, 41, .16);
+        color: #8a6410;
+    }
+
+    .acc-amenity__icon .material-symbols-outlined {
+        font-size: 22px;
+    }
+
+    .acc-amenity h3 {
+        margin: 0;
+        font-size: 15px !important;
+        font-family: 'Open Sans', sans-serif !important;
+        font-weight: 700 !important;
+        color: var(--acc-navy) !important;
+    }
+
+    .acc-amenity p {
+        margin: 6px 0 0;
+        font-size: 13.5px;
+        line-height: 1.6;
+        color: var(--acc-muted);
+    }
+
+    /* ----------------------------------------------------------- off campus */
+    .acc-offcampus {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 26px;
+        align-items: start;
+        padding: 38px;
+        background: linear-gradient(135deg, #fff, var(--acc-paper));
+        border: 1px solid var(--acc-hair);
+        border-left: 4px solid var(--acc-gold);
+        border-radius: 18px;
+    }
+
+    .acc-offcampus__icon {
+        display: grid;
+        place-items: center;
+        width: 62px;
+        height: 62px;
+        border-radius: 16px;
+        background: var(--acc-navy);
+        color: var(--acc-gold);
+    }
+
+    .acc-offcampus__icon .material-symbols-outlined {
+        font-size: 30px;
+    }
+
+    .acc-offcampus h3 {
+        margin: 0;
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: clamp(20px, 2.2vw, 26px) !important;
+        color: var(--acc-navy) !important;
+    }
+
+    .acc-offcampus p {
+        margin: 12px 0 0;
+        font-size: 15px;
+        line-height: 1.78;
+        color: var(--acc-muted);
+    }
+
+    /* -------------------------------------------------------------- related */
+    .acc-related {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 20px;
+        margin-top: 44px;
+    }
+
+    .acc-related a {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 26px 24px;
+        background: #fff;
+        border: 1px solid var(--acc-hair);
+        border-radius: 16px;
+        text-decoration: none;
+        transition: transform .25s var(--acc-ease), border-color .25s var(--acc-ease),
+            box-shadow .25s var(--acc-ease);
+    }
+
+    .acc-related a:hover {
+        transform: translateY(-4px);
+        border-color: rgba(240, 180, 41, .55);
+        box-shadow: 0 22px 38px -26px rgba(0, 33, 71, .45);
+        text-decoration: none;
+    }
+
+    .acc-related .material-symbols-outlined {
+        font-size: 26px;
+        color: var(--acc-gold);
+    }
+
+    .acc-related strong {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--acc-navy);
+    }
+
+    .acc-related strong .material-symbols-outlined {
+        font-size: 16px;
+        color: var(--acc-muted);
+        transition: transform .25s var(--acc-ease);
+    }
+
+    .acc-related a:hover strong .material-symbols-outlined {
+        transform: translateX(4px);
+        color: var(--acc-gold);
+    }
+
+    .acc-related span.txt {
+        font-size: 13.5px;
+        line-height: 1.6;
+        color: var(--acc-muted);
+    }
+
+    /* ------------------------------------------------------------------ cta */
+    .acc-cta {
+        position: relative;
+        padding: 78px 0;
+        overflow: hidden;
+        background:
+            linear-gradient(115deg, var(--acc-navy-deep) 0%, var(--acc-navy) 52%, #0a3161 100%);
+    }
+
+    .acc-cta::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.06' stroke-width='1'%3E%3Cpath d='M28 0 56 28 28 56 0 28z'/%3E%3Cpath d='M28 18 38 28 28 38 18 28z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .acc-cta__inner {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+
+    .acc-cta h2 {
+        margin: 18px 0 0;
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: clamp(27px, 3.8vw, 46px) !important;
+        line-height: 1.16;
+        color: #fff !important;
+    }
+
+    .acc-cta p {
+        margin: 16px auto 0;
+        max-width: 60ch;
+        font-size: clamp(15px, 1.3vw, 17px);
+        line-height: 1.75;
+        color: rgba(255, 255, 255, .82);
+    }
+
+    .acc-cta__btns {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 14px;
+        margin-top: 32px;
+    }
+
+    .acc-cta .acc-eyebrow {
+        background: rgba(240, 180, 41, .18);
+        color: var(--acc-gold);
+    }
+
+    /* -------------------------------------------------------------- responsive */
+    @media (max-width: 900px) {
+        .acc-intro {
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+
+        .acc-stats__grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .acc-offcampus {
+            grid-template-columns: 1fr;
+            padding: 28px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .acc-section {
+            padding: 54px 0;
+        }
+
+        .acc-stats {
+            padding-top: 34px;
+        }
+
+        .acc-stat {
+            padding: 20px 10px;
+        }
+
+        .acc-halls {
+            grid-template-columns: 1fr;
+        }
+
+        .acc-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .acc-hero__cta {
+            flex-direction: column;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .acc * {
+            transition-duration: .01ms !important;
+        }
     }
 </style>
 
-<main class="flex-grow bg-gray-50 dark:bg-gray-900">
+<main class="acc">
+
     <!-- Hero Section (Core Values Design) -->
     <section class="relative min-h-[65vh] flex items-center overflow-hidden bg-gray-900">
         <!-- Background Image with Overlay -->
         <div class="absolute inset-0 z-0">
-            <img src="<?php echo strip_tags($content['hero_image']); ?>" 
+            <img src="<?php echo strip_tags($content['hero_image']); ?>"
                  alt="VVU Accommodation" class="w-full h-full object-cover animate-slow-zoom opacity-50">
             <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
         </div>
-        
+
         <div class="container relative z-10 py-24">
             <div class="max-w-5xl mx-auto text-center">
                 <div class="inline-flex items-center gap-3 px-10 py-4 mb-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
                     <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
                     <span class="text-xl md:text-2xl font-black tracking-widest uppercase text-yellow-400">Student Life</span>
                 </div>
-                
+
                 <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-10 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
                     <?php echo strip_tags($content['hero_title']); ?>
                 </h1>
@@ -100,225 +885,233 @@ if (!$content) {
         </div>
     </section>
 
-    <!-- Introduction Section -->
-    <section class="py-20 md:py-24 bg-white dark:bg-gray-800 relative z-20 -mt-16 mx-auto max-w-[90rem] rounded-t-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
-        <div class="container mx-auto px-8 md:px-16">
-            <div class="text-center max-w-5xl mx-auto mb-20 animate-fadeInUp">
-                <span class="inline-block px-5 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-base md:text-lg font-bold rounded-full mb-6 uppercase tracking-wider">
-                    Residential Services
-                </span>
-                <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white mb-8">
-                    <?php echo strip_tags($content['intro_heading']); ?>
-                </h2>
-                <p class="text-2xl md:text-3xl text-gray-600 dark:text-gray-400 leading-relaxed font-light">
-                    <?php echo nl2br(strip_tags($content['intro_text'])); ?>
-                </p>
-                <?php if (!empty($content['intro_image'])): ?>
-                    <div class="mt-14 rounded-3xl overflow-hidden shadow-xl border border-gray-100 dark:border-gray-700">
-                        <img src="<?php echo strip_tags($content['intro_image']); ?>" alt="Accommodation Introduction" class="w-full h-auto object-cover max-h-[500px]">
+    <!-- ============================= AT A GLANCE ============================= -->
+    <div class="acc-stats">
+        <div class="acc-shell">
+            <div class="acc-stats__grid">
+                <?php foreach ($stats as $s): ?>
+                    <div class="acc-stat">
+                        <span class="material-symbols-outlined"><?php echo htmlspecialchars($s['icon']); ?></span>
+                        <b><?php echo htmlspecialchars((string) $s['value']); ?></b>
+                        <span class="lbl"><?php echo htmlspecialchars($s['label']); ?></span>
                     </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Halls Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 lg:gap-20 mb-24 max-w-[90rem] mx-auto">
-                <?php 
-                $halls = getAccommodationHalls($pdo);
-                foreach ($halls as $hall): 
-                ?>
-                <!-- Hall Card -->
-                <div class="group bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col h-full overflow-hidden">
-                    <div class="aspect-[4/3] relative flex-shrink-0">
-                         <!-- image layer -->
-                         <img src="<?php echo strip_tags($hall['image']); ?>" alt="<?php echo strip_tags($hall['title']); ?>" class="w-full h-full object-cover">
-                         
-                         <!-- Top Overlays -->
-                         <div class="absolute top-0 left-0 right-0 p-5 flex justify-between items-start z-10">
-                              <div class="flex items-center gap-2">
-                                  <!-- Type Badge -->
-                                  <span class="px-4 py-1.5 text-sm md:text-base font-medium text-white rounded-full <?php echo $hall['type'] === 'male' ? 'bg-[#da3b45]' : 'bg-[#d88243]'; ?> shadow-sm shadow-black/20">
-                                      <?php echo $hall['type'] === 'male' ? 'Men\'s Hall' : 'Women\'s Hall'; ?>
-                                  </span>
-                                  <!-- Icon Badge -->
-                                  <div class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#202758] flex items-center justify-center text-white shadow-sm shadow-black/20">
-                                      <span class="material-symbols-outlined text-[1.2rem] text-white"><?php echo strip_tags($hall['icon']); ?></span>
-                                  </div>
-                              </div>
-                              <span class="px-4 md:px-5 py-1.5 text-sm md:text-base font-medium text-white bg-[#202758] rounded-full shadow-sm shadow-black/20">
-                                  Residence
-                              </span>
-                         </div>
-                         
-                         <!-- Bottom Overlays -->
-                         <div class="absolute bottom-0 left-0 right-0 p-5 flex justify-between items-end z-10">
-                              <span class="px-5 py-2 text-base md:text-lg font-bold text-white bg-teal-600 rounded-[0.35rem] shadow-sm shadow-black/20 tracking-wider">
-                                  Valley View Uni
-                              </span>
-                              <button class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white flex items-center justify-center text-[#202758] hover:text-red-500 shadow-md transition-colors">
-                                  <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">favorite</span>
-                              </button>
-                         </div>
-                    </div>
-                    
-                    <div class="p-6 md:p-8 flex-grow flex flex-col bg-white dark:bg-gray-800">
-                        <!-- Location -->
-                        <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 mb-2 md:mb-3">
-                            <span class="material-symbols-outlined text-[1.2rem]">location_on</span>
-                            <span class="text-sm md:text-base font-medium">Accra, Greater Accra</span>
-                        </div>
-                        
-                        <!-- Title -->
-                        <h3 class="text-2xl md:text-3xl font-bold text-[#202758] dark:text-white mb-4 leading-tight"><?php echo strip_tags($hall['title']); ?></h3>
-                        
-                        <!-- Author & Date -->
-                        <div class="flex items-center justify-between text-gray-500 dark:text-gray-400 text-sm md:text-base mb-6">
-                            <div class="flex items-center gap-3">
-                                <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden shrink-0">
-                                    <span class="material-symbols-outlined text-gray-500 text-sm md:text-base">domain</span>
-                                </div>
-                                <span class="font-medium whitespace-nowrap overflow-hidden text-ellipsis">Student Life Services</span>
-                            </div>
-                            <div class="flex items-center gap-1.5 shrink-0">
-                                <span class="material-symbols-outlined text-lg md:text-xl">event</span>
-                                <span class="font-medium">On Campus</span>
-                            </div>
-                        </div>
-                        
-                        <hr class="border-gray-200 dark:border-gray-700 my-2 md:my-4">
-                        
-                        <!-- Amenities Footer -->
-                        <div class="flex flex-wrap items-center gap-4 md:gap-8 mt-4 md:mt-6 text-[#202758] dark:text-gray-300">
-                            <?php 
-                            $hall_items = parseLineItems($hall['halls_list']);
-                            $icons = ['square_foot', 'bed', 'bathtub'];
-                            $count = 0;
-                            foreach ($hall_items as $idx => $item): 
-                                if ($count >= 3) break;
-                                // Grab max 3 words for short display to match design layout
-                                $words = explode(' ', strip_tags($item));
-                                $shortText = count($words) > 3 ? implode(' ', array_slice($words, 0, 3)) . '...' : strip_tags($item);
-                                $icon = $icons[$idx % count($icons)];
-                            ?>
-                            <div class="flex items-center gap-2 text-base md:text-lg font-medium">
-                                <span class="material-symbols-outlined text-2xl text-[#202758] dark:text-gray-400"><?php echo $icon; ?></span>
-                                <span><?php echo $shortText; ?></span>
-                            </div>
-                            <?php 
-                                $count++;
-                            endforeach; 
-                            ?>
-                        </div>
-                    </div>
-                </div>
                 <?php endforeach; ?>
             </div>
+        </div>
+    </div>
 
-            <!-- Off Campus Info -->
-            <div class="bg-blue-50 dark:bg-gray-800/50 rounded-3xl p-10 md:p-16 border border-blue-100 dark:border-gray-700 relative overflow-hidden max-w-6xl mx-auto shadow-sm">
-                <div class="absolute -right-10 -top-10 w-48 h-48 bg-blue-500 opacity-5 rounded-full"></div>
-                <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-yellow-400 opacity-5 rounded-full"></div>
-                <div class="flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left relative z-10">
-                    <div class="w-24 h-24 rounded-3xl bg-white dark:bg-gray-700 flex items-center justify-center shadow-md shrink-0 border border-gray-100 dark:border-gray-600">
-                        <span class="material-symbols-outlined text-5xl text-blue-600 dark:text-blue-400">home_work</span>
-                    </div>
-                    <div>
-                        <h3 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3"><?php echo strip_tags($content['off_campus_heading']); ?></h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-xl md:text-2xl leading-relaxed">
-                            <?php echo nl2br(strip_tags($content['off_campus_text'])); ?>
-                        </p>
+    <!-- =============================== INTRO =============================== -->
+    <section class="acc-section">
+        <div class="acc-shell">
+            <div class="acc-intro">
+                <div class="acc-intro__body">
+                    <span class="acc-eyebrow">
+                        <span class="material-symbols-outlined">home_work</span> Residential Services
+                    </span>
+                    <h2 class="acc-h2"><?php echo htmlspecialchars(strip_tags($content['intro_heading'])); ?></h2>
+                    <p><?php echo nl2br(htmlspecialchars(strip_tags($content['intro_text']))); ?></p>
+                    <div class="acc-hero__cta">
+                        <a class="acc-btn acc-btn--outline" href="#essentials">
+                            <span class="material-symbols-outlined">info</span> Housing Essentials
+                        </a>
                     </div>
                 </div>
+                <?php
+                // Fall back to the first hall photo so the panel is never empty.
+                $intro_img = !empty($content['intro_image'])
+                    ? $content['intro_image']
+                    : ($halls[0]['image'] ?? '');
+                ?>
+                <?php if ($intro_img): ?>
+                    <figure class="acc-intro__figure">
+                        <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($intro_img), 900, 700)); ?>"
+                             alt="Campus housing at Valley View University" loading="lazy" decoding="async">
+                    </figure>
+                <?php endif; ?>
             </div>
         </div>
     </section>
 
-    <!-- Dining Services -->
-    <section class="py-24 bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
-        <div class="container mx-auto max-w-[90rem] px-8 md:px-16">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-                <div class="order-2 lg:order-1 relative">
-                    <div class="absolute -inset-4 bg-green-500/10 rounded-[3rem] blur-2xl"></div>
-                    <img src="<?php echo strip_tags($content['dining_image']); ?>" alt="VVU Cafeteria" class="relative rounded-3xl shadow-2xl w-full h-auto object-cover border border-gray-100 dark:border-gray-800 aspect-[4/3]">
-                </div>
-                
-                <div class="order-1 lg:order-2">
-                    <div class="inline-flex items-center gap-3 px-5 py-2 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-base md:text-lg font-bold rounded-full mb-8 uppercase tracking-wider">
-                        <span class="material-symbols-outlined text-2xl">restaurant</span>
-                        <?php echo strip_tags($content['dining_heading']); ?>
+    <!-- =============================== HALLS =============================== -->
+    <section class="acc-section acc-section--tint" id="halls">
+        <div class="acc-shell">
+            <div class="acc-center">
+                <span class="acc-eyebrow">
+                    <span class="material-symbols-outlined">apartment</span> Residence Halls
+                </span>
+                <h2 class="acc-h2">Where You&rsquo;ll Live</h2>
+                <span class="acc-rule"><i></i></span>
+                <p class="acc-lede">Separate halls of residence for men and women, each supervised by
+                    resident staff and within walking distance of lecture halls, the library and the cafeteria.</p>
+            </div>
+
+            <?php
+            $groups = [
+                ['label' => "Women's Halls", 'icon' => 'woman', 'items' => $halls_female],
+                ['label' => "Men's Halls",   'icon' => 'man',   'items' => $halls_male],
+            ];
+            foreach ($groups as $group):
+                if (!$group['items']) continue;
+            ?>
+                <div class="acc-group">
+                    <div class="acc-group__head">
+                        <h3><?php echo htmlspecialchars($group['label']); ?></h3>
+                        <span class="line"></span>
+                        <span class="count"><?php echo count($group['items']); ?>
+                            <?php echo count($group['items']) === 1 ? 'Hall' : 'Halls'; ?></span>
                     </div>
-                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white mb-8 leading-tight">
-                        <?php echo strip_tags($content['dining_subheading']); ?>
-                    </h2>
-                    <p class="text-2xl md:text-3xl text-gray-600 dark:text-gray-400 font-light leading-relaxed mb-10">
-                        <?php echo nl2br(strip_tags($content['dining_text'])); ?>
-                    </p>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <?php 
-                        $dining_items = parseLineItems($content['dining_list']);
-                        foreach ($dining_items as $item): 
-                        ?>
-                        <div class="flex items-center gap-5 p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
-                            <div class="w-16 h-16 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-green-500 text-2xl">done</span>
-                            </div>
-                            <p class="text-xl md:text-2xl font-semibold text-gray-700 dark:text-gray-300"><?php echo strip_tags($item); ?></p>
-                        </div>
+                    <div class="acc-halls">
+                        <?php foreach ($group['items'] as $hall): ?>
+                            <article class="acc-hall">
+                                <div class="acc-hall__media">
+                                    <?php if (!empty($hall['image'])): ?>
+                                        <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($hall['image']), 640, 480)); ?>"
+                                             alt="<?php echo htmlspecialchars(strip_tags($hall['title'])); ?>"
+                                             loading="lazy" decoding="async">
+                                    <?php endif; ?>
+                                    <span class="acc-tag">
+                                        <span class="material-symbols-outlined"><?php echo htmlspecialchars(strip_tags($hall['icon'])); ?></span>
+                                        <?php echo htmlspecialchars($group['label'] === "Men's Halls" ? "Men's Residence" : "Women's Residence"); ?>
+                                    </span>
+                                </div>
+                                <div class="acc-hall__body">
+                                    <h4><?php echo htmlspecialchars(strip_tags($hall['title'])); ?></h4>
+                                    <?php if (!empty($hall['description'])): ?>
+                                        <p><?php echo htmlspecialchars(strip_tags($hall['description'])); ?></p>
+                                    <?php endif; ?>
+                                    <div class="acc-hall__foot">
+                                        <span class="material-symbols-outlined">location_on</span>
+                                        Main Campus, Oyibi
+                                    </div>
+                                </div>
+                            </article>
                         <?php endforeach; ?>
                     </div>
                 </div>
-            </div>
+            <?php endforeach; ?>
         </div>
     </section>
 
-    <!-- Amenities Section -->
-    <section class="py-24 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800">
-        <div class="container mx-auto max-w-[90rem] px-8 md:px-16">
-            <div class="text-center max-w-4xl mx-auto mb-20">
-                <span class="inline-flex items-center gap-3 px-5 py-2 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-base md:text-lg font-bold rounded-full mb-6 uppercase tracking-wider">
-                    <span class="material-symbols-outlined text-2xl">star</span> Amenities
-                </span>
-                <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white mb-6">Facilities & Amenities</h2>
-                <p class="text-gray-600 dark:text-gray-400 text-xl md:text-2xl font-light">Everything you need for a comfortable stay on campus.</p>
-            </div>
+    <!-- ============================ ESSENTIALS ============================ -->
+    <?php if ($essentials): ?>
+        <section class="acc-section" id="essentials">
+            <div class="acc-shell">
+                <div class="acc-center">
+                    <span class="acc-eyebrow">
+                        <span class="material-symbols-outlined">checklist</span> Housing Essentials
+                    </span>
+                    <h2 class="acc-h2">What You Need to Know</h2>
+                    <span class="acc-rule"><i></i></span>
+                    <p class="acc-lede">Room options, hall facilities, how to secure a place and the standards
+                        every resident agrees to.</p>
+                </div>
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
-                <?php 
-                $features = getAccommodationFeatures($pdo);
-                foreach ($features as $feature): 
-                ?>
-                <div class="group flex flex-col items-center justify-center text-center p-10 md:p-12 bg-gray-50 dark:bg-gray-800/50 rounded-3xl hover:bg-white dark:hover:bg-gray-700 hover:shadow-xl transition-all duration-300 border border-transparent hover:border-gray-100 dark:hover:border-gray-600">
-                    <div class="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-[1.5rem] flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6 group-hover:-translate-y-2 transition-transform duration-300">
-                        <span class="material-symbols-outlined text-4xl"><?php echo strip_tags($feature['icon']); ?></span>
+                <div class="acc-essentials">
+                    <?php foreach ($essentials as $item): ?>
+                        <div class="acc-card">
+                            <div class="acc-card__icon">
+                                <span class="material-symbols-outlined"><?php echo htmlspecialchars($item['icon']); ?></span>
+                            </div>
+                            <small><?php echo htmlspecialchars($item['eyebrow']); ?></small>
+                            <h3><?php echo htmlspecialchars($item['title']); ?></h3>
+                            <p><?php echo nl2br(htmlspecialchars(strip_tags($item['text']))); ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <!-- ============================= AMENITIES ============================= -->
+    <?php if ($features): ?>
+        <section class="acc-section acc-section--tint">
+            <div class="acc-shell">
+                <div class="acc-center">
+                    <span class="acc-eyebrow">
+                        <span class="material-symbols-outlined">star</span> Amenities
+                    </span>
+                    <h2 class="acc-h2">Facilities &amp; Amenities</h2>
+                    <span class="acc-rule"><i></i></span>
+                    <p class="acc-lede">Everything you need for a comfortable, secure and study-friendly
+                        stay on campus.</p>
+                </div>
+
+                <div class="acc-amenities">
+                    <?php foreach ($features as $feature): ?>
+                        <div class="acc-amenity">
+                            <div class="acc-amenity__icon">
+                                <span class="material-symbols-outlined"><?php echo htmlspecialchars(strip_tags($feature['icon'])); ?></span>
+                            </div>
+                            <div>
+                                <h3><?php echo htmlspecialchars(strip_tags($feature['title'])); ?></h3>
+                                <?php if (!empty($feature['description'])): ?>
+                                    <p><?php echo htmlspecialchars(strip_tags($feature['description'])); ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <!-- ============================ OFF CAMPUS ============================ -->
+    <?php if (!empty($content['off_campus_text'])): ?>
+        <section class="acc-section">
+            <div class="acc-shell">
+                <div class="acc-offcampus">
+                    <div class="acc-offcampus__icon">
+                        <span class="material-symbols-outlined">holiday_village</span>
                     </div>
-                    <h3 class="text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wider"><?php echo strip_tags($feature['title']); ?></h3>
+                    <div>
+                        <h3><?php echo htmlspecialchars(strip_tags($content['off_campus_heading'])); ?></h3>
+                        <p><?php echo nl2br(htmlspecialchars(strip_tags($content['off_campus_text']))); ?></p>
+                    </div>
                 </div>
-                <?php endforeach; ?>
             </div>
-        </div>
-    </section>
+        </section>
+    <?php endif; ?>
 
-    <!-- CTA Section -->
-    <section class="relative py-32 overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900"></div>
-        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        
-        <div class="container relative z-10 mx-auto max-w-7xl px-8">
-            <div class="bg-white/10 backdrop-blur-xl rounded-[4rem] p-16 md:p-24 border border-white/20 text-center">
-                <h2 class="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-8"><?php echo strip_tags($content['cta_heading']); ?></h2>
-                <p class="text-2xl md:text-3xl text-white/90 mb-16 max-w-4xl mx-auto leading-relaxed font-medium">
-                    <?php echo strip_tags($content['cta_text']); ?>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-8 justify-center">
-                    <a href="https://admissions.vvu.edu.gh/" class="px-12 py-6 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-2xl font-black rounded-2xl transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-4">
-                        <span class="material-symbols-outlined text-3xl text-white">edit_document</span>
-                        Apply for Housing
-                    </a>
-                    <a href="contact_us.php" class="px-12 py-6 bg-white/10 hover:bg-white/20 text-white text-2xl font-black rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-4">
-                        <span class="material-symbols-outlined text-3xl text-white">contact_support</span>
-                        Contact Us
-                    </a>
+    <!-- ============================== RELATED ============================== -->
+    <?php if ($related): ?>
+        <section class="acc-section acc-section--tint">
+            <div class="acc-shell">
+                <div class="acc-center">
+                    <span class="acc-eyebrow">
+                        <span class="material-symbols-outlined">explore</span> Explore Further
+                    </span>
+                    <h2 class="acc-h2">Life Around Your Hall</h2>
+                    <span class="acc-rule"><i></i></span>
                 </div>
+                <div class="acc-related">
+                    <?php foreach ($related as $r): ?>
+                        <a href="<?php echo htmlspecialchars($r['href']); ?>">
+                            <span class="material-symbols-outlined"><?php echo htmlspecialchars($r['icon']); ?></span>
+                            <strong><?php echo htmlspecialchars($r['title']); ?>
+                                <span class="material-symbols-outlined">arrow_forward</span></strong>
+                            <span class="txt"><?php echo htmlspecialchars($r['text']); ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <!-- ================================ CTA ================================ -->
+    <section class="acc-cta">
+        <div class="acc-shell acc-cta__inner">
+            <span class="acc-eyebrow">
+                <span class="material-symbols-outlined">bed</span> Housing
+            </span>
+            <h2><?php echo htmlspecialchars(strip_tags($content['cta_heading'])); ?></h2>
+            <p><?php echo htmlspecialchars(strip_tags($content['cta_text'])); ?></p>
+            <div class="acc-cta__btns">
+                <a class="acc-btn acc-btn--gold" href="https://admissions.vvu.edu.gh/">
+                    <span class="material-symbols-outlined">edit_document</span> Apply for Housing
+                </a>
+                <a class="acc-btn acc-btn--ghost" href="contact_us.php">
+                    <span class="material-symbols-outlined">contact_support</span> Contact Housing Office
+                </a>
             </div>
         </div>
     </section>
@@ -326,4 +1119,3 @@ if (!$content) {
 
 <?php
 include 'includes/footer.php';
-?>
