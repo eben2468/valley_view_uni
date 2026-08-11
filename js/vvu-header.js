@@ -75,6 +75,10 @@
             if (mobilebar) {
                 mobilebar.classList.toggle('is-stuck', y > 8);
             }
+
+            // The nav slides up as the masthead condenses, which changes how
+            // much room an open dropdown has beneath it.
+            if (header && $('.vvu-nav__item--mega.is-open', header)) sizeMega();
         });
     }
 
@@ -93,10 +97,24 @@
         });
     }
 
+    /**
+     * Caps the dropdown to the space between the nav and the bottom of the
+     * window. Without this a long menu overflows the screen with no way to
+     * reach its lower groups — the panel is anchored to the nav, so the page
+     * scrollbar moves the whole header instead of revealing the overflow.
+     */
+    function sizeMega() {
+        if (!nav) return;
+        var available = window.innerHeight - nav.getBoundingClientRect().bottom - 16;
+        document.documentElement.style.setProperty(
+            '--vvu-mega-max', Math.max(240, Math.round(available)) + 'px');
+    }
+
     function openMega(item) {
         if (!item) return;
         closeAllMega(item);
         closeSearch();
+        sizeMega();
         item.classList.add('is-open');
         var link = $('.vvu-nav__link', item);
         if (link) link.setAttribute('aria-expanded', 'true');
@@ -362,6 +380,7 @@
             window.clearTimeout(resizeTimer);
             resizeTimer = window.setTimeout(function () {
                 scrollOffset = measureOffset();
+                sizeMega();
                 if (isDesktop() && isDrawerOpen()) closeDrawer();
                 if (!isDesktop()) { closeAllMega(); closeSearch(); }
                 onScroll();
