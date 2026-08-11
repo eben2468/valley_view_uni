@@ -48,6 +48,18 @@ $managed_pages = [
         'icon' => 'fa-laptop-code',
         'file' => 'elearning_materials.php',
         'description' => 'Manage digital manuals, email activation guides, and video tutorials.'
+    ],
+    'student_email' => [
+        'title' => 'Student Email',
+        'icon' => 'fa-envelope-open-text',
+        'file' => 'student-email.php',
+        'description' => 'Manage the student email page: Gmail sign-in links, activation steps, and setup guides.'
+    ],
+    'ischool' => [
+        'title' => 'iSchool Portal',
+        'icon' => 'fa-desktop',
+        'file' => 'iSchool.php',
+        'description' => 'Manage the iSchool portal cards, feature list, and ITS support contact details.'
     ]
 ];
 
@@ -70,6 +82,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($uploaded) $hero_image = $uploaded;
             }
 
+            // The secondary CTA button and the help block are only rendered by
+            // some of the managed pages, so their inputs are only present on
+            // those forms. COALESCE keeps the stored value when the field was
+            // not part of the submitted form — without it, saving a page that
+            // has no help inputs would silently blank those columns.
             $stmt = $pdo->prepare("
                 UPDATE academic_pages_content SET
                     hero_badge = ?,
@@ -80,7 +97,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     cta_title = ?,
                     cta_subtitle = ?,
                     cta_button_text = ?,
-                    cta_button_link = ?
+                    cta_button_link = ?,
+                    cta_button_text_2 = COALESCE(?, cta_button_text_2),
+                    cta_button_link_2 = COALESCE(?, cta_button_link_2),
+                    help_title        = COALESCE(?, help_title),
+                    help_description  = COALESCE(?, help_description),
+                    help_phone        = COALESCE(?, help_phone)
                 WHERE page_key = ?
             ");
             $stmt->execute([
@@ -93,6 +115,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['cta_subtitle'] ?? '',
                 $_POST['cta_button_text'] ?? '',
                 $_POST['cta_button_link'] ?? '',
+                $_POST['cta_button_text_2'] ?? null,
+                $_POST['cta_button_link_2'] ?? null,
+                $_POST['help_title'] ?? null,
+                $_POST['help_description'] ?? null,
+                $_POST['help_phone'] ?? null,
                 $page_key
             ]);
             
@@ -341,6 +368,45 @@ include 'sidebar.php';
                                 <input type="text" name="cta_button_link" value="<?php echo htmlspecialchars($page_content['cta_button_link'] ?? ''); ?>" style="width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 12px;">
                             </div>
                         </div>
+
+                        <?php
+                        /*
+                         * Student Email and iSchool render a second CTA button and a
+                         * help block. Those inputs are shown only for the pages that
+                         * display them; the UPDATE above uses COALESCE, so pages
+                         * without these fields keep whatever is already stored.
+                         */
+                        $supports_secondary_cta = in_array($current_page_key, ['student_email', 'ischool'], true);
+                        ?>
+                        <?php if ($supports_secondary_cta): ?>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                            <div class="form-field">
+                                <label style="display: block; font-weight: 800; color: #475569; font-size: 0.8rem; margin-bottom: 8px;">Secondary Button Label</label>
+                                <input type="text" name="cta_button_text_2" value="<?php echo htmlspecialchars($page_content['cta_button_text_2'] ?? ''); ?>" style="width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 12px;">
+                            </div>
+                            <div class="form-field">
+                                <label style="display: block; font-weight: 800; color: #475569; font-size: 0.8rem; margin-bottom: 8px;">Secondary Button Action (Link)</label>
+                                <input type="text" name="cta_button_link_2" value="<?php echo htmlspecialchars($page_content['cta_button_link_2'] ?? ''); ?>" style="width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 12px;">
+                            </div>
+                        </div>
+
+                        <h4 style="margin: 0 0 25px 0; color: #1e293b; font-weight: 900; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">Help / Support Block</h4>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                            <div class="form-field">
+                                <label style="display: block; font-weight: 800; color: #475569; font-size: 0.8rem; margin-bottom: 8px;">Help Heading</label>
+                                <input type="text" name="help_title" value="<?php echo htmlspecialchars($page_content['help_title'] ?? ''); ?>" style="width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 12px;">
+                            </div>
+                            <div class="form-field">
+                                <label style="display: block; font-weight: 800; color: #475569; font-size: 0.8rem; margin-bottom: 8px;">Help Phone</label>
+                                <input type="text" name="help_phone" value="<?php echo htmlspecialchars($page_content['help_phone'] ?? ''); ?>" style="width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 12px;">
+                            </div>
+                            <div class="form-field" style="grid-column: 1 / -1;">
+                                <label style="display: block; font-weight: 800; color: #475569; font-size: 0.8rem; margin-bottom: 8px;">Help Description</label>
+                                <textarea name="help_description" rows="2" style="width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 12px; resize: vertical;"><?php echo htmlspecialchars($page_content['help_description'] ?? ''); ?></textarea>
+                            </div>
+                        </div>
+                        <?php endif; ?>
 
                         <div style="text-align: right;">
                             <button type="submit" style="padding: 15px 45px; background: #1e293b; color: #fff; border: none; border-radius: 14px; font-weight: 900; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.2s;">
