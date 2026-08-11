@@ -196,30 +196,31 @@ include 'includes/header.php';
         <div class="container relative z-10">
             <div class="max-w-7xl mx-auto">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                    <?php foreach ($items_map['success'] as $item): ?>
                     <div>
-                        <h2 class="text-4xl md:text-5xl font-black text-white mb-8 leading-tight"><?php echo strip_tags($success_section['section_title'] ?? 'Changing Lives'); ?></h2>
-                        <p class="text-3xl text-blue-100 font-medium leading-relaxed mb-10">
-                            "<?php echo strip_tags($item['item_description']); ?>"
-                        </p>
-                        <div class="flex items-center gap-5">
-                            <div class="w-16 h-16 rounded-full bg-yellow-400 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-3xl text-white"><?php echo strip_tags($item['item_icon'] ?: 'person'); ?></span>
-                            </div>
-                            <div>
-                                <h4 class="text-2xl font-black text-white"><?php echo strip_tags($item['item_title']); ?></h4>
-                                <p class="text-2xl text-yellow-400 font-bold"><?php echo strip_tags($item['item_subtitle']); ?></p>
-                            </div>
-                        </div>
+                        <h2 class="text-4xl md:text-5xl font-black text-white mb-4 leading-tight"><?php echo strip_tags($success_section['section_title'] ?? 'How Awards Are Decided'); ?></h2>
+                        <div class="h-2 w-28 bg-yellow-400 rounded-full mb-10"></div>
+
+                        <ul class="space-y-8">
+                            <?php foreach ($items_map['success'] as $item): ?>
+                            <li class="flex items-start gap-5">
+                                <div class="w-14 h-14 shrink-0 rounded-2xl bg-yellow-400 flex items-center justify-center shadow-lg">
+                                    <span class="material-symbols-outlined text-3xl text-blue-900"><?php echo strip_tags($item['item_icon'] ?: 'check_circle'); ?></span>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-black text-white mb-1 leading-tight"><?php echo strip_tags($item['item_title']); ?></h4>
+                                    <p class="text-xl text-blue-100 leading-relaxed"><?php echo strip_tags($item['item_description']); ?></p>
+                                </div>
+                            </li>
+                            <?php endforeach; ?>
+                        </ul>
                     </div>
-                    <?php endforeach; ?>
                     <div class="relative">
                         <div class="aspect-square rounded-[3rem] overflow-hidden shadow-2xl rotate-3 group hover:rotate-0 transition-transform duration-700 max-w-md mx-auto">
                             <img src="<?php echo !empty($success_section['section_image']) ? strip_tags($success_section['section_image']) : 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'; ?>" alt="Student Success" class="w-full h-full object-cover">
                         </div>
                         <div class="absolute -bottom-6 -left-6 glass p-8 rounded-2xl shadow-2xl animate-float">
-                            <h4 class="text-3xl font-black text-blue-900 dark:text-white"><?php echo !empty($success_section['section_subtitle']) ? strip_tags($success_section['section_subtitle']) : '$2M+'; ?></h4>
-                            <p class="text-2xl font-bold text-gray-600 dark:text-gray-400"><?php echo !empty($success_section['section_description']) ? strip_tags($success_section['section_description']) : 'Annual Aid'; ?></p>
+                            <h4 class="text-3xl font-black text-blue-900 dark:text-white"><?php echo !empty($success_section['section_subtitle']) ? strip_tags($success_section['section_subtitle']) : 'Merit &amp; Need'; ?></h4>
+                            <p class="text-xl font-bold text-gray-600 dark:text-gray-400"><?php echo !empty($success_section['section_description']) ? strip_tags($success_section['section_description']) : 'The two bases for every award'; ?></p>
                         </div>
                     </div>
                 </div>
