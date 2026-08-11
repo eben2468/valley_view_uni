@@ -39,21 +39,17 @@
     /* --------------------------------------------------- sticky measurements */
 
     /**
-     * The header sticks with `top: -(utility + brand)` so it slides up until
-     * only the nav band is left pinned. Those two bands can change height with
-     * the viewport, so the offset is measured rather than hard-coded.
+     * The header sticks with `top: -(utility strip height)` so it slides up
+     * until only the logo/menu bar is left pinned. The strip's height changes
+     * with the viewport, so the offset is measured rather than hard-coded.
      */
     function measureOffset() {
         if (!header) return 0;
 
         var utility = $('.vvu-utility', header);
-        var brand = $('.vvu-brand', header);
-        var offset = 0;
+        var offset = (utility && utility.offsetParent !== null) ? utility.offsetHeight : 0;
 
-        if (utility && utility.offsetParent !== null) offset += utility.offsetHeight;
-        if (brand && brand.offsetParent !== null) offset += brand.offsetHeight;
-
-        // While stuck the bands are scrolled out of view but still measurable,
+        // While stuck the strip is scrolled out of view but still measurable,
         // so the value stays stable across state changes.
         document.documentElement.style.setProperty('--vvu-scrolloff', offset + 'px');
         return offset;
@@ -171,7 +167,7 @@
                 if (event.key === 'ArrowDown') {
                     event.preventDefault();
                     openMega(item);
-                    var first = $('a', $('.vvu-mega', item));
+                    var first = $('a', $('.mm-pos', item));
                     if (first) first.focus();
                 }
             });

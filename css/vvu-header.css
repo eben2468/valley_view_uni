@@ -36,9 +36,8 @@
 
     /* Rhythm — JS re-measures --vvu-scrolloff on load and resize. */
     --vvu-utility-h: 76px;
-    --vvu-brand-h: 112px;
-    --vvu-nav-h: 58px;
-    --vvu-nav-h-stuck: 60px;
+    --vvu-nav-h: 74px;
+    --vvu-nav-h-stuck: 62px;
     --vvu-mobilebar-h: 64px;
     --vvu-scrolloff: 188px;
 
@@ -460,185 +459,6 @@
 }
 
 /* --------------------------------------------------------------------------
-   5. TIER 2 — BRAND BAND
-   -------------------------------------------------------------------------- */
-.vvu-brand {
-    position: relative;
-    z-index: 2;
-    height: var(--vvu-brand-h);
-    background: var(--vvu-paper);
-}
-
-/* Hairline dividing the lockup band from the navigation band. Inset to the
-   page shell so it reads as a rule rather than a hard edge, and faded at both
-   ends so it resolves into the white instead of stopping abruptly. */
-.vvu-brand::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: min(calc(100% - var(--vvu-gutter) * 2), var(--vvu-shell));
-    height: 1px;
-    transform: translateX(-50%);
-    background: linear-gradient(90deg,
-            rgba(228, 233, 240, 0) 0%,
-            var(--vvu-hair) 12%,
-            var(--vvu-hair) 88%,
-            rgba(228, 233, 240, 0) 100%);
-}
-
-.vvu-brand__inner {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 24px;
-    height: 100%;
-    max-width: var(--vvu-shell);
-    margin: 0 auto;
-    padding: 0 var(--vvu-gutter);
-}
-
-/* Centre lockup */
-.vvu-lockup {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    justify-self: center;
-}
-
-.vvu-lockup__crest {
-    position: relative;
-    display: grid;
-    place-items: center;
-    flex: 0 0 auto;
-    width: 86px;
-    height: 86px;
-}
-
-.vvu-lockup__crest::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(240, 180, 41, .22) 0%, rgba(240, 180, 41, 0) 68%);
-    opacity: 0;
-    transform: scale(.7);
-    transition: opacity .4s var(--vvu-ease-out), transform .4s var(--vvu-ease-out);
-}
-
-.vvu-lockup:hover .vvu-lockup__crest::after {
-    opacity: 1;
-    transform: scale(1.12);
-}
-
-.vvu-lockup__crest img {
-    position: relative;
-    z-index: 1;
-    width: auto;
-    max-width: 100%;
-    max-height: 100%;
-    height: auto;
-    object-fit: contain;
-    mix-blend-mode: multiply;
-}
-
-.vvu-lockup__text {
-    display: block;
-    text-align: center;
-}
-
-.vvu-lockup__name {
-    display: block;
-    font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
-    font-size: clamp(19px, 1.55vw, 27px);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: .045em;
-    color: var(--vvu-navy);
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-/* Gold rule with a diamond centre, echoing the crest */
-.vvu-rule {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 7px auto 6px;
-    width: 100%;
-}
-
-.vvu-rule::before,
-.vvu-rule::after {
-    content: "";
-    flex: 1 1 auto;
-    height: 1px;
-}
-
-.vvu-rule::before {
-    background: linear-gradient(90deg, rgba(240, 180, 41, 0), var(--vvu-gold));
-}
-
-.vvu-rule::after {
-    background: linear-gradient(90deg, var(--vvu-gold), rgba(240, 180, 41, 0));
-}
-
-.vvu-rule i {
-    flex: 0 0 auto;
-    width: 6px;
-    height: 6px;
-    background: var(--vvu-gold);
-    transform: rotate(45deg);
-}
-
-.vvu-lockup__motto {
-    display: block;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: .22em;
-    text-transform: uppercase;
-    color: var(--vvu-ink-soft);
-    white-space: nowrap;
-}
-
-/* Flanking blocks */
-.vvu-brand__aside {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-}
-
-.vvu-brand__aside--right {
-    justify-content: flex-end;
-}
-
-.vvu-estab {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding-left: 16px;
-    border-left: 2px solid var(--vvu-gold);
-    line-height: 1.25;
-}
-
-.vvu-estab strong {
-    font-family: 'Cinzel', Georgia, serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    color: var(--vvu-navy);
-}
-
-.vvu-estab em {
-    font-style: normal;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--vvu-ink-soft);
-}
-
-/* --------------------------------------------------------------------------
    PRIMARY CTA — navy pill with a gold arrow chip
    The chip carries the crest's gold, so the button belongs to the masthead
    palette instead of introducing a third accent colour.
@@ -719,65 +539,69 @@
 /* --------------------------------------------------------------------------
    6. TIER 3 — MAIN NAVIGATION
    -------------------------------------------------------------------------- */
+/* Single band: crest and wordmark on the left, menu pushed to the right —
+   the compact layout from the original header. */
 .vvu-nav {
     position: relative;
     z-index: 4;
     height: var(--vvu-nav-h);
     background: var(--vvu-paper);
     border-bottom: 1px solid var(--vvu-hair);
+    box-shadow: 0 1px 0 rgba(0, 33, 71, .04);
     transition: height .3s var(--vvu-ease), box-shadow .3s var(--vvu-ease);
 }
 
+/* Full width with the same gutter as the utility strip, so the crest lines up
+   with the social icons above it. A centred 1320px shell left the logo and the
+   ~1000px menu fighting for room and clipped the wordmark. */
 .vvu-nav__inner {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 18px;
     height: 100%;
-    max-width: var(--vvu-shell);
-    margin: 0 auto;
     padding: 0 var(--vvu-gutter);
 }
 
-/* Compact lockup revealed only in the stuck state */
 .vvu-nav__mini {
     display: flex;
     align-items: center;
-    gap: 11px;
-    flex: 0 0 auto;
-    max-width: 0;
-    opacity: 0;
+    gap: 14px;
+    flex: 0 1 auto;
+    min-width: 0;
     overflow: hidden;
     white-space: nowrap;
-    transition: max-width .38s var(--vvu-ease), opacity .24s var(--vvu-ease),
-        margin-right .38s var(--vvu-ease);
 }
 
 .vvu-nav__mini img {
     width: auto;
-    height: 38px;
+    height: 52px;
+    flex: 0 0 auto;
     object-fit: contain;
     mix-blend-mode: multiply;
+    transition: height .3s var(--vvu-ease);
 }
 
 .vvu-nav__mini span {
     font-family: 'Cinzel', Georgia, serif;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: clamp(15px, 1.35vw, 21px);
+    font-weight: 600;
     line-height: 1.15;
-    letter-spacing: .045em;
-    text-transform: uppercase;
+    letter-spacing: .03em;
     color: var(--vvu-navy);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Menu */
 /* `align-self: stretch` is what gives the items full band height — without it
    they collapse to the text box and the hover underline lands mid-word. */
 .vvu-nav__menu {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-width: 0;
     display: flex;
     align-self: stretch;
-    justify-content: center;
+    justify-content: flex-end;
+    margin-left: auto;
 }
 
 .vvu-nav__menu>ul {
@@ -881,231 +705,67 @@
 }
 
 /* --------------------------------------------------------------------------
-   7. MEGA MENU
+   7. MEGA MENU — the original four-column dropdown
+
+   Its appearance still comes from css/custom-fixes.css (`.m-menu`, `.mm1-com`,
+   `.ed-course-in` …), which is the original styling and uses `!important`
+   throughout. Only the bits that assume the old `.main-menu ul li` wrapper are
+   re-pointed here, so the two files don't fight:
+
+     - visibility, which the old CSS drove from `.main-menu ul li:hover`
+     - the flyout's anchor, now the flex nav item
+     - a height cap, so a long menu can't run off a short screen
    -------------------------------------------------------------------------- */
-.vvu-mega {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    padding-bottom: 22px;
-    background: linear-gradient(180deg, #fff 0%, var(--vvu-paper-warm) 100%);
-    border-top: 3px solid var(--vvu-gold);
-    box-shadow: var(--vvu-shadow-lg);
+/* The menu sits on the right of the bar, so a ~950px panel anchored to its own
+   item would run off screen for the leftmost items. The items stay `static`
+   and the panel is positioned against the menu instead, so every dropdown
+   lines up with the right edge of the bar. */
+.vvu-nav__menu {
+    position: relative;
+}
+
+.vvu-nav__item--mega {
+    position: static;
+}
+
+/* The legacy rule is `.mm-pos { display: none }`, revealed only by a selector
+   that no longer exists — hence the explicit re-show here. */
+.vvu-header .mm-pos {
+    display: block;
+    left: auto !important;
+    right: 0 !important;
+    z-index: 20;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-14px);
+    transform: translateY(-8px);
     pointer-events: none;
-    transition: opacity .28s var(--vvu-ease-out), transform .28s var(--vvu-ease-out), visibility .28s;
-
-    /* A tall menu (ABOUT carries 24 links) can run past the bottom of a laptop
-       screen, which left its last group unreachable — the panel is anchored to
-       the nav, so the page scrollbar could not bring it into view. Cap it to
-       the space actually below the nav and scroll inside. JS sets the exact
-       value on open; the fallback assumes the fully expanded masthead. */
-    max-height: var(--vvu-mega-max, calc(100vh - 262px));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 33, 71, .28) transparent;
+    transition: opacity .22s var(--vvu-ease-out), transform .22s var(--vvu-ease-out),
+        visibility .22s;
 }
 
-.vvu-mega::-webkit-scrollbar {
-    width: 10px;
-}
-
-.vvu-mega::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.vvu-mega::-webkit-scrollbar-thumb {
-    background: rgba(0, 33, 71, .22);
-    border: 3px solid transparent;
-    border-radius: 999px;
-    background-clip: content-box;
-}
-
-.vvu-mega::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 33, 71, .4);
-    background-clip: content-box;
-}
-
-.vvu-nav__item.is-open>.vvu-mega {
+.vvu-nav__item--mega:hover>.mm-pos,
+.vvu-nav__item--mega.is-open>.mm-pos {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
     pointer-events: auto;
 }
 
-.vvu-mega__inner {
-    display: grid;
-    grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
-    gap: 38px;
-    max-width: var(--vvu-shell);
-    margin: 0 auto;
-    padding: 30px var(--vvu-gutter) 8px;
-}
-
-/* Feature card */
-.vvu-mega__feature {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.vvu-feature-card {
-    position: relative;
-    display: block;
-    height: 172px;
-    border-radius: 14px;
-    overflow: hidden;
-    background: var(--vvu-navy);
-    box-shadow: var(--vvu-shadow-md);
-}
-
-.vvu-feature-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scale(1.02);
-    transition: transform .6s var(--vvu-ease-out);
-}
-
-.vvu-feature-card::after {
+/* The four columns are floated (`.mm1-com { float: left }` in the theme) and
+   `.m-menu-inn` has no clearfix of its own, so it collapsed to zero height
+   outside its old Bootstrap row. */
+.vvu-header .m-menu-inn::after {
     content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0, 21, 46, 0) 34%, rgba(0, 21, 46, .86) 100%);
+    display: table;
+    clear: both;
 }
 
-.vvu-feature-card:hover img {
-    transform: scale(1.09);
-}
-
-.vvu-feature-card__label {
-    position: absolute;
-    z-index: 2;
-    left: 18px;
-    right: 18px;
-    bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    color: #fff;
-    font-family: 'Cinzel', Georgia, serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: .05em;
-}
-
-.vvu-feature-card__label::before {
-    content: "";
-    width: 22px;
-    height: 2px;
-    background: var(--vvu-gold);
-    flex: 0 0 auto;
-    transition: width .3s var(--vvu-ease-out);
-}
-
-.vvu-feature-card:hover .vvu-feature-card__label::before {
-    width: 38px;
-}
-
-.vvu-mega__blurb {
-    margin: 0;
-    color: var(--vvu-ink-soft);
-    font-size: 13.5px;
-    font-weight: 400;
-    line-height: 1.65;
-}
-
-.vvu-textlink {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    align-self: flex-start;
-    color: var(--vvu-navy);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    padding-bottom: 4px;
-    border-bottom: 2px solid var(--vvu-gold);
-    transition: color .2s var(--vvu-ease), gap .25s var(--vvu-ease-out);
-}
-
-.vvu-textlink:hover,
-.vvu-textlink:focus {
-    color: var(--vvu-ember-deep);
-    gap: 14px;
-}
-
-/* Link groups */
-/* `minmax(180px, …)` keeps all four of ABOUT's groups on a single row at
-   common laptop widths; a second row is what pushed the last group off screen.
-   `align-items: start` stops short groups being stretched to the tallest. */
-.vvu-mega__groups {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 26px 30px;
-    align-content: start;
-    align-items: start;
-}
-
-/* Site-wide headings drop to medium (see --vvu-title-weight); these small
-   uppercase labels need the weight back or they read as washed out. */
-.vvu-mega__group h3 {
-    margin: 0 0 14px;
-    padding-bottom: 9px;
-    font-family: 'Cinzel', Georgia, serif;
-    font-size: 11.5px;
-    font-weight: 700 !important;
-    letter-spacing: .15em;
-    text-transform: uppercase;
-    color: var(--vvu-navy);
-    border-bottom: 1px solid var(--vvu-hair);
-}
-
-.vvu-mega__group ul {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.vvu-mega__group a {
-    position: relative;
-    display: block;
-    padding: 6px 0 6px 16px;
-    color: var(--vvu-ink);
-    font-size: 13.5px;
-    font-weight: 500;
-    line-height: 1.45;
-    border-radius: 4px;
-    transition: color .2s var(--vvu-ease), padding-left .25s var(--vvu-ease-out);
-}
-
-.vvu-mega__group a::before {
-    content: "";
-    position: absolute;
-    left: 2px;
-    top: 50%;
-    width: 5px;
-    height: 5px;
-    margin-top: -2.5px;
-    background: var(--vvu-gold);
-    transform: rotate(45deg) scale(0);
-    transition: transform .25s var(--vvu-ease-out);
-}
-
-.vvu-mega__group a:hover,
-.vvu-mega__group a:focus {
-    color: var(--vvu-ember-deep);
-    padding-left: 22px;
-}
-
-.vvu-mega__group a:hover::before,
-.vvu-mega__group a:focus::before {
-    transform: rotate(45deg) scale(1);
+/* Never taller than the room below the bar — JS sets the exact value. */
+.vvu-header .m-menu {
+    max-height: var(--vvu-mega-max, calc(100vh - 200px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
 }
 
 /* --------------------------------------------------------------------------
@@ -1283,74 +943,97 @@
         box-shadow: 0 10px 30px -14px rgba(0, 33, 71, .38);
     }
 
-    /* The pinned bar drops the 1320px shell and spans the window: the menu is
-       ~1000px on its own, which leaves no room for a lockup and tools inside
-       the shell at any viewport width. */
-    .vvu-header.is-stuck .vvu-nav__inner {
-        max-width: none;
-        padding-left: clamp(20px, 3vw, 48px);
-        padding-right: clamp(20px, 3vw, 48px);
+    .vvu-header.is-stuck .vvu-nav__mini img {
+        height: 42px;
     }
 
-    /* Condensed layout: lockup pinned left, menu + tools pinned right.
-       The menu keeps its intrinsic width (`flex: 0 0 auto`) and the lockup is
-       the only shrinkable item, so a narrow window clips the lockup instead of
-       letting the menu overrun it. */
-    .vvu-header.is-stuck .vvu-nav__mini {
-        flex: 0 1 auto;
-        min-width: 0;
-        max-width: 360px;
-        opacity: 1;
-        margin-right: 8px;
-    }
-
-    .vvu-header.is-stuck .vvu-nav__menu {
-        flex: 0 0 auto;
-        margin-left: auto;
-        justify-content: flex-end;
-    }
-
+    /* The utility strip has scrolled away by now, so Search folds into the
+       bar to stay reachable. */
     .vvu-header.is-stuck .vvu-nav__tools {
-        max-width: 240px;
+        max-width: 60px;
         opacity: 1;
+        margin-left: 6px;
     }
 }
 
-/* The wordmark only earns its place once the menu, search and Apply all fit. */
-@media (min-width: 1024px) and (max-width: 1499px) {
-    .vvu-header.is-stuck .vvu-nav__mini span {
-        display: none;
+/* The university name stays beside the crest at every desktop width. Between
+   1024px and 1379px the crest, name and eight menu items only fit if the menu
+   gives ground, so the link padding and tracking tighten rather than the name
+   being dropped. */
+@media (min-width: 1024px) and (max-width: 1379px) {
+    .vvu-nav__inner {
+        gap: 12px;
     }
-}
 
-@media (min-width: 1024px) and (max-width: 1359px) {
-    .vvu-header.is-stuck .vvu-nav__tools .vvu-cta {
-        display: none;
+    .vvu-nav__mini {
+        gap: 10px;
     }
-}
 
-/* Narrow desktops give the menu the whole bar rather than a cropped crest. */
-@media (min-width: 1024px) and (max-width: 1199px) {
-    .vvu-header.is-stuck .vvu-nav__mini {
-        display: none;
+    .vvu-nav__mini img {
+        height: 44px;
     }
-}
 
-@media (min-width: 1024px) and (max-width: 1199px) {
-    :root {
-        --vvu-gutter: 18px;
-        --vvu-brand-h: 100px;
+    .vvu-nav__mini span {
+        font-size: 14px;
+        letter-spacing: .015em;
     }
 
     .vvu-nav__link {
-        font-size: 12px;
-        letter-spacing: .05em;
+        padding: 0 9px;
+        font-size: 11.5px;
+        letter-spacing: .03em;
     }
 
-    /* Nine links plus the button no longer fit on one line, so the button
-       collapses to a circular icon and the links tighten up. */
+    .vvu-nav__link .vvu-caret {
+        font-size: 8px;
+    }
+
+    .vvu-nav__link::after {
+        bottom: 10px;
+    }
+
+    .vvu-nav__item:hover>.vvu-nav__link::after,
+    .vvu-nav__link:focus::after,
+    .vvu-nav__item.is-open>.vvu-nav__link::after,
+    .vvu-nav__link.is-active::after {
+        left: 9px;
+        right: 9px;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1199px) {
+
+    /* Nine service links plus the button no longer fit on one line, so the
+       button collapses to a circular icon and the links tighten up.
+       (The nav link sizing is inherited from the 1379px block above — it must
+       not be re-widened here or the university name loses its room.) */
     :root {
+        --vvu-gutter: 18px;
         --vvu-rail-w: 34px;
+    }
+
+    /* Last step down: the name shrinks a little further so it still reads in
+       full at 1024px instead of ending in an ellipsis. */
+    .vvu-nav__mini img {
+        height: 40px;
+    }
+
+    .vvu-nav__mini span {
+        font-size: 12.5px;
+    }
+
+    .vvu-nav__link {
+        padding: 0 7px;
+        font-size: 11px;
+        letter-spacing: .02em;
+    }
+
+    .vvu-nav__item:hover>.vvu-nav__link::after,
+    .vvu-nav__link:focus::after,
+    .vvu-nav__item.is-open>.vvu-nav__link::after,
+    .vvu-nav__link.is-active::after {
+        left: 7px;
+        right: 7px;
     }
 
     .vvu-rail-btn {
@@ -1379,15 +1062,6 @@
 
     .vvu-utility__links ul {
         gap: 0;
-    }
-
-    .vvu-lockup__crest {
-        width: 64px;
-        height: 64px;
-    }
-
-    .vvu-estab {
-        display: none;
     }
 }
 
@@ -1894,7 +1568,6 @@
 @media (max-width: 1023px) {
 
     .vvu-utility,
-    .vvu-brand,
     .vvu-nav {
         display: none;
     }

@@ -225,43 +225,12 @@ if (!function_exists('vvu_split_sections')) {
             </div>
         </div>
 
-        <!-- ============================= TIER 2 — BRAND BAND ============================= -->
-        <div class="vvu-brand">
-            <div class="vvu-brand__inner">
-
-                <div class="vvu-brand__aside vvu-brand__aside--left">
-                    <span class="vvu-estab">
-                        <strong>Est. <?php echo vvu_e($vvu_since); ?></strong>
-                        <em>Chartered &bull; Accra, Ghana</em>
-                    </span>
-                </div>
-
-                <a class="vvu-lockup" href="index.php">
-                    <span class="vvu-lockup__crest">
-                        <img src="<?php echo vvu_e($vvu_logo); ?>" alt="<?php echo vvu_e($vvu_name); ?> crest">
-                    </span>
-                    <span class="vvu-lockup__text">
-                        <span class="vvu-lockup__name"><?php echo vvu_e($vvu_name); ?></span>
-                        <span class="vvu-rule" aria-hidden="true"><i></i></span>
-                        <span class="vvu-lockup__motto"><?php echo vvu_e($vvu_motto); ?></span>
-                    </span>
-                </a>
-
-                <div class="vvu-brand__aside vvu-brand__aside--right">
-                    <a class="vvu-cta" href="<?php echo vvu_e(vvu_url($vvu_apply_url)); ?>">
-                        <span>Apply Now</span>
-                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================== TIER 3 — MAIN NAVIGATION =========================== -->
+        <!-- ===================== MAIN BAR — LOGO LEFT, MENU RIGHT ====================== -->
         <div class="vvu-nav">
             <div class="vvu-nav__inner">
 
-                <a class="vvu-nav__mini" href="index.php" tabindex="-1" aria-hidden="true">
-                    <img src="<?php echo vvu_e($vvu_logo); ?>" alt="">
+                <a class="vvu-nav__mini" href="index.php">
+                    <img src="<?php echo vvu_e($vvu_logo); ?>" alt="<?php echo vvu_e($vvu_name); ?> crest">
                     <span><?php echo vvu_e($vvu_name); ?></span>
                 </a>
 
@@ -272,10 +241,9 @@ if (!function_exists('vvu_split_sections')) {
                             $has_mega = !empty($item['has_megamenu']) && !empty($item['sections']);
                             $is_active = isset($active_page) && !empty($item['active_key'])
                                 && $active_page === $item['active_key'];
-                            $parts = $has_mega ? vvu_split_sections($item['sections']) : null;
                             ?>
-                            <li class="vvu-nav__item<?php echo $has_mega ? ' vvu-nav__item--mega' : ''; ?>">
-                                <a class="vvu-nav__link<?php echo $is_active ? ' is-active' : ''; ?>"
+                            <li class="vvu-nav__item<?php echo $has_mega ? ' vvu-nav__item--mega' : ''; ?> <?php echo vvu_e($item['menu_class'] ?? ''); ?>">
+                                <a class="vvu-nav__link<?php echo $is_active ? ' is-active' : ''; ?><?php echo $has_mega ? ' mm-arr' : ''; ?>"
                                     href="<?php echo vvu_e(vvu_url($item['url'])); ?>"
                                     <?php if ($has_mega): ?>aria-haspopup="true" aria-expanded="false" <?php endif; ?>
                                     <?php if ($is_active): ?>aria-current="page" <?php endif; ?>>
@@ -286,59 +254,69 @@ if (!function_exists('vvu_split_sections')) {
                                 </a>
 
                                 <?php if ($has_mega): ?>
-                                    <div class="vvu-mega">
-                                        <div class="vvu-mega__inner">
+                                    <?php
+                                    // Original four-column dropdown: featured image, blurb,
+                                    // then two columns of link groups.
+                                    $cols = [1 => [], 2 => [], 3 => [], 4 => []];
+                                    foreach ($item['sections'] as $section) {
+                                        $pos = (int) $section['column_position'];
+                                        if (isset($cols[$pos])) {
+                                            $cols[$pos][] = $section;
+                                        }
+                                    }
+                                    ?>
+                                    <div class="mm-pos">
+                                        <div class="<?php echo vvu_e($item['megamenu_type'] ?? 'about-mm'); ?> m-menu">
+                                            <div class="m-menu-inn">
 
-                                            <div class="vvu-mega__feature">
-                                                <?php
-                                                $feature = $parts['feature'];
-                                                $blurb   = $parts['blurb'];
-                                                $feature_href = '';
-                                                if ($feature && !empty($feature['featured_link'])) {
-                                                    $feature_href = $feature['featured_link'];
-                                                } elseif ($blurb && !empty($blurb['button_link'])) {
-                                                    $feature_href = $blurb['button_link'];
-                                                }
-                                                ?>
-                                                <?php if ($feature): ?>
-                                                    <a class="vvu-feature-card"
-                                                        href="<?php echo vvu_e($feature_href !== '' ? vvu_url($feature_href) : '#'); ?>">
-                                                        <?php // Originals here run 2-16 MB; the card is 320x172. ?>
-                                                        <img src="<?php echo vvu_e(vvu_thumb($feature['featured_image'], 640, 344)); ?>"
-                                                            alt="" width="640" height="344" loading="lazy" decoding="async">
-                                                        <?php if (!empty($feature['featured_text'])): ?>
-                                                            <span class="vvu-feature-card__label"><?php echo vvu_e($feature['featured_text']); ?></span>
+                                                <div class="mm1-com mm1-s1">
+                                                    <?php foreach ($cols[1] as $sec): ?>
+                                                        <?php if (!empty($sec['featured_image'])): ?>
+                                                            <div class="ed-course-in">
+                                                                <a class="course-overlay menu-about"
+                                                                    href="<?php echo vvu_e(vvu_url($sec['featured_link'] ?? '#')); ?>">
+                                                                    <?php // Originals run 2-16 MB; the card is ~250x160. ?>
+                                                                    <img src="<?php echo vvu_e(vvu_thumb($sec['featured_image'], 520, 340)); ?>"
+                                                                        alt="" loading="lazy" decoding="async">
+                                                                    <span><?php echo vvu_e($sec['featured_text'] ?? ''); ?></span>
+                                                                </a>
+                                                            </div>
                                                         <?php endif; ?>
-                                                    </a>
-                                                <?php endif; ?>
+                                                    <?php endforeach; ?>
+                                                </div>
 
-                                                <?php if ($blurb && !empty($blurb['description_text'])): ?>
-                                                    <p class="vvu-mega__blurb"><?php echo vvu_e($blurb['description_text']); ?></p>
-                                                <?php endif; ?>
-
-                                                <?php if ($blurb && !empty($blurb['button_link'])): ?>
-                                                    <a class="vvu-textlink" href="<?php echo vvu_e(vvu_url($blurb['button_link'])); ?>">
-                                                        <span><?php echo vvu_e($blurb['button_text'] ?: 'Learn more'); ?></span>
-                                                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                                                    </a>
-                                                <?php endif; ?>
-                                            </div>
-
-                                            <div class="vvu-mega__groups">
-                                                <?php foreach ($parts['groups'] as $group): ?>
-                                                    <div class="vvu-mega__group">
-                                                        <?php if (!empty($group['section_title'])): ?>
-                                                            <h3><?php echo vvu_e($group['section_title']); ?></h3>
+                                                <div class="mm1-com mm1-s2">
+                                                    <?php foreach ($cols[2] as $sec): ?>
+                                                        <p><?php echo vvu_e($sec['description_text'] ?? ''); ?></p>
+                                                        <?php if (!empty($sec['button_link'])): ?>
+                                                            <a href="<?php echo vvu_e(vvu_url($sec['button_link'])); ?>" class="mm-r-m-btn">
+                                                                <?php echo vvu_e($sec['button_text'] ?: 'Learn More'); ?>
+                                                            </a>
                                                         <?php endif; ?>
+                                                    <?php endforeach; ?>
+                                                </div>
+
+                                                <div class="mm1-com mm1-s3">
+                                                    <?php foreach ($cols[3] as $sec): ?>
+                                                        <h4><?php echo vvu_e($sec['section_title'] ?? ''); ?></h4>
                                                         <ul>
-                                                            <?php foreach ($group['links'] as $link): ?>
-                                                                <li>
-                                                                    <a href="<?php echo vvu_e(vvu_url($link['url'])); ?>"><?php echo vvu_e($link['title']); ?></a>
-                                                                </li>
+                                                            <?php foreach (($sec['links'] ?? []) as $link): ?>
+                                                                <li><a href="<?php echo vvu_e(vvu_url($link['url'])); ?>"><?php echo vvu_e($link['title']); ?></a></li>
                                                             <?php endforeach; ?>
                                                         </ul>
-                                                    </div>
-                                                <?php endforeach; ?>
+                                                    <?php endforeach; ?>
+                                                </div>
+
+                                                <div class="mm1-com mm1-s4">
+                                                    <?php foreach ($cols[4] as $sec): ?>
+                                                        <h4><?php echo vvu_e($sec['section_title'] ?? ''); ?></h4>
+                                                        <ul>
+                                                            <?php foreach (($sec['links'] ?? []) as $link): ?>
+                                                                <li><a href="<?php echo vvu_e(vvu_url($link['url'])); ?>"><?php echo vvu_e($link['title']); ?></a></li>
+                                                            <?php endforeach; ?>
+                                                        </ul>
+                                                    <?php endforeach; ?>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -348,15 +326,13 @@ if (!function_exists('vvu_split_sections')) {
                     </ul>
                 </nav>
 
+                <?php // Appears only once the utility strip has scrolled away, so Search
+                      // stays reachable without adding anything to the bar at rest. ?>
                 <div class="vvu-nav__tools">
                     <button type="button" class="vvu-icon-btn" data-vvu-toggle="search"
                         aria-expanded="false" aria-controls="vvu-search" aria-label="Search this site">
                         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                     </button>
-                    <a class="vvu-cta vvu-cta--sm" href="<?php echo vvu_e(vvu_url($vvu_apply_url)); ?>">
-                        <span>Apply</span>
-                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                    </a>
                 </div>
             </div>
 
