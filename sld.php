@@ -197,7 +197,10 @@ if (!$content) {
                     ?>
                     <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-100 dark:border-gray-700 <?php echo $index === count($staff_members) - 1 && count($staff_members) % 2 !== 0 ? 'md:col-span-2' : ''; ?>">
                         <div class="flex items-center gap-4 mb-4">
-                            <span class="material-symbols-outlined text-4xl text-<?php echo $staff['color'] ?? 'blue'; ?>-600">person</span>
+                            <?php // The column is icon_color; reading $staff['color'] always
+                                  // yielded null, so every icon rendered blue regardless of
+                                  // what was set in the admin panel. ?>
+                            <span class="material-symbols-outlined text-4xl text-<?php echo strip_tags($staff['icon_color'] ?: 'blue'); ?>-600">person</span>
                             <div>
                                 <h4 class="text-3xl font-black text-gray-900 dark:text-white"><?php echo strip_tags($staff['name']); ?></h4>
                                 <p class="text-xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags($staff['position']); ?></p>
