@@ -27,10 +27,11 @@ $quickLinks = $adminContent->getSectionFields($page_id, 'db_quick_links');
 
 $is_admin = isset($_SESSION['admin_id']);
 
-// E-Books collection is gated behind VVU email verification (button + QR code)
+// The e-books collection is shared with the student Google Workspace domain, so
+// Google performs the sign-in check. Both the button and the QR code point at
+// ebooks_access.php, which explains which account to use before handing over.
 $ebooks_gate_url = vvu_ebook_gate_url('ebooks');
-$ebooks_verified = vvu_ebook_has_access();
-$ebooks_verified_email = vvu_ebook_verified_email();
+$ebooks_domain   = vvu_ebook_student_domain();
 
 include 'includes/header.php';
 ?>
@@ -540,7 +541,7 @@ include 'includes/header.php';
                         <div class="flex items-center justify-center p-8 md:p-12 lg:p-16 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
                             <div class="qr-image-container animate-float">
                                 <img src="ebooks_qr.php?r=ebooks"
-                                     alt="Scan to verify your VVU email and open the E-Books Collection">
+                                     alt="Scan to open the E-Books Collection with your VVU student account">
                             </div>
                         </div>
                         <!-- Info Side -->
@@ -552,41 +553,28 @@ include 'includes/header.php';
                                 <h3 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white">E-Books Collection</h3>
                             </div>
                             <p class="text-2xl text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-                                Scan the QR code with your mobile device camera, or use the button below. You will be asked to confirm your VVU email address before the collection opens.
+                                Scan the QR code with your mobile device camera, or use the button below. Google will ask you to sign in with your student account before the collection opens.
                             </p>
                             <div class="flex items-center gap-4 text-lg text-gray-500 dark:text-gray-500 mb-6">
                                 <span class="material-symbols-outlined text-green-500" style="font-size: 1.25rem;">verified</span>
-                                <span>Hosted on Google Drive • VVU Students &amp; Staff Only • Updated Regularly</span>
+                                <span>Hosted on Google Drive • VVU Students Only • Updated Regularly</span>
                             </div>
 
-                            <?php if ($ebooks_verified): ?>
-                                <div class="ebooks-status ebooks-status-ok mb-8">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    <div>
-                                        <strong>Verified as <?php echo htmlspecialchars($ebooks_verified_email); ?></strong>
-                                        <span>You have access for the next few hours.
-                                            <a href="<?php echo htmlspecialchars($ebooks_gate_url . '&switch=1'); ?>">Not you?</a>
-                                        </span>
-                                    </div>
+                            <div class="ebooks-status ebooks-status-lock mb-8">
+                                <span class="material-symbols-outlined">shield_person</span>
+                                <div>
+                                    <strong>Student sign-in required</strong>
+                                    <span>Access is granted by Google, not by this website. Sign in with your
+                                        <code>@<?php echo htmlspecialchars($ebooks_domain); ?></code> student account &mdash; a personal Gmail will be turned away.</span>
                                 </div>
-                            <?php else: ?>
-                                <div class="ebooks-status ebooks-status-lock mb-8">
-                                    <span class="material-symbols-outlined">lock</span>
-                                    <div>
-                                        <strong>Verification required</strong>
-                                        <span>Sign in with an <code>@st.vvu.edu.gh</code> or <code>@vvu.edu.gh</code> email address to open this collection.</span>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
+                            </div>
 
                             <div class="flex flex-wrap gap-4">
                                 <a href="<?php echo htmlspecialchars($ebooks_gate_url); ?>"
                                    class="cta-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500"
                                    style="font-size: 1.1rem; padding: 14px 28px;">
-                                    <span class="material-symbols-outlined"><?php echo $ebooks_verified ? 'open_in_new' : 'lock_person'; ?></span>
-                                    <?php echo $ebooks_verified
-                                        ? strip_tags($qrEbooks['button_text'] ?? 'Access E-Books Collection')
-                                        : 'Verify Email to Access'; ?>
+                                    <span class="material-symbols-outlined">open_in_new</span>
+                                    <?php echo strip_tags($qrEbooks['button_text'] ?? 'Access E-Books Collection'); ?>
                                 </a>
                             </div>
                         </div>

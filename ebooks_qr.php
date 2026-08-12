@@ -2,8 +2,9 @@
 /**
  * E-Books QR Code
  *
- * Serves a QR code that encodes the *verification gate* URL rather than the
- * Google Drive link, so a phone scan lands on the email check first.
+ * Serves a QR code that encodes the sign-in signpost URL rather than the raw
+ * Google Drive link, so a phone scan lands on the "use your student account"
+ * explainer first. The Drive folder itself is what enforces access.
  *
  * The PNG is generated once and cached under uploads/Library/qr-cache/, keyed by
  * the encoded URL, so the site keeps working offline after the first render.
@@ -84,8 +85,7 @@ if ($png !== false) {
 }
 
 // 3. Generation failed. Draw a local placeholder rather than falling back to the
-//    old static QR image — that one encodes the Google Drive link directly and
-//    would let a scan skip the email verification entirely.
+//    old static QR image — that one encodes an out-of-date Google Drive link.
 if (function_exists('imagecreatetruecolor')) {
     $img = imagecreatetruecolor($size, $size);
     $bg     = imagecolorallocate($img, 255, 255, 255);
@@ -94,7 +94,7 @@ if (function_exists('imagecreatetruecolor')) {
     imagefilledrectangle($img, 0, 0, $size, $size, $bg);
     imagerectangle($img, 4, 4, $size - 5, $size - 5, $border);
 
-    $lines = ['QR code unavailable', 'Use the "Verify Email', 'to Access" button'];
+    $lines = ['QR code unavailable', 'Use the "Access E-Books', 'Collection" button'];
     $font = 5;
     $line_h = imagefontheight($font) + 8;
     $y = (int)(($size - (count($lines) * $line_h)) / 2);

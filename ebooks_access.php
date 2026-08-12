@@ -1,10 +1,15 @@
 <?php
 /**
- * E-Books Access Gate
+ * E-Books — Sign-in signpost
  *
- * Every route to the Google Drive collection (the "Access E-Books Collection"
- * button and the QR code) points here first. Visitors must supply a valid VVU
- * student/staff email address before they are forwarded to the Drive folder.
+ * Both routes to the collection (the "Access E-Books Collection" button and the
+ * QR code) land here. The page does not grant anything: the Drive folder is
+ * shared with the st.vvu.edu.gh domain, so Google asks for a student sign-in
+ * when the folder opens. This screen exists to say *which* account to use, so
+ * a student already signed into a personal Gmail is not dumped on Google's
+ * "You need access — Request access" page with no explanation.
+ *
+ * ?open=1 records the hand-off and forwards to Drive.
  */
 require_once 'includes/db_connect.php';
 require_once 'includes/ebook_access.php';
@@ -20,55 +25,20 @@ if (!$resource) {
     exit;
 }
 
-$error = '';
-$submitted_email = '';
-$lockout = vvu_ebook_lockout_remaining();
+$domain      = vvu_ebook_student_domain();
+$destination = $resource['url'];
+$ready       = vvu_ebook_is_safe_destination($destination);
 
-// "Not you?" — drop the current verification and show the form again.
-if (isset($_GET['switch'])) {
-    vvu_ebook_revoke_access();
-    header('Location: ' . vvu_ebook_gate_url($resource_key));
+// Hand-off: log the click, then let Google take over the access decision.
+if ($ready && isset($_GET['open'])) {
+    vvu_ebook_log_open($pdo, $resource_key);
+    header('Location: ' . $destination);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $submitted_email = trim((string)($_POST['student_email'] ?? ''));
-
-    if ($lockout > 0) {
-        $error = 'Too many failed attempts. Please try again in ' . ceil($lockout / 60) . ' minute(s).';
-    } elseif (!vvu_ebook_check_csrf($_POST['csrf_token'] ?? '')) {
-        $error = 'Your session expired. Please submit the form again.';
-    } elseif ($submitted_email === '') {
-        $error = 'Please enter your university email address.';
-    } elseif (!vvu_ebook_is_valid_email($submitted_email)) {
-        vvu_ebook_record_failed_attempt();
-        $error = 'That address is not recognised. Use your VVU email ending in @st.vvu.edu.gh or @vvu.edu.gh.';
-        $lockout = vvu_ebook_lockout_remaining();
-    } else {
-        // Redirect back as a GET so a refresh does not re-post the form; the
-        // block below then logs the visit and forwards to the resource.
-        vvu_ebook_grant_access($submitted_email);
-        header('Location: ' . vvu_ebook_gate_url($resource_key));
-        exit;
-    }
-}
-
-// Already verified (this visit, or just now) — send them straight through.
-if ($error === '' && vvu_ebook_has_access() && !empty($resource['url'])) {
-    vvu_ebook_log_access($pdo, vvu_ebook_verified_email(), $resource_key);
-    header('Location: ' . $resource['url']);
-    exit;
-}
-
-// Verified, but the library has not configured a destination link yet.
-$unconfigured = ($error === '' && vvu_ebook_has_access() && empty($resource['url']));
-if ($unconfigured) {
-    $error = 'You are verified, but this collection has no link configured yet. Please contact the library.';
-}
-
-$page_title = 'Verify Your VVU Email - ' . $resource['label'];
+$page_title  = 'Open ' . $resource['label'] . ' - Valley View University';
 $active_page = 'academics';
-$csrf = vvu_ebook_csrf_token();
+$open_url    = vvu_ebook_gate_url($resource_key) . '&open=1';
 
 include 'includes/header.php';
 ?>
@@ -99,7 +69,7 @@ include 'includes/header.php';
         border-color: rgba(255,255,255,0.08);
     }
     .gate-head {
-        padding: 44px 44px 28px;
+        padding: 44px 44px 32px;
         text-align: center;
         background: linear-gradient(135deg, #1e3a8a 0%, #4338ca 100%);
         color: #fff;
@@ -115,7 +85,7 @@ include 'includes/header.php';
         align-items: center;
         justify-content: center;
     }
-    .gate-lock .material-symbols-outlined { font-size: 2.6rem; }
+    .gate-lock .material-symbols-outlined { font-size: 2.6rem; color: #fff; }
     .gate-head h1 {
         font-size: 2.4rem;
         font-weight: 900;
@@ -148,63 +118,59 @@ include 'includes/header.php';
         color: #0f172a;
     }
     .dark .gate-resource strong { color: #f1f5f9; }
-    .gate-resource span {
-        font-size: 1.2rem;
-        color: #64748b;
+    .gate-resource span { font-size: 1.2rem; color: #64748b; }
+
+    /* Numbered "what will happen" list */
+    .gate-steps {
+        list-style: none;
+        margin: 0 0 30px;
+        padding: 0;
+        counter-reset: gatestep;
     }
-    .gate-label {
-        display: block;
-        font-size: 1.25rem;
-        font-weight: 800;
+    .gate-steps li {
+        position: relative;
+        counter-increment: gatestep;
+        padding: 0 0 22px 54px;
+        font-size: 1.22rem;
+        line-height: 1.65;
         color: #334155;
-        margin-bottom: 10px;
-        letter-spacing: 0.02em;
     }
-    .dark .gate-label { color: #cbd5e1; }
-    .gate-input {
-        width: 100%;
-        padding: 18px 20px;
-        font-size: 1.35rem;
-        border: 2px solid #cbd5e1;
-        border-radius: 18px;
-        background: #fff;
-        color: #0f172a;
-        transition: border-color .25s, box-shadow .25s;
-        box-sizing: border-box;
-    }
-    .dark .gate-input {
-        background: #0f172a;
-        border-color: rgba(255,255,255,0.15);
-        color: #f1f5f9;
-    }
-    .gate-input:focus {
-        outline: none;
-        border-color: #4f46e5;
-        box-shadow: 0 0 0 4px rgba(79,70,229,0.15);
-    }
-    .gate-hint {
-        margin-top: 12px;
+    .dark .gate-steps li { color: #cbd5e1; }
+    .gate-steps li:last-child { padding-bottom: 0; }
+    .gate-steps li::before {
+        content: counter(gatestep);
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #eef2ff;
+        color: #4338ca;
+        font-weight: 900;
         font-size: 1.15rem;
-        color: #64748b;
-        line-height: 1.6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    .dark .gate-hint { color: #94a3b8; }
-    .gate-hint code {
+    .dark .gate-steps li::before { background: rgba(99,102,241,0.18); color: #a5b4fc; }
+    .gate-steps code, .gate-hint code {
         background: #eef2ff;
         color: #4338ca;
         padding: 2px 8px;
         border-radius: 8px;
         font-weight: 700;
+        white-space: nowrap;
     }
-    .dark .gate-hint code { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    .dark .gate-steps code, .dark .gate-hint code { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+
     .gate-btn {
         width: 100%;
-        margin-top: 26px;
         padding: 18px 28px;
         border: none;
         border-radius: 18px;
         background: linear-gradient(135deg, #2563eb, #4f46e5);
-        color: #fff;
+        color: #fff !important;
         font-size: 1.35rem;
         font-weight: 900;
         cursor: pointer;
@@ -212,14 +178,14 @@ include 'includes/header.php';
         align-items: center;
         justify-content: center;
         gap: 12px;
-        transition: transform .25s, box-shadow .25s, opacity .25s;
+        text-decoration: none !important;
+        transition: transform .25s, box-shadow .25s;
         box-shadow: 0 14px 30px rgba(37,99,235,0.28);
     }
-    .gate-btn:hover:not(:disabled) {
+    .gate-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 18px 38px rgba(37,99,235,0.35);
     }
-    .gate-btn:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; }
     .gate-alert {
         display: flex;
         align-items: flex-start;
@@ -238,16 +204,25 @@ include 'includes/header.php';
         border-color: rgba(239,68,68,0.3);
         color: #fca5a5;
     }
-    .gate-privacy {
-        margin-top: 24px;
+    .gate-help {
+        margin-top: 26px;
+        padding: 18px 22px;
+        border-radius: 16px;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        font-size: 1.15rem;
+        line-height: 1.65;
+        color: #92400e;
         display: flex;
         align-items: flex-start;
-        gap: 10px;
-        font-size: 1.1rem;
-        color: #64748b;
-        line-height: 1.6;
+        gap: 12px;
     }
-    .dark .gate-privacy { color: #94a3b8; }
+    .dark .gate-help {
+        background: rgba(245,158,11,0.12);
+        border-color: rgba(245,158,11,0.3);
+        color: #fcd34d;
+    }
+    .gate-help .material-symbols-outlined { font-size: 1.5rem; flex-shrink: 0; }
     .gate-back {
         display: inline-flex;
         align-items: center;
@@ -260,9 +235,10 @@ include 'includes/header.php';
     }
     .gate-back:hover { text-decoration: underline; }
     @media (max-width: 640px) {
-        .gate-head { padding: 34px 24px 24px; }
+        .gate-head { padding: 34px 24px 26px; }
         .gate-head h1 { font-size: 1.9rem; }
         .gate-body { padding: 28px 24px 34px; }
+        .gate-steps li { font-size: 1.15rem; padding-left: 48px; }
     }
 </style>
 
@@ -271,10 +247,10 @@ include 'includes/header.php';
         <div class="gate-card">
             <div class="gate-head">
                 <div class="gate-lock">
-                    <span class="material-symbols-outlined">lock_person</span>
+                    <span class="material-symbols-outlined">school</span>
                 </div>
-                <h1>Student Verification Required</h1>
-                <p>The VVU digital collection is reserved for members of the university. Enter your university email address to continue.</p>
+                <h1>Sign in with your student email</h1>
+                <p>This collection is shared only with Valley View University student accounts on <strong><?php echo htmlspecialchars('@' . $domain); ?></strong>.</p>
             </div>
 
             <div class="gate-body">
@@ -286,43 +262,32 @@ include 'includes/header.php';
                     </div>
                 </div>
 
-                <?php if ($error !== ''): ?>
+                <?php if (!$ready): ?>
                     <div class="gate-alert">
                         <span class="material-symbols-outlined" style="font-size:1.4rem;">error</span>
-                        <span><?php echo htmlspecialchars($error); ?></span>
+                        <span>This collection has no Google Drive link configured yet. Please contact the library.</span>
+                    </div>
+                <?php else: ?>
+                    <ol class="gate-steps">
+                        <li>Click <strong>Open in Google Drive</strong> below.</li>
+                        <li>Google will ask you to sign in. Use your student address — <code><?php echo htmlspecialchars('yourname@' . $domain); ?></code> — not a personal Gmail account.</li>
+                        <li>The collection opens. You can read and download any title in it.</li>
+                    </ol>
+
+                    <a href="<?php echo htmlspecialchars($open_url); ?>" class="gate-btn" rel="noopener">
+                        <span class="material-symbols-outlined">open_in_new</span>
+                        Open in Google Drive
+                    </a>
+
+                    <div class="gate-help">
+                        <span class="material-symbols-outlined">help</span>
+                        <span>
+                            Seeing <strong>&ldquo;You need access&rdquo;</strong>? You are signed into the wrong Google account.
+                            Click <strong>Switch accounts</strong> on that page and pick your
+                            <code><?php echo htmlspecialchars('@' . $domain); ?></code> address, or open the link in a private/incognito window.
+                        </span>
                     </div>
                 <?php endif; ?>
-
-                <form method="post" action="<?php echo htmlspecialchars(vvu_ebook_gate_url($resource_key)); ?>" novalidate>
-                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf); ?>">
-
-                    <label class="gate-label" for="student_email">University Email Address</label>
-                    <input class="gate-input"
-                           type="email"
-                           id="student_email"
-                           name="student_email"
-                           inputmode="email"
-                           autocomplete="email"
-                           autocapitalize="off"
-                           spellcheck="false"
-                           placeholder="yourname@st.vvu.edu.gh"
-                           value="<?php echo htmlspecialchars($submitted_email); ?>"
-                           <?php echo $lockout > 0 ? 'disabled' : 'required autofocus'; ?>>
-
-                    <p class="gate-hint">
-                        Accepted domains: <code>@st.vvu.edu.gh</code> (students) and <code>@vvu.edu.gh</code> (staff &amp; faculty).
-                    </p>
-
-                    <button type="submit" class="gate-btn" <?php echo $lockout > 0 ? 'disabled' : ''; ?>>
-                        <span class="material-symbols-outlined">verified_user</span>
-                        <?php echo $lockout > 0 ? 'Temporarily Locked' : 'Verify &amp; Continue'; ?>
-                    </button>
-                </form>
-
-                <div class="gate-privacy">
-                    <span class="material-symbols-outlined" style="font-size:1.3rem;">shield</span>
-                    <span>Your address is used only to confirm you belong to Valley View University and to keep a library access record. Verification lasts for 12 hours on this device.</span>
-                </div>
 
                 <a href="digital_books.php" class="gate-back">
                     <span class="material-symbols-outlined" style="font-size:1.3rem;">arrow_back</span>
