@@ -21,9 +21,18 @@
 (function () {
     'use strict';
 
-    var MAX_DIMENSION = 2000;      // px on the longest edge
+    // The widest thing on the site is the lead "Discover More" card, roughly
+    // 900 CSS px. On a 2x display that is 1800 device px, and the card also
+    // zooms its image to 1.12 on hover — so ~2000px of source was only just
+    // enough at rest and visibly short while hovering. 2600 leaves headroom
+    // without letting files get heavy again.
+    var MAX_DIMENSION = 2600;      // px on the longest edge
     var SIZE_THRESHOLD = 1200000;  // ~1.2MB — below this, leave the file alone
-    var QUALITY = 0.85;
+
+    // 0.85 was mushy on detailed photographs — foliage, crowds, brickwork —
+    // which is exactly what campus photos are full of. 0.92 costs a little
+    // size and holds that detail together.
+    var QUALITY = 0.92;
 
     // Bail out on browsers without the APIs needed to swap the file back in
     var supported = (typeof DataTransfer !== 'undefined') &&
@@ -51,6 +60,43 @@
         if (file.type === 'image/gif') return false;   // keep animation intact
         if (file.type === 'image/svg+xml') return false;
         return file.size > SIZE_THRESHOLD;
+    }
+
+    /**
+     * Repeatedly halves the source onto an offscreen canvas until one more
+     * halving would go past the target, then returns that canvas for the final
+     * draw. Returns the original image untouched when no halving step is
+     * warranted, so small images cost nothing.
+     */
+    function stepDown(img, targetW, targetH) {
+        var w = img.width;
+        var h = img.height;
+
+        // Only worth doing when shrinking by more than 2x.
+        if (w <= targetW * 2 && h <= targetH * 2) {
+            return img;
+        }
+
+        var src = img;
+        var canvas, ctx;
+
+        while (w > targetW * 2 && h > targetH * 2) {
+            w = Math.max(1, Math.floor(w / 2));
+            h = Math.max(1, Math.floor(h / 2));
+
+            canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            ctx = canvas.getContext('2d');
+            if (!ctx) { return img; }
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(src, 0, 0, w, h);
+            src = canvas;
+        }
+
+        return src;
     }
 
     /** Resize one File; resolves with the original if anything goes wrong. */
@@ -88,7 +134,16 @@
 
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(img, 0, 0, w, h);
+
+                // Draw through successive halvings rather than one big
+                // downscale. A single drawImage from 6000px straight to 2600px
+                // samples only a fraction of the source pixels, so fine detail
+                // aliases into mush — most visible on foliage and crowds.
+                // Halving repeatedly averages neighbouring pixels at each step
+                // and keeps the result crisp. This mirrors what
+                // includes/image_helper.php already does server-side in
+                // vvu_make_thumb(); the browser side had been left naive.
+                ctx.drawImage(stepDown(img, w, h), 0, 0, w, h);
 
                 canvas.toBlob(function (blob) {
                     // Keep the original if re-encoding somehow made it bigger
