@@ -559,6 +559,20 @@ h6 {
     margin-top: 20px !important;
 }
 
+/* Breathing room between stacked sections inside one mega-menu column.
+   Each section renders as a bare <h4> + <ul> with no wrapper, and the rule
+   above zeroes every heading's top margin — so two sections in the same
+   column ran straight into each other with only the list's 15px to separate
+   them, and the second heading read as part of the first group.
+
+   Targeting `ul + h4` leaves the column's FIRST heading flush with the top
+   (where the extra space would just look like a misalignment) and spaces only
+   the ones that actually follow another section. The margins collapse against
+   the list's own 15px, so the gap is 28px, not 43px. */
+.mm1-com ul+h4 {
+    margin-top: 28px !important;
+}
+
 .mm1-com ul {
     padding: 0 !important;
     margin: 0 0 15px 0 !important;
