@@ -58,11 +58,129 @@ if (!$content) {
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+    /* ---------------- Service cards ----------------
+       Each card carries its own accent through the --c / --c2 custom
+       properties set inline, so the colour drives the icon gradient, the
+       top rule, the hover glow and the shadow from one place. Doing it with
+       variables rather than `bg-<colour>-600` class names also means the
+       shadow and tint can use real alpha values, which Tailwind's palette
+       utilities cannot express here. */
     .sld-card {
-        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 2.25rem 2rem 2.5rem;
+        background: #fff;
+        border: 1px solid rgb(226 232 240);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        isolation: isolate;
+        transition: transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease, border-color .4s ease;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px -16px rgba(15, 23, 42, .25);
     }
-    .sld-card:hover {
-        transform: translateY(-10px);
+    .dark .sld-card {
+        background: rgb(17 24 39);
+        border-color: rgb(55 65 81);
+    }
+
+    /* Accent rule across the top — grows in from the left on hover. */
+    .sld-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--c), var(--c2));
+        transform: scaleX(.28);
+        transform-origin: left;
+        transition: transform .45s cubic-bezier(.2,.8,.2,1);
+    }
+    .sld-card:hover::before,
+    .sld-card:focus-within::before { transform: scaleX(1); }
+
+    /* Soft wash of the accent colour, top-right, revealed on hover. */
+    .sld-card::after {
+        content: "";
+        position: absolute;
+        top: -70px; right: -70px;
+        width: 200px; height: 200px;
+        border-radius: 999px;
+        background: radial-gradient(circle, var(--c) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity .45s ease;
+        z-index: -1;
+    }
+    .sld-card:hover::after,
+    .sld-card:focus-within::after { opacity: .13; }
+
+    .sld-card:hover,
+    .sld-card:focus-within {
+        transform: translateY(-8px);
+        border-color: color-mix(in srgb, var(--c) 35%, transparent);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04),
+                    0 26px 44px -22px color-mix(in srgb, var(--c) 55%, transparent);
+    }
+
+    .sld-card__icon {
+        width: 4rem; height: 4rem;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 1.15rem;
+        margin-bottom: 1.5rem;
+        color: #fff;
+        background: linear-gradient(140deg, var(--c), var(--c2));
+        box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--c) 75%, transparent);
+        transition: transform .4s cubic-bezier(.2,.8,.2,1);
+    }
+    .sld-card__icon .material-symbols-outlined { font-size: 2rem; color: #fff; }
+    .sld-card:hover .sld-card__icon,
+    .sld-card:focus-within .sld-card__icon { transform: translateY(-2px) scale(1.06) rotate(-3deg); }
+
+    .sld-card__title {
+        font-size: 1.5rem;
+        line-height: 1.25;
+        font-weight: 700;
+        letter-spacing: .01em;
+        color: rgb(15 23 42);
+        margin: 0 0 .75rem;
+    }
+    .dark .sld-card__title { color: #fff; }
+
+    /* A short accent underline keeps the serif heading anchored to the card's
+       colour without another heavy border. */
+    .sld-card__title::after {
+        content: "";
+        display: block;
+        width: 2.25rem; height: 3px;
+        margin-top: .85rem;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--c), var(--c2));
+        opacity: .85;
+        transition: width .45s cubic-bezier(.2,.8,.2,1);
+    }
+    .sld-card:hover .sld-card__title::after,
+    .sld-card:focus-within .sld-card__title::after { width: 3.75rem; }
+
+    .sld-card__text {
+        font-size: 1.0625rem;
+        line-height: 1.7;
+        color: rgb(71 85 105);
+        margin: 0;
+    }
+    .dark .sld-card__text { color: rgb(203 213 225); }
+
+    /* color-mix is recent; these fallbacks keep older browsers sane. */
+    @supports not (color: color-mix(in srgb, red 50%, transparent)) {
+        .sld-card:hover, .sld-card:focus-within {
+            border-color: rgb(203 213 225);
+            box-shadow: 0 26px 44px -22px rgba(15, 23, 42, .35);
+        }
+        .sld-card__icon { box-shadow: 0 10px 20px -10px rgba(15, 23, 42, .45); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sld-card, .sld-card::before, .sld-card::after,
+        .sld-card__icon, .sld-card__title::after { transition: none !important; }
+        .sld-card:hover, .sld-card:focus-within { transform: none; }
     }
 </style>
 
@@ -145,21 +263,41 @@ if (!$content) {
                 <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Comprehensive spiritual care and development programs designed to support your journey.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                <?php 
+            <?php
+            // The colour stored per service is a Tailwind palette name. Mapping it
+            // to real hex here lets the card CSS build gradients, tinted shadows and
+            // hover glows from it — none of which a `bg-<name>-600` class can do.
+            // Unknown names fall back to the house blue rather than rendering
+            // colourless.
+            $sld_palette = [
+                'blue'   => ['#2563eb', '#1d4ed8'],
+                'green'  => ['#16a34a', '#15803d'],
+                'purple' => ['#9333ea', '#7e22ce'],
+                'yellow' => ['#d97706', '#b45309'],
+                'red'    => ['#dc2626', '#b91c1c'],
+                'indigo' => ['#4f46e5', '#4338ca'],
+                'teal'   => ['#0d9488', '#0f766e'],
+                'pink'   => ['#db2777', '#be185d'],
+                'orange' => ['#ea580c', '#c2410c'],
+            ];
+            ?>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                <?php
                 $services = getSLDServices($pdo);
-                foreach ($services as $service): 
+                foreach ($services as $service):
+                    $key = strtolower(trim((string) ($service['color'] ?? '')));
+                    [$c1, $c2] = $sld_palette[$key] ?? $sld_palette['blue'];
                 ?>
                 <!-- Service -->
-                <div class="sld-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-xl border-t-8 border-<?php echo $service['color'] ?? 'blue'; ?>-600 hover:shadow-2xl">
-                    <div class="w-24 h-24 rounded-3xl bg-<?php echo $service['color'] ?? 'blue'; ?>-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($service['icon']); ?></span>
+                <article class="sld-card" style="--c: <?php echo $c1; ?>; --c2: <?php echo $c2; ?>;">
+                    <div class="sld-card__icon">
+                        <span class="material-symbols-outlined" aria-hidden="true"><?php echo strip_tags($service['icon']); ?></span>
                     </div>
-                    <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($service['title']); ?></h3>
-                    <p class="text-3xl text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                    <h3 class="sld-card__title"><?php echo strip_tags($service['title']); ?></h3>
+                    <p class="sld-card__text">
                         <?php echo strip_tags($service['description']); ?>
                     </p>
-                </div>
+                </article>
                 <?php endforeach; ?>
             </div>
         </div>
