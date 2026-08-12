@@ -215,8 +215,26 @@ include 'includes/header.php';
                         </ul>
                     </div>
                     <div class="relative">
-                        <div class="aspect-square rounded-[3rem] overflow-hidden shadow-2xl rotate-3 group hover:rotate-0 transition-transform duration-700 max-w-md mx-auto">
-                            <img src="<?php echo !empty($success_section['section_image']) ? strip_tags($success_section['section_image']) : 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'; ?>" alt="Student Success" class="w-full h-full object-cover">
+                        <?php
+                        /*
+                         * The slot is 4:5 rather than a square: the uploaded photos are
+                         * landscape camera originals, and forcing them into a square made
+                         * object-cover discard most of the frame and zoom hard into what
+                         * was left, which is what made the picture look soft.
+                         *
+                         * object-top keeps faces in shot when the crop does bite, and the
+                         * width is capped in CSS pixels so the browser is never asked to
+                         * paint a 6000px original into a small box.
+                         */
+                        $success_image = !empty($success_section['section_image'])
+                            ? strip_tags($success_section['section_image'])
+                            : 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80';
+                        ?>
+                        <div class="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl rotate-3 group hover:rotate-0 transition-transform duration-700 max-w-md mx-auto">
+                            <img src="<?php echo htmlspecialchars($success_image); ?>"
+                                 alt="Student Success"
+                                 width="800" height="1000" loading="lazy" decoding="async"
+                                 class="w-full h-full object-cover object-top">
                         </div>
                         <div class="absolute -bottom-6 -left-6 glass p-8 rounded-2xl shadow-2xl animate-float">
                             <h4 class="text-3xl font-black text-blue-900 dark:text-white"><?php echo !empty($success_section['section_subtitle']) ? strip_tags($success_section['section_subtitle']) : 'Merit &amp; Need'; ?></h4>

@@ -3,43 +3,76 @@ $page_title = "Faculty Encyclopedia - Valley View University";
 $active_page = "academics";
 include 'includes/header.php';
 require_once 'includes/db_connect.php';
+require_once 'includes/directory_helper.php';
 
-// Fetch dynamic content
+// ---------------------------------------------------------------------------
+// Page copy (hero + CTA) — managed from admin/manage_encyclopedia_content.php
+// ---------------------------------------------------------------------------
 $content_stmt = $pdo->prepare("SELECT * FROM encyclopedia_content WHERE page_key = 'faculty'");
 $content_stmt->execute();
-$page_content = $content_stmt->fetch();
+$page_content = $content_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+$page_content += [
+    'hero_title'    => 'Faculty Encyclopedia',
+    'hero_subtitle' => 'Discover our distinguished team of academic professionals shaping the future.',
+    'hero_image'    => '',
+    'cta_title'     => 'Join Our Academic Community',
+    'cta_subtitle'  => 'Are you passionate about education and research? Explore careers at Valley View University.',
+];
 
-// Pagination and Filters
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-$dept = isset($_GET['department']) ? $_GET['department'] : '';
-$faculty_group = isset($_GET['faculty_group']) ? $_GET['faculty_group'] : '';
+// ---------------------------------------------------------------------------
+// Filters
+// ---------------------------------------------------------------------------
+$search        = trim((string) ($_GET['search'] ?? ''));
+$dept          = trim((string) ($_GET['department'] ?? ''));
+$faculty_group = trim((string) ($_GET['faculty_group'] ?? ''));
+$rank          = trim((string) ($_GET['rank'] ?? ''));
 
-$query = "SELECT * FROM directory WHERE type = 'faculty'";
+$query  = "SELECT * FROM directory WHERE type = 'faculty' AND is_active = 1";
 $params = [];
 
-if ($search) {
-    $query .= " AND (name LIKE ? OR job_title LIKE ? OR department LIKE ?)";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
+if ($search !== '') {
+    $query .= " AND (name LIKE ? OR job_title LIKE ? OR department LIKE ? OR faculty_group LIKE ?)";
+    array_push($params, "%$search%", "%$search%", "%$search%", "%$search%");
 }
-if ($dept) {
+if ($dept !== '') {
     $query .= " AND department = ?";
     $params[] = $dept;
 }
-if ($faculty_group) {
+if ($faculty_group !== '') {
     $query .= " AND faculty_group = ?";
     $params[] = $faculty_group;
 }
+if ($rank !== '') {
+    $query .= " AND job_title LIKE ?";
+    $params[] = "%$rank%";
+}
 
-$query .= " ORDER BY name ASC";
+// sort_order carries the official running order of the ITS roll, so faculties
+// and departments come out in the sequence the university publishes them in.
+$query .= " ORDER BY sort_order ASC, name ASC";
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
-$faculties = $stmt->fetchAll();
+$faculties = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get unique departments and groups for filters
-$depts = $pdo->query("SELECT DISTINCT department FROM directory WHERE type = 'faculty' AND department != ''")->fetchAll(PDO::FETCH_COLUMN);
-$groups = $pdo->query("SELECT DISTINCT faculty_group FROM directory WHERE type = 'faculty' AND faculty_group != ''")->fetchAll(PDO::FETCH_COLUMN);
+// Filter option lists — always the full set, never just what's on screen.
+$depts  = $pdo->query("SELECT DISTINCT department FROM directory WHERE type = 'faculty' AND is_active = 1 AND department <> '' ORDER BY department")->fetchAll(PDO::FETCH_COLUMN);
+$groups = $pdo->query("SELECT faculty_group, COUNT(*) AS n FROM directory WHERE type = 'faculty' AND is_active = 1 AND faculty_group <> '' GROUP BY faculty_group ORDER BY MIN(sort_order) ASC, faculty_group ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+$total_faculty = (int) $pdo->query("SELECT COUNT(*) FROM directory WHERE type = 'faculty' AND is_active = 1")->fetchColumn();
+$total_depts   = count($depts);
+$total_profs   = (int) $pdo->query("SELECT COUNT(*) FROM directory WHERE type = 'faculty' AND is_active = 1 AND (job_title LIKE '%Professor%')")->fetchColumn();
+
+// Group the result set for rendering: faculty group -> department -> people
+$grouped = [];
+foreach ($faculties as $row) {
+    $g = $row['faculty_group'] !== '' ? $row['faculty_group'] : 'Other Academic Staff';
+    $d = $row['department'] !== '' ? $row['department'] : 'General';
+    $grouped[$g][$d][] = $row;
+}
+
+$has_filters = ($search !== '' || $dept !== '' || $faculty_group !== '' || $rank !== '');
+
+$ranks = ['Professor', 'Senior Lecturer', 'Lecturer', 'Assistant Lecturer'];
 ?>
 
 <style>
@@ -53,7 +86,7 @@ $groups = $pdo->query("SELECT DISTINCT faculty_group FROM directory WHERE type =
     }
     .animate-slow-zoom { animation: slowZoom 20s linear infinite alternate; }
     .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
-    
+
     .glass {
         background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(10px);
@@ -64,224 +97,30 @@ $groups = $pdo->query("SELECT DISTINCT faculty_group FROM directory WHERE type =
         background: rgba(31, 41, 55, 0.7);
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
-
-    .faculty-card {
-        background: white;
-        border-radius: 0.75rem;
-        overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .faculty-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        border-color: #800000;
-    }
-
-    .faculty-image-wrapper {
-        position: relative;
-        aspect-ratio: 1/1;
-        overflow: hidden;
-        background: #f8fafc;
-    }
-
-    .faculty-image-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
-    }
-
-    .faculty-card:hover .faculty-image-wrapper img {
-        transform: scale(1.05);
-    }
-
-    .job-badge {
-        display: inline-block;
-        background: #006400;
-        color: white;
-        padding: 2px 8px;
-        font-size: 8px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-radius: 4px;
-        margin-bottom: 4px;
-    }
-
-    .faculty-info {
-        padding: 8px 10px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        text-align: center;
-    }
-
-    .faculty-name {
-        font-size: 13px;
-        font-weight: 800;
-        color: #1e293b;
-        margin-bottom: 2px;
-        line-height: 1.2;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        min-height: 2.4em;
-    }
-
-    .faculty-dept {
-        font-size: 10px;
-        color: #64748b;
-        font-weight: 600;
-        line-height: 1.2;
-        margin-bottom: 6px;
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        min-height: 1.2em;
-    }
-
-    .btn-profile {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        width: 100%;
-        padding: 5px;
-        background: #f8fafc;
-        color: #334155;
-        font-weight: 700;
-        font-size: 9px;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-        text-decoration: none !important;
-        text-transform: uppercase;
-        margin-top: auto;
-        border: 1px solid #e2e8f0;
-    }
-
-    .faculty-card:hover .btn-profile {
-        background: #800000;
-        color: white;
-        border-color: #800000;
-    }
-
-    /* Filters Layout Update */
-    .filter-container {
-        position: relative;
-        background: white;
-        border-radius: 2rem;
-        padding: 0.75rem;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-    }
-
-    .filter-group {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .filter-icon {
-        position: absolute;
-        left: 1.5rem;
-        color: #64748b;
-        font-size: 1.5rem;
-        pointer-events: none;
-    }
-
-    .filter-input {
-        width: 100%;
-        padding: 1.25rem 1.5rem 1.25rem 3.5rem;
-        border-radius: 1.5rem;
-        border: 1px solid transparent;
-        background: #f8fafc;
-        font-size: 1.1rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        outline: none;
-        color: #1e293b;
-    }
-
-    .filter-input:focus {
-        background: white;
-        border-color: #800000;
-        box-shadow: 0 0 0 4px rgba(128, 0, 0, 0.05);
-    }
-
-    .filter-select {
-        padding-left: 3.5rem;
-        padding-right: 3.5rem;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1.5rem center;
-        background-size: 1.5rem;
-    }
-
-    .btn-search {
-        width: 100%;
-        height: 100%;
-        padding: 1.25rem;
-        border-radius: 1.5rem;
-        background: #800000;
-        color: white;
-        font-weight: 800;
-        border: none;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        font-size: 1.1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-    }
-
-    .btn-search:hover {
-        background: #600000;
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px -5px rgba(128, 0, 0, 0.3);
-    }
-
-    .btn-search:active {
-        transform: translateY(0);
-    }
 </style>
+<?php vvu_dir_styles('#800000', '#5c0000'); ?>
 
-<main class="flex-grow bg-gray-50 dark:bg-gray-900 pb-20">
+<main class="flex-grow bg-gray-50 dark:bg-gray-900 pb-20 dir-scope">
     <!-- Hero Section (Directly from faqs_about_vvu.php design) -->
     <section class="relative min-h-[60vh] flex items-center overflow-hidden bg-gray-900">
         <div class="absolute inset-0 z-0">
-            <img src="<?php echo strip_tags($page_content['hero_image'] ?: 'vvu_faq_hero_1766876441891.png'); ?>" 
+            <img src="<?php echo strip_tags($page_content['hero_image'] ?: 'vvu_faq_hero_1766876441891.png'); ?>"
                  alt="Faculty Hero" class="w-full h-full object-cover animate-slow-zoom opacity-60">
             <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
         </div>
-        
+
         <div class="container relative z-10 py-24">
             <div class="max-w-5xl mx-auto text-center">
                 <div class="inline-flex items-center gap-2 px-6 py-2 mb-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fadeInUp shadow-2xl">
                     <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
                     <span class="text-xs md:text-sm font-black tracking-widest uppercase text-yellow-400">Academic Directory</span>
                 </div>
-                
+
                 <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-none tracking-tighter text-white mb-8 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
                     <?php echo strip_tags($page_content['hero_title']); ?> <br>
                     <span class="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-2">Faculty Profiles</span>
                 </h1>
-                
+
                 <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-3xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
                     "<?php echo strip_tags($page_content['hero_subtitle']); ?>"
                 </p>
@@ -289,89 +128,189 @@ $groups = $pdo->query("SELECT DISTINCT faculty_group FROM directory WHERE type =
         </div>
     </section>
 
-    <!-- Search/Filter Section -->
-    <section class="py-16 relative z-20 -mt-24">
-        <div class="container">
-            <div class="max-w-6xl mx-auto">
-                <div class="filter-container">
-                    <form action="" method="GET" class="m-0 w-full">
-                        <div class="flex flex-col lg:flex-row gap-4 items-center w-full">
-                            <div class="w-full lg:w-4/12">
-                                <div class="filter-group w-full">
-                                    <span class="material-symbols-outlined filter-icon">person_search</span>
-                                    <input type="text" name="search" placeholder="Search by name or role..." 
-                                           class="filter-input w-full" value="<?php echo strip_tags($search); ?>">
-                                </div>
-                            </div>
-                            <div class="w-full lg:w-3/12">
-                                <div class="filter-group w-full">
-                                    <span class="material-symbols-outlined filter-icon">school</span>
-                                    <select name="department" class="filter-input filter-select w-full">
-                                        <option value="">All Departments</option>
-                                        <?php foreach ($depts as $d): ?>
-                                            <option value="<?php echo strip_tags($d); ?>" <?php echo $dept == $d ? 'selected' : ''; ?>><?php echo strip_tags($d); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="w-full lg:w-3/12">
-                                <div class="filter-group w-full">
-                                    <span class="material-symbols-outlined filter-icon">account_balance</span>
-                                    <select name="faculty_group" class="filter-input filter-select w-full">
-                                        <option value="">All Faculties</option>
-                                        <?php foreach ($groups as $g): ?>
-                                            <option value="<?php echo strip_tags($g); ?>" <?php echo $faculty_group == $g ? 'selected' : ''; ?>><?php echo strip_tags($g); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="w-full lg:w-2/12 h-full">
-                                <button type="submit" class="btn-search w-full h-full">
-                                    <span class="material-symbols-outlined">search</span>
-                                    Search
-                                </button>
-                            </div>
+    <!-- Search / Filter -->
+    <section class="relative z-20 -mt-20 md:-mt-24">
+        <div class="container px-4">
+            <div class="dir-wrap">
+                <form action="faculty_encyclopedia.php" method="GET" class="dir-panel m-0">
+                    <div class="dir-panel__grid">
+                        <label class="dir-field">
+                            <span class="material-symbols-outlined">person_search</span>
+                            <input type="text" name="search" data-dir-search
+                                   class="dir-field__control"
+                                   placeholder="Search by name, rank or department…"
+                                   value="<?php echo vvu_dir_e($search); ?>"
+                                   autocomplete="off">
+                        </label>
+
+                        <label class="dir-field">
+                            <span class="material-symbols-outlined">account_balance</span>
+                            <select name="faculty_group" class="dir-field__control browser-default">
+                                <option value="">All Faculties</option>
+                                <?php foreach ($groups as $g): ?>
+                                    <option value="<?php echo vvu_dir_e($g['faculty_group']); ?>" <?php echo $faculty_group === $g['faculty_group'] ? 'selected' : ''; ?>><?php echo vvu_dir_e($g['faculty_group']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+
+                        <label class="dir-field">
+                            <span class="material-symbols-outlined">school</span>
+                            <select name="department" class="dir-field__control browser-default">
+                                <option value="">All Departments</option>
+                                <?php foreach ($depts as $d): ?>
+                                    <option value="<?php echo vvu_dir_e($d); ?>" <?php echo $dept === $d ? 'selected' : ''; ?>><?php echo vvu_dir_e($d); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+
+                        <button type="submit" class="dir-btn">
+                            <span class="material-symbols-outlined">search</span>
+                            Search
+                        </button>
+                    </div>
+
+                    <div class="dir-panel__foot">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="font-black uppercase tracking-wider" style="font-size:11px;" style="color:var(--muted)">Rank:</span>
+                            <?php
+                            $rank_options = array_merge([''], $ranks);
+                            foreach ($rank_options as $r):
+                                $qs = http_build_query(array_filter([
+                                    'search' => $search, 'department' => $dept,
+                                    'faculty_group' => $faculty_group, 'rank' => $r,
+                                ], 'strlen'));
+                            ?>
+                                <a href="faculty_encyclopedia.php<?php echo $qs ? '?' . $qs : ''; ?>"
+                                   class="dir-tab <?php echo $rank === $r ? 'is-active' : ''; ?>"
+                                   style="padding:7px 14px;font-size:12px;">
+                                    <?php echo $r === '' ? 'All' : vvu_dir_e($r); ?>
+                                </a>
+                            <?php endforeach; ?>
                         </div>
-                    </form>
+
+                        <div class="flex items-center gap-3">
+                            <span class="dir-count" data-dir-count><b><?php echo count($faculties); ?></b> of <?php echo $total_faculty; ?> listed</span>
+                            <?php if ($has_filters): ?>
+                                <a href="faculty_encyclopedia.php" class="dir-btn dir-btn--ghost" style="height:42px;font-size:12px;padding:0 18px;">
+                                    <span class="material-symbols-outlined" style="font-size:17px;">restart_alt</span>
+                                    Reset
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="dir-block">
+        <div class="container px-4">
+            <div class="dir-wrap dir-stats">
+                <div class="dir-stat">
+                    <span class="dir-stat__icon"><span class="material-symbols-outlined">groups</span></span>
+                    <div>
+                        <div class="dir-stat__num"><?php echo $total_faculty; ?></div>
+                        <div class="dir-stat__label">Faculty Members</div>
+                    </div>
+                </div>
+                <div class="dir-stat">
+                    <span class="dir-stat__icon"><span class="material-symbols-outlined">account_balance</span></span>
+                    <div>
+                        <div class="dir-stat__num"><?php echo count($groups); ?></div>
+                        <div class="dir-stat__label">Faculties &amp; Schools</div>
+                    </div>
+                </div>
+                <div class="dir-stat">
+                    <span class="dir-stat__icon"><span class="material-symbols-outlined">school</span></span>
+                    <div>
+                        <div class="dir-stat__num"><?php echo $total_depts; ?></div>
+                        <div class="dir-stat__label">Departments</div>
+                    </div>
+                </div>
+                <div class="dir-stat">
+                    <span class="dir-stat__icon"><span class="material-symbols-outlined">workspace_premium</span></span>
+                    <div>
+                        <div class="dir-stat__num"><?php echo $total_profs; ?></div>
+                        <div class="dir-stat__label">Professorial Rank</div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Faculty Grid Section -->
-    <section class="py-12">
+    <!-- Faculty / School quick jump -->
+    <?php if (!empty($groups)): ?>
+    <section class="dir-block--tight">
         <div class="container px-4">
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            <div class="dir-wrap dir-tabs">
+                <a href="faculty_encyclopedia.php" class="dir-tab <?php echo $faculty_group === '' ? 'is-active' : ''; ?>">
+                    <span class="material-symbols-outlined" style="font-size:17px;">apps</span>
+                    All Faculties
+                    <span class="dir-tab__n"><?php echo $total_faculty; ?></span>
+                </a>
+                <?php foreach ($groups as $g): ?>
+                    <a href="faculty_encyclopedia.php?faculty_group=<?php echo urlencode($g['faculty_group']); ?>"
+                       class="dir-tab <?php echo $faculty_group === $g['faculty_group'] ? 'is-active' : ''; ?>">
+                        <?php echo vvu_dir_e($g['faculty_group']); ?>
+                        <span class="dir-tab__n"><?php echo (int) $g['n']; ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Faculty grid -->
+    <section class="dir-block--cards">
+        <div class="container px-4">
+            <div class="dir-wrap">
                 <?php if (empty($faculties)): ?>
-                    <div class="col-span-full text-center py-20">
-                        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                            <span class="material-symbols-outlined text-4xl text-gray-300">search_off</span>
-                        </div>
-                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-2">No results found</h3>
-                        <p class="text-lg text-gray-500 mb-8">Try adjusting your filters or search term.</p>
-                        <a href="faculty_encyclopedia.php" class="inline-flex items-center gap-2 text-wine font-black text-lg hover:gap-4 transition-all">
-                            Reset All Filters <span class="material-symbols-outlined">restart_alt</span>
+                    <div class="dir-empty">
+                        <div class="dir-empty__icon"><span class="material-symbols-outlined">search_off</span></div>
+                        <h3>No faculty members found</h3>
+                        <p>Try a different name, department or rank.</p>
+                        <a href="faculty_encyclopedia.php" class="dir-btn">
+                            <span class="material-symbols-outlined">restart_alt</span> Reset All Filters
                         </a>
                     </div>
                 <?php else: ?>
-                    <?php foreach ($faculties as $fac): ?>
-                        <div class="faculty-card animate-fadeInUp">
-                                <div class="faculty-image-wrapper">
-                                    <img src="<?php echo strip_tags($fac['image_url'] ?: 'images/default-profile.png'); ?>" alt="<?php echo strip_tags($fac['name']); ?>">
+                    <?php foreach ($grouped as $groupName => $departments): ?>
+                        <?php $groupCount = array_sum(array_map('count', $departments)); ?>
+                        <section class="dir-section" data-dir-section>
+                            <div class="dir-section__head">
+                                <span class="dir-section__bar"></span>
+                                <div>
+                                    <h2 class="dir-section__title"><?php echo vvu_dir_e($groupName); ?></h2>
+                                    <p class="dir-section__meta">
+                                        <?php echo $groupCount; ?> member<?php echo $groupCount === 1 ? '' : 's'; ?>
+                                        &middot; <?php echo count($departments); ?> department<?php echo count($departments) === 1 ? '' : 's'; ?>
+                                    </p>
                                 </div>
-                                <div class="faculty-info">
-                                    <h3 class="faculty-name"><?php echo strip_tags($fac['name']); ?></h3>
-                                    <?php if ($fac['job_title']): ?>
-                                        <div class="mb-2"><span class="job-badge"><?php echo strip_tags($fac['job_title']); ?></span></div>
-                                    <?php endif; ?>
-                                    <p class="faculty-dept"><?php echo strip_tags($fac['department']); ?></p>
-                                    <a href="profile.php?id=<?php echo $fac['id']; ?>" class="btn-profile">
-                                        View Full Profile
-                                        <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
-                                    </a>
-                                </div>
+                                <span class="dir-section__rule"></span>
                             </div>
+
+                            <?php foreach ($departments as $deptName => $people): ?>
+                                <div data-dir-group>
+                                    <?php if (count($departments) > 1 || $deptName !== $groupName): ?>
+                                        <h3 class="dir-subhead">
+                                            <?php echo vvu_dir_e($deptName); ?>
+                                            <span class="dir-subhead__n"><?php echo count($people); ?></span>
+                                        </h3>
+                                    <?php endif; ?>
+                                    <div class="dir-grid">
+                                        <?php foreach ($people as $fac) { vvu_dir_card($fac, 'faculty'); } ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </section>
                     <?php endforeach; ?>
+
+                    <div class="dir-empty" data-dir-empty hidden>
+                        <div class="dir-empty__icon"><span class="material-symbols-outlined">search_off</span></div>
+                        <h3>Nothing matches that search</h3>
+                        <p>Clear the search box to see every faculty member again.</p>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -394,6 +333,11 @@ $groups = $pdo->query("SELECT DISTINCT faculty_group FROM directory WHERE type =
             </div>
         </div>
     </section>
+
+    <button type="button" class="dir-backtotop" data-dir-top aria-label="Back to top">
+        <span class="material-symbols-outlined">arrow_upward</span>
+    </button>
 </main>
 
+<?php vvu_dir_script(); ?>
 <?php include 'includes/footer.php'; ?>
