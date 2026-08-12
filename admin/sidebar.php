@@ -137,6 +137,12 @@
                                 <span>Campus Life Lists</span>
                             </a>
                         </li>
+                        <li class="<?php echo (basename($_SERVER['PHP_SELF']) == 'manage_gallery.php' || basename($_SERVER['PHP_SELF']) == 'edit_gallery_album.php') ? 'active' : ''; ?>">
+                            <a href="manage_gallery.php">
+                                <i class="fas fa-images"></i>
+                                <span>Photo Gallery</span>
+                            </a>
+                        </li>
                         <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'manage_ventures_pages.php' ? 'active' : ''; ?>">
                             <a href="manage_ventures_pages.php">
                                 <i class="fas fa-store"></i>
