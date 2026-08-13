@@ -70,13 +70,30 @@ for h in "Strict-Transport-Security" "X-Frame-Options" "X-Content-Type-Options" 
 done
 
 head_ "Findings 5 & 6 — directly exposed service ports"
-for port in 8080 4000; do
-    if curl -s -o /dev/null --max-time 8 "http://$HOST:$port/" 2>/dev/null; then
-        red "port $port is reachable from the internet"
-    else
-        green "port $port not reachable"
-    fi
-done
+# Detect the "ran it on the server" case. Traffic from a host to its own public
+# address is routed over the loopback interface, and ufw's default ruleset
+# accepts everything on lo — so a firewalled port still answers and every port
+# check reports a false failure.
+TARGET_IP=$(getent hosts "$HOST" 2>/dev/null | awk '{print $1; exit}')
+ON_TARGET=0
+if [ -n "$TARGET_IP" ] && ip -o addr 2>/dev/null | grep -qw "$TARGET_IP"; then
+    ON_TARGET=1
+fi
+
+if [ "$ON_TARGET" = "1" ]; then
+    warn "SKIPPED — you are running this ON $HOST itself."
+    warn "     Connections to your own address bypass ufw, so these checks"
+    warn "     would report open ports whether or not the firewall blocks them."
+    warn "     Re-run this script from your laptop to test ports for real."
+else
+    for port in 8080 4000; do
+        if curl -s -o /dev/null --max-time 8 "http://$HOST:$port/" 2>/dev/null; then
+            red "port $port is reachable from the internet"
+        else
+            green "port $port not reachable"
+        fi
+    done
+fi
 
 head_ "Site still works"
 c=$(code "https://$HOST/")
