@@ -1,6 +1,6 @@
 <?php
 /**
- * Installer: "Past Vice Chancellors" page (past-vc.php)
+ * Installer: "Past Vice-Chancellors" page (past-vc.php)
  * ----------------------------------------------------
  * Registers the page in the administration_pages CMS tables so that all of its
  * content becomes editable from /admin/manage_administration_pages.php
@@ -13,7 +13,7 @@ require_once 'includes/db_connect.php';
 header('Content-Type: text/html; charset=utf-8');
 
 $SLUG  = 'past-vc';
-$TITLE = 'Past Vice Chancellors';
+$TITLE = 'Past Vice-Chancellors';
 
 $log = [];
 
@@ -54,11 +54,11 @@ try {
         ['Donald Eichner',        'President',                   '1989 / 1990 - 1991', $IMG . 'dummy.jpg',         'Championed early campus development and the expansion of academic programmes at Oyibi.'],
         ['Francis Chase',         'Acting President',            '1991 - 1992',        $IMG . 'dummy.jpg',         'Maintained institutional stability and mission focus during a season of transition.'],
         ['Roland L. Joachim',     'President',                   '1992 - 1994',        $IMG . 'joachim.jpg',       'Strengthened the academic foundations that prepared the college for national accreditation.'],
-        ['Seth A. Laryea',        'President / Vice Chancellor', '1995 - 2010',        $IMG . 'laryea.jpg',        'The longest serving head of the institution. Under his leadership Valley View became the first accredited private tertiary institution in Ghana (1997) and the first to receive a Presidential Charter (2006).'],
-        ['Prof. Daniel Buor',     'Vice Chancellor',             '2010 - 2015',        $IMG . 'buor.jpg',          'Expanded graduate education and research output while consolidating the university\'s chartered status.'],
-        ['Prof. Daniel K. Bediako', 'Vice Chancellor',           '2015 - 2022',        $IMG . 'prof-bediako.jpg',  'Advanced scholarship, faculty development and the international profile of the university.'],
-        ['Prof. William K. Koomson', 'President / Vice Chancellor', '2022 - 2025',     $IMG . 'prof-koomson.jpg',  'Brought three decades of international service to bear on digital transformation and community outreach.'],
-        ['Prof. Daniel Ganu',     'Vice Chancellor',             '2026 - Present',     $IMG . 'prof-ganu.jpeg',    'The current Vice Chancellor, leading Valley View University into its next era of academic and spiritual excellence.'],
+        ['Seth A. Laryea',        'President / Vice-Chancellor', '1995 - 2010',        $IMG . 'laryea.jpg',        'The longest serving head of the institution. Under his leadership Valley View became the first accredited private tertiary institution in Ghana (1997) and the first to receive a Presidential Charter (2006).'],
+        ['Prof. Daniel Buor',     'Vice-Chancellor',             '2010 - 2015',        $IMG . 'buor.jpg',          'Expanded graduate education and research output while consolidating the university\'s chartered status.'],
+        ['Prof. Daniel K. Bediako', 'Vice-Chancellor',           '2015 - 2022',        $IMG . 'prof-bediako.jpg',  'Advanced scholarship, faculty development and the international profile of the university.'],
+        ['Prof. William K. Koomson', 'President / Vice-Chancellor', '2022 - 2025',     $IMG . 'prof-koomson.jpg',  'Brought three decades of international service to bear on digital transformation and community outreach.'],
+        ['Prof. Daniel Ganu',     'Vice-Chancellor',             '2026 - Present',     $IMG . 'prof-ganu.jpeg',    'The current Vice-Chancellor, leading Valley View University into its next era of academic and spiritual excellence.'],
     ];
 
     $definitions = [
@@ -76,7 +76,7 @@ try {
             ['paragraph_1',    'Initially, casually christened "Bekwai Seminary," the Adventist Missionary College (renamed Adventist Ministerial College in 1981) was hosted by the Bekwai Secondary School from September 1979 to September 1983, when it collapsed to give way to the Adventist Missionary College that started at Adenta near Accra (1983-1989).', 'textarea'],
             ['paragraph_2',    'In January 1989, the institution was moved to Oyibi and renamed Valley View College.', 'textarea'],
             ['paragraph_3',    'When the National Accreditation Board granted an institutional accreditation to the College in 1997 - becoming the first private tertiary institution to be accredited in Ghana - the name Valley View University was adopted. In 2006, a Presidential Charter placed the institution on a full university status, again becoming the first private tertiary educational institution to be chartered in Ghana.', 'textarea'],
-            ['paragraph_4',    'Since its establishment, there have been five acting presidents and six substantive presidents, three of them bearing the title "Vice Chancellor" - a title reserved for the head of a chartered university in Ghana.', 'textarea'],
+            ['paragraph_4',    'Since its establishment, there have been five acting presidents and six substantive presidents, three of them bearing the title "Vice-Chancellor" - a title reserved for the head of a chartered university in Ghana.', 'textarea'],
         ]],
 
         'stats_section' => ['type' => 'section', 'order' => 3, 'fields' => [
@@ -100,7 +100,7 @@ try {
             ['cta_title',       'Continuing a Legacy of', 'text'],
             ['cta_highlight',   'Excellence and Service', 'text'],
             ['cta_description', 'Discover the office that carries this legacy forward today, and the story of how Valley View University came to be.', 'textarea'],
-            ['button_1_text',   'Office of the Vice Chancellor', 'text'],
+            ['button_1_text',   'Office of the Vice-Chancellor', 'text'],
             ['button_1_url',    'office_of_the_vice_chancellor.php', 'text'],
             ['button_2_text',   'Our History', 'text'],
             ['button_2_url',    'history.php', 'text'],
@@ -164,7 +164,7 @@ try {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Install - Past Vice Chancellors Page</title>
+<title>Install - Past Vice-Chancellors Page</title>
 <style>
     body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f5f9;margin:0;padding:40px 20px;color:#1e293b}
     .box{max-width:760px;margin:0 auto;background:#fff;border-radius:20px;padding:40px;box-shadow:0 10px 40px rgba(0,0,0,.06)}
@@ -180,7 +180,7 @@ try {
 </head>
 <body>
 <div class="box">
-    <h1>Past Vice Chancellors &mdash; CMS Installer</h1>
+    <h1>Past Vice-Chancellors &mdash; CMS Installer</h1>
     <p class="sub">Registers <code>past-vc.php</code> with the administration pages CMS.</p>
     <?php foreach ($log as $row): ?>
         <div class="row <?php echo $row[0]; ?>"><?php echo $row[1]; ?></div>

@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS `administration_pages` (
 
 -- Insert page records (only if they don't exist)
 INSERT IGNORE INTO `administration_pages` (`page_slug`, `page_title`, `page_name`) VALUES
-('office_of_the_vice_chancellor', 'Office of the Vice Chancellor', 'Office of the Vice Chancellor'),
-('office_of_the_pro-vice_chancellor', 'Office of the Pro-Vice Chancellor', 'Office of the Pro-Vice Chancellor'),
+('office_of_the_vice_chancellor', 'Office of the Vice-Chancellor', 'Office of the Vice-Chancellor'),
+('office_of_the_pro-vice_chancellor', 'Office of the Pro Vice-Chancellor', 'Office of the Pro Vice-Chancellor'),
 ('office_of_the_registrar', 'Office of the Registrar', 'Office of the Registrar'),
 ('rectors', 'Campus Rectors', 'Campus Rectors'),
 ('recorders', 'University Recorders', 'University Recorders');
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `administration_content_fields` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================
--- Insert initial content for Vice Chancellor page
+-- Insert initial content for Vice-Chancellor page
 -- ============================================
 INSERT INTO `administration_content` (`page_id`, `section_type`, `section_key`, `content_order`) VALUES
 (1, 'hero', 'hero_section', 1),
@@ -71,7 +71,7 @@ INSERT INTO `administration_content` (`page_id`, `section_type`, `section_key`, 
 INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_value`, `field_type`) VALUES
 (1, 'badge_text', 'University Leadership', 'text'),
 (1, 'title_main', 'Office of the', 'text'),
-(1, 'title_highlight', 'Vice Chancellor', 'text'),
+(1, 'title_highlight', 'Vice-Chancellor', 'text'),
 (1, 'subtitle', 'Leading Valley View University towards a future of academic excellence, spiritual growth, and societal impact through dedicated service and visionary leadership.', 'textarea'),
 (1, 'background_image', 'https://lh3.googleusercontent.com/aida-public/AB6AXuBo5kZ6ARGIXa5op7ZfwzuPd_3xc-gFuuNqLtlQhfI9FuPove2RJVSOjvla0bPKFyCQOvwkTsYTIZdrFobxFPda_ADJkaxK8QL0qmmVPAKWk_9tEnOjMndUI5kaG1-10q1H3lzodyVSzIKbkMJ7WqnJu9KTZSW1d6XFiKZSRiTidjPlL62RZcBjVtugVdJVT5ppDqxQJA6zTqKqiuG3IU5tUDZ6EebyhVcSLQd5pruhpjRWsJ4DE2gmxOgB7LP1mLj5zrE5d-hXP6bE', 'image');
 
@@ -79,7 +79,7 @@ INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_v
 INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_value`, `field_type`) VALUES
 (2, 'profile_image', 'https://lh3.googleusercontent.com/aida-public/AB6AXuCLxwRQaStcMjctmdRSUlFrbTzHrHZ4QmQ7_w-SjNu0YbuDefwcI5HThsfCdLLv2t2buwPecrNFBE0YG9eouPiuXF_v0W_iZyuf-LqyyZDM_LGTDg50yAveRJO1xUoJWTArmE9HlG_NBbpBogj3YzigfkiFnlpHCvldhseWxVTj3HaJpdFaTDwR34NqL0UJmX8pZa6aANMldz55PZSL0ZrzavkAeMjQv_pYGZbL4ObyJK-1ZZU9mW2rBo-Z6I1hzq_bCvv7QBKpvQy0', 'image'),
 (2, 'name', 'William Kofi Koomson, PhD', 'text'),
-(2, 'title', 'Vice Chancellor', 'text'),
+(2, 'title', 'Vice-Chancellor', 'text'),
 (2, 'bio_paragraph_1', 'William Kofi Koomson, a Ghanaian by birth, lived and worked in the Americas, including Jamaica, Trinidad and Tobago, Canada, and the United States of America for the past 30 years, after acquiring his initial secondary education in Ghana. He is married with four adult children.', 'textarea'),
 (2, 'bio_paragraph_2', 'He has worked for the Seventh-day Adventist Church for the past 35 years as an Administrator and Departmental Director at the local Conference, Union and General Conference (Review and Herald Publishing Association) levels, Vice Principal for the Literature Ministry Seminary, University Professor, College Principal/Rector and Pastor.', 'textarea'),
 (2, 'bio_paragraph_3', 'As part of his evangelistic outreach, he spearheaded a Community Sharing Ministry program in the USA, Canada and Europe to distribute within seven years over 250,000 copies of the book, Steps to Christ. He led in establishing two Churches in North America and through his evangelistic efforts, more than 1510 souls have been baptized into the Seventh-day Adventist Church.', 'textarea'),
@@ -89,7 +89,7 @@ INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_v
 -- Strategic Vision Section
 INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_value`, `field_type`) VALUES
 (3, 'section_title', 'Strategic Vision', 'text'),
-(3, 'section_subtitle', 'Under the leadership of Dr. William Kofi Koomson, the Office of the Vice Chancellor is focused on four key pillars of transformation.', 'textarea'),
+(3, 'section_subtitle', 'Under the leadership of Dr. William Kofi Koomson, the Office of the Vice-Chancellor is focused on four key pillars of transformation.', 'textarea'),
 (3, 'pillar_1_title', 'Academic Excellence', 'text'),
 (3, 'pillar_1_description', 'Enhancing the quality of teaching and learning through innovative curricula and world-class faculty development.', 'textarea'),
 (3, 'pillar_2_title', 'Research & Innovation', 'text'),

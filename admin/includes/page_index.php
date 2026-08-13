@@ -31,7 +31,7 @@ if (!function_exists('vvu_admin_page_index')) {
             ['file' => 'manage_departmental_resources.php','title' => 'Resource Dept CMS',           'icon' => 'fa-layer-group',      'keywords' => 'department resources'],
             ['file' => 'manage_faqs.php',                  'title' => 'Manage FAQs',                 'icon' => 'fa-question-circle',  'keywords' => 'questions answers help'],
             ['file' => 'manage_strategy_history.php',      'title' => 'Strategy & History',          'icon' => 'fa-history',          'keywords' => 'strategic plan timeline past'],
-            ['file' => 'manage_administration_pages.php',  'title' => 'Resource & Admin Pages',      'icon' => 'fa-university',       'keywords' => 'offices registrar vice chancellor cfo'],
+            ['file' => 'manage_administration_pages.php',  'title' => 'Resource & Admin Pages',      'icon' => 'fa-university',       'keywords' => 'offices registrar vice-chancellor vice chancellor cfo'],
             ['file' => 'manage_resources_pages.php',       'title' => 'Application & Resources',     'icon' => 'fa-file-invoice',     'keywords' => 'fees structure why choose vvu'],
             ['file' => 'manage_programs.php',              'title' => 'Academic Programs',           'icon' => 'fa-graduation-cap',   'keywords' => 'courses degrees faculty departments'],
             ['file' => 'manage_program_categories.php',    'title' => 'Program Categories',          'icon' => 'fa-sitemap',          'keywords' => 'course grouping'],

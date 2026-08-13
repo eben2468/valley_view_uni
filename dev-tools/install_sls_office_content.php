@@ -4,7 +4,7 @@
  * ---------------------------------------------------------------
  * Replaces the generic placeholder body content with the profile of
  * Pr. Peter Obeng Manu and the Office's own welcome message, plus the
- * supporting sections used on the Vice Chancellor and Pro-Vice Chancellor
+ * supporting sections used on the Vice-Chancellor and Pro Vice-Chancellor
  * pages.
  *
  * Sources: the officer profile comes from
@@ -188,7 +188,7 @@ try {
             ['link_3_url',   'activities_and_clubs.php', 'text'],
 
             ['link_4_icon',  'account_balance',  'text'],
-            ['link_4_title', 'Office of the Vice Chancellor', 'text'],
+            ['link_4_title', 'Office of the Vice-Chancellor', 'text'],
             ['link_4_text',  'Executive leadership and the strategic direction of the University.', 'textarea'],
             ['link_4_url',   'office_of_the_vice_chancellor.php', 'text'],
         ]],

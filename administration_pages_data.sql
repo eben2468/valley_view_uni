@@ -1,14 +1,14 @@
 -- ============================================
 -- Complete Data for Remaining 4 Administration Pages
 -- Run this AFTER administration_pages_schema.sql
--- Vice Chancellor data is already in the schema file
+-- Vice-Chancellor data is already in the schema file
 -- ============================================
 
 -- Note: This file only adds data for pages 2-5
--- Page 1 (Vice Chancellor) is already created in the schema file
+-- Page 1 (Vice-Chancellor) is already created in the schema file
 
 -- ============================================
--- PRO-VICE CHANCELLOR PAGE DATA (page_id = 2)
+-- PRO VICE-CHANCELLOR PAGE DATA (page_id = 2)
 -- ============================================
 
 -- Get the Pro-VC page ID
@@ -30,7 +30,7 @@ SET @provc_profile = @provc_hero + 1;
 INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_value`, `field_type`) VALUES
 (@provc_hero, 'badge_text', 'Academic Leadership', 'text'),
 (@provc_hero, 'title_main', 'Office of the', 'text'),
-(@provc_hero, 'title_highlight', 'Pro-Vice Chancellor', 'text'),
+(@provc_hero, 'title_highlight', 'Pro Vice-Chancellor', 'text'),
 (@provc_hero, 'subtitle', 'Empowering academic excellence, fostering innovation, and driving digital transformation to shape the future of Valley View University.', 'textarea'),
 (@provc_hero, 'background_image', 'https://lh3.googleusercontent.com/aida-public/AB6AXuBo5kZ6ARGIXa5op7ZfwzuPd_3xc-gFuuNqLtlQhfI9FuPove2RJVSOjvla0bPKFyCQOvwkTsYTIZdrFobxFPda_ADJkaxK8QL0qmmVPAKWk_9tEnOjMndUI5kaG1-10q1H3lzodyVSzIKbkMJ7WqnJu9KTZSW1d6XFiKZSRiTidjPlL62RZcBjVtugVdJVT5ppDqxQJA6zTqKqiuG3IU5tUDZ6EebyhVcSLQd5pruhpjRWsJ4DE2gmxOgB7LP1mLj5zrE5d-hXP6bE', 'image');
 
@@ -38,7 +38,7 @@ INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_v
 INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_value`, `field_type`) VALUES
 (@provc_profile, 'profile_image', 'https://lh3.googleusercontent.com/aida-public/AB6AXuA3DYOu722UbeqMnt5A6z1RSC3ZJL7ObJOF_ymftJttcbb5hu5KPxUDwEWQ1YnJlEH67SXOPJLcgHfK6yLx9gBSAua8CWI_F6jNO2wY-e7O34KnmgWRDReSfhRVWn52zOTyEdtoE2cGzFfFu9sNA1Dh-aJLxeJGilTtSnsSi8a9Y43daV1pkjPRFDI5UuJzqGSbsFQFsvwFGALUyQptWXtxWsDY-4eLAiFyVJgje0T_UrdsWG0iKcP-FCYMHijjKe-1x5gwT5xhNjWk', 'image'),
 (@provc_profile, 'name', 'Prof. Winfred Ofoe Larkotey', 'text'),
-(@provc_profile, 'title', 'Pro-Vice Chancellor', 'text'),
+(@provc_profile, 'title', 'Pro Vice-Chancellor', 'text'),
 (@provc_profile, 'bio_paragraph_1', 'Prof. Winfred Ofoe Larkotey, an accomplished academic and visionary leader, embodies a rare blend of academic excellence, innovative thinking, and administrative prowess. With a robust background in Information Systems coupled with extensive experience in higher education administration, Prof. Larkotey has made significant contributions to academia, research, and institutional development.', 'textarea'),
 (@provc_profile, 'bio_paragraph_2', 'His exemplary journey epitomizes academic excellence, leadership, and a steadfast commitment to driving positive change. As he continues to inspire and empower the next generation of scholars and leaders, his impact resonates far beyond the confines of academia, shaping the future of technology and education.', 'textarea'),
 (@provc_profile, 'academic_journey', 'PhD in Information Systems from the University of Ghana, Legon.', 'text'),
@@ -123,7 +123,7 @@ INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_v
 -- Introduction Section
 INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_value`, `field_type`) VALUES
 (@rect_intro, 'section_title', 'Our Campus Leadership Structure', 'text'),
-(@rect_intro, 'section_description', 'Valley View University operates across three campuses. The main campus is led by the Vice Chancellor and Pro-Vice Chancellor, while the Kumasi and Techiman campuses each have a Rector who serves as the chief academic and administrative officer, ensuring excellence in teaching, research, and community engagement.', 'textarea');
+(@rect_intro, 'section_description', 'Valley View University operates across three campuses. The main campus is led by the Vice-Chancellor and Pro Vice-Chancellor, while the Kumasi and Techiman campuses each have a Rector who serves as the chief academic and administrative officer, ensuring excellence in teaching, research, and community engagement.', 'textarea');
 
 -- Kumasi Rector Profile
 INSERT INTO `administration_content_fields` (`content_id`, `field_key`, `field_value`, `field_type`) VALUES

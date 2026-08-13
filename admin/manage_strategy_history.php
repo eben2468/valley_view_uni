@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['message_paragraph_5'] ?? '',
                 $_POST['is_active'] ?? 1, $_POST['id']
             ]);
-            $success = "Vice Chancellor's message updated successfully!";
+            $success = "Vice-Chancellor's message updated successfully!";
         }
 
         elseif ($action === 'update_strategic_heading') {
@@ -511,7 +511,7 @@ include 'sidebar.php';
 </div>
 </div>
 <div class="col-md-12">
-<button type="submit" class="btn btn-primary"><i class="fa fa-save" style="margin-right: 8px;"></i>Update Vice Chancellor's Message</button>
+<button type="submit" class="btn btn-primary"><i class="fa fa-save" style="margin-right: 8px;"></i>Update Vice-Chancellor's Message</button>
 </div>
 </div>
 </form>

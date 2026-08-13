@@ -37,7 +37,7 @@ if (!function_exists('vcIcon')) {
 }
 
 // Set page title from database or use default
-$page_title = $page ? $page['page_title'] . " - Valley View University" : "Office of the Vice Chancellor - Valley View University";
+$page_title = $page ? $page['page_title'] . " - Valley View University" : "Office of the Vice-Chancellor - Valley View University";
 $active_page = "about";
 include 'includes/header.php';
 ?>
@@ -131,7 +131,7 @@ include 'includes/header.php';
 
                 <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-10 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
                     <?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_main', 'Office of the')); ?> <br>
-                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-4"><?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_highlight', 'Vice Chancellor')); ?></span>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-4"><?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_highlight', 'Vice-Chancellor')); ?></span>
                 </h1>
 
                 <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
@@ -152,12 +152,12 @@ include 'includes/header.php';
                             <div class="absolute -inset-3 bg-gradient-to-r from-blue-600 to-yellow-400 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                             <div class="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
                                 <img src="<?php echo strip_tags(getContent($pageContent, 'vc_profile', 'profile_image', 'images/leadership/prof-daniel-ganu.jpg')); ?>"
-                                     alt="<?php echo vcOut($pageContent, 'vc_profile', 'name', 'Vice Chancellor'); ?>"
+                                     alt="<?php echo vcOut($pageContent, 'vc_profile', 'name', 'Vice-Chancellor'); ?>"
                                      class="w-full h-full object-cover object-top">
                             </div>
                             <div class="mt-6 text-center lg:text-left">
-                                <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-1 tracking-tight"><?php echo vcOut($pageContent, 'vc_profile', 'name', 'Vice Chancellor'); ?></h2>
-                                <p class="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest"><?php echo vcOut($pageContent, 'vc_profile', 'title', 'Vice Chancellor'); ?></p>
+                                <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-1 tracking-tight"><?php echo vcOut($pageContent, 'vc_profile', 'name', 'Vice-Chancellor'); ?></h2>
+                                <p class="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest"><?php echo vcOut($pageContent, 'vc_profile', 'title', 'Vice-Chancellor'); ?></p>
                             </div>
                         </div>
                     </div>
@@ -194,7 +194,7 @@ include 'includes/header.php';
         </div>
     </section>
 
-    <!-- ============================ VICE CHANCELLOR'S MESSAGE ============================ -->
+    <!-- ============================ VICE-CHANCELLOR'S MESSAGE ============================ -->
     <section class="relative py-24 sm:py-32 bg-gray-50 dark:bg-gray-950 overflow-hidden">
         <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[130px] -mr-64 -mt-64"></div>
         <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-yellow-500/5 rounded-full blur-[130px] -ml-64 -mb-64"></div>
@@ -203,10 +203,10 @@ include 'includes/header.php';
             <div class="vc-wrap">
                 <div class="text-center mb-14">
                     <span class="inline-block px-5 py-2 mb-6 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-base font-black uppercase tracking-widest">
-                        <?php echo vcOut($pageContent, 'vc_message', 'section_label', 'From the Vice Chancellor'); ?>
+                        <?php echo vcOut($pageContent, 'vc_message', 'section_label', 'From the Vice-Chancellor'); ?>
                     </span>
                     <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-5 tracking-tight">
-                        <?php echo vcOut($pageContent, 'vc_message', 'section_title', "The Vice Chancellor's Message"); ?>
+                        <?php echo vcOut($pageContent, 'vc_message', 'section_title', "The Vice-Chancellor's Message"); ?>
                     </h2>
                     <div class="h-2 w-36 bg-yellow-400 mx-auto rounded-full"></div>
                 </div>
@@ -219,7 +219,7 @@ include 'includes/header.php';
                             <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
                                 <div class="relative aspect-[4/5] bg-gray-100 dark:bg-gray-800 overflow-hidden">
                                     <img src="<?php echo strip_tags(getContent($pageContent, 'vc_message', 'signature_image', 'images/leadership/prof-daniel-ganu.jpg')); ?>"
-                                         alt="<?php echo vcOut($pageContent, 'vc_message', 'signature_name', 'Vice Chancellor'); ?>"
+                                         alt="<?php echo vcOut($pageContent, 'vc_message', 'signature_name', 'Vice-Chancellor'); ?>"
                                          loading="lazy"
                                          class="w-full h-full object-cover object-top">
                                     <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/70 to-transparent"></div>
@@ -489,7 +489,7 @@ include 'includes/header.php';
                                 <?php echo vcOut($pageContent, 'office_contact', 'form_description', ''); ?>
                             </p>
                             <form action="contact_process.php" method="post" class="space-y-4">
-                                <input type="hidden" name="inquiry-type" value="Appointment Request - Office of the Vice Chancellor">
+                                <input type="hidden" name="inquiry-type" value="Appointment Request - Office of the Vice-Chancellor">
                                 <div>
                                     <label for="vc_name" class="sr-only">Full name</label>
                                     <input id="vc_name" name="name" type="text" required placeholder="Your Full Name"

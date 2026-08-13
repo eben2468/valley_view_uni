@@ -1,9 +1,9 @@
 <?php
 /**
- * Installer: Office of the Vice Chancellor - content refresh
+ * Installer: Office of the Vice-Chancellor - content refresh
  * ----------------------------------------------------------
  * Removes the legacy "Strategic Vision" and "Contact the Office" sections and
- * installs the new, richer set of sections (Vice Chancellor's Message,
+ * installs the new, richer set of sections (Vice-Chancellor's Message,
  * Strategic Priorities, Mandate of the Office, Related Offices, Contact).
  *
  * The hero section, the VC profile and the CTA section are left untouched.
@@ -42,19 +42,19 @@ try {
 
     $definitions = [
 
-        // ---- The Vice Chancellor's Message (vvu.edu.gh) ----
+        // ---- The Vice-Chancellor's Message (vvu.edu.gh) ----
         'vc_message' => ['type' => 'section', 'order' => 3, 'fields' => [
-            ['section_label',    'From the Vice Chancellor', 'text'],
-            ['section_title',    "The Vice Chancellor's Message", 'text'],
+            ['section_label',    'From the Vice-Chancellor', 'text'],
+            ['section_title',    "The Vice-Chancellor's Message", 'text'],
             ['greeting',         'Welcome to Valley View University', 'text'],
             ['paragraph_1',      "Welcome to Valley View University (VVU), Ghana's premier chartered private university! Valley View University is a Seventh-day Adventist higher education institution committed to wholistic education, which emphasizes the integrated development of the intellectual, physical, social, and spiritual dimensions of learners.", 'textarea'],
-            ['paragraph_2',      'It is with great honor and a deep sense of responsibility that I assume the role of Vice Chancellor of this esteemed institution. I am delighted to join a vibrant academic community known for its commitment to excellence in teaching, research, and service.', 'textarea'],
+            ['paragraph_2',      'It is with great honor and a deep sense of responsibility that I assume the role of Vice-Chancellor of this esteemed institution. I am delighted to join a vibrant academic community known for its commitment to excellence in teaching, research, and service.', 'textarea'],
             ['paragraph_3',      'As we look to the future, my vision is to strengthen our academic foundation, foster innovation, and nurture an inclusive environment where students, faculty, and staff can thrive. Together, we will build on our proud legacy while embracing new opportunities that prepare our graduates to lead and serve in a rapidly changing world.', 'textarea'],
             ['paragraph_4',      'I therefore extend a warm welcome to our students, prospective students, faculty, staff, partners, and visitors to VVU, where the pursuit of knowledge is inseparably linked with faith, service, and character development.', 'textarea'],
             ['paragraph_5',      "I look forward to working collaboratively with all stakeholders as we advance our shared mission and uphold the values that define VVU. I invite you to consider VVU your institution of choice for both undergraduate and graduate education. Explore our website to learn how you can benefit from VVU's academic programs.", 'textarea'],
             ['pull_quote',       'The pursuit of knowledge is inseparably linked with faith, service, and character development.', 'textarea'],
             ['signature_name',   'Professor Daniel Ganu', 'text'],
-            ['signature_title',  'Vice Chancellor', 'text'],
+            ['signature_title',  'Vice-Chancellor', 'text'],
             ['signature_image',  $GANU, 'image'],
         ]],
 
@@ -62,7 +62,7 @@ try {
         'vision_pillars' => ['type' => 'section', 'order' => 4, 'fields' => [
             ['section_label',       'Looking Ahead', 'text'],
             ['section_title',       'Strategic Priorities', 'text'],
-            ['section_description', "The Vice Chancellor's vision for Valley View University rests on four commitments that shape every decision of the office.", 'textarea'],
+            ['section_description', "The Vice-Chancellor's vision for Valley View University rests on four commitments that shape every decision of the office.", 'textarea'],
 
             ['pillar_1_icon',        'foundation', 'text'],
             ['pillar_1_title',       'A Stronger Academic Foundation', 'text'],
@@ -85,7 +85,7 @@ try {
         'office_mandate' => ['type' => 'section', 'order' => 5, 'fields' => [
             ['section_label',       'The Office', 'text'],
             ['section_title',       'Mandate of the Office', 'text'],
-            ['section_description', 'As the chief executive officer of the University, the Vice Chancellor carries responsibility for the academic, administrative and financial life of the institution.', 'textarea'],
+            ['section_description', 'As the chief executive officer of the University, the Vice-Chancellor carries responsibility for the academic, administrative and financial life of the institution.', 'textarea'],
 
             ['item_1_icon',  'account_balance', 'text'],
             ['item_1_title', 'Executive Leadership', 'text'],
@@ -118,7 +118,7 @@ try {
             ['section_title', 'Related Offices & Resources', 'text'],
 
             ['link_1_icon',  'co_present',   'text'],
-            ['link_1_title', 'Office of the Pro-Vice Chancellor', 'text'],
+            ['link_1_title', 'Office of the Pro Vice-Chancellor', 'text'],
             ['link_1_text',  'Academic leadership, quality assurance and digital transformation.', 'textarea'],
             ['link_1_url',   'office_of_the_pro-vice_chancellor.php', 'text'],
 
@@ -128,7 +128,7 @@ try {
             ['link_2_url',   'office_of_the_registrar.php', 'text'],
 
             ['link_3_icon',  'history_edu',  'text'],
-            ['link_3_title', 'Past Vice Chancellors', 'text'],
+            ['link_3_title', 'Past Vice-Chancellors', 'text'],
             ['link_3_text',  'The leaders who have shaped Valley View University since 1979.', 'textarea'],
             ['link_3_url',   'past-vc.php', 'text'],
 
@@ -142,7 +142,7 @@ try {
         'office_contact' => ['type' => 'section', 'order' => 7, 'fields' => [
             ['section_label',     'Get in Touch', 'text'],
             ['section_title',     'Contact the Office', 'text'],
-            ['section_description', 'For official inquiries, invitations, scheduling or administrative matters, the team in the Vice Chancellor\'s office is glad to assist.', 'textarea'],
+            ['section_description', 'For official inquiries, invitations, scheduling or administrative matters, the team in the Vice-Chancellor\'s office is glad to assist.', 'textarea'],
             ['email',             'vc@vvu.edu.gh', 'text'],
             ['phone',             '+233 (0) 302 501 101', 'text'],
             ['office_location',   'Administration Block, Main Campus, Oyibi', 'text'],
@@ -150,7 +150,7 @@ try {
             ['office_hours',      'Monday - Thursday, 8:00am - 5:00pm | Friday, 8:00am - 12:00pm', 'text'],
             ['map_url',           'https://maps.google.com/?q=Valley+View+University+Oyibi', 'text'],
             ['form_title',        'Request an Appointment', 'text'],
-            ['form_description',  'To request a meeting with the Vice Chancellor, share your details and the purpose of your visit. The office will respond within three working days.', 'textarea'],
+            ['form_description',  'To request a meeting with the Vice-Chancellor, share your details and the purpose of your visit. The office will respond within three working days.', 'textarea'],
             ['form_btn_text',     'Submit Request', 'text'],
         ]],
     ];
@@ -218,7 +218,7 @@ try {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Install - Vice Chancellor's Office Content</title>
+<title>Install - Vice-Chancellor's Office Content</title>
 <style>
     body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f5f9;margin:0;padding:40px 20px;color:#1e293b}
     .box{max-width:760px;margin:0 auto;background:#fff;border-radius:20px;padding:40px;box-shadow:0 10px 40px rgba(0,0,0,.06)}
@@ -234,7 +234,7 @@ try {
 </head>
 <body>
 <div class="box">
-    <h1>Vice Chancellor&rsquo;s Office &mdash; Content Refresh</h1>
+    <h1>Vice-Chancellor&rsquo;s Office &mdash; Content Refresh</h1>
     <p class="sub">Replaces the outdated Strategic Vision &amp; Contact sections with the new message-led content.</p>
     <?php foreach ($log as $row): ?>
         <div class="row <?php echo $row[0]; ?>"><?php echo $row[1]; ?></div>

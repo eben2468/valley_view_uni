@@ -36,7 +36,7 @@ if (!function_exists('pvcIcon')) {
     }
 }
 
-$page_title = $page ? $page['page_title'] . " - Valley View University" : "Office of the Pro-Vice Chancellor - Valley View University";
+$page_title = $page ? $page['page_title'] . " - Valley View University" : "Office of the Pro Vice-Chancellor - Valley View University";
 $active_page = "about";
 include 'includes/header.php';
 ?>
@@ -122,7 +122,7 @@ include 'includes/header.php';
 
                 <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white mb-10 animate-fadeInUp drop-shadow-2xl" style="animation-delay: 0.1s;">
                     <?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_main', 'Office of the')); ?> <br>
-                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-4"><?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_highlight', 'Pro-Vice Chancellor')); ?></span>
+                    <span class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 block mt-4"><?php echo strip_tags(getContent($pageContent, 'hero_section', 'title_highlight', 'Pro Vice-Chancellor')); ?></span>
                 </h1>
 
                 <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
@@ -143,12 +143,12 @@ include 'includes/header.php';
                             <div class="absolute -inset-3 bg-gradient-to-r from-blue-600 to-yellow-400 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                             <div class="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
                                 <img src="<?php echo strip_tags(getContent($pageContent, 'pvc_profile', 'profile_image', 'images/leadership/prof-peter-agyekum-boateng.jpg')); ?>"
-                                     alt="<?php echo pvcOut($pageContent, 'pvc_profile', 'name', 'Pro-Vice Chancellor'); ?>"
+                                     alt="<?php echo pvcOut($pageContent, 'pvc_profile', 'name', 'Pro Vice-Chancellor'); ?>"
                                      class="w-full h-full object-cover object-top">
                             </div>
                             <div class="mt-6 text-center lg:text-left">
-                                <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-1 tracking-tight"><?php echo pvcOut($pageContent, 'pvc_profile', 'name', 'Pro-Vice Chancellor'); ?></h2>
-                                <p class="text-base font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest"><?php echo pvcOut($pageContent, 'pvc_profile', 'title', 'Pro-Vice Chancellor'); ?></p>
+                                <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-1 tracking-tight"><?php echo pvcOut($pageContent, 'pvc_profile', 'name', 'Pro Vice-Chancellor'); ?></h2>
+                                <p class="text-base font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest"><?php echo pvcOut($pageContent, 'pvc_profile', 'title', 'Pro Vice-Chancellor'); ?></p>
                             </div>
                         </div>
                     </div>
@@ -157,7 +157,7 @@ include 'includes/header.php';
                     <div class="w-full lg:w-3/4 space-y-10 animate-fadeInUp" style="animation-delay: 0.2s;">
                         <div>
                             <span class="inline-block px-5 py-2 mb-6 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-base font-black uppercase tracking-widest">
-                                <?php echo pvcOut($pageContent, 'pvc_profile', 'section_label', 'Meet the Pro-Vice Chancellor'); ?>
+                                <?php echo pvcOut($pageContent, 'pvc_profile', 'section_label', 'Meet the Pro Vice-Chancellor'); ?>
                             </span>
                             <h3 class="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white mb-5 tracking-tight"><?php echo pvcOut($pageContent, 'pvc_profile', 'section_title', 'Profile & Biography'); ?></h3>
                             <div class="h-2 w-32 bg-yellow-400 rounded-full mb-8"></div>
@@ -429,7 +429,7 @@ include 'includes/header.php';
                                 <?php echo pvcOut($pageContent, 'office_contact', 'form_description', ''); ?>
                             </p>
                             <form action="contact_process.php" method="post" class="space-y-4">
-                                <input type="hidden" name="inquiry-type" value="Academic Enquiry - Office of the Pro-Vice Chancellor">
+                                <input type="hidden" name="inquiry-type" value="Academic Enquiry - Office of the Pro Vice-Chancellor">
                                 <div>
                                     <label for="pvc_name" class="sr-only">Full name</label>
                                     <input id="pvc_name" name="name" type="text" required placeholder="Your Full Name"

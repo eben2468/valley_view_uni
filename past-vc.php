@@ -4,7 +4,7 @@ require_once 'includes/administration_content_helper.php';
 
 // ---------------------------------------------------------------
 // Load CMS content for this page (managed from
-// /admin/manage_administration_pages.php -> "Past Vice Chancellors")
+// /admin/manage_administration_pages.php -> "Past Vice-Chancellors")
 // ---------------------------------------------------------------
 $content = new AdministrationContent($pdo);
 $page = $content->getPageBySlug('past-vc');
@@ -57,7 +57,7 @@ foreach ($pageContent as $key => $section) {
 }
 usort($leaders, function ($a, $b) { return $a['order'] <=> $b['order']; });
 
-$page_title  = ($page ? $page['page_title'] : 'Past Vice Chancellors') . ' - Valley View University';
+$page_title  = ($page ? $page['page_title'] : 'Past Vice-Chancellors') . ' - Valley View University';
 $active_page = 'about';
 include 'includes/header.php';
 ?>
@@ -293,7 +293,7 @@ include 'includes/header.php';
                     <a href="<?php echo htmlspecialchars(pvcText($pageContent, 'cta_section', 'button_1_url', 'office_of_the_vice_chancellor.php')); ?>"
                        class="px-8 py-4 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-base font-black rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
                         <span class="material-symbols-outlined">account_balance</span>
-                        <?php echo htmlspecialchars(pvcText($pageContent, 'cta_section', 'button_1_text', 'Office of the Vice Chancellor')); ?>
+                        <?php echo htmlspecialchars(pvcText($pageContent, 'cta_section', 'button_1_text', 'Office of the Vice-Chancellor')); ?>
                     </a>
                     <a href="<?php echo htmlspecialchars(pvcText($pageContent, 'cta_section', 'button_2_url', 'history.php')); ?>"
                        class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white text-base font-black rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">

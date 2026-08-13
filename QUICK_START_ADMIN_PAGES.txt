@@ -6,8 +6,8 @@
 ✅ WHAT THIS SYSTEM DOES:
 
     - Full admin control over 5 administration pages:
-      1. Office of the Vice Chancellor
-      2. Office of the Pro-Vice Chancellor
+      1. Office of the Vice-Chancellor
+      2. Office of the Pro Vice-Chancellor
       3. Office of the Registrar
       4. Campus Rectors
       5. University Recorders
@@ -148,10 +148,10 @@ TO UPDATE:
   EXAMPLE WORKFLOW
 ═══════════════════════════════════════════════════════════════════════════════
 
-Scenario: Update Vice Chancellor's email address
+Scenario: Update Vice-Chancellor's email address
 
 1. Go to: admin/manage_administration_pages.php
-2. Click "Edit Content" on Vice Chancellor row
+2. Click "Edit Content" on Vice-Chancellor row
 3. Scroll to "Contact Section"
 4. Find "Email" field
 5. Change from: vc@vvu.edu.gh

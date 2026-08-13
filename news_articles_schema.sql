@@ -80,7 +80,7 @@ INSERT INTO news_articles (title, slug, excerpt, content, featured_image, catego
 <p>The lecture series will be held at the University Auditorium from <strong>February 5-9, 2026</strong>. Each day features a keynote address followed by panel discussions and Q&A sessions.</p>
 
 <blockquote>
-    <p>"This is an unprecedented opportunity for our students and faculty to engage with leaders who are shaping the future of healthcare globally." - Vice Chancellor, Prof. Daniel Owusu</p>
+    <p>"This is an unprecedented opportunity for our students and faculty to engage with leaders who are shaping the future of healthcare globally." - Vice-Chancellor, Prof. Daniel Owusu</p>
 </blockquote>
 
 <p>Registration is open to all students, faculty, staff, and members of the public. Seats are limited, so early registration is encouraged.</p>',
@@ -109,12 +109,12 @@ INSERT INTO news_articles (title, slug, excerpt, content, featured_image, catego
     <li>Excellent student support services</li>
 </ol>
 
-<p>Vice Chancellor Prof. Daniel Owusu expressed gratitude to the entire VVU community, stating: <em>"This award belongs to every member of our university family - our dedicated faculty, hardworking staff, and ambitious students who make VVU a center of excellence."</em></p>
+<p>Vice-Chancellor Prof. Daniel Owusu expressed gratitude to the entire VVU community, stating: <em>"This award belongs to every member of our university family - our dedicated faculty, hardworking staff, and ambitious students who make VVU a center of excellence."</em></p>
 
 <p>The award comes as VVU celebrates its 45th anniversary as Ghana''s first chartered private university, reaffirming its position as a leader in higher education on the continent.</p>',
     'uploads/news/accreditation-award.jpg',
     'announcements',
-    'Office of the Vice Chancellor',
+    'Office of the Vice-Chancellor',
     'published',
     0,
     '2026-01-25 09:00:00',

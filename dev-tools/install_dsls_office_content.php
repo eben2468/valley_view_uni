@@ -4,7 +4,7 @@
  * ------------------------------------------------------------
  * Replaces the generic placeholder body content with the profile of
  * Dr. Martha Duah, plus the richer supporting sections used on the
- * Vice Chancellor and Pro-Vice Chancellor pages.
+ * Vice-Chancellor and Pro Vice-Chancellor pages.
  *
  * Source: vvu.edu.gh/.../key-officers/profile-of-dr-martha-duah
  *

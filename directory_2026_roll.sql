@@ -251,8 +251,8 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO directory
     (type, name, title, job_title, department, faculty_group, staff_category, sort_order, is_active, employment_status)
 VALUES
-    ('staff', 'Prof. Daniel Ganu', 'Prof.', 'Professor/Vice Chancellor', 'Vice Chancellery', 'Non-Teaching Senior Members', 'senior_member', 10, 1, 'Full-time'),
-    ('staff', 'Prof. Peter Agyekum Boateng', 'Prof.', 'Pro-Vice Chancellor', 'Vice Chancellery', 'Non-Teaching Senior Members', 'senior_member', 20, 1, 'Full-time')
+    ('staff', 'Prof. Daniel Ganu', 'Prof.', 'Professor/Vice-Chancellor', 'Vice Chancellery', 'Non-Teaching Senior Members', 'senior_member', 10, 1, 'Full-time'),
+    ('staff', 'Prof. Peter Agyekum Boateng', 'Prof.', 'Pro Vice-Chancellor', 'Vice Chancellery', 'Non-Teaching Senior Members', 'senior_member', 20, 1, 'Full-time')
 ON DUPLICATE KEY UPDATE
     title = VALUES(title), job_title = VALUES(job_title), department = VALUES(department),
     faculty_group = VALUES(faculty_group), staff_category = VALUES(staff_category),

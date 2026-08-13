@@ -4,7 +4,7 @@
  * ----------------------------------------------------------------
  * Replaces the generic placeholder body content with the profile of
  * Dr. Francis Osei-Kuffour, plus the richer supporting sections used on the
- * Vice Chancellor and Pro-Vice Chancellor pages.
+ * Vice-Chancellor and Pro Vice-Chancellor pages.
  *
  * The hero section and the CTA section are left untouched.
  * Legacy sections are dropped once; new sections are only created when
@@ -186,7 +186,7 @@ try {
             ['section_title', 'Related Offices & Resources', 'text'],
 
             ['link_1_icon',  'account_balance', 'text'],
-            ['link_1_title', 'Office of the Vice Chancellor', 'text'],
+            ['link_1_title', 'Office of the Vice-Chancellor', 'text'],
             ['link_1_text',  'Executive leadership and the strategic direction of the University.', 'textarea'],
             ['link_1_url',   'office_of_the_vice_chancellor.php', 'text'],
 

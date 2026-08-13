@@ -61,8 +61,8 @@ try {
                     'title' => 'Administration',
                     'column' => 4,
                     'links' => [
-                        ['Office of the Vice Chancellor', 'office_of_the_vice_chancellor.php'],
-                        ['Office of the Pro-Vice Chancellor', 'office_of_the_pro-vice_chancellor.php'],
+                        ['Office of the Vice-Chancellor', 'office_of_the_vice_chancellor.php'],
+                        ['Office of the Pro Vice-Chancellor', 'office_of_the_pro-vice_chancellor.php'],
                         ['Office of the Registrar', 'office_of_the_registrar.php'],
                         ['Rectors', 'rectors.php'],
                         ['Recorders', 'recorders.php']

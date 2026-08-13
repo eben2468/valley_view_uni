@@ -51,7 +51,7 @@
                     $pdo->exec($schema);
                     echo '<div class="step success">
                         <h3>✅ Step 1 Complete!</h3>
-                        <p>Database schema and Vice Chancellor data installed successfully.</p>
+                        <p>Database schema and Vice-Chancellor data installed successfully.</p>
                         </div>';
                     $step = 2;
                 } catch (Exception $e) {
@@ -95,7 +95,7 @@
                 
                 <div class="step">
                     <h3>Step 1: Install Database Schema</h3>
-                    <p>This will create the necessary database tables and install the Vice Chancellor page data.</p>
+                    <p>This will create the necessary database tables and install the Vice-Chancellor page data.</p>
                     <p><strong>Tables to be created:</strong></p>
                     <ul style="margin: 15px 0 15px 20px; line-height: 1.8;">
                         <li><code>administration_pages</code> - Page metadata</li>
@@ -111,7 +111,7 @@
                     <h3>Step 2: Install Remaining Pages Data</h3>
                     <p>This will install content for the following pages:</p>
                     <ul style="margin: 15px 0 15px 20px; line-height: 1.8;">
-                        <li>Office of the Pro-Vice Chancellor</li>
+                        <li>Office of the Pro Vice-Chancellor</li>
                         <li>Office of the Registrar</li>
                         <li>Campus Rectors</li>
                         <li>University Recorders</li>
@@ -144,7 +144,7 @@
                                 🎛️ Open Admin Dashboard
                             </a>
                             <a href="office_of_the_vice_chancellor.php" class="btn" style="display: inline-block; margin-bottom: 10px;">
-                                👁️ View Vice Chancellor Page
+                                👁️ View Vice-Chancellor Page
                             </a>
                         </div>
                     </div>

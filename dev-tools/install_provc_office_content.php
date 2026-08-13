@@ -1,10 +1,10 @@
 <?php
 /**
- * Installer: Office of the Pro-Vice Chancellor - content refresh
+ * Installer: Office of the Pro Vice-Chancellor - content refresh
  * --------------------------------------------------------------
  * Replaces the outdated body content (which still described a previous
  * office holder) with the profile of Prof. Peter Agyekum Boateng, plus the
- * richer supporting sections used on the Vice Chancellor's page.
+ * richer supporting sections used on the Vice-Chancellor's page.
  *
  * The hero section is left completely untouched.
  * Legacy sections are dropped once; new sections are only created when
@@ -46,8 +46,8 @@ try {
         'pvc_profile' => ['type' => 'profile', 'order' => 2, 'fields' => [
             ['profile_image',  $PHOTO, 'image'],
             ['name',           'Prof. Peter Agyekum Boateng, PhD', 'text'],
-            ['title',          'Pro-Vice Chancellor', 'text'],
-            ['section_label',  'Meet the Pro-Vice Chancellor', 'text'],
+            ['title',          'Pro Vice-Chancellor', 'text'],
+            ['section_label',  'Meet the Pro Vice-Chancellor', 'text'],
             ['section_title',  'Profile & Biography', 'text'],
             ['bio_paragraph_1', 'Prof. Peter Agyekum Boateng is an Associate Professor of Business Administration (Strategic Management) at Valley View University, Ghana. He is an experienced academic leader, researcher, and administrator with over two decades of service in higher education. His work spans teaching, research, governance, and institutional leadership, with a strong focus on connecting theory with practice in both faith-based and secular settings.', 'textarea'],
             ['bio_paragraph_2', 'Since 2006, Prof. Boateng has held several senior leadership positions at Valley View University. These include Acting Vice-Chancellor, Pro Vice-Chancellor, Rector of both the Kumasi and Techiman campuses, and Dean of the School of Graduate Studies. These roles have provided extensive experience in university governance, strategic planning, and organizational development. He has also contributed to national education reform initiatives in Ghana through consultancy, coaching, and facilitation under programmes supported by the Ghana Education Service.', 'textarea'],
@@ -69,7 +69,7 @@ try {
             ['role_1_text',  'Provided executive leadership for the University, representing it before its Council, regulators and partners.', 'textarea'],
 
             ['role_2_icon',  'co_present',        'text'],
-            ['role_2_title', 'Pro-Vice Chancellor', 'text'],
+            ['role_2_title', 'Pro Vice-Chancellor', 'text'],
             ['role_2_text',  'Leads the academic division of the University, overseeing quality, planning and academic policy.', 'textarea'],
 
             ['role_3_icon',  'apartment',         'text'],
@@ -116,7 +116,7 @@ try {
         'office_mandate' => ['type' => 'section', 'order' => 5, 'fields' => [
             ['section_label',       'The Office', 'text'],
             ['section_title',       'Mandate of the Office', 'text'],
-            ['section_description', 'The Pro-Vice Chancellor is the principal academic officer of the University, deputising for the Vice Chancellor and leading the academic enterprise.', 'textarea'],
+            ['section_description', 'The Pro Vice-Chancellor is the principal academic officer of the University, deputising for the Vice-Chancellor and leading the academic enterprise.', 'textarea'],
 
             ['item_1_icon',  'menu_book',   'text'],
             ['item_1_title', 'Academic Leadership', 'text'],
@@ -149,7 +149,7 @@ try {
             ['section_title', 'Related Offices & Resources', 'text'],
 
             ['link_1_icon',  'account_balance', 'text'],
-            ['link_1_title', 'Office of the Vice Chancellor', 'text'],
+            ['link_1_title', 'Office of the Vice-Chancellor', 'text'],
             ['link_1_text',  'Executive leadership and the strategic direction of the University.', 'textarea'],
             ['link_1_url',   'office_of_the_vice_chancellor.php', 'text'],
 
@@ -173,7 +173,7 @@ try {
         'office_contact' => ['type' => 'section', 'order' => 7, 'fields' => [
             ['section_label',       'Get in Touch', 'text'],
             ['section_title',       'Contact the Office', 'text'],
-            ['section_description', 'For academic inquiries, programme matters or administrative correspondence, the Pro-Vice Chancellor\'s office is glad to assist.', 'textarea'],
+            ['section_description', 'For academic inquiries, programme matters or administrative correspondence, the Pro Vice-Chancellor\'s office is glad to assist.', 'textarea'],
             ['email',               'pro.vc@vvu.edu.gh', 'text'],
             ['phone',               '+233 (0) 302 501 101', 'text'],
             ['office_location',     'Registry Building, Main Campus, Oyibi', 'text'],
@@ -250,7 +250,7 @@ try {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Install - Pro-Vice Chancellor's Office Content</title>
+<title>Install - Pro Vice-Chancellor's Office Content</title>
 <style>
     body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f5f9;margin:0;padding:40px 20px;color:#1e293b}
     .box{max-width:760px;margin:0 auto;background:#fff;border-radius:20px;padding:40px;box-shadow:0 10px 40px rgba(0,0,0,.06)}
@@ -266,7 +266,7 @@ try {
 </head>
 <body>
 <div class="box">
-    <h1>Pro-Vice Chancellor&rsquo;s Office &mdash; Content Refresh</h1>
+    <h1>Pro Vice-Chancellor&rsquo;s Office &mdash; Content Refresh</h1>
     <p class="sub">Installs the profile of Prof. Peter Agyekum Boateng and the supporting sections.</p>
     <?php foreach ($log as $row): ?>
         <div class="row <?php echo $row[0]; ?>"><?php echo $row[1]; ?></div>

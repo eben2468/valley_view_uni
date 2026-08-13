@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS strategic_plan_hero (
 
 CREATE TABLE IF NOT EXISTS strategic_plan_president_message (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    section_title VARCHAR(255) NOT NULL DEFAULT 'A Message From The Vice Chancellor',
+    section_title VARCHAR(255) NOT NULL DEFAULT 'A Message From The Vice-Chancellor',
     president_image_url TEXT NOT NULL,
     message_quote TEXT NOT NULL,
     message_author VARCHAR(255) DEFAULT '— Join us as we build the future of Valley View.',

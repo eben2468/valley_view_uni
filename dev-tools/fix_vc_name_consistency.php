@@ -1,14 +1,14 @@
 <?php
 /**
- * Fix: naming consistency on the Office of the Vice Chancellor page
+ * Fix: naming consistency on the Office of the Vice-Chancellor page
  * ------------------------------------------------------------------
- * The profile section referred to the Vice Chancellor as "Daniel Ganu, PhD"
+ * The profile section referred to the Vice-Chancellor as "Daniel Ganu, PhD"
  * while the message below it was signed "Professor Daniel Ganu" - the same
  * person named two different ways on one page. Both now read
  * "Professor Daniel Ganu, PhD".
  *
  * Also clears two leftover statements in the profile side-boxes that still
- * described the previous Vice Chancellor.
+ * described the previous Vice-Chancellor.
  *
  * Idempotent: re-running only rewrites values that still hold the old text.
  */
@@ -21,7 +21,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $page_id = $pdo->query("SELECT id FROM administration_pages WHERE page_slug = 'office_of_the_vice_chancellor'")->fetchColumn();
-    if (!$page_id) throw new Exception('Vice Chancellor page not found.');
+    if (!$page_id) throw new Exception('Vice-Chancellor page not found.');
 
     $VC_NAME = 'Professor Daniel Ganu, PhD';
 
@@ -29,8 +29,8 @@ try {
     $updates = [
         'vc_profile' => [
             'name'            => $VC_NAME,
-            'title'           => 'Vice Chancellor',
-            // side-boxes still carried the previous Vice Chancellor's details
+            'title'           => 'Vice-Chancellor',
+            // side-boxes still carried the previous Vice-Chancellor's details
             'experience_title'=> 'Experience',
             'experience_text' => 'Over two decades of university teaching, mentoring and academic administration at Valley View University (2002-2012) and the Adventist University of Africa, Kenya.',
             'impact_title'    => 'Research & Scholarship',
@@ -38,7 +38,7 @@ try {
         ],
         'vc_message' => [
             'signature_name'  => $VC_NAME,
-            'signature_title' => 'Vice Chancellor',
+            'signature_title' => 'Vice-Chancellor',
         ],
     ];
 
@@ -84,7 +84,7 @@ function AdministrationContentPlainValue($v) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fix - Vice Chancellor Name Consistency</title>
+<title>Fix - Vice-Chancellor Name Consistency</title>
 <style>
     body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f5f9;margin:0;padding:40px 20px;color:#1e293b}
     .box{max-width:760px;margin:0 auto;background:#fff;border-radius:20px;padding:40px;box-shadow:0 10px 40px rgba(0,0,0,.06)}
@@ -100,8 +100,8 @@ function AdministrationContentPlainValue($v) {
 </head>
 <body>
 <div class="box">
-    <h1>Vice Chancellor &mdash; Name Consistency</h1>
-    <p class="sub">Harmonises how the Vice Chancellor is named across the page.</p>
+    <h1>Vice-Chancellor &mdash; Name Consistency</h1>
+    <p class="sub">Harmonises how the Vice-Chancellor is named across the page.</p>
     <?php foreach ($log as $row): ?>
         <div class="row <?php echo $row[0]; ?>"><?php echo $row[1]; ?></div>
     <?php endforeach; ?>

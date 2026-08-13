@@ -4,7 +4,7 @@
  * ----------------------------------------------------------------------
  * Replaces the generic placeholder body content with the profile of
  * Prof. Josephine Ganu, plus the richer supporting sections used on the
- * Vice Chancellor and Pro-Vice Chancellor pages.
+ * Vice-Chancellor and Pro Vice-Chancellor pages.
  *
  * NOTE on sources: the officer profile is taken verbatim from
  * vvu.edu.gh/.../profile-of-josephine-ganu-phd. The RDIR office page on
@@ -177,12 +177,12 @@ try {
             ['section_title', 'Related Offices & Resources', 'text'],
 
             ['link_1_icon',  'account_balance', 'text'],
-            ['link_1_title', 'Office of the Vice Chancellor', 'text'],
+            ['link_1_title', 'Office of the Vice-Chancellor', 'text'],
             ['link_1_text',  'Executive leadership and the strategic direction of the University.', 'textarea'],
             ['link_1_url',   'office_of_the_vice_chancellor.php', 'text'],
 
             ['link_2_icon',  'co_present',      'text'],
-            ['link_2_title', 'Office of the Pro-Vice Chancellor', 'text'],
+            ['link_2_title', 'Office of the Pro Vice-Chancellor', 'text'],
             ['link_2_text',  'Academic leadership, quality assurance and academic planning.', 'textarea'],
             ['link_2_url',   'office_of_the_pro-vice_chancellor.php', 'text'],
 

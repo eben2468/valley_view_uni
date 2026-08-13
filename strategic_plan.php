@@ -52,7 +52,7 @@ include 'includes/header.php';
         background: rgba(31, 41, 55, 0.7);
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    /* Vice Chancellor's message flows as one continuous column at every width */
+    /* Vice-Chancellor's message flows as one continuous column at every width */
     .sp-message p + p { margin-top: 1.5rem; }
 
     /* Wide content rail - fills the empty gutters on large screens.

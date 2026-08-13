@@ -18,8 +18,8 @@ TRUNCATE TABLE university_directory;
 
 -- Insert Principal Officers
 INSERT INTO university_directory (name, title, category, display_order) VALUES
-('Pr. Prof. Daniel Ganu', 'Vice Chancellor', 'Principal Officers', 1),
-('Pr. Prof. Peter Agyekum Boateng', 'Pro-Vice Chancellor', 'Principal Officers', 2),
+('Pr. Prof. Daniel Ganu', 'Vice-Chancellor', 'Principal Officers', 1),
+('Pr. Prof. Peter Agyekum Boateng', 'Pro Vice-Chancellor', 'Principal Officers', 2),
 ('Pr. Dr. Samuel K. Amankwah', 'Registrar', 'Principal Officers', 3),
 ('Dr. Francis K. Osei-Kuffour', 'Finance Officer', 'Principal Officers', 4),
 ('Pr. Dr. Charles N.E. Amoah', 'University Librarian', 'Principal Officers', 5);

@@ -95,7 +95,7 @@ include 'includes/header.php';
                 <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(getContent($pageContent, 'introduction', 'section_title', 'Our Campus Leadership Structure')); ?></h2>
                 <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
                 <p class="text-4xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                    <?php echo strip_tags(getContent($pageContent, 'introduction', 'section_description', 'Valley View University operates across three campuses. The main campus is led by the Vice Chancellor and Pro-Vice Chancellor, while the Kumasi and Techiman campuses each have a Rector who serves as the chief academic and administrative officer, ensuring excellence in teaching, research, and community engagement.')); ?>
+                    <?php echo strip_tags(getContent($pageContent, 'introduction', 'section_description', 'Valley View University operates across three campuses. The main campus is led by the Vice-Chancellor and Pro Vice-Chancellor, while the Kumasi and Techiman campuses each have a Rector who serves as the chief academic and administrative officer, ensuring excellence in teaching, research, and community engagement.')); ?>
                 </p>
             </div>
         </div>
@@ -110,18 +110,18 @@ include 'includes/header.php';
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <!-- Vice Chancellor Card -->
+                <!-- Vice-Chancellor Card -->
                 <div class="rector-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-purple-200 dark:border-purple-800">
                     <div class="flex flex-col items-center text-center">
                         <div class="w-24 h-24 rounded-full bg-purple-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
                             <span class="material-symbols-outlined text-6xl text-white">account_balance</span>
                         </div>
-                        <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'main_campus', 'vc_title', 'Vice Chancellor')); ?></h3>
+                        <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'main_campus', 'vc_title', 'Vice-Chancellor')); ?></h3>
                         <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold mb-6"><?php echo strip_tags(getContent($pageContent, 'main_campus', 'vc_subtitle', 'Chief Executive Officer of the University')); ?></p>
                         <div class="space-y-4 text-left w-full">
                             <div class="p-6 bg-purple-50 dark:bg-purple-900/20 rounded-2xl">
                                 <p class="text-3xl text-gray-700 dark:text-gray-300 font-medium leading-relaxed">
-                                    <?php echo strip_tags(getContent($pageContent, 'main_campus', 'vc_description', 'The Vice Chancellor provides overall leadership and strategic direction for the entire university system.')); ?>
+                                    <?php echo strip_tags(getContent($pageContent, 'main_campus', 'vc_description', 'The Vice-Chancellor provides overall leadership and strategic direction for the entire university system.')); ?>
                                 </p>
                             </div>
                             <a href="<?php echo strip_tags(getContent($pageContent, 'main_campus', 'vc_url', 'office_of_the_vice_chancellor.php')); ?>" class="flex items-center justify-center gap-3 px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white text-2xl font-bold rounded-2xl transition-all transform hover:scale-105">
@@ -132,18 +132,18 @@ include 'includes/header.php';
                     </div>
                 </div>
 
-                <!-- Pro-Vice Chancellor Card -->
+                <!-- Pro Vice-Chancellor Card -->
                 <div class="rector-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-indigo-200 dark:border-indigo-800">
                     <div class="flex flex-col items-center text-center">
                         <div class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
                             <span class="material-symbols-outlined text-6xl text-white">co_present</span>
                         </div>
-                        <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'main_campus', 'provc_title', 'Pro-Vice Chancellor')); ?></h3>
+                        <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'main_campus', 'provc_title', 'Pro Vice-Chancellor')); ?></h3>
                         <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold mb-6"><?php echo strip_tags(getContent($pageContent, 'main_campus', 'provc_subtitle', 'Academic Leadership & Innovation')); ?></p>
                         <div class="space-y-4 text-left w-full">
                             <div class="p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl">
                                 <p class="text-3xl text-gray-700 dark:text-gray-300 font-medium leading-relaxed">
-                                    <?php echo strip_tags(getContent($pageContent, 'main_campus', 'provc_description', 'The Pro-Vice Chancellor oversees academic excellence, digital transformation, and strategic development.')); ?>
+                                    <?php echo strip_tags(getContent($pageContent, 'main_campus', 'provc_description', 'The Pro Vice-Chancellor oversees academic excellence, digital transformation, and strategic development.')); ?>
                                 </p>
                             </div>
                             <a href="<?php echo strip_tags(getContent($pageContent, 'main_campus', 'provc_url', 'office_of_the_pro-vice_chancellor.php')); ?>" class="flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-2xl font-bold rounded-2xl transition-all transform hover:scale-105">

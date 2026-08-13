@@ -82,7 +82,7 @@ if (!function_exists('vvu_dir_rank')) {
             return ['Academic Staff', 'lecturer', 6];
         }
 
-        if (strpos($j, 'VICE CHANCELLOR') !== false || strpos($j, 'CHANCELLOR') !== false) return ['Chancellery', 'chancellery', 1];
+        if (strpos($j, 'VICE-CHANCELLOR') !== false || strpos($j, 'CHANCELLOR') !== false) return ['Chancellery', 'chancellery', 1];
         if (strpos($j, 'REGISTRAR') !== false)  return ['Registry', 'registry', 3];
         if (strpos($j, 'DIRECTOR') !== false)   return ['Directorate', 'directorate', 2];
         if (strpos($j, 'DEAN') !== false)       return ['Deanery', 'chancellery', 2];
@@ -101,7 +101,7 @@ if (!function_exists('vvu_dir_leadership')) {
      */
     function vvu_dir_leadership(string $jobTitle): string
     {
-        $keywords = ['VICE CHANCELLOR', 'CHANCELLOR', 'RECTOR', 'DEAN', 'HOD', 'HEAD',
+        $keywords = ['VICE-CHANCELLOR', 'CHANCELLOR', 'RECTOR', 'DEAN', 'HOD', 'HEAD',
                      'DIRECTOR', 'REGISTRAR', 'COORDINATOR', 'CHIEF', 'MANAGER', 'PROVOST'];
 
         foreach (preg_split('#\s*/\s*#', $jobTitle) as $segment) {
