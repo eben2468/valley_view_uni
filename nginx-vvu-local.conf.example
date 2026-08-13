@@ -1,0 +1,71 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Local-only nginx rules for alpha.vvu.edu.gh
+#
+# ⚠️  THIS TEMPLATE IS TRACKED IN GIT. THE FILE YOU CREATE FROM IT IS NOT.
+#
+# Copy it to the server and fill in the real value there:
+#
+#     cp nginx-vvu-local.conf.example /etc/nginx/snippets/vvu-local.conf
+#     nano /etc/nginx/snippets/vvu-local.conf
+#
+# Never commit the filled-in version, and never paste its contents into chat,
+# a ticket, or an email. It contains the private path to your database console.
+#
+# nginx-vvu-alpha.conf includes /etc/nginx/snippets/vvu-local*.conf with a
+# wildcard, which means nginx starts normally whether or not this file exists.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+# ── Protected phpMyAdmin ───────────────────────────────────────────────────
+#
+# Replace CHANGE_ME_TO_YOUR_FOLDER_NAME below with the directory name you
+# renamed phpmyadmin to. Keep the leading and trailing slashes.
+#
+# The "^~" is load-bearing, not decoration. Without it this is an ordinary
+# prefix match, and nginx gives regular-expression locations higher priority —
+# so the server-level `location ~ \.php$` would win for
+# /yourfolder/index.php and serve phpMyAdmin's PHP files with NO password,
+# even though this block appears to protect the directory. "^~" makes the
+# prefix match beat the regex, so everything under the folder — including the
+# PHP files — passes through the auth check below.
+#
+# This is the same class of mistake as the old config, where auth_basic sat in
+# the port-80 block that the HTTPS redirect made unreachable.
+
+location ^~ /CHANGE_ME_TO_YOUR_FOLDER_NAME/ {
+
+    # ── Password gate ──────────────────────────────────────────────────────
+    auth_basic "Restricted";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+
+    # ── Optional but strongly recommended: IP allow-list ───────────────────
+    # A password alone can be brute-forced or phished. Restricting by source
+    # address means an attacker must be on your network before the password
+    # even matters.
+    #
+    # Uncomment and set real values. Find your current public address with:
+    #     curl -s ifconfig.me
+    #
+    # WARNING: if your internet connection uses a dynamic IP (most home and
+    # mobile connections do), your address will change and you will lock
+    # yourself out. Leave these commented if you are not sure.
+    #
+    # allow 41.0.0.0/8;        # example: VVU campus range
+    # allow 197.0.0.0/8;       # example: your ISP range
+    # deny  all;
+
+    # phpMyAdmin's own PHP files. This nested block inherits auth_basic and
+    # the allow/deny rules above, so it is still gated.
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    }
+
+    # phpMyAdmin ships a setup wizard and doc/test directories that have
+    # carried remote-code-execution advisories in the past. Nothing legitimate
+    # needs them at runtime.
+    location ~ ^/[^/]+/(setup|examples|test|doc|sql|libraries|templates)/ {
+        deny all;
+        return 404;
+    }
+}

@@ -43,3 +43,7 @@ Desktop.ini
 *~
 *.bak
 *.orig
+
+# Server-local nginx rules (contains the private phpMyAdmin path)
+nginx-vvu-local.conf
+vvu-local.conf
