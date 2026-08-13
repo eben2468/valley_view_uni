@@ -17,6 +17,8 @@ data/
 # ── User-uploaded content ─────────────────────────────────────────────────
 uploads/*
 !uploads/.gitkeep
+# The no-execute rule for uploads MUST ship with the code, so keep it tracked.
+!uploads/.htaccess
 tmp/*
 !tmp/.gitkeep
 

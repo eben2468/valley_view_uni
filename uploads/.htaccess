@@ -1,0 +1,33 @@
+# uploads/ holds attacker-influenced content. Nothing in here may ever be
+# executed as code — this is the last line of defence if a malicious file
+# gets past the type checks in includes/upload_helper.php.
+#
+# nginx does not read this file; the equivalent block is in
+# nginx-vvu.conf.example under "location ^~ /uploads/".
+
+# Turn the PHP interpreter off entirely for this directory.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+
+# Deny any request for a script, whatever handler might pick it up.
+<FilesMatch "\.(php|php[0-9]|phtml|phps|phar|pl|py|cgi|sh|asp|aspx|jsp|htaccess)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Strip any handler/type mapping that could route these to an interpreter.
+<IfModule mod_mime.c>
+    RemoveHandler .php .php3 .php4 .php5 .php7 .php8 .phtml .phar .pl .py .cgi
+    RemoveType .php .php3 .php4 .php5 .php7 .php8 .phtml .phar
+</IfModule>
+
+Options -Indexes -ExecCGI

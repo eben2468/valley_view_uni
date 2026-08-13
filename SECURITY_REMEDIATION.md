@@ -9,8 +9,11 @@ This document has two halves:
 - **Part B — must be done on the server / in accounts.** Nobody can do these
   from the codebase; they are yours to run.
 
-Nothing here is finished until **Part B step 0** (rotate the live admin password)
+Nothing here is finished until **Part B step 1** (rotate the live admin password)
 is done. Until then the live site is still fully compromisable.
+
+Work Part B in order. Steps 0 and 0b must come first — they stop the deploy from
+taking the site down.
 
 ---
 
@@ -107,18 +110,98 @@ all five security headers plus the CSP are present on responses.
 
 ## Part B — You must do these on the server
 
-### Step 0 — Rotate the live admin password (do this first, today)
+Your server details, for reference throughout:
+
+| Thing | Value |
+|-------|-------|
+| Host | `dspace-srv` (`alpha.vvu.edu.gh`) |
+| Site directory | `/home/valley_view_uni` |
+| Deploy method | `git pull origin master` |
+| Web server | nginx |
+
+### Step 0 — Pre-flight: create `includes/config.php` BEFORE you pull
+
+**Read this before running anything.** Skipping it takes the live site down.
+
+The new `includes/db_connect.php` reads its credentials from
+`includes/config.php`, which is deliberately **not** in git. Your server does not
+have that file yet. If you pull the new code first, every page will show
+*"Service temporarily unavailable."* until you create it.
+
+Your server also has its own edited copy of `includes/db_connect.php` — that is
+why `git pull` failed with *"Your local changes would be overwritten"*. That
+edited file contains your **live** database credentials, so read them out before
+you discard it.
+
+```bash
+cd /home/valley_view_uni
+
+# 1. Read the live credentials currently in use. Write down the four values.
+grep -E '^\$(servername|username|password|dbname)' includes/db_connect.php
+
+# 2. Keep a copy of the old file outside the site, just in case.
+cp includes/db_connect.php /root/db_connect.php.backup
+
+# 3. Back up the database before touching anything.
+mysqldump -u root -p valley_view_uni > /root/vvu-backup-$(date +%F).sql
+```
+
+Now create the config file with the values from step 1:
+
+```bash
+nano includes/config.php
+```
+
+Paste this, substituting your four real values:
+
+```php
+<?php
+return [
+    'host'    => 'localhost',
+    'name'    => 'valley_view_uni',
+    'user'    => 'PUT_THE_USERNAME_HERE',
+    'pass'    => 'PUT_THE_PASSWORD_HERE',
+    'charset' => 'utf8mb4',
+];
+```
+
+Save with `Ctrl+O`, `Enter`, then exit with `Ctrl+X`. Lock the file down:
+
+```bash
+chmod 640 includes/config.php
+chown root:www-data includes/config.php
+```
+
+### Step 0b — Now pull the new code
+
+```bash
+cd /home/valley_view_uni
+git checkout -- includes/db_connect.php   # discard the server's edited copy
+git pull origin master
+```
+
+Check the site immediately — open `https://alpha.vvu.edu.gh` in a browser. If you
+see *"Service temporarily unavailable"*, the credentials in `includes/config.php`
+are wrong; re-check them against `/root/db_connect.php.backup`.
+
+> **Note on `.git`:** because you deploy by pulling, the `.git` directory has to
+> stay on the server, so Finding 2 is closed by the nginx rule in Step 3 rather
+> than by deleting it. Step 3 is therefore not optional for you.
+
+### Step 1 — Rotate the live admin password (do this today)
 
 `admin` / `password` is a working login on the live site right now. Everything
 else is secondary.
 
 ```bash
-ssh youruser@alpha.vvu.edu.gh
-cd /var/www/vvu
+cd /home/valley_view_uni
 
 mysql -u root -p valley_view_uni < tools/security_migration.sql
 php tools/set_admin_password.php admin
 ```
+
+The migration prints three `Duplicate column name` errors if you run it twice —
+that is expected and harmless.
 
 Then review the account list the migration prints. **Every row must be a real,
 named person.** Delete anything you don't recognise:
@@ -137,7 +220,7 @@ find uploads/ -type f \( -name '*.php*' -o -name '*.phtml' -o -name '*.phar' \) 
 
 Also spot-check page content in the CMS for defacement.
 
-### Step 1 — Make the GitHub repository private
+### Step 2 — Make the GitHub repository private
 
 `https://github.com/eben2468/valley_view_uni` is publicly cloneable from a
 personal account.
@@ -150,7 +233,7 @@ personal account.
    cloned it already. Making it private does not undo that, which is why
    Step 2 is not optional.
 
-### Step 2 — Rotate the database credentials
+### Step 3 — Rotate the database credentials
 
 The repo published MySQL `root` with an empty password. Even though phpMyAdmin
 rejected it, stop using `root` from the web app.
@@ -176,7 +259,7 @@ chown root:www-data includes/config.php
 Confirm it is not readable over the web — `https://alpha.vvu.edu.gh/includes/config.php`
 must return 403 or 404.
 
-### Step 3 — Deploy the nginx configuration
+### Step 4 — Deploy the nginx configuration
 
 `.htaccess` does nothing on nginx. This is the step that actually closes
 Finding 2 in production.
@@ -207,7 +290,7 @@ curl -sI https://alpha.vvu.edu.gh/.git/config | head -1      # expect 404
 curl -sI https://alpha.vvu.edu.gh/phpmyadmin/ | head -1      # expect 404
 ```
 
-### Step 4 — Stop deploying the `.git` directory
+### Step 5 — Tighten what gets deployed
 
 Blocking it is the safety net; not shipping it is the fix.
 
@@ -215,7 +298,7 @@ Blocking it is the safety net; not shipping it is the fix.
 rsync -av --delete \
   --exclude='.git' --exclude='.gitignore' --exclude='dev-tools' \
   --exclude='includes/config.php' --exclude='*.md' --exclude='.qoder' \
-  ./ youruser@alpha.vvu.edu.gh:/var/www/vvu/
+  ./ youruser@alpha.vvu.edu.gh:/home/valley_view_uni/
 ```
 
 Note `--exclude='includes/config.php'` — the server's own config must never be
@@ -225,10 +308,10 @@ If the live directory is currently a git working copy, delete `.git` from it
 after you have a deployment method that doesn't need it:
 
 ```bash
-rm -rf /var/www/vvu/.git
+rm -rf /home/valley_view_uni/.git
 ```
 
-### Step 5 — Remove phpMyAdmin
+### Step 6 — Remove phpMyAdmin
 
 Blocking it in nginx is not the same as removing it.
 
@@ -244,7 +327,7 @@ ssh -L 8888:localhost:80 youruser@alpha.vvu.edu.gh
 # then browse http://localhost:8888/phpmyadmin/
 ```
 
-### Step 6 — Close ports 8080 (Tomcat) and 4000 (DSpace)
+### Step 7 — Close ports 8080 (Tomcat) and 4000 (DSpace)
 
 Bind both to loopback:
 
@@ -266,7 +349,7 @@ server block at the bottom of `nginx-vvu.conf.example`.
 Also confirm DSpace is even in scope for this host — the pentest was unsure, and
 it is the sort of thing that gets left running by accident.
 
-### Step 7 — Restrict SSH
+### Step 8 — Restrict SSH
 
 ```bash
 sudo nano /etc/ssh/sshd_config
@@ -283,7 +366,7 @@ sudo systemctl restart sshd
 sudo apt-get install fail2ban && sudo systemctl enable --now fail2ban
 ```
 
-### Step 8 — Put the site behind Cloudflare
+### Step 9 — Put the site behind Cloudflare
 
 DNS is already on Cloudflare nameservers, but `alpha.vvu.edu.gh` resolves
 straight to the origin IP — the orange cloud is off, so there is no WAF, no DDoS
@@ -296,14 +379,14 @@ protection, and the origin IP is public.
 5. Firewall the origin so it only accepts :80/:443 from Cloudflare's IP ranges —
    otherwise attackers who know the origin IP can bypass all of the above.
 
-### Step 9 — Review the 64 enumerated subdomains
+### Step 10 — Review the 64 enumerated subdomains
 
 Out of scope for the pentest, but `vaultwarden.`, `backup.`, `test.`, `uat.`,
 `homeassistant.`, `plex.` and `proxy.` on a university domain each deserve their
 own look. `vaultwarden.` is a password manager — if that is VVU's, it is the
 highest-value target on the estate and should be reviewed first.
 
-### Step 10 — Re-test, then decide Go / No-Go
+### Step 11 — Re-test, then decide Go / No-Go
 
 ```bash
 curl -sI https://alpha.vvu.edu.gh/.git/HEAD          # 404
@@ -321,11 +404,11 @@ And confirm by hand that `admin` / `password` no longer logs in.
 
 | When | Steps |
 |------|-------|
-| **Today** | 0 (rotate admin password), 1 (repo private) |
-| **Before launch** | 2, 3, 4, 5 |
-| **Before launch** | 6, 7 |
-| **Soon after** | 8, 9 |
-| **Then** | 10 — re-test and re-decide Go / No-Go |
+| **Today** | 0, 0b (deploy safely), 1 (rotate admin password), 2 (repo private) |
+| **Before launch** | 3, 4, 5, 6 |
+| **Before launch** | 7, 8 |
+| **Soon after** | 9, 10 |
+| **Then** | 11 — re-test and re-decide Go / No-Go |
 
 ---
 
