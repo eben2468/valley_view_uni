@@ -1,5 +1,13 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# Valley View University — nginx server block
+# Valley View University — nginx server block (REFERENCE / greenfield)
+#
+# ⚠️  If you already have a working nginx config for alpha.vvu.edu.gh — which
+#     you do, on dspace-srv — do NOT copy this file over it. It assumes a clean
+#     install and would drop your existing TLS, DSpace and PHP-FPM settings.
+#
+#     Use `nginx-vvu-security.conf` instead: it holds only the hardening rules
+#     and is designed to be included inside the server block you already have.
+#     This file is kept as the reference for what a complete config looks like.
 #
 # The production host runs nginx, which IGNORES .htaccess entirely. Everything
 # in this file must be applied here to take effect.
