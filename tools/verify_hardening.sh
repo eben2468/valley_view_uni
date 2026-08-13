@@ -107,9 +107,14 @@ warn "Finding 3: is github.com/eben2468/valley_view_uni still publicly cloneable
 warn "Finding 3: is the web app still connecting to MySQL as root?"
 
 printf '\n'
-if [ "$FAILED" = "0" ]; then
-    printf '\033[32mAll automated checks passed.\033[0m Confirm the three manual items above.\n'
+if [ "$FAILED" != "0" ]; then
+    printf '\033[31mSome checks FAILED — see the FAIL lines above.\033[0m\n'
+elif [ "$ON_TARGET" = "1" ]; then
+    # Don't claim a clean bill of health when a whole category was skipped.
+    printf '\033[33mThe checks that ran all passed, but the port checks were SKIPPED.\033[0m\n'
+    printf 'Findings 5 and 6 are still unverified. Re-run from a machine outside\n'
+    printf 'the server, then confirm the three manual items above.\n'
 else
-    printf '\033[31mSome checks failed — see FAIL lines above.\033[0m\n'
+    printf '\033[32mAll automated checks passed.\033[0m Confirm the three manual items above.\n'
 fi
 exit "$FAILED"
