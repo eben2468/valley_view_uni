@@ -165,7 +165,7 @@ server {
         # deny  all;
 
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.2-fpm.sock;   # <-- adjust version
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
     }
 
     # location ^~ /admin/ {
@@ -184,7 +184,7 @@ server {
         try_files $uri =404;
 
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.2-fpm.sock;   # <-- adjust version
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
         fastcgi_param HTTP_PROXY "";
         fastcgi_hide_header X-Powered-By;
 
