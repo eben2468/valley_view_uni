@@ -31,6 +31,49 @@ foreach ($items_raw as $i) {
 $stmt = $pdo->prepare("SELECT * FROM academic_pages_stats WHERE page_key = 'download_forms' AND is_active = 1 ORDER BY display_order");
 $stmt->execute();
 $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+/**
+ * Turn a stored item_link into a usable href, or null when there is no file
+ * behind it.
+ *
+ * item_link is free text typed into the admin panel (manage_resources_pages.php
+ * "Link URL / File Path"), so it can be an external URL, an internal page, or a
+ * path to a document in uploads/. Only the last kind needs work:
+ *
+ *   - The forms live in "uploads/Download Forms/", but several rows were typed
+ *     as "uploads/<file>.pdf" or as a bare filename, so the href 404'd.
+ *   - Almost every form filename contains spaces, which have to be percent-
+ *     encoded per path segment or the link breaks on stricter clients.
+ *
+ * Returning null lets the caller render the card without a dead button, rather
+ * than sending the visitor to a 404 page.
+ */
+function vvu_form_href($link)
+{
+    $link = trim((string) $link);
+    if ($link === '') {
+        return null;
+    }
+
+    // External destinations and internal pages are used exactly as stored.
+    if (preg_match('~^([a-z][a-z0-9+.-]*:|//)~i', $link) || preg_match('~\.php($|[?#])~i', $link)) {
+        return $link;
+    }
+
+    $path = ltrim(str_replace('\\', '/', $link), '/');
+    $name = basename($path);
+
+    // The path as typed first, then the two places the file is actually likely
+    // to be. Anything that resolves is good enough — the DB is repaired
+    // separately by tools/fix_download_form_links.php.
+    foreach ([$path, 'uploads/Download Forms/' . $name, 'uploads/' . $name] as $candidate) {
+        if ($name !== '' && is_file(__DIR__ . '/' . $candidate)) {
+            return implode('/', array_map('rawurlencode', explode('/', $candidate)));
+        }
+    }
+
+    return null;
+}
 ?>
 
 <style>
@@ -162,7 +205,7 @@ $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        <?php foreach ($section_items as $item): ?>
+                        <?php foreach ($section_items as $item): $href = vvu_form_href($item['item_link']); ?>
                         <div class="download-card bg-white dark:bg-gray-900 p-10 rounded-[2rem] shadow-lg hover:shadow-2xl border border-<?php echo $config['color']; ?>-100 dark:border-gray-700 group">
                             <div class="flex flex-col gap-5">
                                 <div class="flex items-center gap-5">
@@ -173,10 +216,17 @@ $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </div>
                                 <h4 class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white group-hover:text-<?php echo $config['color']; ?>-600 transition-colors"><?php echo strip_tags($item['item_title']); ?></h4>
                                 <p class="text-xl text-gray-500 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($item['item_description']); ?></p>
-                                <a href="<?php echo strip_tags($item['item_link']); ?>" download class="inline-flex items-center justify-center gap-4 w-full px-8 py-5 bg-<?php echo $config['color']; ?>-<?php echo $config['color'] == 'yellow' ? '500' : '600'; ?> hover:bg-<?php echo $config['color']; ?>-700 text-white rounded-xl text-xl font-bold transition-all shadow-md hover:shadow-xl mt-2">
+                                <?php if ($href !== null): ?>
+                                <a href="<?php echo htmlspecialchars($href, ENT_QUOTES); ?>" download class="inline-flex items-center justify-center gap-4 w-full px-8 py-5 bg-<?php echo $config['color']; ?>-<?php echo $config['color'] == 'yellow' ? '500' : '600'; ?> hover:bg-<?php echo $config['color']; ?>-700 text-white rounded-xl text-xl font-bold transition-all shadow-md hover:shadow-xl mt-2">
                                     <span class="material-symbols-outlined text-2xl">download</span>
                                     Download Form
                                 </a>
+                                <?php else: ?>
+                                <span class="inline-flex items-center justify-center gap-4 w-full px-8 py-5 bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-xl text-xl font-bold shadow-inner mt-2 cursor-not-allowed" title="This form has not been uploaded yet.">
+                                    <span class="material-symbols-outlined text-2xl">hourglass_empty</span>
+                                    Coming Soon
+                                </span>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <?php endforeach; ?>
