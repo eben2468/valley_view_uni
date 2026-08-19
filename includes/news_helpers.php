@@ -114,16 +114,51 @@ if (!function_exists('vvu_kicker_tone')) {
     }
 }
 
+if (!function_exists('vvu_block_separator')) {
+    /**
+     * What to put between two blocks of copy that were separate elements.
+     *
+     * A paragraph is a finished thought, so the join is a full stop unless the
+     * author already ended it with punctuation of their own.
+     *
+     * $hard distinguishes a real block boundary (</p>, </li>, </h2>) from a
+     * soft one (<br>). A <br> is often just a wrapped line — "The deadline is"
+     * <br> "15 September" is one sentence — so it only earns a full stop when
+     * the next line opens with a capital, which is what a new sentence does.
+     */
+    function vvu_block_separator($before, $after, $hard)
+    {
+        // Ignore any closing quote or bracket when looking for the last mark,
+        // so 'he said "now."' is not given a second full stop.
+        $tail = rtrim($before, "\"')]}\xc2\xbb\xe2\x80\x9d\xe2\x80\x99 ");
+        $last = mb_substr($tail, -1, 1, 'UTF-8');
+
+        // Already ends in a mark of its own (\x{2026} is the ellipsis).
+        if ($last === '' || preg_match('/^[.!?:;,\x{2026}]$/u', $last)) {
+            return ' ';
+        }
+
+        if (!$hard && !preg_match('/^\p{Lu}/u', $after)) {
+            return ' ';
+        }
+
+        return '. ';
+    }
+}
+
 if (!function_exists('vvu_html_to_text')) {
     /**
-     * Flatten article HTML to plain text.
+     * Flatten article HTML to readable plain text.
      *
      * strip_tags() deletes a tag without leaving anything in its place, so
      * "<p>...September 13, 2026</p><p>Date: August 14, 2026</p>" collapses to
      * "...September 13, 2026Date: August 14, 2026" — the run-together wording
      * that turned up in excerpts and standfirsts wherever an author wrote the
-     * body as separate paragraphs. A block boundary is a word break, so it
-     * becomes a space before the tags are stripped.
+     * body as separate paragraphs.
+     *
+     * Block boundaries are therefore recorded before the tags are stripped and
+     * turned into sentence breaks afterwards, so the same content reads
+     * "...September 13, 2026. Date: August 14, 2026. The Office of..."
      *
      * Inline tags (<strong>, <em>, <a>, <sub>) are still removed with nothing
      * in their place, so mid-word emphasis and "H<sub>2</sub>O" survive.
@@ -135,24 +170,54 @@ if (!function_exists('vvu_html_to_text')) {
         // Non-prose blocks contribute nothing to a summary.
         $text = preg_replace('#<(script|style|figure|figcaption|table)[^>]*>.*?</\1>#is', ' ', $text);
 
-        // Every block-level boundary reads as a word break.
-        $blocks = 'p|div|br|hr|li|ul|ol|dl|dt|dd|tr|td|th|h[1-6]|section|article'
+        // Mark the boundaries while the tags are still there to be seen. \x01
+        // ends a block, \x02 is a soft line break within one; neither can
+        // occur in article copy, so they are safe to use as markers.
+        $blocks = 'p|div|li|ul|ol|dl|dt|dd|tr|td|th|h[1-6]|section|article'
                 . '|header|footer|aside|nav|blockquote|pre|figure|figcaption'
                 . '|table|thead|tbody|tfoot|caption|address|main|form|fieldset';
-        $text = preg_replace('#<\s*/?\s*(' . $blocks . ')\b[^>]*>#i', ' ', $text);
+        $text = preg_replace('#<\s*/?\s*(' . $blocks . ')\b[^>]*>#i', "\x01", $text);
+        $text = preg_replace('#<\s*(br|hr)\b[^>]*>#i', "\x02", $text);
 
         $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
         // &nbsp; decodes to U+00A0, which \s does not match.
         $text = str_replace("\xC2\xA0", ' ', $text);
 
-        // Collapse the whitespace the substitutions above introduce, then pull
-        // punctuation back onto the word it belongs to (a paragraph that opens
-        // with a comma or full stop is rare but reads badly when left adrift).
-        $text = preg_replace('/\s+/u', ' ', $text);
-        $text = preg_replace('/\s+([,.;:!?])/u', '$1', $text);
+        $pieces = preg_split('/([\x01\x02])/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 
-        return trim($text);
+        $out      = '';
+        $boundary = null;
+
+        foreach ($pieces as $piece) {
+            if ($piece === "\x01" || $piece === "\x02") {
+                // Tags often sit together ("</p><p>"); a hard break outranks
+                // a soft one across the whole run.
+                if ($boundary !== "\x01") {
+                    $boundary = $piece;
+                }
+                continue;
+            }
+
+            $chunk = trim(preg_replace('/\s+/u', ' ', $piece));
+            if ($chunk === '') {
+                continue;
+            }
+
+            if ($out === '') {
+                $out = $chunk;
+            } else {
+                $out .= vvu_block_separator($out, $chunk, $boundary === "\x01") . $chunk;
+            }
+
+            $boundary = null;
+        }
+
+        // Pull punctuation back onto the word it belongs to — a paragraph that
+        // opens with a comma or full stop is rare but reads badly left adrift.
+        $out = preg_replace('/\s+([,.;:!?])/u', '$1', $out);
+
+        return trim($out);
     }
 }
 
@@ -199,11 +264,16 @@ if (!function_exists('vvu_auto_excerpt')) {
             $summary = $candidate;
         }
 
-        if ($summary !== '') {
+        // Whole sentences only pay off when they actually fill the space. Now
+        // that block boundaries end in full stops, a body opening with short
+        // metadata lines ("Title: ... Date: ...") would otherwise stop after
+        // them and leave most of the card empty, so anything that comes back
+        // well under the limit falls through to the word-boundary cut instead.
+        if ($summary !== '' && $strlen($summary) >= $limit * 0.6) {
             return $summary;
         }
 
-        // First sentence alone overshoots — cut on the last whole word
+        // Too little to show — cut on the last whole word inside the limit
         $cut = $substr($text, 0, $limit);
         $space = function_exists('mb_strrpos') ? mb_strrpos($cut, ' ', 0, 'UTF-8') : strrpos($cut, ' ');
         if ($space !== false && $space > $limit * 0.5) {

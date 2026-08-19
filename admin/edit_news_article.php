@@ -1522,8 +1522,9 @@ if (imageWrapper && imageInput) {
 }
 
 // ── Excerpt auto-generation ──────────────────────────────────
-// Mirrors vvu_auto_excerpt() in includes/news_helpers.php: prefer whole
-// sentences, fall back to a word-boundary cut.
+// Mirrors vvu_html_to_text() + vvu_auto_excerpt() in includes/news_helpers.php:
+// block boundaries become sentence breaks, then prefer whole sentences and fall
+// back to a word-boundary cut. Keep the two in step when either changes.
 (function () {
     var field = document.getElementById('excerptField');
     var button = document.getElementById('generateExcerpt');
@@ -1543,19 +1544,53 @@ if (imageWrapper && imageInput) {
             html = document.getElementById('contentEditor').value || '';
         }
         html = html.replace(/<(script|style|figure|figcaption|table)[^>]*>[\s\S]*?<\/\1>/gi, ' ');
+
         // textContent glues blocks together ("...2026Date: August 14..."), so
-        // turn every block boundary into a space first. Mirrors the $blocks
-        // list in vvu_html_to_text().
+        // mark the boundaries while the tags are still there. Mirrors
+        // vvu_html_to_text(): \x01 ends a block, \x02 is a soft line break.
         html = html.replace(
-            /<\s*\/?\s*(p|div|br|hr|li|ul|ol|dl|dt|dd|tr|td|th|h[1-6]|section|article|header|footer|aside|nav|blockquote|pre|figure|figcaption|table|thead|tbody|tfoot|caption|address|main|form|fieldset)\b[^>]*>/gi,
-            ' '
+            /<\s*\/?\s*(p|div|li|ul|ol|dl|dt|dd|tr|td|th|h[1-6]|section|article|header|footer|aside|nav|blockquote|pre|figure|figcaption|table|thead|tbody|tfoot|caption|address|main|form|fieldset)\b[^>]*>/gi,
+            '\x01'
         );
+        html = html.replace(/<\s*(br|hr)\b[^>]*>/gi, '\x02');
+
         var tmp = document.createElement('div');
         tmp.innerHTML = html;
-        return (tmp.textContent || tmp.innerText || '')
-            .replace(/\s+/g, ' ')
-            .replace(/\s+([,.;:!?])/g, '$1')
-            .trim();
+        // JS \s already covers the U+00A0 that &nbsp; decodes to.
+        var text = (tmp.textContent || tmp.innerText || '');
+
+        var pieces = text.split(/([\x01\x02])/);
+        var out = '';
+        var boundary = null;
+
+        for (var i = 0; i < pieces.length; i++) {
+            var piece = pieces[i];
+
+            if (piece === '\x01' || piece === '\x02') {
+                // Tags often sit together ("</p><p>"); hard outranks soft.
+                if (boundary !== '\x01') boundary = piece;
+                continue;
+            }
+
+            var chunk = piece.replace(/\s+/g, ' ').trim();
+            if (!chunk) continue;
+
+            out = out ? out + separator(out, chunk, boundary === '\x01') + chunk : chunk;
+            boundary = null;
+        }
+
+        return out.replace(/\s+([,.;:!?])/g, '$1').trim();
+    }
+
+    // Mirrors vvu_block_separator(): a finished block earns a full stop, a
+    // <br> only does when the next line opens like a new sentence.
+    function separator(before, after, hard) {
+        var tail = before.replace(/["')\]}\u00bb\u201d\u2019\s]+$/, '');
+        var last = tail.slice(-1);
+
+        if (!last || '.!?:;,\u2026'.indexOf(last) !== -1) return ' ';
+        if (!hard && !/^[A-Z\u00c0-\u00de]/.test(after)) return ' ';
+        return '. ';
     }
 
     function summarise(text) {
@@ -1569,7 +1604,10 @@ if (imageWrapper && imageInput) {
             if (candidate.length > LIMIT) break;
             summary = candidate;
         }
-        if (summary) return summary;
+        // Mirrors vvu_auto_excerpt(): whole sentences only pay off when they
+        // fill the space, or a body opening with short "Title: / Date:" lines
+        // would stop after them and leave most of the card empty.
+        if (summary && summary.length >= LIMIT * 0.6) return summary;
 
         var cut = text.slice(0, LIMIT);
         var space = cut.lastIndexOf(' ');
