@@ -1543,9 +1543,19 @@ if (imageWrapper && imageInput) {
             html = document.getElementById('contentEditor').value || '';
         }
         html = html.replace(/<(script|style|figure|figcaption|table)[^>]*>[\s\S]*?<\/\1>/gi, ' ');
+        // textContent glues blocks together ("...2026Date: August 14..."), so
+        // turn every block boundary into a space first. Mirrors the $blocks
+        // list in vvu_html_to_text().
+        html = html.replace(
+            /<\s*\/?\s*(p|div|br|hr|li|ul|ol|dl|dt|dd|tr|td|th|h[1-6]|section|article|header|footer|aside|nav|blockquote|pre|figure|figcaption|table|thead|tbody|tfoot|caption|address|main|form|fieldset)\b[^>]*>/gi,
+            ' '
+        );
         var tmp = document.createElement('div');
         tmp.innerHTML = html;
-        return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
+        return (tmp.textContent || tmp.innerText || '')
+            .replace(/\s+/g, ' ')
+            .replace(/\s+([,.;:!?])/g, '$1')
+            .trim();
     }
 
     function summarise(text) {

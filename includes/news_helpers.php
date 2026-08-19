@@ -114,6 +114,48 @@ if (!function_exists('vvu_kicker_tone')) {
     }
 }
 
+if (!function_exists('vvu_html_to_text')) {
+    /**
+     * Flatten article HTML to plain text.
+     *
+     * strip_tags() deletes a tag without leaving anything in its place, so
+     * "<p>...September 13, 2026</p><p>Date: August 14, 2026</p>" collapses to
+     * "...September 13, 2026Date: August 14, 2026" — the run-together wording
+     * that turned up in excerpts and standfirsts wherever an author wrote the
+     * body as separate paragraphs. A block boundary is a word break, so it
+     * becomes a space before the tags are stripped.
+     *
+     * Inline tags (<strong>, <em>, <a>, <sub>) are still removed with nothing
+     * in their place, so mid-word emphasis and "H<sub>2</sub>O" survive.
+     */
+    function vvu_html_to_text($html)
+    {
+        $text = (string) $html;
+
+        // Non-prose blocks contribute nothing to a summary.
+        $text = preg_replace('#<(script|style|figure|figcaption|table)[^>]*>.*?</\1>#is', ' ', $text);
+
+        // Every block-level boundary reads as a word break.
+        $blocks = 'p|div|br|hr|li|ul|ol|dl|dt|dd|tr|td|th|h[1-6]|section|article'
+                . '|header|footer|aside|nav|blockquote|pre|figure|figcaption'
+                . '|table|thead|tbody|tfoot|caption|address|main|form|fieldset';
+        $text = preg_replace('#<\s*/?\s*(' . $blocks . ')\b[^>]*>#i', ' ', $text);
+
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // &nbsp; decodes to U+00A0, which \s does not match.
+        $text = str_replace("\xC2\xA0", ' ', $text);
+
+        // Collapse the whitespace the substitutions above introduce, then pull
+        // punctuation back onto the word it belongs to (a paragraph that opens
+        // with a comma or full stop is rare but reads badly when left adrift).
+        $text = preg_replace('/\s+/u', ' ', $text);
+        $text = preg_replace('/\s+([,.;:!?])/u', '$1', $text);
+
+        return trim($text);
+    }
+}
+
 if (!function_exists('vvu_auto_excerpt')) {
     /**
      * Build a summary from article body copy.
@@ -124,11 +166,9 @@ if (!function_exists('vvu_auto_excerpt')) {
      */
     function vvu_auto_excerpt($content, $limit = 200)
     {
-        // Drop anything that is not prose before measuring
-        $html = preg_replace('#<(script|style|figure|figcaption|table)[^>]*>.*?</\1>#is', ' ', (string)$content);
-        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $text = preg_replace('/\s+/u', ' ', $text);
-        $text = trim($text);
+        // Flattened via vvu_html_to_text() so block boundaries become spaces
+        // instead of running the last word of one paragraph into the next.
+        $text = vvu_html_to_text($content);
 
         if ($text === '') {
             return '';
@@ -179,11 +219,10 @@ if (!function_exists('vvu_excerpt')) {
      */
     function vvu_excerpt($excerpt, $content = '', $length = 165)
     {
-        $text = trim(strip_tags((string)$excerpt));
+        $text = vvu_html_to_text($excerpt);
         if ($text === '') {
-            $text = trim(strip_tags((string)$content));
+            $text = vvu_html_to_text($content);
         }
-        $text = preg_replace('/\s+/', ' ', $text);
         if ($text === '') {
             return '';
         }

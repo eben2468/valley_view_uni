@@ -5,6 +5,7 @@
  */
 
 require_once('includes/db_connect.php');
+require_once('includes/news_helpers.php');
 
 // Get notice by slug or ID
 $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
@@ -42,7 +43,7 @@ if (!$article) {
 
 // Set page title and meta
 $page_title = strip_tags($article['title']) . " - Notices & Announcements - Valley View University";
-$meta_description = !empty($article['meta_description']) ? $article['meta_description'] : $article['excerpt'];
+$meta_description = !empty($article['meta_description']) ? $article['meta_description'] : vvu_html_to_text($article['excerpt']);
 $active_page = "notices";
 
 // Category labels
@@ -166,7 +167,7 @@ include 'includes/header.php';
                     <!-- Excerpt/Lead -->
                     <?php if (!empty($article['excerpt'])): ?>
                     <div class="article-lead">
-                        <?php echo strip_tags($article['excerpt']); ?>
+                        <?php echo vvu_html_to_text($article['excerpt']); ?>
                     </div>
                     <?php endif; ?>
                     

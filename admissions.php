@@ -5,6 +5,7 @@
  */
 
 require_once('includes/db_connect.php');
+require_once('includes/news_helpers.php');
 
 $page_title = "Admissions - Valley View University";
 $active_page = "admissions";
@@ -378,7 +379,7 @@ include 'includes/header.php';
                                             <?php echo strip_tags($notice['title']); ?>
                                         </h4>
                                         <p class="text-xl text-gray-500 mt-2 line-clamp-2">
-                                            <?php echo strip_tags($notice['excerpt'] ?: 'Click to read more about this notice.'); ?>
+                                            <?php echo vvu_excerpt($notice['excerpt'], '', 165) ?: 'Click to read more about this notice.'; ?>
                                         </p>
                                         <span class="text-base text-gray-400 mt-2 inline-block">
                                             <span class="material-symbols-outlined text-base align-middle">schedule</span>
@@ -608,7 +609,7 @@ include 'includes/header.php';
                             <?php echo strip_tags($news_item['title']); ?>
                         </h4>
                         <p class="text-xl text-gray-600 dark:text-gray-400 mb-6 leading-relaxed line-clamp-2">
-                            <?php echo strip_tags($news_item['excerpt'] ?: 'Click to read more about this update.'); ?>
+                            <?php echo vvu_excerpt($news_item['excerpt'], '', 165) ?: 'Click to read more about this update.'; ?>
                         </p>
                         <div class="flex items-center justify-between">
                             <span class="text-base text-gray-500">

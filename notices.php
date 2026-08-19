@@ -5,6 +5,7 @@
  */
 
 require_once('includes/db_connect.php');
+require_once('includes/news_helpers.php');
 
 $page_title = "Notices & Announcements - Valley View University";
 $active_page = "notices";
@@ -111,7 +112,7 @@ include 'includes/header.php';
                     <span class="text-white" style="color: white !important;">Urgent Announcement</span>
                 </div>
                 <h1 class="hero-title"><?php echo strip_tags($featured_notice['title']); ?></h1>
-                <p class="hero-excerpt"><?php echo strip_tags($featured_notice['excerpt']); ?></p>
+                <p class="hero-excerpt"><?php echo vvu_excerpt($featured_notice['excerpt'], '', 240); ?></p>
                 <div class="hero-meta text-white" style="color: white !important;">
                     <span class="hero-date text-white" style="color: white !important;">
                         <i class="fa fa-calendar text-white" style="color: white !important;"></i>
@@ -191,7 +192,7 @@ include 'includes/header.php';
                         </div>
                         <div class="news-card-content">
                             <h3 class="news-card-title"><?php echo strip_tags($notice['title']); ?></h3>
-                            <p class="news-card-excerpt"><?php echo strip_tags($notice['excerpt']); ?></p>
+                            <p class="news-card-excerpt"><?php echo vvu_excerpt($notice['excerpt'], '', 165); ?></p>
                             <div class="news-card-meta">
                                 <span class="news-card-date">
                                     <i class="fa fa-calendar-o"></i>

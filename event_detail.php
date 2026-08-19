@@ -5,6 +5,7 @@
  */
 
 require_once('includes/db_connect.php');
+require_once('includes/news_helpers.php');
 
 // Get article by slug or ID
 $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
@@ -42,7 +43,7 @@ if (!$article) {
 
 // Set page title and meta
 $page_title = strip_tags($article['title']) . " - University Events - Valley View University";
-$meta_description = !empty($article['meta_description']) ? $article['meta_description'] : $article['excerpt'];
+$meta_description = !empty($article['meta_description']) ? $article['meta_description'] : vvu_html_to_text($article['excerpt']);
 $active_page = "events";
 
 // Category labels
@@ -166,7 +167,7 @@ include 'includes/header.php';
             <h1 class="ed-headline"><?php echo strip_tags($article['title']); ?></h1>
 
             <?php if (!empty($article['excerpt'])): ?>
-            <p class="ed-standfirst"><?php echo strip_tags($article['excerpt']); ?></p>
+            <p class="ed-standfirst"><?php echo vvu_html_to_text($article['excerpt']); ?></p>
             <?php endif; ?>
 
             <?php if (!empty($article['event_date']) || !empty($article['event_time']) || !empty($article['event_location'])): ?>
