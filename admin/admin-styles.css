@@ -16,7 +16,16 @@ body {
     color: #333;
     font-size: 14px;
     line-height: 1.6;
-    overflow-x: hidden;
+    /* clip, not hidden. When one axis is hidden the other axis's "visible"
+       computes to "auto", which turned <body> into a scroll container — and a
+       sticky element anchors to its nearest scrollport, so .top-header was
+       sticking to a box that never scrolls while the real scrolling happened
+       on the viewport. The header rode away with the page. clip contains the
+       same horizontal overflow without creating a scrollport, so the header
+       stays put. (html{overflow-x:hidden} in admin-modern.css is the guard
+       that actually suppresses the horizontal scrollbar; the root element's
+       value propagates to the viewport, which is why that one is harmless.) */
+    overflow-x: clip;
 }
 
 /* Admin Wrapper */

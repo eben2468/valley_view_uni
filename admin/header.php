@@ -37,6 +37,11 @@ require_once('../includes/upload_helper.php');
     <!-- CUSTOM ADMIN CSS -->
     <link href="admin-styles.css?v=1.3" rel="stylesheet" />
     <link href="admin-modern.css?v=1.3" rel="stylesheet" />
+    <!-- Responsive corrections. Loaded last so it can override the two above;
+         its companion script tags wide tables and fixed grids that only a
+         stylesheet cannot reach. -->
+    <link href="admin-responsive.css?v=1.0" rel="stylesheet" />
+    <script src="js/admin-responsive.js?v=1.0" defer></script>
     <!-- Shrinks oversized photos in the browser so uploads can't trip the
          server's request-size limit (HTTP 413) -->
     <script src="js/upload-guard.js?v=1.1" defer></script>

@@ -67,6 +67,45 @@ $managed_pages = [
 $message = '';
 $message_type = '';
 
+/**
+ * Where a document uploaded against a resources item should be stored.
+ *
+ * Download Forms keeps its PDFs in uploads/Download Forms/ alongside the ones
+ * already published there, which is where download-forms.php looks for them.
+ * Everything else goes to the generic resources folder.
+ */
+if (!function_exists('vvu_resource_upload_dir')) {
+    function vvu_resource_upload_dir($page_key)
+    {
+        return $page_key === 'download_forms' ? 'Download Forms' : 'resources';
+    }
+}
+
+/**
+ * The item's downloadable file: a freshly uploaded one when the admin chose a
+ * file, otherwise whatever path is already typed in the text box.
+ *
+ * UPLOAD_ERR_NO_FILE is the only error worth ignoring — it just means the
+ * field was left empty. Every other failure is left for handleAdminFileUpload
+ * to record, and admin/header.php shows it on the next page load, so a
+ * rejected upload can no longer look like a successful save.
+ */
+if (!function_exists('vvu_resource_item_link')) {
+    function vvu_resource_item_link($page_key)
+    {
+        $link = $_POST['item_link'] ?? '';
+
+        if (isset($_FILES['item_file']) && $_FILES['item_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $uploaded = handleAdminFileUpload($_FILES['item_file'], vvu_resource_upload_dir($page_key), 'form_');
+            if ($uploaded) {
+                $link = $uploaded;
+            }
+        }
+
+        return $link;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
@@ -119,6 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($uploaded) $item_image = $uploaded;
             }
 
+            $item_link = vvu_resource_item_link($_POST['page_key'] ?? $_GET['page'] ?? '');
+
             $stmt = $pdo->prepare("
                 UPDATE academic_pages_items SET
                     item_title = ?,
@@ -140,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['item_icon'] ?? '',
                 $_POST['item_color'] ?? 'blue-600',
                 $item_image,
-                $_POST['item_link'] ?? '',
+                $item_link,
                 $_POST['item_stat_value'] ?? '',
                 $_POST['item_extra_data'] ?? null,
                 isset($_POST['is_active']) ? 1 : 0,
@@ -156,6 +197,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($uploaded) $item_image = $uploaded;
             }
 
+            $item_link = vvu_resource_item_link($_POST['page_key'] ?? '');
+
             $stmt = $pdo->prepare("
                 INSERT INTO academic_pages_items (page_key, section_key, item_title, item_subtitle, item_description, item_icon, item_color, item_image, item_link, item_stat_value, extra_data, display_order)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (SELECT COALESCE(MAX(display_order), 0) + 1 FROM academic_pages_items i2 WHERE i2.page_key = ? AND i2.section_key = ?))
@@ -169,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['item_icon'] ?? '',
                 $_POST['item_color'] ?? 'blue-600',
                 $item_image,
-                $_POST['item_link'] ?? '',
+                $item_link,
                 $_POST['item_stat_value'] ?? '',
                 $_POST['item_extra_data'] ?? null,
                 $_POST['page_key'],
@@ -389,6 +432,7 @@ include 'sidebar.php';
                             <form method="POST" action="" enctype="multipart/form-data">
                                 <input type="hidden" name="action" value="update_item">
                                 <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
+                                <input type="hidden" name="page_key" value="<?php echo htmlspecialchars($current_page_key); ?>">
                                 
                                 <div class="row g-3">
                                     <div class="col-md-9">
@@ -425,6 +469,21 @@ include 'sidebar.php';
                                     <div class="col-md-4">
                                         <label class="form-label small fw-bold">Link URL / File Path</label>
                                         <input type="text" name="item_link" value="<?php echo htmlspecialchars($item['item_link'] ?? ''); ?>" class="form-control">
+                                        <small class="text-muted d-block mt-1">A page on this site (<code>admissions.php</code>), a full address (<code>https://&hellip;</code>), or leave blank and upload a file instead. A link opens the page; a file downloads.</small>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label small fw-bold">
+                                            Upload Document <span class="text-muted fw-normal">(PDF, Word or Excel &mdash; replaces the path above)</span>
+                                        </label>
+                                        <input type="file" name="item_file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="form-control">
+                                        <?php if (!empty($item['item_link']) && preg_match('~\.(pdf|docx?|xlsx?)$~i', $item['item_link'])): ?>
+                                            <small class="text-muted d-block mt-1">
+                                                Current file:
+                                                <a href="../<?php echo implode('/', array_map('rawurlencode', explode('/', $item['item_link']))); ?>" target="_blank" rel="noopener">
+                                                    <?php echo htmlspecialchars(basename($item['item_link'])); ?>
+                                                </a>
+                                            </small>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="col-md-12">
                                         <label class="form-label small fw-bold text-primary">Advanced Data (JSON Format)</label>
@@ -497,6 +556,14 @@ include 'sidebar.php';
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Link / File Path</label>
                     <input type="text" name="item_link" class="form-control">
+                    <small class="text-muted d-block mt-1">A page on this site (<code>admissions.php</code>), a full address (<code>https://&hellip;</code>), or leave blank and upload a file instead. A link opens the page; a file downloads.</small>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Upload Document <span class="text-muted fw-normal small">(PDF, Word or Excel)</span>
+                    </label>
+                    <input type="file" name="item_file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="form-control">
+                    <small class="text-muted d-block mt-1">Choosing a file here fills in the path above for you.</small>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Color Class</label>

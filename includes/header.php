@@ -14,13 +14,25 @@ $topbar_settings = getTopbarSettings($pdo);
 $main_nav        = getNavItems($pdo, 'main');
 $topbar_nav      = getNavItems($pdo, 'topbar');
 
-// Identity: header_settings wins, topbar_settings is the fallback.
+// Identity comes from two tables. global_settings is the one the admin panel
+// actually writes (Admin > Settings > Visual Theme > Site Logo), so it wins.
+// header_settings is older and nothing in admin/ updates it, which is why a
+// logo uploaded through Settings never reached the masthead. It is kept as the
+// fallback, and still supplies the values that live only there.
 $header_settings = [];
 try {
     $header_settings = $pdo->query("SELECT setting_key, setting_value FROM header_settings")
         ->fetchAll(PDO::FETCH_KEY_PAIR);
 } catch (Exception $e) {
     $header_settings = [];
+}
+
+$global_settings = [];
+try {
+    $global_settings = $pdo->query("SELECT setting_key, setting_value FROM global_settings")
+        ->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch (Exception $e) {
+    $global_settings = [];
 }
 
 // Social accounts are already maintained for the footer — reuse them.
@@ -70,8 +82,40 @@ if (!function_exists('vvu_e')) {
     }
 }
 
-$vvu_logo  = $header_settings['logo_path'] ?? 'vvu_logo.jpg';
-$vvu_name  = $header_settings['logo_text'] ?? 'Valley View University';
+/**
+ * First value that is actually set to something — ?? alone is not enough here,
+ * because a setting cleared in the admin panel is stored as '' rather than
+ * NULL and would otherwise win over a perfectly good fallback.
+ */
+if (!function_exists('vvu_setting')) {
+    function vvu_setting(...$candidates)
+    {
+        foreach ($candidates as $candidate) {
+            if ($candidate !== null && trim((string) $candidate) !== '') {
+                return $candidate;
+            }
+        }
+        return '';
+    }
+}
+
+$vvu_logo  = vvu_setting(
+    $global_settings['logo_url'] ?? null,
+    $header_settings['logo_path'] ?? null,
+    'vvu_logo.jpg'
+);
+// Admin > Settings > General Config > "Website Name". Unlike the logo this is
+// read verbatim rather than through vvu_setting(): the current logo artwork
+// already spells the university out, so clearing the field has to be able to
+// hide the wordmark beside it instead of snapping back to a default. Only a
+// missing row (or a missing table) falls back.
+$vvu_name = array_key_exists('site_name', $global_settings)
+    ? trim((string) $global_settings['site_name'])
+    : ($header_settings['logo_text'] ?? 'Valley View University');
+
+// Used where a name is required even when the wordmark is hidden — image alt
+// text, the search landmark, the document title.
+$vvu_name_alt = $vvu_name !== '' ? $vvu_name : 'Valley View University';
 $vvu_motto = 'Excellence • Integrity • Service';
 $vvu_since = '1979';
 
@@ -145,7 +189,7 @@ if (!function_exists('vvu_split_sections')) {
     <!-- GOOGLE FONT — Cinzel for titles, Open Sans for body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <!-- FONTAWESOME ICONS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- MATERIAL SYMBOLS -->
@@ -230,8 +274,8 @@ if (!function_exists('vvu_split_sections')) {
             <div class="vvu-nav__inner">
 
                 <a class="vvu-nav__mini" href="index.php">
-                    <img src="<?php echo vvu_e($vvu_logo); ?>" alt="<?php echo vvu_e($vvu_name); ?> crest">
-                    <span><?php echo vvu_e($vvu_name); ?></span>
+                    <img src="<?php echo vvu_e($vvu_logo); ?>" alt="<?php echo vvu_e($vvu_name_alt); ?> crest">
+                    <?php if ($vvu_name !== ''): ?><span><?php echo vvu_e($vvu_name); ?></span><?php endif; ?>
                 </a>
 
                 <nav class="vvu-nav__menu" aria-label="Main navigation">
@@ -371,7 +415,7 @@ if (!function_exists('vvu_split_sections')) {
 
                 <a class="vvu-mobilebar__brand" href="index.php">
                     <img src="<?php echo vvu_e($vvu_logo); ?>" alt="">
-                    <span><?php echo vvu_e($vvu_name); ?></span>
+                    <?php if ($vvu_name !== ''): ?><span><?php echo vvu_e($vvu_name); ?></span><?php endif; ?>
                 </a>
 
                 <div class="vvu-mobilebar__actions">
@@ -391,7 +435,7 @@ if (!function_exists('vvu_split_sections')) {
             <a class="vvu-drawer__lockup" href="index.php">
                 <img src="<?php echo vvu_e($vvu_logo); ?>" alt="">
                 <span>
-                    <strong><?php echo vvu_e($vvu_name); ?></strong>
+                    <?php if ($vvu_name !== ''): ?><strong><?php echo vvu_e($vvu_name); ?></strong><?php endif; ?>
                     <em><?php echo vvu_e($vvu_motto); ?></em>
                 </span>
             </a>

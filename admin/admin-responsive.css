@@ -1,0 +1,177 @@
+/* =============================================================================
+   ADMIN RESPONSIVE LAYER
+   Loaded last in admin/header.php so it can correct the older admin styles.
+
+   The shell — sidebar, overlay, hamburger — was already responsive in
+   admin-styles.css. This file covers what sits inside the page: wide tables,
+   fixed-column grids, Materialize markup being rendered by Bootstrap, and
+   hand-rolled modals taller than a phone screen.
+
+   Some rules need !important. They are marked with the reason; each one is
+   fighting either an inline style attribute or a page-level <style> block,
+   both of which outrank an external sheet.
+   ========================================================================== */
+
+/* ── 1. Nothing may push the page sideways ───────────────────────────────── */
+
+.main-content,
+.sb2-2 {
+    min-width: 0;
+}
+
+.main-content img,
+.main-content video,
+.main-content iframe,
+.main-content embed,
+.sb2-2 img,
+.sb2-2 video,
+.sb2-2 iframe {
+    max-width: 100%;
+}
+
+.main-content pre,
+.sb2-2 pre {
+    overflow-x: auto;
+}
+
+/* File paths, URLs and tokens are long and unbreakable; let them wrap rather
+   than stretch their column. */
+.main-content td,
+.main-content th,
+.sb2-2 td,
+.sb2-2 th {
+    overflow-wrap: break-word;
+}
+
+/* ── 2. Wide tables scroll inside their own box ──────────────────────────── */
+/* admin/js/admin-responsive.js wraps any table not already inside a
+   .table-responsive. */
+
+.vvu-scroll-x {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.vvu-scroll-x > table {
+    margin-bottom: 0;
+}
+
+/* ── 3. Fixed-column grids become fluid ──────────────────────────────────── */
+/* Tagged by admin-responsive.js. The dashboard's repeat(4, 1fr) would
+   otherwise stay four columns on a phone. !important because the declaration
+   being overridden lives in a page-level <style> block. */
+
+@media (max-width: 991.98px) {
+    .vvu-grid-fluid,
+    .main-content [style*="grid-template-columns"],
+    .sb2-2 [style*="grid-template-columns"] {
+        grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)) !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .vvu-grid-fluid,
+    .main-content [style*="grid-template-columns"],
+    .sb2-2 [style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ── 4. Materialize column markup under Bootstrap ────────────────────────── */
+/* manage_homepage.php is written with Materialize classes (col s6) but the
+   panel loads Bootstrap, whose bare .col is an equal-width flex column that
+   never stacks. Below md that leaves two cramped fields side by side. */
+
+@media (max-width: 767.98px) {
+    .main-content .row > .col,
+    .sb2-2 .row > .col {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ── 5. Hand-rolled modal overlays ───────────────────────────────────────── */
+/* Several managers build their own overlay as <div id="...Modal"> rather than
+   using a Bootstrap modal. They set width: 90% but no height limit, so a long
+   form cannot be scrolled to its submit button on a short screen. */
+
+[id$="Modal"]:not(.modal) {
+    padding: 16px;
+}
+
+[id$="Modal"]:not(.modal) > div {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@media (max-width: 575.98px) {
+    /* !important: the padding it replaces is an inline style attribute. */
+    [id$="Modal"]:not(.modal) > div {
+        padding: 20px !important;
+        width: 100% !important;
+    }
+}
+
+/* ── 6. Tab strips and toolbars ──────────────────────────────────────────── */
+
+@media (max-width: 767.98px) {
+    .main-content .nav-tabs,
+    .main-content .nav-pills {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .main-content .nav-tabs .nav-link,
+    .main-content .nav-pills .nav-link {
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .main-content .d-flex.justify-content-end,
+    .main-content .d-flex.justify-content-between {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .main-content .btn {
+        white-space: normal;
+    }
+}
+
+/* ── 7. Forms on a phone ─────────────────────────────────────────────────── */
+
+@media (max-width: 575.98px) {
+    .main-content input,
+    .main-content select,
+    .main-content textarea,
+    .sb2-2 input,
+    .sb2-2 select,
+    .sb2-2 textarea {
+        max-width: 100%;
+    }
+
+    /* iOS zooms the whole page when a focused control is under 16px. */
+    .main-content input:not([type="checkbox"]):not([type="radio"]),
+    .main-content select,
+    .main-content textarea,
+    .sb2-2 input:not([type="checkbox"]):not([type="radio"]),
+    .sb2-2 select,
+    .sb2-2 textarea {
+        font-size: 16px;
+    }
+}
+
+/* ── 8. Top bar on very narrow handsets ──────────────────────────────────── */
+
+@media (max-width: 400px) {
+    .top-header {
+        padding: 0 12px;
+    }
+
+    .header-icon {
+        padding: 4px;
+    }
+}

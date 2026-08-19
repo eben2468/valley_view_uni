@@ -33,31 +33,58 @@ $stmt->execute();
 $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 /**
- * Turn a stored item_link into a usable href, or null when there is no file
- * behind it.
+ * A human-readable name for the saved file.
+ *
+ * Uploaded forms are stored under a generated name (form_1755….pdf) so that a
+ * hostile filename can never be written into the web root. That is the right
+ * thing on disk and the wrong thing in the visitor's Downloads folder, so the
+ * anchor's download attribute renames it to the form's title on the way out.
+ */
+function vvu_form_filename($title, $href)
+{
+    $extension = strtolower(pathinfo(parse_url($href, PHP_URL_PATH), PATHINFO_EXTENSION));
+    $name = trim(preg_replace('/[^A-Za-z0-9]+/', ' ', strip_tags((string) $title)));
+
+    if ($name === '') {
+        return '';
+    }
+
+    return str_replace(' ', '-', $name) . ($extension !== '' ? '.' . $extension : '');
+}
+
+/**
+ * Work out what a stored item_link actually points at.
  *
  * item_link is free text typed into the admin panel (manage_resources_pages.php
- * "Link URL / File Path"), so it can be an external URL, an internal page, or a
- * path to a document in uploads/. Only the last kind needs work:
+ * "Link URL / File Path"), so a card can be one of two quite different things:
  *
- *   - The forms live in "uploads/Download Forms/", but several rows were typed
- *     as "uploads/<file>.pdf" or as a bare filename, so the href 404'd.
- *   - Almost every form filename contains spaces, which have to be percent-
- *     encoded per path segment or the link breaks on stricter clients.
+ *   - a document to download — the usual case, a PDF in uploads/Download Forms/
+ *   - a link to somewhere else — another page on the site, or an external URL
  *
- * Returning null lets the caller render the card without a dead button, rather
- * than sending the visitor to a 404 page.
+ * The two cannot be rendered the same way. A page link given the `download`
+ * attribute makes the browser save the HTML instead of opening it, so the card
+ * has to know which kind it is holding.
+ *
+ * Returns null when the target is a file that is not on disk, so the caller can
+ * render the card without a dead button instead of sending anyone to a 404.
+ *
+ * @return array{href:string,kind:string}|null  kind is 'file', 'page' or 'external'
  */
-function vvu_form_href($link)
+function vvu_form_target($link)
 {
     $link = trim((string) $link);
     if ($link === '') {
         return null;
     }
 
-    // External destinations and internal pages are used exactly as stored.
-    if (preg_match('~^([a-z][a-z0-9+.-]*:|//)~i', $link) || preg_match('~\.php($|[?#])~i', $link)) {
-        return $link;
+    // Absolute URLs and protocol-relative links leave the site.
+    if (preg_match('~^([a-z][a-z0-9+.-]*:|//)~i', $link)) {
+        return ['href' => $link, 'kind' => 'external'];
+    }
+
+    // An internal page, with or without a query string or fragment.
+    if (preg_match('~\.php($|[?#])~i', $link)) {
+        return ['href' => $link, 'kind' => 'page'];
     }
 
     $path = ltrim(str_replace('\\', '/', $link), '/');
@@ -68,12 +95,23 @@ function vvu_form_href($link)
     // separately by tools/fix_download_form_links.php.
     foreach ([$path, 'uploads/Download Forms/' . $name, 'uploads/' . $name] as $candidate) {
         if ($name !== '' && is_file(__DIR__ . '/' . $candidate)) {
-            return implode('/', array_map('rawurlencode', explode('/', $candidate)));
+            return [
+                'href' => implode('/', array_map('rawurlencode', explode('/', $candidate))),
+                'kind' => 'file',
+            ];
         }
+    }
+
+    // Not a file on disk. A bare path with no extension is almost certainly a
+    // link the admin typed (a pretty URL or a folder), so treat it as one
+    // rather than showing "Coming Soon" for something that works.
+    if (!preg_match('~\.[a-z0-9]{2,5}$~i', $name)) {
+        return ['href' => $path, 'kind' => 'page'];
     }
 
     return null;
 }
+
 ?>
 
 <style>
@@ -205,21 +243,36 @@ function vvu_form_href($link)
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        <?php foreach ($section_items as $item): $href = vvu_form_href($item['item_link']); ?>
+                        <?php
+                        foreach ($section_items as $item):
+                            $target = vvu_form_target($item['item_link']);
+                            // A file is saved, a link is followed. Only the
+                            // first gets the download attribute; giving it to a
+                            // page link would save the HTML instead of opening it.
+                            $is_file  = $target !== null && $target['kind'] === 'file';
+                            $is_away  = $target !== null && $target['kind'] === 'external';
+                            $btn_icon = $is_file ? 'download' : ($is_away ? 'open_in_new' : 'arrow_forward');
+                            $btn_text = $is_file ? 'Download Form' : 'Open Page';
+                            // The badge defaults to the file type; a link is not a PDF.
+                            $badge = $item['item_subtitle'] ?: ($is_file ? 'PDF' : 'Link');
+                        ?>
                         <div class="download-card bg-white dark:bg-gray-900 p-10 rounded-[2rem] shadow-lg hover:shadow-2xl border border-<?php echo $config['color']; ?>-100 dark:border-gray-700 group">
                             <div class="flex flex-col gap-5">
                                 <div class="flex items-center gap-5">
                                     <div class="w-18 h-18 rounded-xl bg-gradient-to-br from-<?php echo $config['color']; ?>-500 to-<?php echo $config['color']; ?>-600 flex items-center justify-center text-white shrink-0 shadow-lg group-hover:scale-110 transition-transform" style="width: 4.5rem; height: 4.5rem;">
                                         <span class="material-symbols-outlined text-3xl"><?php echo strip_tags($item['item_icon'] ?: 'description'); ?></span>
                                     </div>
-                                    <span class="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-lg font-bold rounded-lg"><?php echo $item['item_subtitle'] ?: 'PDF'; ?></span>
+                                    <span class="px-4 py-2 <?php echo $is_file ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'; ?> text-lg font-bold rounded-lg"><?php echo strip_tags($badge); ?></span>
                                 </div>
                                 <h4 class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white group-hover:text-<?php echo $config['color']; ?>-600 transition-colors"><?php echo strip_tags($item['item_title']); ?></h4>
                                 <p class="text-xl text-gray-500 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($item['item_description']); ?></p>
-                                <?php if ($href !== null): ?>
-                                <a href="<?php echo htmlspecialchars($href, ENT_QUOTES); ?>" download class="inline-flex items-center justify-center gap-4 w-full px-8 py-5 bg-<?php echo $config['color']; ?>-<?php echo $config['color'] == 'yellow' ? '500' : '600'; ?> hover:bg-<?php echo $config['color']; ?>-700 text-white rounded-xl text-xl font-bold transition-all shadow-md hover:shadow-xl mt-2">
-                                    <span class="material-symbols-outlined text-2xl">download</span>
-                                    Download Form
+                                <?php if ($target !== null): ?>
+                                <a href="<?php echo htmlspecialchars($target['href'], ENT_QUOTES); ?>"
+                                   <?php if ($is_file): ?>download="<?php echo htmlspecialchars(vvu_form_filename($item['item_title'], $target['href']), ENT_QUOTES); ?>"<?php endif; ?>
+                                   <?php if ($is_away): ?>target="_blank" rel="noopener noreferrer"<?php endif; ?>
+                                   class="inline-flex items-center justify-center gap-4 w-full px-8 py-5 bg-<?php echo $config['color']; ?>-<?php echo $config['color'] == 'yellow' ? '500' : '600'; ?> hover:bg-<?php echo $config['color']; ?>-700 text-white rounded-xl text-xl font-bold transition-all shadow-md hover:shadow-xl mt-2">
+                                    <span class="material-symbols-outlined text-2xl"><?php echo $btn_icon; ?></span>
+                                    <?php echo $btn_text; ?>
                                 </a>
                                 <?php else: ?>
                                 <span class="inline-flex items-center justify-center gap-4 w-full px-8 py-5 bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-xl text-xl font-bold shadow-inner mt-2 cursor-not-allowed" title="This form has not been uploaded yet.">

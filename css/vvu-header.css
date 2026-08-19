@@ -14,6 +14,14 @@
    1. DESIGN TOKENS
    -------------------------------------------------------------------------- */
 :root {
+    /* The university name in the masthead is set in Baskerville, apart from
+       the Cinzel used for navigation and section headings. Libre Baskerville
+       is the web cut (loaded in includes/header.php); the rest of the stack is
+       the desktop Baskervilles, so the lockup still reads correctly if Google
+       Fonts is blocked or slow. */
+    --vvu-brand-font: 'Libre Baskerville', Baskerville, 'Baskerville Old Face',
+        'Hoefler Text', Garamond, 'Times New Roman', serif;
+
     /* Brand palette — navy base (matches the site footer), gold ornament,
        ember orange reserved for calls to action. */
     --vvu-navy: #002147;
@@ -582,11 +590,18 @@
 }
 
 .vvu-nav__mini span {
-    font-family: 'Cinzel', Georgia, serif;
-    font-size: clamp(15px, 1.35vw, 21px);
-    font-weight: 600;
+    font-family: var(--vvu-brand-font);
+    /* Measured: Libre Baskerville is ~6% narrower than the Cinzel it replaced
+       at the same size, so no width compensation was needed for the swap. The
+       ceiling and tracking are eased back anyway because .vvu-nav__mini is
+       flex: 0 1 auto and the nav squeezes it below ~1450px, where the name
+       ellipsises. Smaller text simply survives that squeeze at more widths.
+       Weight is 400 because Libre Baskerville ships only 400 and 700 — the
+       previous 600 would be synthesised into the bold cut. */
+    font-size: clamp(15px, 1.3vw, 20px);
+    font-weight: 400;
     line-height: 1.15;
-    letter-spacing: .03em;
+    letter-spacing: .01em;
     color: var(--vvu-navy);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1168,11 +1183,14 @@
 
 .vvu-mobilebar__brand span {
     min-width: 0;
-    font-family: 'Cinzel', Georgia, serif;
-    font-size: clamp(10.5px, 3.1vw, 15px);
+    font-family: var(--vvu-brand-font);
+    /* Same reasoning as the desktop lockup: the tracking goes and the ceiling
+       drops so the uppercase name survives the squeeze on a wide handset,
+       where the brand cell is capped well below the text's natural width. */
+    font-size: clamp(10.5px, 3vw, 14px);
     font-weight: 700;
     line-height: 1.15;
-    letter-spacing: .02em;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: var(--vvu-navy);
     white-space: nowrap;
@@ -1304,7 +1322,7 @@
 
 .vvu-drawer__head strong {
     display: block;
-    font-family: 'Cinzel', Georgia, serif;
+    font-family: var(--vvu-brand-font);
     font-size: 14px;
     font-weight: 700;
     line-height: 1.2;

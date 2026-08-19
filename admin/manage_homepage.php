@@ -21,9 +21,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             if ($action === 'add_slider') {
-                $stmt = $pdo->prepare("INSERT INTO homepage_sliders (image_url, title, highlight_text, description, button1_text, button1_link, button2_text, button2_link, button3_text, button3_link, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$image_url, $_POST['title'], $_POST['highlight_text'], $_POST['description'], $_POST['button1_text'], $_POST['button1_link'], $_POST['button2_text'], $_POST['button2_link'], $_POST['button3_text'], $_POST['button3_link'], $_POST['display_order'], $_POST['is_active'] ?? 1]);
-                $success = "Slider added successfully!";
+                // A newly added slider always leads the carousel: push every
+                // existing one down a place, then take position 1. Both
+                // statements run in one transaction so a failure part-way
+                // through cannot leave two sliders sharing an order.
+                $pdo->beginTransaction();
+                try {
+                    $pdo->exec("UPDATE homepage_sliders SET display_order = display_order + 1");
+
+                    $stmt = $pdo->prepare("INSERT INTO homepage_sliders (image_url, title, highlight_text, description, button1_text, button1_link, button2_text, button2_link, button3_text, button3_link, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)");
+                    $stmt->execute([$image_url, $_POST['title'], $_POST['highlight_text'], $_POST['description'], $_POST['button1_text'], $_POST['button1_link'], $_POST['button2_text'], $_POST['button2_link'], $_POST['button3_text'], $_POST['button3_link'], $_POST['is_active'] ?? 1]);
+
+                    $pdo->commit();
+                } catch (Exception $e) {
+                    $pdo->rollBack();
+                    throw $e;
+                }
+                $success = "Slider added and placed first. The other sliders moved down one place.";
             } else {
                 $stmt = $pdo->prepare("UPDATE homepage_sliders SET image_url=?, title=?, highlight_text=?, description=?, button1_text=?, button1_link=?, button2_text=?, button2_link=?, button3_text=?, button3_link=?, display_order=?, is_active=? WHERE id=?");
                 $stmt->execute([$image_url, $_POST['title'], $_POST['highlight_text'], $_POST['description'], $_POST['button1_text'], $_POST['button1_link'], $_POST['button2_text'], $_POST['button2_link'], $_POST['button3_text'], $_POST['button3_link'], $_POST['display_order'], $_POST['is_active'] ?? 1, $_POST['id']]);
@@ -338,8 +352,18 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             </div>
                             <div class="row">
                                 <div class="input-field col s6">
-                                    <input type="number" name="display_order" value="<?php echo $edit_data['display_order'] ?? '0'; ?>" required>
-                                    <label>Display Order</label>
+                                    <?php if ($edit_type === 'slider'): ?>
+                                        <input type="number" name="display_order" value="<?php echo $edit_data['display_order'] ?? '0'; ?>" required>
+                                        <label>Display Order</label>
+                                    <?php else: ?>
+                                        <!-- A new slider is always inserted at position 1, so there is
+                                             nothing to choose here. Showing the box anyway invited an
+                                             order that the insert would immediately overrule. -->
+                                        <p class="grey-text text-darken-1" style="margin: 8px 0 0;">
+                                            <i class="material-icons tiny">vertical_align_top</i>
+                                            Shows <strong>first</strong>. Existing sliders each move down one place.
+                                        </p>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="input-field col s6">
                                     <select name="is_active" class="browser-default">
