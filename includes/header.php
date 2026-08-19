@@ -205,7 +205,7 @@ if (!function_exists('vvu_split_sections')) {
     <!-- CUSTOM FIXES -->
     <link href="css/custom-fixes.css" rel="stylesheet" />
     <!-- MASTHEAD & NAVIGATION (loads last so it wins over the legacy theme) -->
-    <link href="css/vvu-header.css" rel="stylesheet" />
+    <link href="css/vvu-header.css?v=1.1" rel="stylesheet" />
     <script src="js/vvu-header.js" defer></script>
 </head>
 

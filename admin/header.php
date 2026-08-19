@@ -35,7 +35,7 @@ require_once('../includes/upload_helper.php');
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- CUSTOM ADMIN CSS -->
-    <link href="admin-styles.css?v=1.3" rel="stylesheet" />
+    <link href="admin-styles.css?v=1.4" rel="stylesheet" />
     <link href="admin-modern.css?v=1.3" rel="stylesheet" />
     <!-- Responsive corrections. Loaded last so it can override the two above;
          its companion script tags wide tables and fixed grids that only a
