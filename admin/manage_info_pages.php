@@ -98,6 +98,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $uploaded = isset($_FILES['item_image_file']) ? handleAdminFileUpload($_FILES['item_image_file'], 'info') : null;
             if ($uploaded) $item_image = $uploaded;
 
+            // Downloadable document. Separate from the image above: a PDF put
+            // through the image box uploads fine but lands in item_image, so
+            // the public page has no link to offer and the card stays dead.
+            $item_link = vvu_resource_item_link($_POST['page_key'] ?? $_GET['page'] ?? '');
+
             $stmt = $pdo->prepare("
                 UPDATE academic_pages_items SET
                     item_title = ?,
@@ -118,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['item_icon'] ?? '',
                 $_POST['item_color'] ?? 'blue-600',
                 $item_image,
-                $_POST['item_link'] ?? '',
+                $item_link,
                 $_POST['item_stat_value'] ?? '',
                 isset($_POST['is_active']) ? 1 : 0,
                 $_POST['item_id']
@@ -130,6 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $item_image = $_POST['item_image'] ?? '';
             $uploaded = isset($_FILES['item_image_file']) ? handleAdminFileUpload($_FILES['item_image_file'], 'info') : null;
             if ($uploaded) $item_image = $uploaded;
+
+            $item_link = vvu_resource_item_link($_POST['page_key'] ?? '');
 
             $stmt = $pdo->prepare("
                 INSERT INTO academic_pages_items (page_key, section_key, item_title, item_subtitle, item_description, item_icon, item_color, item_image, item_link, item_stat_value, display_order)
@@ -144,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['item_icon'] ?? '',
                 $_POST['item_color'] ?? 'blue-600',
                 $item_image,
-                $_POST['item_link'] ?? '',
+                $item_link,
                 $_POST['item_stat_value'] ?? '',
                 $_POST['page_key'],
                 $_POST['section_key']
@@ -418,6 +425,7 @@ include 'sidebar.php';
                                 <form method="POST" action="" enctype="multipart/form-data">
                                     <input type="hidden" name="action" value="update_item">
                                     <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
+                                    <input type="hidden" name="page_key" value="<?php echo htmlspecialchars($current_page_key); ?>">
                                     
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                                         <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1;">
@@ -463,9 +471,23 @@ include 'sidebar.php';
                                             <i class="fas fa-image"></i> Asset Management
                                         </label>
                                         <div style="display: flex; gap: 10px;">
-                                            <input type="text" name="item_image" value="<?php echo htmlspecialchars(strip_tags($item['item_image'] ?? '')); ?>" style="flex-grow: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; font-size: 0.8rem;" placeholder="Direct URL">
-                                            <input type="file" name="item_image_file" style="width: 100px; font-size: 0.7rem;">
+                                            <input type="text" name="item_image" value="<?php echo htmlspecialchars(strip_tags($item['item_image'] ?? '')); ?>" style="flex-grow: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; font-size: 0.8rem;" placeholder="Direct URL (image only)">
+                                            <input type="file" name="item_image_file" accept="image/*" style="width: 100px; font-size: 0.7rem;">
                                         </div>
+                                        <p style="margin: 8px 0 0; font-size: 0.7rem; color: #94a3b8;">Images only. A PDF belongs in the box below, or it will not be downloadable.</p>
+                                    </div>
+
+                                    <div style="margin-top: 12px; background: #fafafa; padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9;">
+                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">
+                                            <i class="fas fa-file-arrow-down"></i> Downloadable Document
+                                        </label>
+                                        <input type="file" name="item_file" accept=".pdf,.doc,.docx,.xls,.xlsx" style="width: 100%; font-size: 0.75rem;">
+                                        <p style="margin: 8px 0 0; font-size: 0.7rem; color: #94a3b8;">
+                                            PDF, Word or Excel. Fills in the Link / Action URL above.
+                                            <?php if (!empty($item['item_link']) && preg_match('~\.(pdf|docx?|xlsx?)$~i', $item['item_link'])): ?>
+                                                Current: <a href="../<?php echo implode('/', array_map('rawurlencode', explode('/', $item['item_link']))); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars(basename($item['item_link'])); ?></a>
+                                            <?php endif; ?>
+                                        </p>
                                     </div>
 
                                     <div style="margin-top: 20px;">
@@ -569,7 +591,12 @@ include 'sidebar.php';
                 <label style="display: block; font-weight: 800; font-size: 0.8rem; color: #475569; margin-bottom: 10px;">Media Asset (Optional)</label>
                 <div style="display: flex; gap: 10px;">
                     <input type="text" name="item_image" placeholder="Image URL" style="flex-grow: 1; padding: 10px; border: 2px solid #e2e8f0; border-radius: 10px;">
-                    <input type="file" name="item_image_file" style="width: 150px; font-size: 0.7rem;">
+                    <input type="file" name="item_image_file" accept="image/*" style="width: 150px; font-size: 0.7rem;">
+                </div>
+                <div style="margin-top: 12px;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">Downloadable Document</label>
+                    <input type="file" name="item_file" accept=".pdf,.doc,.docx,.xls,.xlsx" style="width: 100%; font-size: 0.75rem;">
+                    <p style="margin: 6px 0 0; font-size: 0.7rem; color: #94a3b8;">PDF, Word or Excel &mdash; fills in the Link / Action URL for you.</p>
                 </div>
             </div>
 

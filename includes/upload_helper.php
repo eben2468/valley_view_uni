@@ -218,3 +218,224 @@ if (!function_exists('handleAdminFileUpload')) {
         return null;
     }
 }
+
+/**
+ * Where a document uploaded against a CMS item should be stored.
+ *
+ * Download Forms keeps its PDFs in uploads/Download Forms/ alongside the ones
+ * already published there, which is where download-forms.php looks for them.
+ * Everything else goes to the generic resources folder.
+ */
+if (!function_exists('vvu_resource_upload_dir')) {
+    function vvu_resource_upload_dir($page_key)
+    {
+        return $page_key === 'download_forms' ? 'Download Forms' : 'resources';
+    }
+}
+
+/**
+ * The item's downloadable file: a freshly uploaded one when the admin chose a
+ * file, otherwise whatever path is already typed in the link box.
+ *
+ * Lives here rather than in one manager because two separate admin screens
+ * edit the same academic_pages_items rows — manage_resources_pages.php and
+ * manage_info_pages.php both list Download Forms — and a document uploaded
+ * through either has to end up in the same column and the same folder.
+ *
+ * UPLOAD_ERR_NO_FILE is the only error worth ignoring: it just means the field
+ * was left empty. Every other failure is left for handleAdminFileUpload to
+ * record, and admin/header.php shows it on the next page load, so a rejected
+ * upload can no longer look like a successful save.
+ */
+if (!function_exists('vvu_resource_item_link')) {
+    function vvu_resource_item_link($page_key)
+    {
+        $link = $_POST['item_link'] ?? '';
+
+        if (isset($_FILES['item_file']) && $_FILES['item_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $uploaded = handleAdminFileUpload($_FILES['item_file'], vvu_resource_upload_dir($page_key), 'form_');
+            if ($uploaded) {
+                $link = $uploaded;
+            }
+        }
+
+        return $link;
+    }
+}
+
+if (!function_exists('vvu_video_upload_types')) {
+    /**
+     * Video formats the homepage player accepts, mapped to the extension the
+     * file is stored under. Deliberately narrow: these four are the only
+     * containers every current browser can play without a plugin.
+     *
+     * .mov is included because that is what an iPhone produces, but Safari is
+     * the only browser that reliably plays it — the admin form warns about it.
+     */
+    function vvu_video_upload_types() {
+        return [
+            'video/mp4'        => 'mp4',
+            'video/webm'       => 'webm',
+            'video/ogg'        => 'ogv',
+            'video/quicktime'  => 'mov',
+        ];
+    }
+}
+
+if (!function_exists('handleAdminVideoUpload')) {
+    /**
+     * Stores an uploaded video and returns its path relative to the project
+     * root, or null on failure (with the reason in vvu_last_upload_error()).
+     *
+     * Kept separate from handleAdminFileUpload() rather than widening that
+     * function's allow-list: images and documents are uploaded on ~30 admin
+     * screens, and none of them should silently start accepting a 60MB video.
+     */
+    function handleAdminVideoUpload($file, $targetSubDir = 'videos', $prefix = 'video_') {
+        vvu_set_upload_error(null);
+
+        if (!isset($file) || !is_array($file)) {
+            return null;
+        }
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            if ($file['error'] !== UPLOAD_ERR_NO_FILE) {
+                vvu_set_upload_error(vvu_upload_error_message($file['error']));
+            }
+            return null;
+        }
+
+        $uploadBase = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+        $targetDir  = $uploadBase . rtrim($targetSubDir, '/\\') . DIRECTORY_SEPARATOR;
+
+        if (!is_dir($targetDir)) {
+            if (!@mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+                vvu_set_upload_error('Could not create the upload folder (' . htmlspecialchars($targetSubDir) . '). Set uploads/ to 755 on the server.');
+                return null;
+            }
+        }
+
+        if (!is_writable($targetDir)) {
+            vvu_set_upload_error('The upload folder is not writable (uploads/' . htmlspecialchars(rtrim($targetSubDir, '/\\')) . '). Set it to 755 on the server.');
+            return null;
+        }
+
+        $allowed = vvu_video_upload_types();
+        $mimeType = vvu_detect_video_mime($file['tmp_name'], $file['name']);
+
+        if ($mimeType === null) {
+            vvu_set_upload_error('The server could not determine the file type. Ask your host to enable the PHP "fileinfo" extension.');
+            return null;
+        }
+
+        if (!isset($allowed[$mimeType])) {
+            vvu_set_upload_error("That file type ({$mimeType}) is not a supported video. Use MP4, WebM, OGV or MOV.");
+            return null;
+        }
+
+        // Extension comes from the detected type, never the uploaded filename,
+        // for the same reason as in handleAdminFileUpload().
+        $filename   = $prefix . time() . '_' . uniqid() . '.' . $allowed[$mimeType];
+        $targetPath = $targetDir . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            @chmod($targetPath, 0644);
+            return 'uploads/' . rtrim($targetSubDir, '/\\') . '/' . $filename;
+        }
+
+        vvu_set_upload_error('The video could not be saved to the server. Check that uploads/ is writable.');
+
+        return null;
+    }
+}
+
+if (!function_exists('vvu_detect_video_mime')) {
+    /**
+     * MIME type of an uploaded video.
+     *
+     * vvu_detect_mime() is image/document oriented — its getimagesize() and
+     * extension fallbacks know nothing about video — so a host without the
+     * "fileinfo" extension would reject every video with a confusing message.
+     * This adds a video-aware fallback: the container signature in the first
+     * bytes, then the extension.
+     */
+    function vvu_detect_video_mime($tmpPath, $originalName = '') {
+        if (function_exists('finfo_open')) {
+            $finfo = @finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo) {
+                $mime = @finfo_file($finfo, $tmpPath);
+                finfo_close($finfo);
+                if (is_string($mime) && $mime !== '' && $mime !== 'application/octet-stream') {
+                    return $mime;
+                }
+            }
+        }
+
+        // Fallback 1: container signatures.
+        $head = '';
+        $fh = @fopen($tmpPath, 'rb');
+        if ($fh) {
+            $head = (string) fread($fh, 16);
+            fclose($fh);
+        }
+
+        if ($head !== '') {
+            if (substr($head, 4, 4) === 'ftyp') {
+                // ISO base media: MP4 and QuickTime share it; the brand tells
+                // them apart ('qt  ' is QuickTime, everything else is MP4).
+                return substr($head, 8, 4) === 'qt  ' ? 'video/quicktime' : 'video/mp4';
+            }
+            if (substr($head, 0, 4) === "\x1A\x45\xDF\xA3") {
+                return 'video/webm';   // Matroska/WebM
+            }
+            if (substr($head, 0, 4) === 'OggS') {
+                return 'video/ogg';
+            }
+        }
+
+        // Fallback 2: the extension, still checked against the allow-list.
+        $byExtension = [
+            'mp4'  => 'video/mp4',
+            'm4v'  => 'video/mp4',
+            'webm' => 'video/webm',
+            'ogv'  => 'video/ogg',
+            'ogg'  => 'video/ogg',
+            'mov'  => 'video/quicktime',
+        ];
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+        return $byExtension[$ext] ?? null;
+    }
+}
+
+if (!function_exists('vvu_php_upload_limit_bytes')) {
+    /**
+     * The smaller of upload_max_filesize and post_max_size, in bytes — the
+     * real ceiling a single uploaded file has to stay under. Shown to the
+     * editor so an oversized video is caught in the browser rather than
+     * failing halfway through a long upload.
+     */
+    function vvu_php_upload_limit_bytes() {
+        $toBytes = function ($value) {
+            $value = trim((string) $value);
+            if ($value === '') {
+                return 0;
+            }
+            $unit   = strtolower(substr($value, -1));
+            $number = (float) $value;
+            switch ($unit) {
+                case 'g': return (int) ($number * 1024 * 1024 * 1024);
+                case 'm': return (int) ($number * 1024 * 1024);
+                case 'k': return (int) ($number * 1024);
+                default:  return (int) $number;
+            }
+        };
+
+        $limits = array_filter([
+            $toBytes(ini_get('upload_max_filesize')),
+            $toBytes(ini_get('post_max_size')),
+        ]);
+
+        return $limits ? min($limits) : 0;
+    }
+}

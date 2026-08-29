@@ -790,6 +790,14 @@ function getHImg($path, $cat) {
 <?php
 require_once 'includes/image_helper.php';
 require_once 'includes/video_helper.php';
+
+// The video box plays either an uploaded file (uploads/videos/...) or a
+// YouTube embed, whichever the admin chose. A row with neither — an upload
+// whose file was deleted and no link to fall back on — shows the empty state
+// rather than a broken player.
+$video_is_upload = $video ? vvu_video_is_upload($video) : false;
+$video_embed     = ($video && !$video_is_upload) ? vvu_video_embed(strip_tags($video['video_url'] ?? '')) : '';
+$video_playable  = $video && ($video_is_upload || $video_embed !== '');
 ?>
 <section class="modern-media-section">
     <div class="container">
@@ -828,14 +836,25 @@ require_once 'includes/video_helper.php';
                     <h4>Latest Campus Video</h4>
                     <p>See the university through our lens</p>
                 </div>
-                <?php if ($video): ?>
+                <?php if ($video_playable): ?>
                     <div class="modern-video-wrapper">
                         <div class="video-frame">
-                            <iframe src="<?php echo htmlspecialchars(vvu_video_embed(strip_tags($video['video_url']))); ?>"
-                                    title="<?php echo htmlspecialchars(strip_tags($video['title'])); ?>"
-                                    frameborder="0" loading="lazy"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
+                            <?php if ($video_is_upload):
+                                $video_file = strip_tags($video['video_file']); ?>
+                                <video controls preload="metadata" playsinline
+                                       title="<?php echo htmlspecialchars(strip_tags($video['title'])); ?>">
+                                    <source src="<?php echo htmlspecialchars($video_file); ?>"
+                                            type="<?php echo htmlspecialchars(vvu_video_mime($video_file)); ?>">
+                                    Your browser cannot play this video.
+                                    <a href="<?php echo htmlspecialchars($video_file); ?>">Download it instead</a>.
+                                </video>
+                            <?php else: ?>
+                                <iframe src="<?php echo htmlspecialchars($video_embed); ?>"
+                                        title="<?php echo htmlspecialchars(strip_tags($video['title'])); ?>"
+                                        frameborder="0" loading="lazy"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen></iframe>
+                            <?php endif; ?>
                         </div>
                         <div class="video-info">
                             <h5><?php echo strip_tags($video['title']); ?></h5>

@@ -67,45 +67,6 @@ $managed_pages = [
 $message = '';
 $message_type = '';
 
-/**
- * Where a document uploaded against a resources item should be stored.
- *
- * Download Forms keeps its PDFs in uploads/Download Forms/ alongside the ones
- * already published there, which is where download-forms.php looks for them.
- * Everything else goes to the generic resources folder.
- */
-if (!function_exists('vvu_resource_upload_dir')) {
-    function vvu_resource_upload_dir($page_key)
-    {
-        return $page_key === 'download_forms' ? 'Download Forms' : 'resources';
-    }
-}
-
-/**
- * The item's downloadable file: a freshly uploaded one when the admin chose a
- * file, otherwise whatever path is already typed in the text box.
- *
- * UPLOAD_ERR_NO_FILE is the only error worth ignoring — it just means the
- * field was left empty. Every other failure is left for handleAdminFileUpload
- * to record, and admin/header.php shows it on the next page load, so a
- * rejected upload can no longer look like a successful save.
- */
-if (!function_exists('vvu_resource_item_link')) {
-    function vvu_resource_item_link($page_key)
-    {
-        $link = $_POST['item_link'] ?? '';
-
-        if (isset($_FILES['item_file']) && $_FILES['item_file']['error'] !== UPLOAD_ERR_NO_FILE) {
-            $uploaded = handleAdminFileUpload($_FILES['item_file'], vvu_resource_upload_dir($page_key), 'form_');
-            if ($uploaded) {
-                $link = $uploaded;
-            }
-        }
-
-        return $link;
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     

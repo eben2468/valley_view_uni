@@ -5,6 +5,10 @@ require_once('../includes/db_connect.php');
 require_once('../includes/upload_helper.php');
 require_once('../includes/video_helper.php');
 
+// The video box can play an uploaded file as well as a YouTube embed; this
+// adds the columns that record which, on the first load after deploying.
+vvu_video_install($pdo);
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -138,14 +142,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // VIDEO ACTIONS
         elseif ($action === 'edit_video') {
-            // Accept any YouTube link shape and store a playable embed URL
-            $video_url = vvu_video_embed($_POST['video_url'] ?? '');
-            $stmt = $pdo->prepare("UPDATE homepage_video SET video_url=?, title=?, description=?, is_active=? WHERE id=?");
-            $stmt->execute([$video_url, $_POST['title'], $_POST['description'], $_POST['is_active'] ?? 1, $_POST['id']]);
+            // Two sources: a YouTube link (any shape is normalised to a
+            // playable embed URL) or a file uploaded to uploads/videos/.
+            $video_source = ($_POST['video_source'] ?? 'youtube') === 'upload' ? 'upload' : 'youtube';
+            $video_url    = vvu_video_embed($_POST['video_url'] ?? '');
 
-            $success = "Video updated successfully!";
-            if (vvu_youtube_id($video_url) === null && trim($video_url) !== '') {
-                $success .= " (Note: this doesn't look like a YouTube link — check the homepage to confirm it plays.)";
+            // Keep the stored file unless a new one is uploaded, so saving a
+            // title change does not wipe the video.
+            $current    = $pdo->query("SELECT * FROM homepage_video LIMIT 1")->fetch();
+            $video_file = trim((string) ($current['video_file'] ?? ''));
+            $video_problem = '';
+
+            if (isset($_FILES['video_upload']) && $_FILES['video_upload']['error'] !== UPLOAD_ERR_NO_FILE) {
+                $uploaded = handleAdminVideoUpload($_FILES['video_upload']);
+                if ($uploaded) {
+                    if ($video_file !== '' && $video_file !== $uploaded) {
+                        vvu_video_delete_file($video_file);
+                    }
+                    $video_file = $uploaded;
+                } else {
+                    $video_problem = vvu_last_upload_error() ?: 'The video could not be uploaded.';
+                }
+            }
+
+            if ($video_problem === '' && $video_source === 'upload' && $video_file === '') {
+                $video_problem = 'Choose a video file to upload, or switch back to "YouTube link".';
+            } elseif ($video_problem === '' && $video_source === 'youtube' && trim($video_url) === '') {
+                $video_problem = 'Please paste a YouTube link.';
+            }
+
+            if ($video_problem !== '') {
+                $error = $video_problem;
+            } else {
+                $stmt = $pdo->prepare("UPDATE homepage_video SET video_source=?, video_url=?, video_file=?, title=?, description=?, is_active=? WHERE id=?");
+                $stmt->execute([
+                    $video_source,
+                    $video_url,
+                    $video_file !== '' ? $video_file : null,
+                    $_POST['title'],
+                    $_POST['description'],
+                    $_POST['is_active'] ?? 1,
+                    $_POST['id'],
+                ]);
+
+                $success = "Video updated successfully!";
+                if ($video_source === 'youtube' && vvu_youtube_id($video_url) === null && trim($video_url) !== '') {
+                    $success .= " (Note: this doesn't look like a YouTube link — check the homepage to confirm it plays.)";
+                } elseif ($video_source === 'upload' && strtolower(pathinfo($video_file, PATHINFO_EXTENSION)) === 'mov') {
+                    $success .= " (Note: .mov files usually play only in Safari — convert to MP4 if visitors see a blank player.)";
+                }
             }
         }
         
@@ -881,14 +926,39 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                         <h4>Edit Homepage Video</h4>
                     </div>
                     <div class="tab-inn">
-                        <form method="POST" class="s12">
+                        <?php
+                        $video_source = ($video['video_source'] ?? 'youtube') === 'upload' ? 'upload' : 'youtube';
+                        $video_file   = trim((string) ($video['video_file'] ?? ''));
+                        $upload_limit = vvu_php_upload_limit_bytes();
+                        ?>
+                        <form method="POST" class="s12" enctype="multipart/form-data" id="video_form">
                             <input type="hidden" name="action" value="edit_video">
                             <input type="hidden" name="id" value="<?php echo (int) ($video['id'] ?? 1); ?>">
 
+                            <!-- Which of the two sources the homepage plays -->
                             <div class="row">
+                                <div class="col s12">
+                                    <p style="margin:0 0 8px; font-weight:600; color:#333;">Where does the video come from?</p>
+                                    <label style="margin-right:24px; color:#333;">
+                                        <input type="radio" name="video_source" value="youtube" class="with-gap"
+                                               <?php echo $video_source === 'youtube' ? 'checked' : ''; ?>>
+                                        <span>YouTube link</span>
+                                    </label>
+                                    <label style="color:#333;">
+                                        <input type="radio" name="video_source" value="upload" class="with-gap"
+                                               <?php echo $video_source === 'upload' ? 'checked' : ''; ?>>
+                                        <span>Upload a video file</span>
+                                    </label>
+                                    <p style="margin:8px 0 0; color:#777; font-size:12px;">
+                                        Both can be filled in &mdash; only the option selected here plays on the homepage.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row" id="video_youtube_fields">
                                 <div class="input-field col s12">
                                     <input type="text" id="video_url" name="video_url"
-                                           value="<?php echo htmlspecialchars($video['video_url'] ?? ''); ?>" required>
+                                           value="<?php echo htmlspecialchars($video['video_url'] ?? ''); ?>">
                                     <label class="active" for="video_url">YouTube Link</label>
                                     <span class="helper-text" style="color:#777; font-size:12px;">
                                         Paste any YouTube link &mdash; the Share link (<code>youtu.be/…</code>),
@@ -898,7 +968,42 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                                 </div>
                             </div>
 
-                            <!-- Live preview: confirms the link actually plays before saving -->
+                            <div class="row" id="video_upload_fields">
+                                <div class="col s12">
+                                    <p style="margin:0 0 8px; font-weight:600; color:#333;">Video File</p>
+                                    <input type="file" id="video_upload" name="video_upload"
+                                           accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                                           style="display:block; margin-bottom:8px;">
+                                    <span class="helper-text" style="color:#777; font-size:12px;">
+                                        MP4 plays everywhere and is the safe choice. WebM and OGV also work;
+                                        .mov files from an iPhone often play only in Safari.
+                                        <?php if ($upload_limit): ?>
+                                            Maximum size on this server: <strong><?php echo round($upload_limit / 1048576); ?>MB</strong>.
+                                        <?php endif; ?>
+                                    </span>
+                                    <p id="video_upload_msg" style="margin-top:8px; font-size:13px; color:#c0392b;"></p>
+                                    <?php if ($video_file !== ''): ?>
+                                        <p style="margin:8px 0 0; font-size:13px; color:#333;">
+                                            Currently uploaded:
+                                            <a href="../<?php echo htmlspecialchars($video_file); ?>" target="_blank" rel="noopener">
+                                                <?php echo htmlspecialchars(basename($video_file)); ?>
+                                            </a>
+                                            <?php if (!vvu_video_file_exists($video_file)): ?>
+                                                <span style="color:#c0392b;">&mdash; this file is missing from the server, upload it again.</span>
+                                            <?php else: ?>
+                                                <span style="color:#777;">
+                                                    (<?php echo round(filesize(dirname(__DIR__) . '/' . $video_file) / 1048576, 1); ?>MB).
+                                                    Choosing a new file replaces it.
+                                                </span>
+                                            <?php endif; ?>
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <!-- Live preview: confirms the video actually plays before saving.
+                                 One box, two players — the iframe for a YouTube link, the
+                                 <video> element for the uploaded (or just-chosen) file. -->
                             <div class="row">
                                 <div class="col s12">
                                     <p style="margin:0 0 8px; font-weight:600; color:#333;">Preview</p>
@@ -906,6 +1011,9 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                                          style="position:relative; width:100%; max-width:520px; aspect-ratio:16/9; background:#000; border-radius:8px; overflow:hidden;">
                                         <iframe id="video_preview" src="" allowfullscreen
                                                 style="position:absolute; inset:0; width:100%; height:100%; border:0;"></iframe>
+                                        <video id="video_file_preview" controls preload="metadata"
+                                               <?php echo vvu_video_file_exists($video_file) ? 'src="../' . htmlspecialchars($video_file) . '"' : ''; ?>
+                                               style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000;"></video>
                                     </div>
                                     <p id="video_preview_msg" style="margin-top:8px; font-size:13px; color:#c0392b;"></p>
                                 </div>
@@ -981,6 +1089,90 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             input.addEventListener('input', refresh);
                             input.addEventListener('change', refresh);
                             refresh();
+
+                            /* YouTube link vs uploaded file: show only the fields for the
+                               chosen source, preview the file the editor just picked, and
+                               refuse one the server would reject anyway. */
+                            var radios      = document.querySelectorAll('input[name="video_source"]');
+                            var youtubeBox  = document.getElementById('video_youtube_fields');
+                            var uploadBox   = document.getElementById('video_upload_fields');
+                            var fileInput   = document.getElementById('video_upload');
+                            var filePreview = document.getElementById('video_file_preview');
+                            var fileMessage = document.getElementById('video_upload_msg');
+                            var videoForm   = document.getElementById('video_form');
+                            if (!radios.length || !youtubeBox || !uploadBox) return;
+
+                            var MAX_BYTES = <?php echo (int) $upload_limit; ?>;
+                            var HAS_FILE  = <?php echo vvu_video_file_exists($video_file) ? 'true' : 'false'; ?>;
+                            var objectUrl = null;
+
+                            function chosenSource() {
+                                var picked = document.querySelector('input[name="video_source"]:checked');
+                                return picked ? picked.value : 'youtube';
+                            }
+
+                            function applySource() {
+                                var upload = chosenSource() === 'upload';
+                                youtubeBox.style.display = upload ? 'none' : '';
+                                uploadBox.style.display  = upload ? '' : 'none';
+
+                                // Only one player is visible at a time, and the hidden one
+                                // is paused so a preview cannot keep playing unseen.
+                                frame.style.display = upload ? 'none' : '';
+                                if (filePreview) {
+                                    filePreview.style.display = upload ? '' : 'none';
+                                    if (!upload) filePreview.pause();
+                                }
+                                if (upload) {
+                                    frame.removeAttribute('src');
+                                    message.textContent = '';
+                                } else {
+                                    refresh();
+                                }
+                            }
+
+                            for (var i = 0; i < radios.length; i++) {
+                                radios[i].addEventListener('change', applySource);
+                            }
+
+                            if (fileInput) {
+                                fileInput.addEventListener('change', function () {
+                                    var file = fileInput.files && fileInput.files[0];
+                                    fileMessage.textContent = '';
+                                    if (!file) return;
+
+                                    if (MAX_BYTES && file.size > MAX_BYTES) {
+                                        fileMessage.textContent = 'This file is ' + (file.size / 1048576).toFixed(1) +
+                                            'MB — the server accepts at most ' + Math.round(MAX_BYTES / 1048576) +
+                                            'MB. Compress it, or put it on YouTube and paste the link instead.';
+                                        fileInput.value = '';
+                                        return;
+                                    }
+
+                                    if (filePreview) {
+                                        if (objectUrl) URL.revokeObjectURL(objectUrl);
+                                        objectUrl = URL.createObjectURL(file);
+                                        filePreview.src = objectUrl;
+                                        filePreview.load();
+                                    }
+                                });
+                            }
+
+                            if (videoForm) {
+                                videoForm.addEventListener('submit', function (event) {
+                                    if (chosenSource() === 'upload' && !HAS_FILE && !(fileInput && fileInput.files.length)) {
+                                        event.preventDefault();
+                                        fileMessage.textContent = 'Choose a video file to upload first.';
+                                        return;
+                                    }
+                                    if (chosenSource() === 'youtube' && !input.value.trim()) {
+                                        event.preventDefault();
+                                        message.textContent = 'Paste a YouTube link first.';
+                                    }
+                                });
+                            }
+
+                            applySource();
                         })();
                         </script>
                     </div>
