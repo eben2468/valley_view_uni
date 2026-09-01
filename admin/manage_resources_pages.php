@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $item_image,
                 $item_link,
                 $_POST['item_stat_value'] ?? '',
-                $_POST['item_extra_data'] ?? null,
+                vvu_json_column_value($_POST['item_extra_data'] ?? null),
                 isset($_POST['is_active']) ? 1 : 0,
                 $_POST['item_id']
             ]);
@@ -175,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $item_image,
                 $item_link,
                 $_POST['item_stat_value'] ?? '',
-                $_POST['item_extra_data'] ?? null,
+                vvu_json_column_value($_POST['item_extra_data'] ?? null),
                 $_POST['page_key'],
                 $_POST['section_key']
             ]);
@@ -207,6 +207,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message_type = "success";
         }
         
+    } catch (InvalidArgumentException $e) {
+        $message = $e->getMessage();
+        $message_type = "error";
     } catch (PDOException $e) {
         $message = "Error: " . $e->getMessage();
         $message_type = "error";

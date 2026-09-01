@@ -439,3 +439,39 @@ if (!function_exists('vvu_php_upload_limit_bytes')) {
         return $limits ? min($limits) : 0;
     }
 }
+
+if (!function_exists('vvu_json_column_value')) {
+    /**
+     * Normalises an "Extra Data (JSON)" form field before it reaches a JSON column.
+     *
+     * `extra_data` is a JSON column, which MariaDB/MySQL enforce with
+     * CHECK (json_valid(`extra_data`)). An empty textarea posts '' rather than
+     * nothing at all, and '' is not valid JSON, so the whole row is rejected with
+     * "Check constraint 'academic_pages_items_chk_1' is violated". Blank means
+     * "no extra data", so it has to arrive as NULL.
+     *
+     * @throws InvalidArgumentException when the editor typed something that is not
+     *         JSON — the save stops with a readable message instead of silently
+     *         discarding what they wrote.
+     */
+    function vvu_json_column_value($value) {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
+        }
+
+        json_decode($value);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new InvalidArgumentException(
+                'The "Extra Data" box must contain valid JSON (for example {"key": "value"}) '
+                . 'or be left empty. Nothing was saved.'
+            );
+        }
+
+        return $value;
+    }
+}
