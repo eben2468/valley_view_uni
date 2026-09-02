@@ -475,3 +475,192 @@ if (!function_exists('vvu_json_column_value')) {
         return $value;
     }
 }
+
+if (!function_exists('vvu_audio_upload_types')) {
+    /**
+     * Audio containers an editor may upload, mapped to the extension they are
+     * stored with. Kept separate from vvu_video_upload_types() so a screen that
+     * wants a video does not silently start accepting an MP3, and vice versa.
+     */
+    function vvu_audio_upload_types() {
+        return [
+            'audio/mpeg'  => 'mp3',
+            'audio/mp3'   => 'mp3',
+            'audio/mp4'   => 'm4a',
+            'audio/x-m4a' => 'm4a',
+            'audio/aac'   => 'm4a',
+            'audio/ogg'   => 'ogg',
+            'audio/wav'   => 'wav',
+            'audio/x-wav' => 'wav',
+            'audio/webm'  => 'weba',
+        ];
+    }
+}
+
+if (!function_exists('vvu_detect_audio_mime')) {
+    /**
+     * MIME type of an uploaded audio file, with the same fallback ladder as
+     * vvu_detect_video_mime(): fileinfo, then the container signature in the
+     * first bytes, then the extension — so a host without the "fileinfo"
+     * extension can still accept an MP3.
+     */
+    function vvu_detect_audio_mime($tmpPath, $originalName = '') {
+        if (function_exists('finfo_open')) {
+            $finfo = @finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo) {
+                $mime = @finfo_file($finfo, $tmpPath);
+                finfo_close($finfo);
+                if (is_string($mime) && $mime !== '' && $mime !== 'application/octet-stream') {
+                    return $mime;
+                }
+            }
+        }
+
+        // Fallback 1: container signatures.
+        $head = '';
+        $fh = @fopen($tmpPath, 'rb');
+        if ($fh) {
+            $head = (string) fread($fh, 16);
+            fclose($fh);
+        }
+
+        if ($head !== '') {
+            if (substr($head, 0, 3) === 'ID3') {
+                return 'audio/mpeg';                       // MP3 carrying an ID3 tag
+            }
+            if (strlen($head) > 1 && ord($head[0]) === 0xFF && (ord($head[1]) & 0xE0) === 0xE0) {
+                return 'audio/mpeg';                       // bare MPEG frame sync
+            }
+            if (substr($head, 4, 4) === 'ftyp' && substr($head, 8, 3) === 'M4A') {
+                return 'audio/mp4';
+            }
+            if (substr($head, 0, 4) === 'OggS') {
+                return 'audio/ogg';
+            }
+            if (substr($head, 0, 4) === 'RIFF' && substr($head, 8, 4) === 'WAVE') {
+                return 'audio/wav';
+            }
+        }
+
+        // Fallback 2: the extension, still checked against the allow-list.
+        $byExtension = [
+            'mp3'  => 'audio/mpeg',
+            'm4a'  => 'audio/mp4',
+            'aac'  => 'audio/aac',
+            'ogg'  => 'audio/ogg',
+            'oga'  => 'audio/ogg',
+            'wav'  => 'audio/wav',
+            'weba' => 'audio/webm',
+        ];
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+        return $byExtension[$ext] ?? null;
+    }
+}
+
+if (!function_exists('handleAdminAudioUpload')) {
+    /**
+     * Stores an uploaded audio file and returns its path relative to the
+     * project root, or null on failure (with the reason in
+     * vvu_last_upload_error()). Mirrors handleAdminVideoUpload().
+     */
+    function handleAdminAudioUpload($file, $targetSubDir = 'audio', $prefix = 'audio_') {
+        vvu_set_upload_error(null);
+
+        if (!isset($file) || !is_array($file)) {
+            return null;
+        }
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            if ($file['error'] !== UPLOAD_ERR_NO_FILE) {
+                vvu_set_upload_error(vvu_upload_error_message($file['error']));
+            }
+            return null;
+        }
+
+        $uploadBase = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+        $targetDir  = $uploadBase . rtrim($targetSubDir, '/\\') . DIRECTORY_SEPARATOR;
+
+        if (!is_dir($targetDir)) {
+            if (!@mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+                vvu_set_upload_error('Could not create the upload folder (' . htmlspecialchars($targetSubDir) . '). Set uploads/ to 755 on the server.');
+                return null;
+            }
+        }
+
+        if (!is_writable($targetDir)) {
+            vvu_set_upload_error('The upload folder is not writable (uploads/' . htmlspecialchars(rtrim($targetSubDir, '/\\')) . '). Set it to 755 on the server.');
+            return null;
+        }
+
+        $allowed  = vvu_audio_upload_types();
+        $mimeType = vvu_detect_audio_mime($file['tmp_name'], $file['name']);
+
+        if ($mimeType === null) {
+            vvu_set_upload_error('The server could not determine the file type. Ask your host to enable the PHP "fileinfo" extension.');
+            return null;
+        }
+
+        if (!isset($allowed[$mimeType])) {
+            vvu_set_upload_error("That file type ({$mimeType}) is not a supported audio file. Use MP3, M4A, OGG or WAV.");
+            return null;
+        }
+
+        // Extension comes from the detected type, never the uploaded filename,
+        // for the same reason as in handleAdminFileUpload().
+        $filename   = $prefix . time() . '_' . uniqid() . '.' . $allowed[$mimeType];
+        $targetPath = $targetDir . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            @chmod($targetPath, 0644);
+            return 'uploads/' . rtrim($targetSubDir, '/\\') . '/' . $filename;
+        }
+
+        vvu_set_upload_error('The audio could not be saved to the server. Check that uploads/ is writable.');
+
+        return null;
+    }
+}
+
+if (!function_exists('vvu_media_is_audio')) {
+    /**
+     * Whether a stored media path points at audio rather than video. Used by
+     * the anthem section, where one column (`video_url`) holds either kind and
+     * the page has to choose between an <audio> and a <video> player.
+     */
+    function vvu_media_is_audio($url) {
+        $path = parse_url(trim((string) $url), PHP_URL_PATH);
+        $ext  = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
+
+        return in_array($ext, ['mp3', 'm4a', 'aac', 'ogg', 'oga', 'wav', 'weba'], true);
+    }
+}
+
+if (!function_exists('vvu_media_mime')) {
+    /**
+     * The `type` attribute for a <source> pointing at a stored media file, so
+     * the browser is told what it is getting. Empty when unknown — an omitted
+     * type is better than a wrong one.
+     */
+    function vvu_media_mime($url) {
+        $path = parse_url(trim((string) $url), PHP_URL_PATH);
+        $ext  = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
+
+        $types = [
+            'mp3'  => 'audio/mpeg',
+            'm4a'  => 'audio/mp4',
+            'aac'  => 'audio/aac',
+            'ogg'  => 'audio/ogg',
+            'oga'  => 'audio/ogg',
+            'wav'  => 'audio/wav',
+            'weba' => 'audio/webm',
+            'mp4'  => 'video/mp4',
+            'm4v'  => 'video/mp4',
+            'webm' => 'video/webm',
+            'ogv'  => 'video/ogg',
+            'mov'  => 'video/quicktime',
+        ];
+
+        return $types[$ext] ?? '';
+    }
+}

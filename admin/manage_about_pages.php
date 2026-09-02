@@ -137,9 +137,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $uploaded = handleAdminFileUpload($_FILES['video_poster_file'], 'about');
             if ($uploaded) $image_url = $uploaded;
 
-            $stmt = $pdo->prepare("UPDATE anthem_video SET section_title=?, section_description=?, video_url=?, video_poster_url=?, is_active=? WHERE id=?");
-            $stmt->execute([$_POST['section_title'], $_POST['section_description'], $_POST['video_url'], $image_url, $_POST['is_active'] ?? 1, $_POST['id']]);
-            $success = "Anthem video section updated successfully!";
+            // The anthem plays either an audio recording or a video clip, and
+            // both live in `video_url`. Keep whatever is stored unless a new
+            // file actually arrives, so editing the description does not wipe
+            // the recording.
+            $media_url = $_POST['video_url'];
+            if (isset($_FILES['anthem_media_file']) && $_FILES['anthem_media_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+                $media = $_FILES['anthem_media_file'];
+                $is_video = strpos((string) vvu_detect_video_mime($media['tmp_name'], $media['name']), 'video/') === 0;
+                $uploaded_media = $is_video
+                    ? handleAdminVideoUpload($media, 'anthem', 'anthem_')
+                    : handleAdminAudioUpload($media, 'anthem', 'anthem_');
+
+                if ($uploaded_media) {
+                    $media_url = $uploaded_media;
+                } else {
+                    $error = vvu_last_upload_error() ?: 'The anthem file could not be uploaded.';
+                }
+            }
+
+            if ($error === '') {
+                $stmt = $pdo->prepare("UPDATE anthem_video SET section_title=?, section_description=?, video_url=?, video_poster_url=?, is_active=? WHERE id=?");
+                $stmt->execute([$_POST['section_title'], $_POST['section_description'], $media_url, $image_url, $_POST['is_active'] ?? 1, $_POST['id']]);
+                $success = "Anthem video section updated successfully!";
+            }
         }
         
         elseif ($action === 'update_anthem_about') {
@@ -1001,9 +1022,33 @@ include 'sidebar.php';
         <textarea name="section_description" class="form-control" rows="3"><?php echo htmlspecialchars($anthem_video['section_description']); ?></textarea>
     </div>
     
-    <div class="col-md-12 mb-3">
-        <label class="form-label fw-bold">Video URL</label>
+    <?php
+    // One column holds the anthem media, which may be an audio recording or a
+    // video clip; the page picks the right player from the file extension.
+    $anthem_media_is_audio = vvu_media_is_audio($anthem_video['video_url'] ?? '');
+    $anthem_upload_limit   = vvu_php_upload_limit_bytes();
+    ?>
+
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-bold">Audio / Video URL</label>
         <input type="text" name="video_url" class="form-control" value="<?php echo htmlspecialchars($anthem_video['video_url']); ?>">
+        <small class="text-muted">
+            Currently playing as
+            <strong><?php echo $anthem_media_is_audio ? 'audio' : 'video'; ?></strong>.
+            Upload an MP3 to switch this section to an audio player — the poster image is kept and shown behind it.
+        </small>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-bold">Or Upload Audio / Video File</label>
+        <input type="file" name="anthem_media_file" class="form-control" accept="audio/*,video/*">
+        <small class="text-muted">
+            MP3, M4A, OGG or WAV for audio; MP4, WebM or MOV for video.
+            <?php if ($anthem_upload_limit): ?>
+                Maximum <?php echo round($anthem_upload_limit / 1048576); ?>MB per file.
+            <?php endif; ?>
+            Leave empty to keep the current file.
+        </small>
     </div>
     
     <div class="col-md-6 mb-3">

@@ -2,6 +2,7 @@
 $pageTitle = "VVU Anthem - Valley View University";
 $activePage = "student_life";
 require_once 'includes/db_connect.php';
+require_once 'includes/upload_helper.php';
 
 // Fetch content from database
 $hero = $pdo->query("SELECT * FROM anthem_hero WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetch();
@@ -160,18 +161,43 @@ include 'includes/header.php';
     <!-- Video Section (Below Lyrics) -->
     <section class="py-20 bg-white dark:bg-gray-900">
         <div class="container">
+            <?php
+            // `video_url` holds either an audio recording or a video clip. The
+            // poster image is the section's artwork either way — a video uses it
+            // as its poster frame, audio shows it behind the player.
+            $anthem_title  = trim(strip_tags((string) ($video['section_title'] ?? ''))) ?: 'Listen to the Anthem';
+            $anthem_desc   = trim(strip_tags((string) ($video['section_description'] ?? ''))) ?: 'Experience the official VVU Anthem - Vocal Path Cover';
+            $anthem_media  = trim(strip_tags((string) ($video['video_url'] ?? ''))) ?: 'uploads/vvu-anthem-video.mp4';
+            $anthem_poster = trim(strip_tags((string) ($video['video_poster_url'] ?? ''))) ?: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCO7K3MdvhJBsjnRN7t5ahbUnpEsN6IBzUuZZwH7CLb_OOZoqM3pwpXrQV7wTMDVY18bMLximB5Zpi0iNvsgzXDtOrZt20qiq3aKc6ohFAZ7FtlLVdEfxa6mSjbk6EnoF25ccqAEmVf4y-AF3Xq6laGg5Oxwl6WoCqTAcdqgl5ZHKssfYqfv0_HJmwgVa0RIAiC8lKcDETXxxgrOLnYn8C_ELq9y7H2k5L_YYT2-KC8QAIpSMdEOtygPw4fv94jht34itrHs6p5i4rl';
+            $anthem_mime   = vvu_media_mime($anthem_media);
+            ?>
             <div class="max-w-4xl mx-auto text-center mb-12">
-                <h2 class="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">Listen to the Anthem</h2>
-                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium">Experience the official VVU Anthem - Vocal Path Cover</p>
+                <h2 class="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo htmlspecialchars($anthem_title); ?></h2>
+                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium"><?php echo htmlspecialchars($anthem_desc); ?></p>
             </div>
             <div class="max-w-4xl mx-auto relative aspect-video rounded-3xl overflow-hidden shadow-2xl shadow-primary/20 dark:shadow-primary/10 bg-black">
-                <video 
-                    class="w-full h-full"
-                    controls
-                    poster="<?php echo strip_tags($video['video_poster_url'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuCO7K3MdvhJBsjnRN7t5ahbUnpEsN6IBzUuZZwH7CLb_OOZoqM3pwpXrQV7wTMDVY18bMLximB5Zpi0iNvsgzXDtOrZt20qiq3aKc6ohFAZ7FtlLVdEfxa6mSjbk6EnoF25ccqAEmVf4y-AF3Xq6laGg5Oxwl6WoCqTAcdqgl5ZHKssfYqfv0_HJmwgVa0RIAiC8lKcDETXxxgrOLnYn8C_ELq9y7H2k5L_YYT2-KC8QAIpSMdEOtygPw4fv94jht34itrHs6p5i4rl'); ?>">
-                    <source src="<?php echo strip_tags($video['video_url'] ?? 'uploads/vvu-anthem-video.mp4'); ?>" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+                <?php if (vvu_media_is_audio($anthem_media)): ?>
+                    <img
+                        src="<?php echo htmlspecialchars($anthem_poster); ?>"
+                        alt="<?php echo htmlspecialchars($anthem_title); ?>"
+                        class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
+                    <div class="absolute inset-x-0 bottom-0 p-5 sm:p-8">
+                        <audio class="w-full" controls preload="metadata">
+                            <source src="<?php echo htmlspecialchars($anthem_media); ?>"<?php echo $anthem_mime ? ' type="' . htmlspecialchars($anthem_mime) . '"' : ''; ?>>
+                            Your browser does not support the audio tag.
+                            <a href="<?php echo htmlspecialchars($anthem_media); ?>" class="underline">Download the anthem</a>.
+                        </audio>
+                    </div>
+                <?php else: ?>
+                    <video
+                        class="w-full h-full"
+                        controls
+                        poster="<?php echo htmlspecialchars($anthem_poster); ?>">
+                        <source src="<?php echo htmlspecialchars($anthem_media); ?>"<?php echo $anthem_mime ? ' type="' . htmlspecialchars($anthem_mime) . '"' : ''; ?>>
+                        Your browser does not support the video tag.
+                    </video>
+                <?php endif; ?>
             </div>
         </div>
     </section>
