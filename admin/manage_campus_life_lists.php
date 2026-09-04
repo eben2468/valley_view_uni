@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $fields = ['title', 'description', 'icon', 'display_order'];
                     break;
                 case 'radio_programs':
-                    $fields = ['title', 'schedule', 'description', 'icon', 'border_color', 'icon_bg_color', 'display_order', 'status'];
+                    $fields = ['title', 'schedule', 'description', 'logo', 'host', 'category', 'icon', 'border_color', 'icon_bg_color', 'display_order', 'status'];
                     break;
                 case 'radio_features':
                     $fields = ['title', 'icon', 'color_class', 'display_order'];
@@ -922,15 +922,32 @@ include 'sidebar.php';
                                 <label class="form-label">Description</label>
                                 <textarea name="description" class="form-control" rows="2"><?php echo htmlspecialchars($item['description']); ?></textarea>
                             </div>
-                            <div class="col-md-3 mt-2">
-                                <label class="form-label">Icon (material symbol)</label>
-                                <input type="text" name="icon" class="form-control" value="<?php echo htmlspecialchars($item['icon']); ?>">
+                            <div class="col-md-6 mt-2">
+                                <label class="form-label">Logo path <span class="text-muted small">(e.g. images/radio/shows/campuzvibe.png)</span></label>
+                                <input type="text" name="logo" class="form-control" value="<?php echo htmlspecialchars($item['logo'] ?? ''); ?>">
                             </div>
                             <div class="col-md-3 mt-2">
+                                <label class="form-label">Host(s)</label>
+                                <input type="text" name="host" class="form-control" value="<?php echo htmlspecialchars($item['host'] ?? ''); ?>">
+                            </div>
+                            <div class="col-md-3 mt-2">
+                                <label class="form-label">Category</label>
+                                <select name="category" class="form-select">
+                                    <?php foreach (['news' => 'News & Current Affairs', 'worship' => 'Worship & Sermons', 'devotion' => 'Devotion', 'talk' => 'Talk & Magazine', 'youth' => 'Youth & Campus', 'sports' => 'Sports', 'music' => 'Music'] as $key => $label): ?>
+                                        <option value="<?php echo $key; ?>" <?php echo ($item['category'] ?? 'music') === $key ? 'selected' : ''; ?>><?php echo $label; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mt-2">
+                                <label class="form-label">Icon (material symbol)</label>
+                                <input type="text" name="icon" class="form-control" value="<?php echo htmlspecialchars($item['icon']); ?>">
+                                <div class="form-text">Used on the card when no logo file is found.</div>
+                            </div>
+                            <div class="col-md-4 mt-2">
                                 <label class="form-label">Border Color</label>
                                 <input type="text" name="border_color" class="form-control" value="<?php echo htmlspecialchars($item['border_color']); ?>">
                             </div>
-                            <div class="col-md-3 mt-2">
+                            <div class="col-md-4 mt-2">
                                 <label class="form-label">Icon BG Color</label>
                                 <input type="text" name="icon_bg_color" class="form-control" value="<?php echo htmlspecialchars($item['icon_bg_color']); ?>">
                             </div>
@@ -1238,6 +1255,21 @@ include 'sidebar.php';
                     <div class="col-md-6 mb-3"><label class="form-label">Schedule/Time</label><input type="text" name="schedule" class="form-control" placeholder="Mon - Fri | 6:00 AM" required></div>
                 </div>
                 <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="2"></textarea></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3"><label class="form-label">Logo path</label><input type="text" name="logo" class="form-control" placeholder="images/radio/shows/my-show.png"></div>
+                    <div class="col-md-3 mb-3"><label class="form-label">Host(s)</label><input type="text" name="host" class="form-control"></div>
+                    <div class="col-md-3 mb-3"><label class="form-label">Category</label>
+                        <select name="category" class="form-select">
+                            <option value="talk">Talk &amp; Magazine</option>
+                            <option value="news">News &amp; Current Affairs</option>
+                            <option value="worship">Worship &amp; Sermons</option>
+                            <option value="devotion">Devotion</option>
+                            <option value="youth">Youth &amp; Campus</option>
+                            <option value="sports">Sports</option>
+                            <option value="music" selected>Music</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-4 mb-3"><label class="form-label">Icon (Material)</label><input type="text" name="icon" class="form-control" value="radio"></div>
                     <div class="col-md-4 mb-3"><label class="form-label">Border Color</label><input type="text" name="border_color" class="form-control" value="purple-600"></div>
