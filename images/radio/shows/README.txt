@@ -7,9 +7,9 @@ its path is set on the show in the admin panel
 
 Filenames the installer already points at:
 
-    morning-in-the-valley.png   -> "Morning Show"
-    campuzvibe.png              -> "CampuzVibe"
-    the-business-show.png       -> "The Business Show"
+    morning-in-the-valley.jpg   -> "Morning Show"
+    campuzvibe.jpg              -> "CampuzVibe"
+    the-business-show.jpg       -> "The Business Show"
 
 Until a file is actually present, that show's card falls back to its coloured
 icon tile — nothing breaks, it just looks plainer.
