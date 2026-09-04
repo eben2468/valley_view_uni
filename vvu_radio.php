@@ -132,6 +132,11 @@ $asset_exists = static function ($path) {
 
 $schedule_pdf = $asset_exists($content['schedule_pdf']) ? $content['schedule_pdf'] : '';
 
+// Shows without artwork of their own carry the station banner instead of a
+// flat colour tile. If the file is ever removed the cards fall back to the
+// tile rather than to a broken image.
+$station_banner = $asset_exists('images/radio/vvr-banner.jpg') ? 'images/radio/vvr-banner.jpg' : '';
+
 /** Hero buttons: fall back to the on-page anchors if an editor blanks a link. */
 $hero_link = static function ($value, $fallback) {
     $value = trim((string) $value);
@@ -141,7 +146,7 @@ $hero_cta_1_link = $hero_link($content['hero_cta_1_link'], '#listen-live');
 $hero_cta_2_link = $hero_link($content['hero_cta_2_link'], '#schedule');
 ?>
 
-<link href="css/vvu-radio.css?v=1.0" rel="stylesheet">
+<link href="css/vvu-radio.css?v=1.1" rel="stylesheet">
 
 <style>
     @keyframes fadeInUp {
@@ -364,16 +369,25 @@ $hero_cta_2_link = $hero_link($content['hero_cta_2_link'], '#schedule');
                     $has_logo = $asset_exists($prog['logo'] ?? '');
                 ?>
                 <article class="vvr-card vvr-cat-<?php echo vvu_e($category); ?> flex flex-col">
-                    <div class="vvr-show__logo">
-                        <?php if ($has_logo): ?>
+                    <?php if ($has_logo): ?>
+                        <div class="vvr-show__logo">
                             <img src="<?php echo vvu_e($prog['logo']); ?>" alt="<?php echo vvu_e($prog['title']); ?> logo" loading="lazy">
-                        <?php else: ?>
+                        </div>
+                    <?php elseif ($station_banner): ?>
+                        <div class="vvr-show__banner">
+                            <img src="<?php echo vvu_e($station_banner); ?>" alt="" loading="lazy">
+                            <span class="vvr-show__badge vvr-cat-<?php echo vvu_e($category); ?>">
+                                <span class="material-symbols-outlined"><?php echo vvu_e($prog['icon'] ?: 'radio'); ?></span>
+                            </span>
+                        </div>
+                    <?php else: ?>
+                        <div class="vvr-show__logo">
                             <span class="vvr-show__fallback bg-<?php echo vvu_e($prog['icon_bg_color'] ?: 'purple-600'); ?>">
                                 <span class="material-symbols-outlined"><?php echo vvu_e($prog['icon'] ?: 'radio'); ?></span>
                                 <span class="text-xs font-black uppercase tracking-widest opacity-90">97.7 MHz</span>
                             </span>
-                        <?php endif; ?>
-                    </div>
+                        </div>
+                    <?php endif; ?>
                     <div class="p-6 flex flex-col flex-grow">
                         <span class="vvr-chip mb-3 self-start"><?php echo vvu_e($category_labels[$category] ?? $category); ?></span>
                         <h3 class="text-xl font-extrabold text-gray-900 dark:text-white mb-1.5"><?php echo vvu_e($prog['title']); ?></h3>

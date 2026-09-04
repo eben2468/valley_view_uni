@@ -387,6 +387,44 @@
     object-fit: contain;
 }
 
+/* Shows with no artwork of their own get the station banner. It is 2:1 and the
+   tile is 16:10, so `cover` trims ~11% from each side — which also crops away
+   the white paper margins of the photographed banner. The category badge keeps
+   the eleven banner cards from reading as one repeated image. */
+.vvr-show__banner {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--vvr-ink);
+    border-bottom: 1px solid var(--vvr-line);
+}
+
+.vvr-show__banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.vvr-show__badge {
+    position: absolute;
+    top: .75rem;
+    left: .75rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: .75rem;
+    display: grid;
+    place-items: center;
+    background: var(--c);
+    color: #fff;
+    box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .7);
+}
+
+.vvr-show__badge .material-symbols-outlined {
+    font-size: 1.4rem;
+    color: #fff;
+}
+
 .vvr-show__fallback {
     width: 100%;
     height: 100%;
@@ -397,7 +435,11 @@
     color: #fff;
 }
 
-.vvr-show__fallback .material-symbols-outlined { font-size: 2.6rem; }
+/* Stated on the children too: one of the legacy stylesheets was winning over
+   the inherited colour and rendering both the glyph and the label dark on the
+   coloured tile. */
+.vvr-show__fallback .material-symbols-outlined { font-size: 2.6rem; color: #fff; }
+.vvr-show__fallback > span { color: #fff; }
 
 .vvr-chip {
     display: inline-flex;
