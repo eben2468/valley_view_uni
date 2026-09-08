@@ -112,9 +112,22 @@ $href = function ($path) {
 
 $form_path  = $page_data['cta_button_link'] ?? 'uploads/Download Forms/Athe Application Form.pdf';
 $form_size  = $filesize_of($form_path);
-$form_href  = $href($form_path);
 $whatsapp   = $page_data['cta_button_link_2'] ?? 'https://wa.me/233243416960';
 $apply_text = $page_data['cta_button_text'] ?? 'Download Application Form';
+
+// A form that points at this server but is not actually on it would hand the
+// visitor a 404 page saved as ".htm" — the browser follows the download
+// attribute whatever comes back. So the button only offers a download when the
+// file is really there, and otherwise asks the team for a copy, which is what
+// the flyer tells applicants to do anyway.
+$form_is_remote = (bool)preg_match('~^(https?:|mailto:|tel:)~i', trim((string)$form_path));
+$form_ready     = $form_is_remote || $form_size !== null;
+$form_href      = $form_ready ? $href($form_path) : $whatsapp;
+$form_label     = $form_ready ? $apply_text : 'Request the application form';
+$form_icon      = $form_ready ? 'download' : 'chat';
+$form_attrs     = $form_ready
+    ? ($form_is_remote ? 'target="_blank" rel="noopener"' : 'download')
+    : 'target="_blank" rel="noopener"';
 
 // Jump nav — only the sections that are actually switched on.
 $jump = [];
@@ -1016,10 +1029,10 @@ foreach ([
                 <?php endif; ?>
 
                 <div class="mt-12 flex flex-col sm:flex-row gap-6 justify-center animate-fadeInUp" style="animation-delay: 0.4s;">
-                    <a href="<?php echo $e($form_href); ?>" <?php echo preg_match('#^https?:#i', $form_href) ? '' : 'download'; ?>
+                    <a href="<?php echo $e($form_href); ?>" <?php echo $form_attrs; ?>
                        class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-3 animate-pulse-glow">
-                        <span class="material-symbols-outlined text-2xl">download</span>
-                        <?php echo $e($apply_text); ?>
+                        <span class="material-symbols-outlined text-2xl"><?php echo $e($form_icon); ?></span>
+                        <?php echo $e($form_label); ?>
                     </a>
                     <a href="<?php echo $e($whatsapp); ?>" target="_blank" rel="noopener"
                        class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
@@ -1340,9 +1353,9 @@ foreach ([
                 <?php endif; ?>
 
                 <div class="athe-prog-foot" style="justify-content:flex-start;">
-                    <a class="athe-btn athe-btn-gold" href="<?php echo $e($form_href); ?>" <?php echo preg_match('#^https?:#i', $form_href) ? '' : 'download'; ?>>
-                        <span class="material-symbols-outlined">download</span>
-                        Apply for <?php echo $e($detail['section_title']); ?>
+                    <a class="athe-btn athe-btn-gold" href="<?php echo $e($form_href); ?>" <?php echo $form_attrs; ?>>
+                        <span class="material-symbols-outlined"><?php echo $e($form_icon); ?></span>
+                        <?php echo $form_ready ? 'Apply for ' . $e($detail['section_title']) : $e($form_label); ?>
                     </a>
                     <a class="athe-btn athe-btn-ghost" href="<?php echo $e($whatsapp); ?>" target="_blank" rel="noopener">
                         <span class="material-symbols-outlined">support_agent</span>
@@ -1580,9 +1593,9 @@ foreach ([
                                  alt="ATHE @ Valley View University programme flyer" loading="lazy">
                             <figcaption class="athe-flyer-foot">
                                 <a class="athe-btn athe-btn-gold" href="<?php echo $e($form_href); ?>"
-                                   <?php echo preg_match('#^https?:#i', $form_href) ? '' : 'download'; ?>>
-                                    <span class="material-symbols-outlined">download</span>
-                                    <?php echo $e($apply_text); ?><?php if ($form_size): ?> <span style="font-weight:600;opacity:.75;">(PDF, <?php echo $e($form_size); ?>)</span><?php endif; ?>
+                                   <?php echo $form_attrs; ?>>
+                                    <span class="material-symbols-outlined"><?php echo $e($form_icon); ?></span>
+                                    <?php echo $e($form_label); ?><?php if ($form_size): ?> <span style="font-weight:600;opacity:.75;">(PDF, <?php echo $e($form_size); ?>)</span><?php endif; ?>
                                 </a>
                                 <a class="athe-btn athe-btn-wa" href="<?php echo $e($whatsapp); ?>" target="_blank" rel="noopener">
                                     <span class="material-symbols-outlined">chat</span>
@@ -1614,9 +1627,9 @@ foreach ([
 
                     <div class="athe-cta-actions">
                         <a class="athe-btn athe-btn-gold" href="<?php echo $e($form_href); ?>"
-                           <?php echo preg_match('#^https?:#i', $form_href) ? '' : 'download'; ?>>
-                            <span class="material-symbols-outlined">download</span>
-                            <?php echo $e($apply_text); ?>
+                           <?php echo $form_attrs; ?>>
+                            <span class="material-symbols-outlined"><?php echo $e($form_icon); ?></span>
+                            <?php echo $e($form_label); ?>
                         </a>
                         <a class="athe-btn athe-btn-wa" href="<?php echo $e($whatsapp); ?>" target="_blank" rel="noopener">
                             <span class="material-symbols-outlined">chat</span>

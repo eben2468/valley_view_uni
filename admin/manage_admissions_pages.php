@@ -80,6 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $uploaded = handleAdminFileUpload($_FILES['hero_image_file'], 'admissions');
             if ($uploaded) $hero_image = $uploaded;
 
+            // Button 1 can point at a document (an application form, say).
+            // Uploading it here stores it with a safe generated name, which is
+            // why a form typed in by hand — with spaces, or never copied to the
+            // server at all — used to end up as a broken download.
+            $cta_button_link = $_POST['cta_button_link'] ?? '';
+            $uploaded_cta = handleAdminFileUpload($_FILES['cta_button_link_file'] ?? null, 'admissions', 'form_');
+            if ($uploaded_cta) $cta_button_link = $uploaded_cta;
+
             $stmt = $pdo->prepare("
                 UPDATE academic_pages_content SET
                     hero_badge = ?,
@@ -108,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['cta_title'] ?? '',
                 $_POST['cta_subtitle'] ?? '',
                 $_POST['cta_button_text'] ?? '',
-                $_POST['cta_button_link'] ?? '',
+                $cta_button_link,
                 $_POST['cta_button_text_2'] ?? '',
                 $_POST['cta_button_link_2'] ?? '',
                 $_POST['help_title'] ?? '',
@@ -352,6 +360,22 @@ include 'sidebar.php';
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Button 1 Link</label>
                         <input type="text" name="cta_button_link" value="<?php echo htmlspecialchars($page_content['cta_button_link'] ?? ''); ?>" class="form-control">
+                        <?php
+                        // Show whether a link that points at a file on this
+                        // server actually resolves — a missing form is the one
+                        // fault a visitor sees as a broken download.
+                        $cta_link_value = trim((string)($page_content['cta_button_link'] ?? ''));
+                        $cta_is_local = $cta_link_value !== '' && !preg_match('~^(https?:|mailto:|tel:|#)~i', $cta_link_value);
+                        $cta_missing  = $cta_is_local && !is_file(dirname(__DIR__) . '/' . ltrim($cta_link_value, '/'));
+                        ?>
+                        <?php if ($cta_missing): ?>
+                        <small class="d-block mt-1" style="color:#b42318;font-weight:600;">
+                            <i class="fas fa-triangle-exclamation"></i>
+                            That file is not on this server — the button will not download. Upload it below.
+                        </small>
+                        <?php endif; ?>
+                        <input type="file" name="cta_button_link_file" class="form-control mt-2" accept=".pdf,.doc,.docx">
+                        <small class="text-muted">Upload a PDF or Word document to use as this button's link (replaces the text above).</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Button 2 Text</label>
