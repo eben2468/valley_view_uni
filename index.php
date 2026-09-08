@@ -3,6 +3,7 @@ $page_title = "Valley View University";
 $active_page = "home";
 require_once 'includes/db_connect.php';
 require_once 'includes/slider_settings.php';
+require_once 'includes/slider_buttons.php';
 
 // Hero slider timing (admin-controlled, see Manage Homepage → Hero Sliders)
 $slider_timing = vvu_slider_settings($pdo);
@@ -63,19 +64,23 @@ include 'includes/header.php';
         <div class="carousel-inner">
             <?php 
             $first = true;
-            foreach ($sliders as $slider): 
+            foreach ($sliders as $slider):
                 // Check if this slider has content (title, description, or buttons)
                 $hasTitle = !empty(trim($slider['title']));
                 $hasDescription = !empty(trim($slider['description']));
-                $hasButton1 = !empty($slider['button1_text']); // Changed: Don't require link for visibility
-                $hasButton2 = !empty($slider['button2_text']); 
-                $hasButton3 = !empty($slider['button3_text']);
-                $hasContent = $hasTitle || $hasDescription || $hasButton1 || $hasButton2 || $hasButton3;
+                $buttons = vvu_slide_button_config($slider);
+                $hasButtons = !empty($buttons['buttons']);
+                // Buttons only belong in the caption when the editor asked for
+                // them to sit with the text; every other placement puts them in
+                // their own layer over the slide.
+                $buttonsInCaption = $hasButtons && $buttons['position'] === 'inherit';
+                $hasCaption = $hasTitle || $hasDescription || $buttonsInCaption;
+                $hasContent = $hasTitle || $hasDescription || $hasButtons;
             ?>
             <div class="item <?php echo $first ? 'active' : ''; ?><?php echo !$hasContent ? ' no-overlay' : ''; ?> pos-<?php echo strip_tags(!empty($slider['content_position']) ? $slider['content_position'] : 'middle-center'); ?>"
                  <?php if ($slider_timing['autoplay'] && !empty($slider['slide_interval'])): ?>data-interval="<?php echo (int)$slider['slide_interval'] * 1000; ?>"<?php endif; ?>>
                 <img src="<?php echo strip_tags($slider['image_url']); ?>" alt="">
-                <?php if ($hasContent): ?>
+                <?php if ($hasCaption): ?>
                 <div class="carousel-caption slider-con">
                     <?php if ($hasTitle): ?>
                     <h2><?php echo strip_tags($slider['title']); ?> <?php if ($slider['highlight_text']): ?><span><?php echo strip_tags($slider['highlight_text']); ?></span><?php endif; ?></h2>
@@ -85,21 +90,11 @@ include 'includes/header.php';
                     <p><?php echo $slider['description']; ?></p>
                     <?php endif; ?>
                     
-                    <?php if ($hasButton1 || $hasButton2 || $hasButton3): ?>
-                    <div class="slider-btn-group">
-                        <?php if ($hasButton1): ?>
-                            <a href="<?php echo strip_tags(!empty($slider['button1_link']) ? $slider['button1_link'] : '#'); ?>" class="bann-btn-1"><?php echo strip_tags($slider['button1_text']); ?></a>
-                        <?php endif; ?>
-                        <?php if ($hasButton2): ?>
-                            <a href="<?php echo strip_tags(!empty($slider['button2_link']) ? $slider['button2_link'] : '#'); ?>" class="bann-btn-2"><?php echo strip_tags($slider['button2_text']); ?></a>
-                        <?php endif; ?>
-                        <?php if ($hasButton3): ?>
-                            <a href="<?php echo strip_tags(!empty($slider['button3_link']) ? $slider['button3_link'] : '#'); ?>" class="bann-btn-3"><?php echo strip_tags($slider['button3_text']); ?></a>
-                        <?php endif; ?>
-                    </div>
-                    <?php endif; ?>
+                    <?php if ($buttonsInCaption) echo vvu_slide_buttons_group_html($buttons); ?>
                 </div>
                 <?php endif; ?>
+
+                <?php if ($hasButtons && !$buttonsInCaption) echo vvu_slide_buttons_html($buttons); ?>
             </div>
             <?php 
             $first = false;

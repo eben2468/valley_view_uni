@@ -198,76 +198,77 @@ h6 {
     overflow: hidden;
 }
 
+/* The caption covers the slide and lines its own content up with flexbox.
+   It used to be a floating box whose four offsets were reset to "auto" right
+   here - and because this rule carries an ID, that reset outranked every
+   .pos-* rule below, so the caption fell to its static position underneath
+   the image and was clipped away by the item's overflow:hidden. Alignment
+   cannot collide with a reset, so the spot an editor picks now always holds. */
 #myCarousel .slider-con {
     position: absolute !important;
-    width: 65% !important;
-    padding: 20px !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 6% 8% !important;
     z-index: 10 !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    top: auto !important;
     background: transparent !important;
     box-shadow: none !important;
 }
 
-/* Position overrides based on chosen value */
-.pos-top-left .slider-con {
-    top: 15% !important;
-    left: 10% !important;
-    text-align: left !important;
+/* Keep a long headline from running the full width of the slide. */
+#myCarousel .slider-con h2,
+#myCarousel .slider-con p {
+    max-width: 70%;
 }
 
-.pos-top-center .slider-con {
-    top: 15% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    text-align: center !important;
+/* The paragraph carries "margin: 0 auto" further down this file, which in a
+   flex column centres it whatever the alignment says. Alignment decides. */
+#myCarousel .slider-con p {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
+/* Position choices are pure alignment now - no offsets, no transforms. */
+.pos-top-left .slider-con,
+.pos-top-center .slider-con,
 .pos-top-right .slider-con {
-    top: 15% !important;
-    right: 10% !important;
-    text-align: right !important;
+    justify-content: flex-start;
 }
 
-.pos-middle-left .slider-con {
-    top: 50% !important;
-    left: 10% !important;
-    transform: translateY(-50%) !important;
-    text-align: left !important;
-}
-
-.pos-middle-center .slider-con {
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    text-align: center !important;
-}
-
+.pos-middle-left .slider-con,
+.pos-middle-center .slider-con,
 .pos-middle-right .slider-con {
-    top: 50% !important;
-    right: 10% !important;
-    transform: translateY(-50%) !important;
-    text-align: right !important;
+    justify-content: center;
 }
 
+.pos-bottom-left .slider-con,
+.pos-bottom-center .slider-con,
+.pos-bottom-right .slider-con {
+    justify-content: flex-end;
+}
+
+.pos-top-left .slider-con,
+.pos-middle-left .slider-con,
 .pos-bottom-left .slider-con {
-    bottom: 15% !important;
-    left: 10% !important;
+    align-items: flex-start;
     text-align: left !important;
 }
 
+.pos-top-center .slider-con,
+.pos-middle-center .slider-con,
 .pos-bottom-center .slider-con {
-    bottom: 15% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    align-items: center;
     text-align: center !important;
 }
 
+.pos-top-right .slider-con,
+.pos-middle-right .slider-con,
 .pos-bottom-right .slider-con {
-    bottom: 15% !important;
-    right: 10% !important;
+    align-items: flex-end;
     text-align: right !important;
 }
 
@@ -329,26 +330,22 @@ h6 {
     margin-right: 0 !important;
 }
 
-/* Mobile override: force center on small screens for better readability */
+/* Mobile override: force center on small screens for better readability.
+   The caption keeps the full-cover flex layout from section 4 - only its
+   alignment and breathing room change. */
 @media screen and (max-width: 767px) {
     #myCarousel .slider-con {
-        width: 90% !important;
-        left: 50% !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) !important;
+        padding: 8% 6% !important;
+        justify-content: center !important;
+        align-items: center !important;
         text-align: center !important;
-        display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
     }
 
-    .slider-caption,
-    .slider-con {
-        left: 5% !important;
-        right: 5% !important;
-        width: 90% !important;
-        display: block !important;
-        visibility: visible !important;
+    #myCarousel .slider-con h2,
+    #myCarousel .slider-con p {
+        max-width: 100%;
     }
 
     /* Force buttons to show on mobile and make them significantly smaller */
@@ -1567,25 +1564,27 @@ a {
         text-align: right !important;
     }
 
+    /* The caption is a full-height flex box here, so "bottom" is simply the
+       end of the box plus a margin - no pixel padding hacks needed. */
     .item.pos-bottom-center .slider-con {
         justify-content: flex-end !important;
         align-items: center !important;
         text-align: center !important;
-        padding-bottom: 350px !important;
+        padding-bottom: 10% !important;
     }
 
     .item.pos-bottom-left .slider-con {
         justify-content: flex-end !important;
         align-items: flex-start !important;
         text-align: left !important;
-        padding-bottom: 750px !important;
+        padding-bottom: 10% !important;
     }
 
     .item.pos-bottom-right .slider-con {
         justify-content: flex-end !important;
         align-items: flex-end !important;
         text-align: right !important;
-        padding-bottom: 750px !important;
+        padding-bottom: 10% !important;
     }
 
     /* Adjust text sizes for full screen */

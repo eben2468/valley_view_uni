@@ -1,13 +1,16 @@
 <?php
 require_once('../includes/db_connect.php');
 require_once('../includes/slider_settings.php');
+require_once('../includes/slider_buttons.php');
 require_once('../includes/video_helper.php');
 // Needed here, not just via header.php: the video save below runs before the
 // header is included.
 require_once('../includes/upload_helper.php');
 
-// Make sure the slider timing table/column exist, then handle a save
+// Make sure the slider timing table/column and the button placement columns
+// exist, then handle a save
 vvu_slider_install($pdo);
+vvu_slide_buttons_install($pdo);
 $slider_timing_saved = false;
 $slider_timing_error = '';
 
@@ -319,6 +322,7 @@ $stats = [
                                                     <th>Title</th>
                                                     <th>Description</th>
                                                     <th>Position</th>
+                                                    <th>Buttons</th>
                                                     <th>Display time</th>
                                                     <th>Status</th>
                                                     <th>Actions</th>
@@ -331,6 +335,22 @@ $stats = [
                                                     <td><strong><?php echo htmlspecialchars($slider['title']); ?></strong></td>
                                                     <td><?php echo htmlspecialchars(substr($slider['description'], 0, 50)) . '...'; ?></td>
                                                     <td><span class="badge" style="background: #6f42c1;"><?php echo htmlspecialchars($slider['content_position'] ?? 'middle-center'); ?></span></td>
+                                                    <td>
+                                                        <?php
+                                                        $slide_buttons = vvu_slide_button_config($slider);
+                                                        $slide_button_count = count($slide_buttons['buttons']);
+                                                        ?>
+                                                        <?php if (!$slide_button_count): ?>
+                                                            <span class="text-muted" style="font-size:12px;">none</span>
+                                                        <?php else: ?>
+                                                            <span class="badge" style="background:#198754;"><?php echo $slide_button_count; ?></span>
+                                                            <span class="text-muted" style="font-size:12px;">
+                                                                <?php echo $slide_buttons['position'] === 'custom'
+                                                                    ? htmlspecialchars($slide_buttons['x'] . '% / ' . $slide_buttons['y'] . '%')
+                                                                    : htmlspecialchars($slide_buttons['position'] === 'inherit' ? 'with text' : $slide_buttons['position']); ?>
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </td>
                                                     <td>
                                                         <?php $own = isset($slider['slide_interval']) ? (int)$slider['slide_interval'] : 0; ?>
                                                         <?php if ($own > 0): ?>

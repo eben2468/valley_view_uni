@@ -1,0 +1,530 @@
+/* ==========================================================================
+   VVU HERO SLIDER BUTTONS
+   Placement, styling and responsive behaviour for the call-to-action buttons
+   that sit on a banner slide. Rendered by includes/slider_buttons.php, which
+   the homepage and the admin preview both go through.
+
+   Two things make a chosen position actually hold:
+
+   1. The buttons live in their own layer (.vvu-btn-layer) that covers the
+      slide, so nothing the caption does can push them around.
+   2. Everything is measured in percentages and container units, so the same
+      spot on the artwork is the same spot on every screen - and the admin
+      preview, being a container too, shows the truth.
+   ========================================================================== */
+
+/* The preview stage in the admin is sized like a slide, so both are query
+   containers and one set of rules serves both. */
+.home-slider-section,
+.vvu-slide-preview-stage {
+    container-type: inline-size;
+    container-name: slide;
+}
+
+/* --------------------------------------------------------------------------
+   1. The placement layer
+   -------------------------------------------------------------------------- */
+
+.vvu-btn-layer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    /* Above the caption (z-index 10 in the legacy stylesheet), so a button
+       parked over the caption's box is the thing that gets clicked. */
+    z-index: 12;
+    display: grid;
+    padding: var(--layer-pad-y, 42px) var(--layer-pad-x, 56px);
+    /* Only the buttons themselves take clicks - the rest of the slide stays
+       free for the carousel controls underneath. */
+    pointer-events: none;
+}
+
+.vvu-btn-layer > .vvu-slide-btns {
+    pointer-events: auto;
+}
+
+/* Vertical zone */
+.vvu-btn-layer.at-top-left,
+.vvu-btn-layer.at-top-center,
+.vvu-btn-layer.at-top-right {
+    align-items: start;
+}
+
+.vvu-btn-layer.at-middle-left,
+.vvu-btn-layer.at-middle-center,
+.vvu-btn-layer.at-middle-right {
+    align-items: center;
+}
+
+.vvu-btn-layer.at-bottom-left,
+.vvu-btn-layer.at-bottom-center,
+.vvu-btn-layer.at-bottom-right {
+    align-items: end;
+}
+
+/* Horizontal zone */
+.vvu-btn-layer.at-top-left,
+.vvu-btn-layer.at-middle-left,
+.vvu-btn-layer.at-bottom-left {
+    justify-items: start;
+}
+
+.vvu-btn-layer.at-top-center,
+.vvu-btn-layer.at-middle-center,
+.vvu-btn-layer.at-bottom-center {
+    justify-items: center;
+}
+
+.vvu-btn-layer.at-top-right,
+.vvu-btn-layer.at-middle-right,
+.vvu-btn-layer.at-bottom-right {
+    justify-items: end;
+}
+
+/* Exact spot: --btn-x / --btn-y are the centre of the button group, so the
+   number an editor sets is the point the buttons sit on. */
+.vvu-btn-layer.at-custom {
+    display: block;
+    padding: 0;
+}
+
+.vvu-btn-layer.at-custom > .vvu-slide-btns {
+    position: absolute;
+    left: var(--btn-x, 50%);
+    top: var(--btn-y, 80%);
+    transform: translate(-50%, -50%);
+    max-width: 92%;
+}
+
+/* --------------------------------------------------------------------------
+   2. The group
+   -------------------------------------------------------------------------- */
+
+.vvu-slide-btns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--btn-gap, 14px);
+
+    /* Size tokens live here so a single override can re-assert them inside
+       the legacy caption without repeating every size (see section 5). */
+    --btn-font: 15px;
+    --btn-pad-y: 13px;
+    --btn-pad-x: 32px;
+    --btn-radius: 999px;
+    --btn-border: 2px;
+}
+
+.vvu-slide-btns.lay-column {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.vvu-slide-btns.size-small {
+    --btn-font: 13px;
+    --btn-pad-y: 9px;
+    --btn-pad-x: 22px;
+    --btn-gap: 10px;
+}
+
+.vvu-slide-btns.size-large {
+    --btn-font: 18px;
+    --btn-pad-y: 17px;
+    --btn-pad-x: 44px;
+    --btn-gap: 18px;
+}
+
+.vvu-slide-btns.shape-rounded {
+    --btn-radius: 10px;
+}
+
+.vvu-slide-btns.shape-square {
+    --btn-radius: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   3. The buttons
+   -------------------------------------------------------------------------- */
+
+.vvu-slide-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    padding: var(--btn-pad-y) var(--btn-pad-x);
+    border: var(--btn-border) solid transparent;
+    border-radius: var(--btn-radius);
+    font-size: var(--btn-font);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-shadow: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform .25s ease, box-shadow .25s ease, background-color .25s ease, color .25s ease, border-color .25s ease;
+}
+
+/* The label carries no styling of its own. The legacy theme paints every bare
+   <span> on the site grey at a fixed 15px/400 (style.css), which quietly won
+   over the button around it - so the chosen colour, weight and size never
+   reached the text. Inheriting puts the button back in charge. */
+.vvu-slide-btn > span {
+    display: block;
+    color: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+    text-transform: inherit !important;
+}
+
+/* Solid - the main call to action */
+.vvu-slide-btn.is-solid {
+    background: var(--btn-bg, #ff5722);
+    border-color: var(--btn-bg, #ff5722);
+    color: var(--btn-fg, #fff);
+    box-shadow: 0 6px 20px rgba(var(--btn-rgb, 0, 0, 0), .35);
+}
+
+.vvu-slide-btn.is-solid:hover,
+.vvu-slide-btn.is-solid:focus-visible {
+    color: var(--btn-fg, #fff);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(var(--btn-rgb, 0, 0, 0), .45);
+    filter: brightness(1.08);
+}
+
+/* Outline - reads cleanly over busy artwork */
+.vvu-slide-btn.is-outline {
+    background: transparent;
+    border-color: var(--btn-bg, #fff);
+    color: var(--btn-fg, #fff);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+}
+
+.vvu-slide-btn.is-outline:hover,
+.vvu-slide-btn.is-outline:focus-visible {
+    background: var(--btn-bg, #fff);
+    /* --btn-ink is worked out in PHP: black or white, whichever stays
+       readable once the border colour becomes the fill. */
+    color: var(--btn-ink, #111);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(var(--btn-rgb, 0, 0, 0), .35);
+}
+
+/* Glass - a frosted panel that borrows the colours of the banner behind it */
+.vvu-slide-btn.is-glass {
+    background: rgba(var(--btn-rgb, 255, 255, 255), .22);
+    border-color: rgba(255, 255, 255, .55);
+    color: var(--btn-fg, #fff);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+}
+
+.vvu-slide-btn.is-glass:hover,
+.vvu-slide-btn.is-glass:focus-visible {
+    background: rgba(var(--btn-rgb, 255, 255, 255), .38);
+    color: var(--btn-fg, #fff);
+    transform: translateY(-3px);
+}
+
+/* Text link - for a quiet secondary action */
+.vvu-slide-btn.is-ghost {
+    background: transparent;
+    border-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
+    color: var(--btn-fg, #fff);
+    box-shadow: none;
+}
+
+.vvu-slide-btn.is-ghost > span {
+    border-bottom: 2px solid var(--btn-bg, currentColor);
+    padding-bottom: 3px;
+}
+
+.vvu-slide-btn.is-ghost:hover,
+.vvu-slide-btn.is-ghost:focus-visible {
+    color: var(--btn-bg, #fff);
+    transform: translateX(4px);
+}
+
+.vvu-slide-btn:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, .9);
+    outline-offset: 3px;
+}
+
+/* Slide in with the slide itself, once it is the active one. */
+.carousel-inner > .item.active .vvu-slide-btn {
+    animation: vvuSlideBtnIn .6s cubic-bezier(.22, .61, .36, 1) both;
+}
+
+.carousel-inner > .item.active .vvu-slide-btn:nth-child(2) {
+    animation-delay: .1s;
+}
+
+.carousel-inner > .item.active .vvu-slide-btn:nth-child(3) {
+    animation-delay: .2s;
+}
+
+@keyframes vvuSlideBtnIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .carousel-inner > .item.active .vvu-slide-btn {
+        animation: none;
+    }
+
+    .vvu-slide-btn {
+        transition: background-color .2s ease, color .2s ease;
+    }
+
+    .vvu-slide-btn:hover {
+        transform: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   4. Sizing that follows the slide, not the viewport
+   Container units keep the buttons in proportion inside the admin preview as
+   well as on the live page. Plain pixels above stay as the fallback.
+   -------------------------------------------------------------------------- */
+
+@supports (container-type: inline-size) {
+
+    .vvu-slide-btns {
+        --btn-font: clamp(11px, 1.05cqi, 17px);
+        --btn-pad-y: clamp(8px, .95cqi, 16px);
+        --btn-pad-x: clamp(15px, 2.3cqi, 38px);
+        --btn-gap: clamp(8px, 1cqi, 16px);
+    }
+
+    .vvu-slide-btns.size-small {
+        --btn-font: clamp(10px, .85cqi, 14px);
+        --btn-pad-y: clamp(6px, .7cqi, 12px);
+        --btn-pad-x: clamp(12px, 1.7cqi, 28px);
+        --btn-gap: clamp(6px, .75cqi, 12px);
+    }
+
+    .vvu-slide-btns.size-large {
+        --btn-font: clamp(12px, 1.3cqi, 21px);
+        --btn-pad-y: clamp(10px, 1.25cqi, 21px);
+        --btn-pad-x: clamp(18px, 3.1cqi, 52px);
+        --btn-gap: clamp(10px, 1.3cqi, 22px);
+    }
+
+    .vvu-btn-layer {
+        --layer-pad-x: clamp(14px, 4cqi, 72px);
+        --layer-pad-y: clamp(12px, 3.4cqi, 60px);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   5. Buttons that stay in the caption ("with the text")
+   The legacy caption stylesheet sets padding, margins and font sizes on every
+   link inside .slider-con with !important. These few lines take those back
+   without touching that file - the values come from the tokens above, so one
+   block covers every size and shape.
+   -------------------------------------------------------------------------- */
+
+#myCarousel .slider-con .vvu-slide-btns,
+.vvu-slide-preview-stage .slider-con .vvu-slide-btns {
+    margin-top: 26px;
+    z-index: 5;
+}
+
+/* The caption box is 65% of the slide wide even when it only holds a line of
+   text, so it used to sit on top of anything placed behind it. Nothing in it
+   needs a click except its own links. */
+#myCarousel .slider-con {
+    pointer-events: none;
+}
+
+#myCarousel .slider-con a,
+#myCarousel .slider-con button {
+    pointer-events: auto;
+}
+
+#myCarousel .slider-con .vvu-slide-btn,
+.vvu-slide-preview-stage .slider-con .vvu-slide-btn {
+    display: inline-flex !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: var(--btn-pad-y) var(--btn-pad-x) !important;
+    border-radius: var(--btn-radius) !important;
+    font-size: var(--btn-font) !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    text-shadow: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#myCarousel .slider-con .vvu-slide-btn.is-ghost,
+.vvu-slide-preview-stage .slider-con .vvu-slide-btn.is-ghost {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Caption text alignment decides how the inherited group lines up. */
+.item.pos-top-center .slider-con .vvu-slide-btns,
+.item.pos-middle-center .slider-con .vvu-slide-btns,
+.item.pos-bottom-center .slider-con .vvu-slide-btns {
+    justify-content: center;
+}
+
+.item.pos-top-right .slider-con .vvu-slide-btns,
+.item.pos-middle-right .slider-con .vvu-slide-btns,
+.item.pos-bottom-right .slider-con .vvu-slide-btns {
+    justify-content: flex-end;
+}
+
+/* --------------------------------------------------------------------------
+   6. Phones
+   The mobile rule is a container query so the admin preview behaves exactly
+   like a phone does. Browsers without container queries simply keep the
+   desktop placement, which still scales because it is expressed in percent.
+   -------------------------------------------------------------------------- */
+
+@container slide (max-width: 767px) {
+
+    .vvu-btn-layer.mob-hidden {
+        display: none;
+    }
+
+    /* A spot of its own on phones: --btn-mx / --btn-my replace the desktop
+       point, whatever the desktop placement was. */
+    .vvu-btn-layer.mob-own {
+        display: block;
+        padding: 0;
+    }
+
+    .vvu-btn-layer.mob-own > .vvu-slide-btns {
+        position: absolute;
+        left: var(--btn-mx, 50%);
+        top: var(--btn-my, 85%);
+        transform: translate(-50%, -50%);
+        max-width: 92%;
+    }
+
+    /* Phone sizing.
+
+       A phone is roughly a quarter of a desktop's width, so the desktop
+       formula bottoms out on its clamp minimums and the button ends up eating
+       a quarter of the banner. These tokens are drawn for a ~390px slide
+       instead, and two multipliers ride on top:
+
+         --btn-msize   the chosen size step (Extra small ... Large)
+         --btn-mscale  the editor's fine-tune, 0.6 to 1.4
+
+       Which is why the sizes are declared once here rather than per step. The
+       .size-* selectors are repeated so this block outranks the desktop sizes
+       in section 4, which are set on two classes. */
+    .vvu-slide-btns,
+    .vvu-slide-btns.size-small,
+    .vvu-slide-btns.size-large {
+        --btn-msize: 1;
+        --btn-mfactor: calc(var(--btn-msize) * var(--btn-mscale, 1));
+        --btn-font: calc(clamp(9px, 2.7cqi, 15px) * var(--btn-mfactor));
+        --btn-pad-y: calc(clamp(5px, 1.7cqi, 10px) * var(--btn-mfactor));
+        --btn-pad-x: calc(clamp(10px, 3.2cqi, 26px) * var(--btn-mfactor));
+        --btn-gap: calc(clamp(5px, 1.8cqi, 12px) * var(--btn-mfactor));
+    }
+
+    /* With no phone size of its own, the desktop step sets the proportion. */
+    .vvu-slide-btns.size-small {
+        --btn-msize: .85;
+    }
+
+    .vvu-slide-btns.size-large {
+        --btn-msize: 1.2;
+    }
+
+    /* An explicit phone size wins over the desktop one (these come later). */
+    .vvu-slide-btns.msize-xsmall {
+        --btn-msize: .72;
+    }
+
+    .vvu-slide-btns.msize-small {
+        --btn-msize: .85;
+    }
+
+    .vvu-slide-btns.msize-medium {
+        --btn-msize: 1;
+    }
+
+    .vvu-slide-btns.msize-large {
+        --btn-msize: 1.2;
+    }
+
+    /* Move to the bottom / stack: the buttons leave their spot and line up
+       along the bottom edge, where they can never cover artwork text. */
+    .vvu-btn-layer.mob-bottom,
+    .vvu-btn-layer.mob-stacked {
+        display: grid;
+        padding: var(--layer-pad-y) var(--layer-pad-x);
+        align-items: end;
+        justify-items: center;
+    }
+
+    .vvu-btn-layer.mob-bottom.at-custom > .vvu-slide-btns,
+    .vvu-btn-layer.mob-stacked.at-custom > .vvu-slide-btns {
+        position: static;
+        transform: none;
+        max-width: 100%;
+    }
+
+    .vvu-btn-layer.mob-bottom > .vvu-slide-btns {
+        justify-content: center;
+    }
+
+    .vvu-btn-layer.mob-stacked > .vvu-slide-btns {
+        flex-direction: column;
+        align-items: stretch;
+        width: min(78%, 340px);
+    }
+
+    /* Keeping the same spot: hold the position but never let a long pair of
+       buttons run off the side of the slide. */
+    .vvu-btn-layer.mob-same > .vvu-slide-btns {
+        max-width: 94%;
+    }
+
+    .vvu-slide-btn {
+        white-space: normal;
+        text-align: center;
+    }
+}
+
+/* A last safety net for narrow phones held in portrait: without container
+   query support the media query still stops the buttons overflowing. */
+@media (max-width: 480px) {
+
+    .vvu-btn-layer > .vvu-slide-btns {
+        max-width: 94%;
+    }
+
+    .vvu-slide-btn {
+        white-space: normal;
+    }
+}

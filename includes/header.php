@@ -204,6 +204,8 @@ if (!function_exists('vvu_split_sections')) {
     <link href="Education-Website-and-AdminPanel/css/style-mob.css" rel="stylesheet" />
     <!-- CUSTOM FIXES -->
     <link href="css/custom-fixes.css?v=1.1" rel="stylesheet" />
+    <!-- HERO SLIDER BUTTONS (placement + styling, see includes/slider_buttons.php) -->
+    <link href="css/slider-buttons.css?v=1.2" rel="stylesheet" />
     <!-- MASTHEAD & NAVIGATION (loads last so it wins over the legacy theme) -->
     <link href="css/vvu-header.css?v=1.1" rel="stylesheet" />
     <script src="js/vvu-header.js" defer></script>
