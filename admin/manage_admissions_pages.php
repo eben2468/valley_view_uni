@@ -37,6 +37,12 @@ $managed_pages = [
         'file' => 'entry-requirement.php',
         'description' => 'Manage postgraduate, undergraduate, and special entry requirements.'
     ],
+    'athe' => [
+        'title' => 'ATHE Pre-Degree (Level 3)',
+        'icon' => 'fa-route',
+        'file' => 'athe.php',
+        'description' => 'Manage the ATHE @ VVU pathway page: hero, the two Level 3 programmes, eligibility, progression, FAQs and how to apply.'
+    ],
     'caution_to_applicants' => [
         'title' => 'Caution to Applicants',
         'icon' => 'fa-triangle-exclamation',
