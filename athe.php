@@ -690,6 +690,45 @@ foreach ([
     color: var(--acc);
 }
 
+/* ---------- Degree routes ---------- */
+.athe-routes { margin-top: clamp(18px, 2.4vw, 30px); }
+
+.athe-route-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) { .athe-route-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .athe-route-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.athe-route-list li {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 15px;
+    border-radius: 12px;
+    background: var(--athe-canvas);
+    border: 1px solid var(--athe-line);
+    border-left: 3px solid var(--acc);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--athe-ink);
+    transition: transform .2s ease, border-color .2s ease;
+}
+
+.athe-route-list li:hover { transform: translateY(-2px); }
+
+.athe-route-list .material-symbols-outlined {
+    flex: 0 0 auto;
+    font-size: 20px;
+    color: var(--acc);
+}
+
 /* ---------- Quote ---------- */
 .athe-quote {
     display: flex;
@@ -1009,7 +1048,7 @@ foreach ([
                 </h1>
 
                 <p class="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed max-w-4xl mx-auto animate-fadeInUp font-bold drop-shadow-lg italic" style="animation-delay: 0.2s;">
-                    "<?php echo $e($page_data['hero_description'] ?? 'Your result is not your destination.'); ?>"
+                    "<?php echo $e($page_data['hero_description'] ?? 'Your results are not your destination.'); ?>"
                 </p>
 
                 <?php $hero_pathways = $list('pathways'); ?>
@@ -1340,6 +1379,29 @@ foreach ([
                     <?php endif; ?>
                 </div>
 
+                <?php
+                // The degrees this diploma can lead on to. This is the question
+                // every applicant asks next, so it sits with the programme
+                // rather than in the general progression section further down.
+                $routes = $sec($block['key'] . '_progression');
+                if ($routes && $list($block['key'] . '_progression')):
+                ?>
+                <div class="athe-panel athe-routes" id="<?php echo $e($block['anchor']); ?>-routes">
+                    <p class="athe-panel-title"><?php echo $e($routes['section_title']); ?></p>
+                    <?php if (!empty($routes['section_subtitle'])): ?>
+                    <p class="athe-lede" style="margin:0 0 18px;font-size:15px;"><?php echo $e($routes['section_subtitle']); ?></p>
+                    <?php endif; ?>
+                    <ul class="athe-route-list">
+                        <?php foreach ($list($block['key'] . '_progression') as $route): ?>
+                        <li style="<?php echo $accent($route['item_color']); ?>">
+                            <span class="material-symbols-outlined" aria-hidden="true"><?php echo $e($route['item_icon'] ?: 'school'); ?></span>
+                            <span><?php echo $e($route['item_title']); ?></span>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+                <?php endif; ?>
+
                 <?php if ($tagline): ?>
                 <div class="athe-quote">
                     <span class="material-symbols-outlined" aria-hidden="true"><?php echo $e($tagline['item_icon'] ?: 'rocket_launch'); ?></span>
@@ -1445,6 +1507,27 @@ foreach ([
                     </li>
                     <?php endforeach; ?>
                 </ol>
+                <?php endif; ?>
+
+                <?php
+                // The concrete answer to "where can ATHE take you" lives with
+                // each programme; point readers who jumped straight here at it.
+                $route_links = [];
+                foreach ([['idt', 'Information & Digital Technologies'], ['business', 'Business']] as $r) {
+                    if ($sec($r[0] . '_progression') && $list($r[0] . '_progression')) {
+                        $route_links[] = ['anchor' => $r[0] . '-routes', 'label' => $r[1]];
+                    }
+                }
+                ?>
+                <?php if ($route_links): ?>
+                <div class="athe-prog-foot" style="margin-top:clamp(22px,3vw,34px);">
+                    <?php foreach ($route_links as $rl): ?>
+                    <a class="athe-btn athe-btn-ghost" href="#<?php echo $e($rl['anchor']); ?>">
+                        <span class="material-symbols-outlined">school</span>
+                        Degrees after <?php echo $e($rl['label']); ?>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
                 <?php endif; ?>
 
                 <div class="athe-detail-grid" style="margin-top:clamp(26px,3.4vw,42px);">
