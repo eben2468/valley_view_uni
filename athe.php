@@ -1257,22 +1257,15 @@ foreach ([
                         </span>
                         <h2><?php echo $e($elig['section_title']); ?></h2>
                         <?php if (!empty($elig['section_subtitle'])): ?>
+                        <!-- The question ends the left column so that the list
+                             of requirements — its answer — is the very next
+                             thing read, on a phone as well as on a desktop. -->
                         <p class="athe-lede"><?php echo $e($elig['section_subtitle']); ?></p>
                         <?php endif; ?>
-                        <?php if ($note = $rich($elig['section_description'])): ?>
-                        <p class="athe-note"><?php echo $note; ?></p>
-                        <?php endif; ?>
-                        <div class="athe-prog-foot">
-                            <a class="athe-btn athe-btn-wa" href="<?php echo $e($whatsapp); ?>" target="_blank" rel="noopener">
-                                <span class="material-symbols-outlined">chat</span>
-                                Check my eligibility
-                            </a>
-                        </div>
                     </div>
 
                     <?php if ($list('eligibility')): ?>
                     <div class="athe-panel" style="<?php echo $accent('green-600'); ?>">
-                        <p class="athe-panel-title">You may apply if you have</p>
                         <ul class="athe-bullets">
                             <?php foreach ($list('eligibility') as $req): ?>
                             <li style="<?php echo $accent($req['item_color']); ?>">
@@ -1288,6 +1281,22 @@ foreach ([
                         </ul>
                     </div>
                     <?php endif; ?>
+                </div>
+
+                <!-- The submission note and the call to action come after the
+                     requirements, so nothing separates the question from its
+                     answer. -->
+                <div style="<?php echo $accent('green-600'); ?>">
+                    <?php if ($note = $rich($elig['section_description'])): ?>
+                    <p class="athe-note" style="max-width:760px;margin-top:clamp(20px,2.6vw,30px);"><?php echo $note; ?></p>
+                    <?php endif; ?>
+
+                    <div class="athe-prog-foot" style="justify-content:flex-start;">
+                        <a class="athe-btn athe-btn-wa" href="<?php echo $e($whatsapp); ?>" target="_blank" rel="noopener">
+                            <span class="material-symbols-outlined">chat</span>
+                            Check my eligibility
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
