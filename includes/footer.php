@@ -35,7 +35,7 @@ foreach ($footer_links_all as $link) {
                     <ul>
                         <?php if (isset($footer_links[$section['id']])): ?>
                             <?php foreach ($footer_links[$section['id']] as $link): ?>
-                                <li><a href="<?php echo htmlspecialchars($link['url']); ?>"><?php echo htmlspecialchars($link['label']); ?></a></li>
+                                <li><a href="<?php echo htmlspecialchars(vvu_url($link['url'])); ?>"><?php echo htmlspecialchars($link['label']); ?></a></li>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </ul>
@@ -65,7 +65,7 @@ foreach ($footer_links_all as $link) {
                         if (isset($footer_links[$social_section_id])):
                             foreach ($footer_links[$social_section_id] as $social):
                         ?>
-                        <li><a href="<?php echo htmlspecialchars($social['url']); ?>"><i class="fa-brands <?php echo htmlspecialchars($social['icon_class']); ?>" aria-hidden="true"></i></a></li>
+                        <li><a href="<?php echo htmlspecialchars(vvu_url($social['url'])); ?>"><i class="fa-brands <?php echo htmlspecialchars($social['icon_class']); ?>" aria-hidden="true"></i></a></li>
                         <?php 
                             endforeach;
                         endif; 
@@ -92,10 +92,10 @@ foreach ($footer_links_all as $link) {
          Finding 8): 3.6.0 carries known XSS issues fixed in 3.7.x, and loading
          it from a third-party CDN gave that CDN script-execution rights on
          every page of the site. -->
-    <script src="js/vendor/jquery-3.7.1.min.js"></script>
-    <script src="Education-Website-and-AdminPanel/js/bootstrap.min.js"></script>
-    <script src="Education-Website-and-AdminPanel/js/materialize.min.js"></script>
-    <script src="Education-Website-and-AdminPanel/js/custom.js"></script>
+    <script src="<?php echo $vvu_root; ?>js/vendor/jquery-3.7.1.min.js"></script>
+    <script src="<?php echo $vvu_root; ?>Education-Website-and-AdminPanel/js/bootstrap.min.js"></script>
+    <script src="<?php echo $vvu_root; ?>Education-Website-and-AdminPanel/js/materialize.min.js"></script>
+    <script src="<?php echo $vvu_root; ?>Education-Website-and-AdminPanel/js/custom.js"></script>
     <!-- Header Auto-hide on Scroll -->
     <!-- <script src="js/header-scroll.js"></script> -->
 </body>

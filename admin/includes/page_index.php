@@ -35,6 +35,7 @@ if (!function_exists('vvu_admin_page_index')) {
             ['file' => 'manage_resources_pages.php',       'title' => 'Application & Resources',     'icon' => 'fa-file-invoice',     'keywords' => 'fees structure why choose vvu'],
             ['file' => 'manage_programs.php',              'title' => 'Academic Programs',           'icon' => 'fa-graduation-cap',   'keywords' => 'courses degrees faculty departments'],
             ['file' => 'manage_program_categories.php',    'title' => 'Program Categories',          'icon' => 'fa-sitemap',          'keywords' => 'course grouping'],
+            ['file' => 'manage_research.php',              'title' => 'Research Portal',             'icon' => 'fa-microscope',       'keywords' => 'vvu scholar publications citations researchers h-index google scholar orcid crossref'],
             ['file' => 'manage_directory.php',             'title' => 'Staff & Faculty',             'icon' => 'fa-users',            'keywords' => 'lecturers staff directory people'],
             ['file' => 'manage_university_directory.php',  'title' => 'Univ. Directory hierarchy',   'icon' => 'fa-sitemap',          'keywords' => 'org chart structure'],
             ['file' => 'manage_news.php',                  'title' => 'News & Events',               'icon' => 'fa-newspaper',        'keywords' => 'articles announcements notices'],
@@ -72,6 +73,16 @@ if (!function_exists('vvu_admin_page_index')) {
     /** Tab-based managers, which use #anchors instead of ?page=. */
     function vvu_admin_static_subpages() {
         return [
+            ['file' => 'manage_research.php?tab=settings', 'title' => 'Portal Page Content', 'parent' => 'Research Portal', 'icon' => 'fa-pen-to-square', 'keywords' => 'hero headline cta meta'],
+            ['file' => 'manage_research.php?tab=scholars', 'title' => 'Researchers', 'parent' => 'Research Portal', 'icon' => 'fa-user-graduate', 'keywords' => 'scholars authors profiles citations h-index'],
+            ['file' => 'manage_research.php?tab=publications', 'title' => 'Publications', 'parent' => 'Research Portal', 'icon' => 'fa-book-open', 'keywords' => 'papers journal articles doi catalogue'],
+            ['file' => 'manage_research.php?tab=units', 'title' => 'Research Faculties', 'parent' => 'Research Portal', 'icon' => 'fa-building-columns', 'keywords' => 'colleges schools departments'],
+            ['file' => 'manage_research.php?tab=areas', 'title' => 'Research Areas', 'parent' => 'Research Portal', 'icon' => 'fa-flask', 'keywords' => 'themes clusters sdg'],
+            ['file' => 'manage_research.php?tab=stats', 'title' => 'Research Stat Tiles', 'parent' => 'Research Portal', 'icon' => 'fa-chart-simple', 'keywords' => 'metrics counters figures'],
+            ['file' => 'manage_research.php?tab=sections', 'title' => 'Portal Sections', 'parent' => 'Research Portal', 'icon' => 'fa-layer-group', 'keywords' => 'bands headings order'],
+            ['file' => 'manage_research.php?tab=highlights', 'title' => 'Grants & Awards', 'parent' => 'Research Portal', 'icon' => 'fa-award', 'keywords' => 'funding projects spotlights'],
+            ['file' => 'manage_research.php?tab=partners', 'title' => 'Research Partners', 'parent' => 'Research Portal', 'icon' => 'fa-handshake-angle', 'keywords' => 'collaborations funders institutions'],
+            ['file' => 'manage_research.php?tab=import', 'title' => 'Import Research Data', 'parent' => 'Research Portal', 'icon' => 'fa-cloud-arrow-down', 'keywords' => 'google scholar researchgate orcid crossref bibtex csv'],
             ['file' => 'manage_about_pages.php#mission_vision', 'title' => 'Mission & Vision', 'parent' => 'About Pages', 'icon' => 'fa-bullseye',    'keywords' => 'mission vision pillars'],
             ['file' => 'manage_about_pages.php#core_values',    'title' => 'Core Values',      'parent' => 'About Pages', 'icon' => 'fa-heart',       'keywords' => 'values principles'],
             ['file' => 'manage_about_pages.php#anthem',         'title' => 'VVU Anthem',       'parent' => 'About Pages', 'icon' => 'fa-music',       'keywords' => 'song lyrics'],

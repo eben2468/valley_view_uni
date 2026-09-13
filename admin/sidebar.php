@@ -89,7 +89,12 @@
                                 <span>Academic Programs</span>
                             </a>
                         </li>
-                        <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'manage_directory.php' || basename($_SERVER['PHP_SELF']) == 'edit_directory.php' ? 'active' : ''; ?>">
+                        <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'manage_research.php' ? 'active' : ''; ?>">
+                            <a href="manage_research.php">
+                                <i class="fas fa-microscope"></i>
+                                <span>Research Portal</span>
+                            </a>
+                        </li>                        <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'manage_directory.php' || basename($_SERVER['PHP_SELF']) == 'edit_directory.php' ? 'active' : ''; ?>">
                             <a href="manage_directory.php">
                                 <i class="fas fa-users"></i>
                                 <span>Staff & Faculty</span>

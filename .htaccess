@@ -59,6 +59,8 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^(dev-tools|tools|includes|engagement)(/|$) - [F,L]
+    # research/includes/ holds the portal helpers, which are include-only.
+    RewriteRule ^research/includes(/|$) - [F,L]
 </IfModule>
 
 # ── Uploads must never execute ────────────────────────────────────────────

@@ -1,4 +1,17 @@
 <?php
+/* --------------------------------------------------------------------------
+   SUB-DIRECTORY SUPPORT
+   A page that does not sit at the document root (research/index.php, say)
+   sets $vvu_root to the hop back up ("../") before including this file.
+   Every link and asset below is resolved through it, so the masthead, the
+   stylesheets and the whole navigation keep working one level down.
+   Root-level pages set nothing and are unaffected.
+   -------------------------------------------------------------------------- */
+$vvu_root = trim((string) ($vvu_root ?? ''));
+if ($vvu_root !== '') {
+    $vvu_root = rtrim($vvu_root, '/') . '/';
+}
+
 require_once __DIR__ . '/security_headers.php';
 require_once 'db_connect.php';
 require_once 'navigation_helper.php';
@@ -58,6 +71,7 @@ if (!function_exists('vvu_url')) {
      */
     function vvu_url($url)
     {
+        global $vvu_root;
         $url = trim((string) $url);
         if ($url === '') {
             return '#';
@@ -71,7 +85,7 @@ if (!function_exists('vvu_url')) {
         if (preg_match('#^www\.#i', $url)) {
             return 'https://' . $url;
         }
-        return $url;
+        return ($vvu_root ?? '') . $url;
     }
 }
 
@@ -179,11 +193,11 @@ if (!function_exists('vvu_split_sections')) {
     <title><?php echo isset($page_title) ? vvu_e($page_title) : 'Valley View University'; ?></title>
 
     <!-- FAVICON (VVU mark, cropped tight so it fills the tab tile) -->
-    <link rel="icon" href="favicon.ico" sizes="any">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" href="<?php echo $vvu_root; ?>favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?php echo $vvu_root; ?>favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?php echo $vvu_root; ?>favicon-16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="<?php echo $vvu_root; ?>favicon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?php echo $vvu_root; ?>apple-touch-icon.png">
     <meta name="theme-color" content="#002147">
 
     <!-- GOOGLE FONT — Cinzel for titles, Open Sans for body -->
@@ -197,18 +211,18 @@ if (!function_exists('vvu_split_sections')) {
     <!-- TAILWIND CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- ALL CSS FILES -->
-    <link href="Education-Website-and-AdminPanel/css/materialize.css" rel="stylesheet">
-    <link href="Education-Website-and-AdminPanel/css/bootstrap.css" rel="stylesheet" />
-    <link href="Education-Website-and-AdminPanel/css/style.css" rel="stylesheet" />
+    <link href="<?php echo $vvu_root; ?>Education-Website-and-AdminPanel/css/materialize.css" rel="stylesheet">
+    <link href="<?php echo $vvu_root; ?>Education-Website-and-AdminPanel/css/bootstrap.css" rel="stylesheet" />
+    <link href="<?php echo $vvu_root; ?>Education-Website-and-AdminPanel/css/style.css" rel="stylesheet" />
     <!-- RESPONSIVE.CSS ONLY FOR MOBILE AND TABLET VIEWS -->
-    <link href="Education-Website-and-AdminPanel/css/style-mob.css" rel="stylesheet" />
+    <link href="<?php echo $vvu_root; ?>Education-Website-and-AdminPanel/css/style-mob.css" rel="stylesheet" />
     <!-- CUSTOM FIXES -->
-    <link href="css/custom-fixes.css?v=1.1" rel="stylesheet" />
+    <link href="<?php echo $vvu_root; ?>css/custom-fixes.css?v=1.1" rel="stylesheet" />
     <!-- HERO SLIDER BUTTONS (placement + styling, see includes/slider_buttons.php) -->
-    <link href="css/slider-buttons.css?v=1.2" rel="stylesheet" />
+    <link href="<?php echo $vvu_root; ?>css/slider-buttons.css?v=1.2" rel="stylesheet" />
     <!-- MASTHEAD & NAVIGATION (loads last so it wins over the legacy theme) -->
-    <link href="css/vvu-header.css?v=1.1" rel="stylesheet" />
-    <script src="js/vvu-header.js" defer></script>
+    <link href="<?php echo $vvu_root; ?>css/vvu-header.css?v=1.1" rel="stylesheet" />
+    <script src="<?php echo $vvu_root; ?>js/vvu-header.js" defer></script>
 </head>
 
 <body>
@@ -275,8 +289,8 @@ if (!function_exists('vvu_split_sections')) {
         <div class="vvu-nav">
             <div class="vvu-nav__inner">
 
-                <a class="vvu-nav__mini" href="index.php">
-                    <img src="<?php echo vvu_e($vvu_logo); ?>" alt="<?php echo vvu_e($vvu_name_alt); ?> crest">
+                <a class="vvu-nav__mini" href="<?php echo $vvu_root; ?>index.php">
+                    <img src="<?php echo vvu_e(vvu_url($vvu_logo)); ?>" alt="<?php echo vvu_e($vvu_name_alt); ?> crest">
                     <?php if ($vvu_name !== ''): ?><span><?php echo vvu_e($vvu_name); ?></span><?php endif; ?>
                 </a>
 
@@ -322,7 +336,7 @@ if (!function_exists('vvu_split_sections')) {
                                                                 <a class="course-overlay menu-about"
                                                                     href="<?php echo vvu_e(vvu_url($sec['featured_link'] ?? '#')); ?>">
                                                                     <?php // Originals run 2-16 MB; the card is ~250x160. ?>
-                                                                    <img src="<?php echo vvu_e(vvu_thumb($sec['featured_image'], 520, 340)); ?>"
+                                                                    <img src="<?php echo vvu_e(vvu_url(vvu_thumb($sec['featured_image'], 520, 340))); ?>"
                                                                         alt="" loading="lazy" decoding="async">
                                                                     <span><?php echo vvu_e($sec['featured_text'] ?? ''); ?></span>
                                                                 </a>
@@ -388,7 +402,7 @@ if (!function_exists('vvu_split_sections')) {
                     <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                 </button>
                 <div class="vvu-search__inner">
-                    <form class="vvu-search-form" action="<?php echo vvu_e($vvu_search_url); ?>" method="get" role="search">
+                    <form class="vvu-search-form" action="<?php echo vvu_e(vvu_url($vvu_search_url)); ?>" method="get" role="search">
                         <div class="vvu-search__field">
                             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                             <input class="vvu-search__input browser-default" type="search" name="q"
@@ -400,7 +414,7 @@ if (!function_exists('vvu_split_sections')) {
                     <div class="vvu-search__hints">
                         <span>Popular</span>
                         <?php foreach ($vvu_search_hints as $label => $href): ?>
-                            <a href="<?php echo vvu_e($href); ?>"><?php echo vvu_e($label); ?></a>
+                            <a href="<?php echo vvu_e(vvu_url($href)); ?>"><?php echo vvu_e($label); ?></a>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -415,8 +429,8 @@ if (!function_exists('vvu_split_sections')) {
                     <span></span><span></span><span></span>
                 </button>
 
-                <a class="vvu-mobilebar__brand" href="index.php">
-                    <img src="<?php echo vvu_e($vvu_logo); ?>" alt="">
+                <a class="vvu-mobilebar__brand" href="<?php echo $vvu_root; ?>index.php">
+                    <img src="<?php echo vvu_e(vvu_url($vvu_logo)); ?>" alt="">
                     <?php if ($vvu_name !== ''): ?><span><?php echo vvu_e($vvu_name); ?></span><?php endif; ?>
                 </a>
 
@@ -434,8 +448,8 @@ if (!function_exists('vvu_split_sections')) {
 
     <aside class="vvu-drawer" id="vvu-drawer" aria-hidden="true" aria-label="Site menu">
         <div class="vvu-drawer__head">
-            <a class="vvu-drawer__lockup" href="index.php">
-                <img src="<?php echo vvu_e($vvu_logo); ?>" alt="">
+            <a class="vvu-drawer__lockup" href="<?php echo $vvu_root; ?>index.php">
+                <img src="<?php echo vvu_e(vvu_url($vvu_logo)); ?>" alt="">
                 <span>
                     <?php if ($vvu_name !== ''): ?><strong><?php echo vvu_e($vvu_name); ?></strong><?php endif; ?>
                     <em><?php echo vvu_e($vvu_motto); ?></em>
@@ -449,7 +463,7 @@ if (!function_exists('vvu_split_sections')) {
         <div class="vvu-drawer__body">
 
             <div class="vvu-drawer__search">
-                <form class="vvu-search-form" action="<?php echo vvu_e($vvu_search_url); ?>" method="get" role="search">
+                <form class="vvu-search-form" action="<?php echo vvu_e(vvu_url($vvu_search_url)); ?>" method="get" role="search">
                     <div class="vvu-search__field">
                         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                         <input class="vvu-search__input browser-default" type="search" name="q"
