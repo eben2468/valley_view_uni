@@ -36,8 +36,8 @@ Admin and schema:
 | `sql/research_portal_schema.sql` | The eleven tables, plus the seed stat tiles, section headings and page copy |
 | `sql/research_portal_units.sql` | The real academic structure — four faculties/schools, seven departments |
 | `sql/research_portal_openalex.sql` | The two columns that make an OpenAlex import re-runnable |
-| `sql/import_openalex.php` | Loads the University's real corpus from saved OpenAlex pages |
-| `sql/assign_units_openalex.php` | Places researchers in faculties from their own stated affiliations |
+| `admin/includes/research_openalex_sync.php` | The OpenAlex synchroniser — one engine behind both the admin button and the CLI |
+| `sql/import_openalex.php` | Command-line front door to that engine, for servers without internet |
 
 ---
 
@@ -85,13 +85,15 @@ Department of Accounting and Finance, Valley View University, Oyibi, Accra, Ghan
 School of Nursing and Midwifery, Valley View University, Oyibi, Ghana
 ```
 
-`sql/assign_units_openalex.php` reads those lines and matches them against the
-University's current structure. It is therefore derived from what the authors
-themselves published, not guessed from their subject area. **319 of 537**
-researchers matched; the rest state no more than "Valley View University" and
-are left unassigned for an editor to place.
+Every sync reads those lines and matches them against the University's current
+structure, so placement is derived from what the authors themselves published,
+not guessed from their subject area. **319 of 537** researchers matched; the
+rest state no more than "Valley View University" and are left unassigned for an
+editor to place.
 
-Re-running it never overwrites an editor's correction unless `--force` is given.
+A refresh only fills in a faculty for someone who does not have one, so an
+editor's correction is never overwritten — unless the "re-assign faculties
+already set" box is ticked (or `--force-units` is passed on the command line).
 
 ### Research areas
 
@@ -122,12 +124,57 @@ output, so every area has real work behind it:
   "Valley View" for reasons unrelated to the University. Anything that looks
   wrong can be unpublished on the Publications tab.
 
-### Refreshing later
+### Keeping it up to date
 
-Re-run the OpenAlex import from the admin whenever you want current citation
-counts. Records are matched on their OpenAlex id first, then DOI, then title and
-year, so a re-run updates what is there and adds what is new — it does not
-duplicate. Finish with **Recount metrics** to rebuild the rankings.
+**Admin → Research Portal → Import Data → Refresh from OpenAlex.**
+
+Set *Published from* to last year, leave *Pages this run* at 3, press the button.
+That is the whole routine.
+
+A refresh does the complete job, not just the publications:
+
+- adds papers published since the last run;
+- updates the citation count on every record it sees;
+- creates profiles for researchers new to the portal;
+- links co-authors, so a paper appears on each VVU author's profile;
+- tags each paper with a research area;
+- places people in faculties from the affiliation printed on their own papers;
+- rebuilds the cached citation totals the rankings read.
+
+Everything is keyed on OpenAlex ids, so running it twice changes nothing the
+second time. Editorial work — positions, photographs, biographies, featured
+flags, hidden records, corrected faculties — is never overwritten. The
+"re-assign faculties already set" checkbox is the only thing that touches a
+faculty an editor has chosen, and it is off by default.
+
+If a run hits the page budget or the host's time limit it stops cleanly, saves
+its position and offers a **Continue** button that resumes from exactly there
+rather than starting over.
+
+**How often:** once a term is plenty for a catalogue this size. Citation counts
+drift slowly; new papers appear in OpenAlex within days to a few weeks of
+publication.
+
+**At the turn of the year** there is nothing special to do. The year filter is a
+*from* date, not a range, so `2025` keeps picking up 2026 papers as they appear.
+The trend chart, the "published this year" figure and the year filter all read
+the catalogue directly and roll over on their own. The one thing worth doing
+each January is a single wider run — clear *Published from* and set *Pages this
+run* to 10 — which re-scans the whole corpus and catches anything back-dated or
+indexed late.
+
+### Command-line alternative
+
+Where the server cannot reach the API, fetch the responses elsewhere and run:
+
+```bash
+php sql/import_openalex.php sql/openalex               # same engine as the button
+php sql/import_openalex.php sql/openalex --dry-run     # count, write nothing
+php sql/import_openalex.php sql/openalex --force-units # also re-assign set faculties
+```
+
+The button and the script call the same synchroniser
+(`admin/includes/research_openalex_sync.php`), so they cannot drift apart.
 
 ---
 

@@ -25,6 +25,7 @@ include 'sidebar.php';
 require_once('../includes/db_connect.php');
 require_once(__DIR__ . '/../research/includes/research_helper.php');
 require_once(__DIR__ . '/includes/research_import.php');
+require_once(__DIR__ . '/includes/research_openalex_sync.php');
 
 /* ==========================================================================
    Tab definitions
@@ -583,6 +584,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     . (int) ($m['h_index'] ?? 0) . '.'
                     . ($found ? " $found publications were also read — review them on the Import Data tab." : ''),
                     ['edit' => $sid]);
+                break;
+
+            /* ----------------------------------------------------------
+               A full OpenAlex refresh. Unlike the preview-based importers
+               this writes straight through, because it does far more than
+               insert publications: it creates researcher records for authors
+               the portal has not seen, links co-authors, maps subject areas
+               and places people in faculties. Reviewing 700 rows by hand
+               would not make any of that safer — it is all keyed on OpenAlex
+               ids, so the operation is repeatable and self-correcting.
+               ---------------------------------------------------------- */
+            case 'sync_openalex':
+                @set_time_limit(300);
+
+                $fetch = vvur_openalex_fetch([
+                    'institution' => trim((string) ($_POST['oa_institution'] ?? VVUR_OPENALEX_INSTITUTION)),
+                    'from_year'   => (int) ($_POST['oa_from_year'] ?? 0),
+                    'pages'       => (int) ($_POST['oa_pages'] ?? 3),
+                    'cursor'      => trim((string) ($_POST['oa_cursor'] ?? '*')) ?: '*',
+                    'time_budget' => 120,
+                ]);
+
+                if (!$fetch['ok']) {
+                    vvur_redirect('import', 'danger', $fetch['error']);
+                }
+                if (!$fetch['works']) {
+                    vvur_redirect('import', 'warning',
+                        'OpenAlex returned no works for that filter. Nothing was changed.');
+                }
+
+                $stats = vvur_openalex_sync($pdo, $fetch['works'], [
+                    'overwrite_units' => !empty($_POST['oa_overwrite_units']),
+                ]);
+
+                $message = vvur_openalex_summary($stats);
+                if (!$fetch['complete'] && $fetch['next_cursor'] !== '') {
+                    // More to come: hand the cursor back so the next click
+                    // resumes instead of starting from the beginning.
+                    $_SESSION['vvur_oa_cursor'] = $fetch['next_cursor'];
+                    $message .= ' There are more records to fetch — press Continue to carry on from here.';
+                } else {
+                    unset($_SESSION['vvur_oa_cursor']);
+                    $message .= ' The catalogue is now up to date.';
+                }
+                if ($fetch['error']) {
+                    $message .= ' (' . $fetch['error'] . ')';
+                }
+
+                vvur_redirect('import', 'success', $message);
                 break;
 
             /* ---------------------------------------------------------- */
@@ -1614,33 +1664,70 @@ function vvur_delete_link($type, $id, $what, $csrf)
                         </small>
                     </div>
                     <div class="card-body">
+                        <?php
+                        $resumeCursor = $_SESSION['vvur_oa_cursor'] ?? '';
+                        $thisYear     = (int) date('Y');
+                        ?>
+                        <?php if ($resumeCursor !== ''): ?>
+                            <div class="alert alert-warning py-2">
+                                <i class="fas fa-hourglass-half me-1"></i>
+                                The last run stopped partway through. Press <strong>Continue</strong> to
+                                resume from where it left off.
+                            </div>
+                        <?php endif; ?>
+
                         <form method="post">
                             <?php echo vvu_csrf_field(); ?>
-                            <input type="hidden" name="action" value="import_preview">
-                            <input type="hidden" name="source" value="openalex">
+                            <input type="hidden" name="action" value="sync_openalex">
+                            <input type="hidden" name="oa_cursor" value="<?php echo h($resumeCursor ?: '*'); ?>">
                             <div class="row">
                                 <?php
+                                vvur_control('oa_from_year', ['label' => 'Published from', 'type' => 'number', 'col' => 3,
+                                    'help' => 'A yearly top-up only needs the last year or two. Leave blank to re-scan everything.'],
+                                    $thisYear - 1);
+                                vvur_control('oa_pages', ['label' => 'Pages this run', 'type' => 'number', 'col' => 3,
+                                    'help' => '100 works per page. The whole University is about 8 pages.'], 3);
                                 vvur_control('oa_institution', ['label' => 'OpenAlex institution id', 'type' => 'text', 'col' => 3,
-                                    'help' => 'Valley View University is <code>' . h(VVUR_OPENALEX_INSTITUTION) . '</code>.'], VVUR_OPENALEX_INSTITUTION);
-                                vvur_control('oa_author', ['label' => 'Or one author id', 'type' => 'text', 'col' => 3,
-                                    'help' => 'Optional. Narrows the run to a single researcher.'], '');
-                                vvur_control('oa_from_year', ['label' => 'Published from', 'type' => 'number', 'col' => 2,
-                                    'help' => 'Leave blank for everything.'], '');
-                                vvur_control('oa_pages', ['label' => 'Pages to fetch', 'type' => 'number', 'col' => 2,
-                                    'help' => '100 works each. The full corpus is about 8 pages.'], 3);
-                                vvur_control('attach_scholar', ['label' => 'Credit to', 'type' => 'select', 'col' => 2,
-                                    'options_var' => 'scholarOptions', 'blank' => '— match by author —'], '', ['scholarOptions' => $scholarOptions]);
+                                    'help' => 'Valley View University is <code>' . h(VVUR_OPENALEX_INSTITUTION) . '</code>.'],
+                                    VVUR_OPENALEX_INSTITUTION);
                                 ?>
-                            </div>
-                            <button class="btn btn-success" type="submit">
-                                <i class="fas fa-cloud-arrow-down me-1"></i> Fetch from OpenAlex
-                            </button>
-                            <div class="form-text mt-2">
-                                Records already in the catalogue are matched on their OpenAlex id and DOI, so
-                                a re-run updates citation counts rather than creating duplicates. Leave
-                                &ldquo;Credit to&rdquo; unset when loading the whole University.
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label fw-semibold d-block">&nbsp;</label>
+                                    <button class="btn btn-success w-100" type="submit">
+                                        <i class="fas fa-rotate me-1"></i>
+                                        <?php echo $resumeCursor !== '' ? 'Continue' : 'Refresh from OpenAlex'; ?>
+                                    </button>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="oa_overwrite_units"
+                                               id="oa_overwrite_units" value="1">
+                                        <label class="form-check-label" for="oa_overwrite_units">
+                                            Also re-assign faculties that have already been set
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Leave this off. By default a refresh only fills in a faculty for
+                                        researchers who do not have one, so corrections made here are never
+                                        overwritten.
+                                    </div>
+                                </div>
                             </div>
                         </form>
+
+                        <hr class="my-3">
+                        <p class="mb-1 small text-muted">
+                            <strong>What a refresh does:</strong> adds papers published since your last run,
+                            updates the citation count on every record it sees, creates profiles for
+                            researchers new to the portal, links co-authors, tags subject areas, and places
+                            people in faculties from the affiliation printed on their own papers. It finishes
+                            by rebuilding the rankings.
+                        </p>
+                        <p class="mb-0 small text-muted">
+                            Everything is matched on OpenAlex ids, so running it twice changes nothing the
+                            second time. Your own edits — positions, photographs, biographies, featured
+                            flags, hidden records and corrected faculties — are left alone.
+                        </p>
                     </div>
                 </div>
             </div>
