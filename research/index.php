@@ -225,6 +225,11 @@ include __DIR__ . '/../includes/header.php';
         foreach ($trend as $t) {
             if ($t['publications'] >= $peak['publications']) { $peak = $t; }
         }
+        // Every figure beside the chart describes the charted window, not the
+        // whole catalogue — the card is headed with those years and says so.
+        $winFrom = (int) $trend[0]['year'];
+        $winTo   = (int) end($trend)['year'];
+        $win     = r_window_metrics($pdo, $winFrom, $winTo);
     ?>
         <section class="vvus__band" id="trends" aria-labelledby="trends-h">
             <div class="vvus__wrap">
@@ -280,11 +285,11 @@ include __DIR__ . '/../includes/header.php';
                         </div>
                         <div class="vvus-fact">
                             <dt>Open access share</dt>
-                            <dd><?php echo (int) $metrics['open_access']; ?>%</dd>
+                            <dd><?php echo (int) $win['open_access']; ?>%</dd>
                         </div>
                         <div class="vvus-fact">
                             <dt>Most cited single work</dt>
-                            <dd><?php echo number_format($metrics['top_citation']); ?></dd>
+                            <dd><?php echo number_format($win['top_citation']); ?></dd>
                         </div>
                     </dl>
                 </div>

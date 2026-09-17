@@ -328,6 +328,48 @@ function r_metrics(PDO $pdo)
     return $cache = $m;
 }
 
+/**
+ * The same impact figures as r_metrics(), but confined to one span of years.
+ *
+ * The trend panel is headed with its own window ("2017–2026") and says
+ * "in this window" on the face of it, so every figure beside the chart has to
+ * describe that window and not the whole catalogue. Quoting a catalogue-wide
+ * maximum there reads as the best paper of the decade when it may be older.
+ *
+ * Returns open_access (percent), top_citation, publications and citations for
+ * the range, inclusive at both ends.
+ */
+function r_window_metrics(PDO $pdo, $from, $to)
+{
+    $from = (int) $from;
+    $to   = (int) $to;
+    $out  = ['publications' => 0, 'citations' => 0, 'open_access' => 0, 'top_citation' => 0];
+
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT COUNT(*)                   AS n,
+                    COALESCE(SUM(citations),0) AS cites,
+                    COALESCE(MAX(citations),0) AS top,
+                    COALESCE(SUM(is_open_access),0) AS oa
+               FROM research_publications
+              WHERE is_active = 1 AND pub_year BETWEEN ? AND ?"
+        );
+        $stmt->execute([$from, $to]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        $out['publications'] = (int) ($row['n'] ?? 0);
+        $out['citations']    = (int) ($row['cites'] ?? 0);
+        $out['top_citation'] = (int) ($row['top'] ?? 0);
+        $out['open_access']  = $out['publications'] > 0
+            ? (int) round(((int) ($row['oa'] ?? 0)) / $out['publications'] * 100)
+            : 0;
+    } catch (Exception $e) {
+        error_log('VVU Scholar: window metric query failed — ' . $e->getMessage());
+    }
+
+    return $out;
+}
+
 /** The stat tiles, with auto_key rows resolved against the live metrics. */
 function r_stat_tiles(PDO $pdo)
 {
