@@ -277,6 +277,94 @@ After the import the credited researcher's totals are recounted automatically.
 
 ---
 
+## What the automated sources miss
+
+OpenAlex gave the portal its corpus, but it is not complete, and it is worth
+knowing exactly *how* it is incomplete — the gaps have three different causes
+and three different remedies.
+
+**1. The journal is not indexed anywhere.** A good deal of Ghanaian and
+pan-African scholarship appears in journals that deposit no metadata with
+Crossref and are unknown to OpenAlex — *International Journal of Economic
+Perspectives*, *International Journal of Economics, Commerce & Management*,
+*Journal of Emerging Trends and Novel Research* and others like them. No
+refresh will ever find these. They have to be typed in, or pasted as BibTeX/CSV.
+
+**2. The paper is indexed, but not attributed to Valley View.** This is the
+larger and less obvious gap. A paper is in Crossref with a DOI, but its
+affiliation line names only the author's department, or an earlier employer, or
+nothing at all — so the OpenAlex institution query that drives the refresh never
+returns it. The fix is to search by *person* rather than by institution: an
+ORCID import for that researcher, or a Crossref author search.
+
+**3. The paper is indexed and attributed, but the author is a fresh profile.**
+OpenAlex creates a new author record whenever a byline is spelled differently,
+so one person can end up as several profiles, each holding a slice of their
+work. See *Merging duplicate profiles* below.
+
+### Back-filling DOIs and citation counts
+
+Records typed in by hand carry a title and a citation but no DOI and no citation
+count, which leaves them out of the citation metrics and the open-access figure.
+`sql/enrich_from_crossref.php` looks each one up in Crossref by title and fills
+in what it finds:
+
+```bash
+php sql/enrich_from_crossref.php                     # dry run, everything with no DOI
+php sql/enrich_from_crossref.php --write             # apply
+php sql/enrich_from_crossref.php --write --limit=50  # in batches
+php sql/enrich_from_crossref.php --scholar=45        # one researcher
+```
+
+It only fills blanks and only ever raises a citation count, so it cannot
+overwrite an editor's correction, and it is safe to re-run — anything it
+matched already has a DOI and is skipped next time. A title match must reach
+93% similarity (`--min=` to change it) and the years must agree to within one,
+since a paper's online year and its issue year often differ.
+
+Run **Admin → Research Portal → Recount metrics** afterwards.
+
+### Merging duplicate profiles
+
+One researcher spread across several profiles splits their publication list and
+their citation total, and the directory lists them several times. To merge,
+point the publications and co-authorships at the profile you are keeping, then
+deactivate the rest:
+
+```sql
+-- Keep $KEEP, fold $DUPE into it.
+UPDATE research_publications        SET scholar_id = $KEEP WHERE scholar_id = $DUPE;
+UPDATE IGNORE research_publication_authors SET scholar_id = $KEEP WHERE scholar_id = $DUPE;
+DELETE FROM research_publication_authors   WHERE scholar_id = $DUPE;
+UPDATE research_scholars SET is_active = 0 WHERE id = $DUPE;
+```
+
+`UPDATE IGNORE` then `DELETE` is deliberate: where both profiles are already on
+the same paper the re-point would collide with the primary key, so the ignored
+rows are dropped afterwards. Keep the profile that has the ORCID and the most
+publications. Then **Recount metrics**.
+
+Find the candidates with:
+
+```sql
+SELECT full_name, COUNT(*) n, GROUP_CONCAT(id ORDER BY publications_count DESC)
+  FROM research_scholars GROUP BY LOWER(TRIM(full_name)) HAVING n > 1;
+```
+
+Identical names are safe to merge on sight. Same surname and initial is only a
+hint — *Jeanette Owusu* and *Joseph Owusu* are two people, and so are the four
+different S. Boatengs. Check the publication lists before merging those.
+
+### Research Office submissions
+
+`sql/research_publications_ocansey_2026.sql` is the worked example: 53 citations
+supplied as a Word document, checked against the catalogue, 26 found to be
+missing and inserted with their co-authorship links. The file is idempotent —
+each row is keyed on an `external_id` and guarded by `NOT EXISTS`, so re-running
+it inserts nothing twice. Follow the same shape for the next submission.
+
+---
+
 ## Notes for whoever maintains this
 
 **Sub-directory support.** `includes/header.php` and `includes/footer.php` now
