@@ -181,26 +181,34 @@ if (!$content) $content = ['hero_badge'=>'Campus Essential Services','hero_title
         <div class="container mx-auto px-4">
             <div class="max-w-7xl mx-auto text-center">
                 <h2 class="text-6xl font-black text-gray-900 dark:text-white mb-16">Contact & Hours</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div class="p-10 glass rounded-[3rem] shadow-xl flex flex-col items-center">
-                        <div class="w-20 h-20 post-gradient rounded-3xl flex items-center justify-center text-white mb-6 shadow-lg"><span class="material-symbols-outlined text-5xl text-white">location_on</span></div>
-                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Location</h4>
-                        <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo nl2br(strip_tags($content['contact_location'])); ?></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                    <div class="p-5 md:p-10 glass rounded-3xl md:rounded-[3rem] shadow-xl flex flex-row md:flex-col items-center gap-4 md:gap-0 text-left md:text-center">
+                        <div class="w-16 h-16 md:w-20 md:h-20 shrink-0 post-gradient rounded-2xl md:rounded-3xl flex items-center justify-center text-white md:mb-6 shadow-lg"><span class="material-symbols-outlined text-4xl md:text-5xl text-white">location_on</span></div>
+                        <div class="min-w-0">
+                            <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-1 md:mb-4">Location</h4>
+                            <p class="text-lg break-words text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo nl2br(strip_tags($content['contact_location'])); ?></p>
+                        </div>
                     </div>
-                    <div class="p-10 glass rounded-[3rem] shadow-xl flex flex-col items-center">
-                        <div class="w-20 h-20 post-gradient rounded-3xl flex items-center justify-center text-white mb-6 shadow-lg"><span class="material-symbols-outlined text-5xl text-white">call</span></div>
-                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Phone</h4>
-                        <p class="text-lg text-gray-600 dark:text-gray-400"><?php echo strip_tags($content['contact_phone']); ?></p>
+                    <div class="p-5 md:p-10 glass rounded-3xl md:rounded-[3rem] shadow-xl flex flex-row md:flex-col items-center gap-4 md:gap-0 text-left md:text-center">
+                        <div class="w-16 h-16 md:w-20 md:h-20 shrink-0 post-gradient rounded-2xl md:rounded-3xl flex items-center justify-center text-white md:mb-6 shadow-lg"><span class="material-symbols-outlined text-4xl md:text-5xl text-white">call</span></div>
+                        <div class="min-w-0">
+                            <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-1 md:mb-4">Phone</h4>
+                            <p class="text-lg break-words text-gray-600 dark:text-gray-400"><?php echo strip_tags($content['contact_phone']); ?></p>
+                        </div>
                     </div>
-                    <div class="p-10 glass rounded-[3rem] shadow-xl flex flex-col items-center">
-                        <div class="w-20 h-20 post-gradient rounded-3xl flex items-center justify-center text-white mb-6 shadow-lg"><span class="material-symbols-outlined text-5xl text-white">mail</span></div>
-                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Email</h4>
-                        <p class="text-lg text-gray-600 dark:text-gray-400"><?php echo strip_tags($content['contact_email']); ?></p>
+                    <div class="p-5 md:p-10 glass rounded-3xl md:rounded-[3rem] shadow-xl flex flex-row md:flex-col items-center gap-4 md:gap-0 text-left md:text-center">
+                        <div class="w-16 h-16 md:w-20 md:h-20 shrink-0 post-gradient rounded-2xl md:rounded-3xl flex items-center justify-center text-white md:mb-6 shadow-lg"><span class="material-symbols-outlined text-4xl md:text-5xl text-white">mail</span></div>
+                        <div class="min-w-0">
+                            <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-1 md:mb-4">Email</h4>
+                            <p class="text-lg break-words text-gray-600 dark:text-gray-400"><?php echo strip_tags($content['contact_email']); ?></p>
+                        </div>
                     </div>
-                    <div class="p-10 glass rounded-[3rem] shadow-xl flex flex-col items-center">
-                        <div class="w-20 h-20 post-gradient rounded-3xl flex items-center justify-center text-white mb-6 shadow-lg"><span class="material-symbols-outlined text-5xl text-white">schedule</span></div>
-                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Hours</h4>
-                        <p class="text-lg text-gray-600 dark:text-gray-400"><?php echo nl2br(strip_tags(str_replace(', ', "\n", $content['contact_hours']))); ?></p>
+                    <div class="p-5 md:p-10 glass rounded-3xl md:rounded-[3rem] shadow-xl flex flex-row md:flex-col items-center gap-4 md:gap-0 text-left md:text-center">
+                        <div class="w-16 h-16 md:w-20 md:h-20 shrink-0 post-gradient rounded-2xl md:rounded-3xl flex items-center justify-center text-white md:mb-6 shadow-lg"><span class="material-symbols-outlined text-4xl md:text-5xl text-white">schedule</span></div>
+                        <div class="min-w-0">
+                            <h4 class="text-2xl font-bold text-gray-900 dark:text-white mb-1 md:mb-4">Hours</h4>
+                            <p class="text-lg break-words text-gray-600 dark:text-gray-400"><?php echo nl2br(strip_tags(str_replace(', ', "\n", $content['contact_hours']))); ?></p>
+                        </div>
                     </div>
                 </div>
             </div>
