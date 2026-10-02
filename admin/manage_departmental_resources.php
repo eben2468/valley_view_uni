@@ -60,6 +60,12 @@ $managed_pages = [
         'icon' => 'fa-desktop',
         'file' => 'iSchool.php',
         'description' => 'Manage the iSchool portal cards, feature list, and ITS support contact details.'
+    ],
+    'isims' => [
+        'title' => 'ISIMS Portal',
+        'icon' => 'fa-university',
+        'file' => 'isims.php',
+        'description' => 'Manage the ISIMS page: login and registration steps, hostel and cafeteria guides, PDF user guides, and support channels.'
     ]
 ];
 
@@ -374,12 +380,12 @@ include 'sidebar.php';
 
                         <?php
                         /*
-                         * Student Email and iSchool render a second CTA button and a
-                         * help block. Those inputs are shown only for the pages that
-                         * display them; the UPDATE above uses COALESCE, so pages
+                         * Student Email, iSchool and ISIMS render a second CTA button
+                         * and a help block. Those inputs are shown only for the pages
+                         * that display them; the UPDATE above uses COALESCE, so pages
                          * without these fields keep whatever is already stored.
                          */
-                        $supports_secondary_cta = in_array($current_page_key, ['student_email', 'ischool'], true);
+                        $supports_secondary_cta = in_array($current_page_key, ['student_email', 'ischool', 'isims'], true);
                         ?>
                         <?php if ($supports_secondary_cta): ?>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
