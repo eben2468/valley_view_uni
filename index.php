@@ -172,8 +172,11 @@ function vvuDiscoverIcon($title) {
     background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 55%, #ffffff 100%);
 }
 .vvu-discover .con-title { margin-bottom: 45px; }
-/* "More" keeps its accent colour but uses the same typeface as "Discover" */
-.vvu-discover .con-title h2 span {
+/* Section headings: the accent word ("More", "Programs", "Events") keeps its
+   colour but uses the same typeface as the rest of the heading */
+.vvu-discover .con-title h2 span,
+.pop-cour .con-title h2 span,
+.modern-news-section .con-title h2 span {
     font-family: inherit;
     font-weight: inherit;
     font-variant: inherit;
@@ -182,7 +185,11 @@ function vvuDiscoverIcon($title) {
 }
 @media (max-width: 767px) {
     .vvu-discover .con-title h2,
-    .vvu-discover .con-title h2 span { font-size: 32px; line-height: 38px; }
+    .vvu-discover .con-title h2 span,
+    .pop-cour .con-title h2,
+    .pop-cour .con-title h2 span,
+    .modern-news-section .con-title h2,
+    .modern-news-section .con-title h2 span { font-size: 32px; line-height: 38px; }
 }
 
 .vvu-discover-grid {
