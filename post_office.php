@@ -135,7 +135,7 @@ if (!$content) $content = ['hero_badge'=>'Campus Essential Services','hero_title
                 <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
                 <p class="text-2xl md:text-[1.75rem] lg:text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($sec['section_subtitle']??''); ?></p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 max-w-7xl mx-auto">
                 <?php 
                 $fin_icons = [
                     'Western Union' => ['bg' => '#FFCC00', 'text' => '#000000', 'letter' => 'WU', 'icon_bg' => 'rgba(0,0,0,0.08)'],
@@ -146,12 +146,14 @@ if (!$content) $content = ['hero_badge'=>'Campus Essential Services','hero_title
                     $brand = $fin_icons[$fin['item_title']] ?? ['bg' => '#3b82f6', 'text' => '#fff', 'letter' => '?', 'icon_bg' => 'rgba(255,255,255,0.15)'];
                 ?>
                 <div class="relative group overflow-hidden rounded-3xl shadow-2xl transition-transform duration-300 hover:-translate-y-2 hover:shadow-3xl">
-                    <div class="p-10 h-full flex flex-col items-center text-center" style="background-color: <?php echo $brand['bg']; ?>;">
-                        <div class="w-24 h-24 rounded-full flex items-center justify-center mb-8 shadow-lg group-hover:scale-110 transition-transform" style="background: <?php echo $brand['icon_bg']; ?>;">
-                            <span class="text-4xl font-black" style="color: <?php echo $brand['text']; ?>; opacity: 0.9;"><?php echo $brand['letter']; ?></span>
+                    <div class="p-6 md:p-10 h-full flex flex-row md:flex-col items-center gap-4 md:gap-0 text-left md:text-center" style="background-color: <?php echo $brand['bg']; ?>;">
+                        <div class="w-16 h-16 md:w-24 md:h-24 shrink-0 rounded-full flex items-center justify-center md:mb-8 shadow-lg group-hover:scale-110 transition-transform" style="background: <?php echo $brand['icon_bg']; ?>;">
+                            <span class="text-3xl md:text-4xl font-black" style="color: <?php echo $brand['text']; ?>; opacity: 0.9;"><?php echo $brand['letter']; ?></span>
                         </div>
-                        <h3 class="text-4xl font-black mb-4" style="color: <?php echo $brand['text']; ?>;"><?php echo strip_tags($fin['item_title']); ?></h3>
-                        <p class="text-xl md:text-2xl leading-relaxed" style="color: <?php echo $brand['text']; ?>; opacity: 0.85;"><?php echo strip_tags($fin['item_description']); ?></p>
+                        <div class="min-w-0">
+                            <h3 class="text-3xl md:text-4xl font-black mb-1 md:mb-4" style="color: <?php echo $brand['text']; ?>;"><?php echo strip_tags($fin['item_title']); ?></h3>
+                            <p class="text-xl md:text-2xl leading-relaxed" style="color: <?php echo $brand['text']; ?>; opacity: 0.85;"><?php echo strip_tags($fin['item_description']); ?></p>
+                        </div>
                     </div>
                 </div>
                 <?php endforeach; ?>
