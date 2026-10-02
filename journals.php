@@ -115,28 +115,26 @@ include 'includes/header.php';
                 </div>
 
                 <!-- Journal Features -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-                    <div class="feature-card text-center p-10 bg-gray-50 dark:bg-gray-800 rounded-3xl">
-                        <div class="w-24 h-24 mx-auto rounded-3xl bg-blue-600 flex items-center justify-center text-white shadow-lg mb-8">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card1_icon'] ?? 'verified'); ?></span>
+                <!-- Rows (icon left) on phones, three centred cards from md up -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-20">
+                    <?php
+                    $feature_defaults = [
+                        1 => ['verified', 'Peer-Reviewed'],
+                        2 => ['public', 'Open Access'],
+                        3 => ['diversity_3', 'Multidisciplinary'],
+                    ];
+                    foreach ($feature_defaults as $n => [$default_icon, $default_title]):
+                    ?>
+                    <div class="feature-card flex md:block items-start gap-4 text-left md:text-center p-[18px] md:p-6 lg:p-7 bg-white dark:bg-gray-800 rounded-2xl md:rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <div class="w-[44px] h-[44px] md:w-20 md:h-20 shrink-0 md:mx-auto rounded-xl md:rounded-2xl bg-[#1e3a8a] flex items-center justify-center text-white md:mb-6">
+                            <span class="material-symbols-outlined text-[24px] md:text-4xl text-white"><?php echo strip_tags($features["card{$n}_icon"] ?? $default_icon); ?></span>
                         </div>
-                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($features['card1_title'] ?? 'Peer-Reviewed'); ?></h3>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags($features['card1_desc'] ?? ''); ?></p>
-                    </div>
-                    <div class="feature-card text-center p-10 bg-gray-50 dark:bg-gray-800 rounded-3xl">
-                        <div class="w-24 h-24 mx-auto rounded-3xl bg-green-600 flex items-center justify-center text-white shadow-lg mb-8">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card2_icon'] ?? 'public'); ?></span>
+                        <div class="min-w-0">
+                            <h3 class="text-[18px] md:text-2xl font-black text-gray-900 dark:text-white mb-1 md:mb-3 break-words"><?php echo strip_tags($features["card{$n}_title"] ?? $default_title); ?></h3>
+                            <p class="text-[14px] md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo strip_tags($features["card{$n}_desc"] ?? ''); ?></p>
                         </div>
-                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($features['card2_title'] ?? 'Open Access'); ?></h3>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags($features['card2_desc'] ?? ''); ?></p>
                     </div>
-                    <div class="feature-card text-center p-10 bg-gray-50 dark:bg-gray-800 rounded-3xl">
-                        <div class="w-24 h-24 mx-auto rounded-3xl bg-purple-600 flex items-center justify-center text-white shadow-lg mb-8">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card3_icon'] ?? 'diversity_3'); ?></span>
-                        </div>
-                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($features['card3_title'] ?? 'Multidisciplinary'); ?></h3>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags($features['card3_desc'] ?? ''); ?></p>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
