@@ -215,35 +215,35 @@ if (!$content) {
                 <p class="text-2xl text-gray-600 dark:text-gray-400">Join us for freshly prepared meals throughout the day at our main cafeteria.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-10">
                 <!-- Breakfast -->
-                <div class="schedule-card glass-card p-12 rounded-[2.5rem] text-center">
-                    <div class="w-24 h-24 mx-auto rounded-3xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 mb-8">
-                        <span class="material-symbols-outlined text-5xl">light_mode</span>
+                <div class="schedule-card glass-card p-6 md:p-12 rounded-[2.5rem] text-center">
+                    <div class="w-14 h-14 md:w-24 md:h-24 mx-auto rounded-2xl md:rounded-3xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 mb-4 md:mb-8">
+                        <span class="material-symbols-outlined text-3xl md:text-5xl">light_mode</span>
                     </div>
-                    <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4">Breakfast</h3>
-                    <p class="text-4xl font-black text-blue-900 dark:text-blue-400 mb-6"><?php echo strip_tags($content['breakfast_time']); ?></p>
-                    <p class="text-xl text-gray-500 dark:text-gray-400"><?php echo strip_tags($content['breakfast_desc']); ?></p>
+                    <h3 class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mb-1 md:mb-4">Breakfast</h3>
+                    <p class="text-3xl md:text-4xl font-black text-blue-900 dark:text-blue-400 mb-2 md:mb-6"><?php echo strip_tags($content['breakfast_time']); ?></p>
+                    <p class="text-lg md:text-xl text-gray-500 dark:text-gray-400"><?php echo strip_tags($content['breakfast_desc']); ?></p>
                 </div>
 
                 <!-- Lunch -->
-                <div class="schedule-card glass-card p-12 rounded-[2.5rem] text-center border-2 border-blue-600/20">
-                    <div class="w-24 h-24 mx-auto rounded-3xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-8">
-                        <span class="material-symbols-outlined text-5xl">wb_sunny</span>
+                <div class="schedule-card glass-card p-6 md:p-12 rounded-[2.5rem] text-center border-2 border-blue-600/20">
+                    <div class="w-14 h-14 md:w-24 md:h-24 mx-auto rounded-2xl md:rounded-3xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-4 md:mb-8">
+                        <span class="material-symbols-outlined text-3xl md:text-5xl">wb_sunny</span>
                     </div>
-                    <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4">Lunch</h3>
-                    <p class="text-4xl font-black text-blue-900 dark:text-blue-400 mb-6"><?php echo strip_tags($content['lunch_time']); ?></p>
-                    <p class="text-xl text-gray-500 dark:text-gray-400"><?php echo strip_tags($content['lunch_desc']); ?></p>
+                    <h3 class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mb-1 md:mb-4">Lunch</h3>
+                    <p class="text-3xl md:text-4xl font-black text-blue-900 dark:text-blue-400 mb-2 md:mb-6"><?php echo strip_tags($content['lunch_time']); ?></p>
+                    <p class="text-lg md:text-xl text-gray-500 dark:text-gray-400"><?php echo strip_tags($content['lunch_desc']); ?></p>
                 </div>
 
                 <!-- Dinner -->
-                <div class="schedule-card glass-card p-12 rounded-[2.5rem] text-center">
-                    <div class="w-24 h-24 mx-auto rounded-3xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 mb-8">
-                        <span class="material-symbols-outlined text-5xl">dark_mode</span>
+                <div class="schedule-card glass-card p-6 md:p-12 rounded-[2.5rem] text-center">
+                    <div class="w-14 h-14 md:w-24 md:h-24 mx-auto rounded-2xl md:rounded-3xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 mb-4 md:mb-8">
+                        <span class="material-symbols-outlined text-3xl md:text-5xl">dark_mode</span>
                     </div>
-                    <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-4">Dinner</h3>
-                    <p class="text-4xl font-black text-blue-900 dark:text-blue-400 mb-6"><?php echo strip_tags($content['dinner_time']); ?></p>
-                    <p class="text-xl text-gray-500 dark:text-gray-400"><?php echo strip_tags($content['dinner_desc']); ?></p>
+                    <h3 class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mb-1 md:mb-4">Dinner</h3>
+                    <p class="text-3xl md:text-4xl font-black text-blue-900 dark:text-blue-400 mb-2 md:mb-6"><?php echo strip_tags($content['dinner_time']); ?></p>
+                    <p class="text-lg md:text-xl text-gray-500 dark:text-gray-400"><?php echo strip_tags($content['dinner_desc']); ?></p>
                 </div>
             </div>
         </div>
