@@ -162,9 +162,9 @@ include 'includes/header.php';
         background-size: auto, 28px 28px;
     }
     .preview-tab[aria-selected="true"] {
-        background: #1e3a8a;
+        background: #002147;
         color: #fff;
-        border-color: #1e3a8a;
+        border-color: #002147;
     }
 </style>
 
@@ -490,7 +490,7 @@ include 'includes/header.php';
                                 Open
                             </a>
                             <button type="button" data-preview="<?php echo $i; ?>"
-                                    class="preview-trigger inline-flex max-lg:hidden items-center justify-center gap-3 px-7 py-4 text-blue-700 dark:text-blue-300 text-lg font-bold rounded-2xl hover:bg-blue-50 dark:hover:bg-gray-700 transition-all">
+                                    class="preview-trigger inline-flex max-lg:hidden items-center justify-center gap-3 px-7 py-4 text-[#1e3a8a] dark:text-blue-300 text-lg font-bold rounded-2xl hover:bg-blue-50 dark:hover:bg-gray-700 transition-all">
                                 <span class="material-symbols-outlined text-2xl">visibility</span>
                                 Preview
                             </button>

@@ -786,8 +786,14 @@ h6 {
 
 /* 7. Footer Improvements */
 .wed-hom-footer {
-    background-color: #002147;
+    background-color: #1e3a8a; /* official VVU blue */
     padding: 40px 0px 30px 0px !important;
+}
+
+/* Copyright bar: same VVU blue, separated by a hairline */
+.wed-rights {
+    background: #1e3a8a;
+    border-top: 1px solid rgba(255, 255, 255, .12);
 }
 
 .wed-foot-link {

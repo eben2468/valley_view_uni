@@ -277,9 +277,9 @@ foreach ($items_raw as $i) {
     }
     @media (min-width: 940px) { .wcv-feature { grid-template-columns: 1.05fr .95fr; } }
     .wcv-feature .wcv-eyebrow {
-        color: #86efac;
-        background: rgba(134, 239, 172, .12);
-        border-color: rgba(134, 239, 172, .3);
+        color: #f7d67e;
+        background: rgba(247, 214, 126, .12);
+        border-color: rgba(247, 214, 126, .3);
     }
     .wcv-scope .wcv-feature h2 { color: #ffffff; }
     .wcv-scope .wcv-feature .wcv-lede { color: #b9c6e4; }
@@ -293,7 +293,7 @@ foreach ($items_raw as $i) {
         border-radius: 16px;
     }
     .wcv-feature-item .wcv-row-icon {
-        background: rgba(134, 239, 172, .16); color: #86efac;
+        background: rgba(247, 214, 126, .16); color: #f7d67e;
     }
     .wcv-scope .wcv-feature-item h4 { margin: 0; font-size: 16px; font-weight: 700; color: #ffffff; }
     .wcv-scope .wcv-feature-item p { margin: 4px 0 0; font-size: 14px; line-height: 1.6; color: #b9c6e4; }
@@ -305,7 +305,7 @@ foreach ($items_raw as $i) {
     /* ---------- Shared a11y ---------- */
     .wcv-band { scroll-margin-top: 120px; }
     .wcv-scope a:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
-    .wcv-feature a:focus-visible { outline-color: #86efac; }
+    .wcv-feature a:focus-visible { outline-color: #f7d67e; }
     @media (prefers-reduced-motion: reduce) {
         .wcv-scope * { transition: none !important; animation: none !important; }
         .wcv-card:hover { transform: none; }

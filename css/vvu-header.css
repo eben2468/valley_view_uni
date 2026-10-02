@@ -24,6 +24,7 @@
 
     /* Brand palette — navy base (matches the site footer), gold ornament,
        ember orange reserved for calls to action. */
+    --vvu-blue: #1e3a8a;          /* official VVU blue: utility strip, footer */
     --vvu-navy: #002147;
     --vvu-navy-deep: #00152e;
     --vvu-navy-soft: #0a3161;
@@ -222,7 +223,7 @@
     height: var(--vvu-utility-h);
     background:
         var(--vvu-weave),
-        linear-gradient(115deg, var(--vvu-navy-deep) 0%, var(--vvu-navy) 46%, var(--vvu-navy-soft) 100%);
+        var(--vvu-blue);
     color: rgba(255, 255, 255, .82);
     border-bottom: 1px solid rgba(240, 180, 41, .28);
 }

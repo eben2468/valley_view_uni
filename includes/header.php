@@ -217,11 +217,13 @@ if (!function_exists('vvu_split_sections')) {
     <!-- RESPONSIVE.CSS ONLY FOR MOBILE AND TABLET VIEWS -->
     <link href="<?php echo $vvu_root; ?>Education-Website-and-AdminPanel/css/style-mob.css" rel="stylesheet" />
     <!-- CUSTOM FIXES -->
-    <link href="<?php echo $vvu_root; ?>css/custom-fixes.css?v=1.1" rel="stylesheet" />
+    <link href="<?php echo $vvu_root; ?>css/custom-fixes.css?v=1.2" rel="stylesheet" />
     <!-- HERO SLIDER BUTTONS (placement + styling, see includes/slider_buttons.php) -->
     <link href="<?php echo $vvu_root; ?>css/slider-buttons.css?v=1.2" rel="stylesheet" />
     <!-- MASTHEAD & NAVIGATION (loads last so it wins over the legacy theme) -->
-    <link href="<?php echo $vvu_root; ?>css/vvu-header.css?v=1.1" rel="stylesheet" />
+    <link href="<?php echo $vvu_root; ?>css/vvu-header.css?v=1.2" rel="stylesheet" />
+    <!-- BRAND COLOURS for icon tiles, badges, chips and buttons (see file header) -->
+    <link href="<?php echo $vvu_root; ?>css/vvu-brand-icons.css?v=1.0" rel="stylesheet" />
     <script src="<?php echo $vvu_root; ?>js/vvu-header.js" defer></script>
 </head>
 
