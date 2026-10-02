@@ -240,15 +240,15 @@ include 'includes/header.php';
                 <p class="text-2xl sm:text-3xl text-blue-100 mb-20 max-w-5xl mx-auto leading-relaxed font-medium">
                     <?php echo strip_tags(strip_tags($cta['description'] ?? '')); ?>
                 </p>
-                <div class="flex flex-col sm:flex-row gap-10 justify-center">
+                <div class="flex flex-col sm:flex-row gap-[12px] sm:gap-10 justify-center">
                     <?php if (!empty($document['calendar_pdf'])): ?>
-                    <a href="<?php echo strip_tags($document['calendar_pdf']); ?>" download class="px-16 py-8 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-3xl font-bold rounded-[3rem] transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-5">
-                        <span class="material-symbols-outlined text-4xl text-blue-900">picture_as_pdf</span>
+                    <a href="<?php echo strip_tags($document['calendar_pdf']); ?>" download class="px-[22px] py-[12px] sm:px-16 sm:py-8 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-[15px] sm:text-3xl font-bold rounded-[14px] sm:rounded-[3rem] transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-[10px] sm:gap-5">
+                        <span class="material-symbols-outlined text-[20px] sm:text-4xl text-blue-900">picture_as_pdf</span>
                         Download PDF
                     </a>
                     <?php endif; ?>
-                    <a href="index.php" class="px-16 py-8 bg-white/10 hover:bg-white/20 text-white text-3xl font-bold rounded-[3rem] transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-5">
-                        <span class="material-symbols-outlined text-4xl text-white">home</span>
+                    <a href="index.php" class="px-[22px] py-[12px] sm:px-16 sm:py-8 bg-white/10 hover:bg-white/20 text-white text-[15px] sm:text-3xl font-bold rounded-[14px] sm:rounded-[3rem] transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-[10px] sm:gap-5">
+                        <span class="material-symbols-outlined text-[20px] sm:text-4xl text-white">home</span>
                         Back to Home
                     </a>
                 </div>
