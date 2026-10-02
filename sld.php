@@ -362,17 +362,17 @@ if (!$content) {
                 <p class="text-2xl text-blue-100 font-medium leading-relaxed">Our team serves students across all Valley View University campuses.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-10">
                 <?php 
                 $locations = getSLDLocations($pdo);
                 foreach ($locations as $loc): 
                 ?>
-                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-10 border border-white/20 text-center">
-                    <div class="w-20 h-20 rounded-2xl bg-yellow-400 flex items-center justify-center mx-auto mb-8">
-                        <span class="material-symbols-outlined text-4xl text-blue-900"><?php echo strip_tags($loc['icon']); ?></span>
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 md:p-10 border border-white/20 text-center">
+                    <div class="w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-yellow-400 flex items-center justify-center mx-auto mb-4 md:mb-8">
+                        <span class="material-symbols-outlined text-3xl md:text-4xl text-blue-900"><?php echo strip_tags($loc['icon']); ?></span>
                     </div>
-                    <h3 class="text-4xl font-black text-white mb-4"><?php echo strip_tags($loc['title']); ?></h3>
-                    <p class="text-xl text-blue-100 leading-relaxed"><?php echo strip_tags($loc['description']); ?></p>
+                    <h3 class="text-3xl md:text-4xl font-black text-white mb-2 md:mb-4"><?php echo strip_tags($loc['title']); ?></h3>
+                    <p class="text-lg md:text-xl text-blue-100 leading-relaxed"><?php echo strip_tags($loc['description']); ?></p>
                 </div>
                 <?php endforeach; ?>
             </div>
