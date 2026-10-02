@@ -120,7 +120,7 @@ include 'includes/header.php';
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-xl font-bold text-gray-700 dark:text-gray-300 ml-1" for="name">Full Name</label>
-                            <input type="text" id="name" name="name" placeholder="John Doe" required
+                            <input type="text" id="name" name="name" placeholder="Ebenezer Owusu" required
                                    class="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xl font-medium transition-all outline-none">
                         </div>
                         <div class="space-y-2">
@@ -158,7 +158,7 @@ include 'includes/header.php';
                                   class="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xl font-medium transition-all resize-none outline-none"></textarea>
                     </div>
 
-                    <button type="submit" class="w-full md:w-auto px-12 py-4.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full md:w-auto px-12 py-4 min-h-[56px] bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2">
                         Send Message
                         <span class="material-symbols-outlined text-2xl text-white">send</span>
                     </button>
