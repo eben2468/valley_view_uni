@@ -171,12 +171,12 @@ include 'includes/header.php';
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="p-9 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border-l-8 border-blue-600">
+                            <div class="p-9 bg-blue-50 dark:bg-blue-900/20 rounded-3xl">
                                 <span class="material-symbols-outlined text-5xl text-blue-600 mb-3">history_edu</span>
                                 <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-2"><?php echo rdirOut($pageContent, 'officer_profile', 'highlight_1_title', 'Years in Academia'); ?></h4>
                                 <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo rdirOut($pageContent, 'officer_profile', 'highlight_1_text', ''); ?></p>
                             </div>
-                            <div class="p-9 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl border-l-8 border-yellow-500">
+                            <div class="p-9 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl">
                                 <span class="material-symbols-outlined text-5xl text-yellow-500 mb-3">science</span>
                                 <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-2"><?php echo rdirOut($pageContent, 'officer_profile', 'highlight_2_title', 'Areas of Expertise'); ?></h4>
                                 <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo rdirOut($pageContent, 'officer_profile', 'highlight_2_text', ''); ?></p>
@@ -324,7 +324,7 @@ include 'includes/header.php';
                         $para = getContent($pageContent, 'office_overview', "paragraph_{$i}");
                         if ($para === '') continue;
                         $lead = ($i === 1); ?>
-                    <p class="<?php echo $lead ? 'text-xl sm:text-2xl text-gray-800 dark:text-gray-200 font-medium border-l-4 border-blue-600 pl-6' : ''; ?>">
+                    <p class="<?php echo $lead ? 'text-xl sm:text-2xl text-gray-800 dark:text-gray-200 font-medium ' : ''; ?>">
                         <?php echo htmlspecialchars($para, ENT_QUOTES, 'UTF-8'); ?>
                     </p>
                     <?php endfor; ?>

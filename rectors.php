@@ -192,19 +192,19 @@ include 'includes/header.php';
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="p-8 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border-l-8 border-blue-600">
+                        <div class="p-8 bg-blue-50 dark:bg-blue-900/20 rounded-3xl">
                             <span class="material-symbols-outlined text-5xl text-blue-600 mb-4">school</span>
                             <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'kumasi_rector', 'credentials_title', 'Academic Credentials')); ?></h4>
                             <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags(getContent($pageContent, 'kumasi_rector', 'credentials_text', 'PhD in Information Systems, University of Ghana. BSc Computer Science from VVU')); ?></p>
                         </div>
-                        <div class="p-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl border-l-8 border-yellow-500">
+                        <div class="p-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl">
                             <span class="material-symbols-outlined text-5xl text-yellow-500 mb-4">interests</span>
                             <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'kumasi_rector', 'interests_title', 'Research Interests')); ?></h4>
                             <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags(getContent($pageContent, 'kumasi_rector', 'interests_text', 'Digital Government, Mobile Platforms, Human-Computer Interaction')); ?></p>
                         </div>
                     </div>
 
-                    <div class="p-8 bg-green-50 dark:bg-green-900/20 rounded-3xl border-l-8 border-green-600">
+                    <div class="p-8 bg-green-50 dark:bg-green-900/20 rounded-3xl">
                         <div class="flex items-start gap-6">
                             <span class="material-symbols-outlined text-5xl text-green-600 mt-1">workspace_premium</span>
                             <div>
@@ -262,19 +262,19 @@ include 'includes/header.php';
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="p-8 bg-green-50 dark:bg-green-900/20 rounded-3xl border-l-8 border-green-600">
+                        <div class="p-8 bg-green-50 dark:bg-green-900/20 rounded-3xl">
                             <span class="material-symbols-outlined text-5xl text-green-600 mb-4">school</span>
                             <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'techiman_rector', 'credentials_title', 'Academic Credentials')); ?></h4>
                             <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags(getContent($pageContent, 'techiman_rector', 'credentials_text', 'PhD in Business Administration, MPhil Accounting, BA Religion/Business Administration')); ?></p>
                         </div>
-                        <div class="p-8 bg-purple-50 dark:bg-purple-900/20 rounded-3xl border-l-8 border-purple-600">
+                        <div class="p-8 bg-purple-50 dark:bg-purple-900/20 rounded-3xl">
                             <span class="material-symbols-outlined text-5xl text-purple-600 mb-4">verified</span>
                             <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags(getContent($pageContent, 'techiman_rector', 'status_title', 'Professional Status')); ?></h4>
                             <p class="text-3xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags(getContent($pageContent, 'techiman_rector', 'status_text', 'Member, Chartered Institute of Management Accountants (UK & Ghana) since 2002')); ?></p>
                         </div>
                     </div>
 
-                    <div class="p-8 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border-l-8 border-blue-600">
+                    <div class="p-8 bg-blue-50 dark:bg-blue-900/20 rounded-3xl">
                         <div class="flex items-start gap-6">
                             <span class="material-symbols-outlined text-5xl text-blue-600 mt-1">menu_book</span>
                             <div>

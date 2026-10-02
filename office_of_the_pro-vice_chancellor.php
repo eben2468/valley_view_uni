@@ -171,12 +171,12 @@ include 'includes/header.php';
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="p-9 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border-l-8 border-blue-600">
+                            <div class="p-9 bg-blue-50 dark:bg-blue-900/20 rounded-3xl">
                                 <span class="material-symbols-outlined text-5xl text-blue-600 mb-3">school</span>
                                 <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-2"><?php echo pvcOut($pageContent, 'pvc_profile', 'highlight_1_title', 'Academic Rank'); ?></h4>
                                 <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo pvcOut($pageContent, 'pvc_profile', 'highlight_1_text', ''); ?></p>
                             </div>
-                            <div class="p-9 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl border-l-8 border-yellow-500">
+                            <div class="p-9 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl">
                                 <span class="material-symbols-outlined text-5xl text-yellow-500 mb-3">history_edu</span>
                                 <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-2"><?php echo pvcOut($pageContent, 'pvc_profile', 'highlight_2_title', 'Service in Higher Education'); ?></h4>
                                 <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo pvcOut($pageContent, 'pvc_profile', 'highlight_2_text', ''); ?></p>
@@ -257,12 +257,12 @@ include 'includes/header.php';
 
             <!-- Teaching + ministry -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pvc-wrap">
-                <div class="p-10 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border-l-8 border-blue-600">
+                <div class="p-10 bg-blue-50 dark:bg-blue-900/20 rounded-3xl">
                     <span class="material-symbols-outlined text-5xl text-blue-600 mb-3">cast_for_education</span>
                     <h4 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-3"><?php echo pvcOut($pageContent, 'research_focus', 'teaching_title', 'Teaching'); ?></h4>
                     <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo pvcOut($pageContent, 'research_focus', 'teaching_text', ''); ?></p>
                 </div>
-                <div class="p-10 bg-purple-50 dark:bg-purple-900/20 rounded-3xl border-l-8 border-purple-600">
+                <div class="p-10 bg-purple-50 dark:bg-purple-900/20 rounded-3xl">
                     <span class="material-symbols-outlined text-5xl text-purple-600 mb-3">volunteer_activism</span>
                     <h4 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-3"><?php echo pvcOut($pageContent, 'research_focus', 'ministry_title', 'Ministry'); ?></h4>
                     <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo pvcOut($pageContent, 'research_focus', 'ministry_text', ''); ?></p>

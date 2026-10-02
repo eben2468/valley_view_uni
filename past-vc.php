@@ -152,7 +152,7 @@ include 'includes/header.php';
                     if ($para === '') continue;
                     $isLead = ($i === 1);
                 ?>
-                <p class="<?php echo $isLead ? 'text-lg sm:text-xl text-gray-800 dark:text-gray-200 font-medium border-l-4 border-blue-600 pl-6' : 'text-base sm:text-lg text-gray-600 dark:text-gray-400'; ?> leading-relaxed">
+                <p class="<?php echo $isLead ? 'text-lg sm:text-xl text-gray-800 dark:text-gray-200 font-medium ' : 'text-base sm:text-lg text-gray-600 dark:text-gray-400'; ?> leading-relaxed">
                     <?php echo htmlspecialchars($para); ?>
                 </p>
                 <?php endfor; ?>

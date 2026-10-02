@@ -178,12 +178,12 @@ include 'includes/header.php';
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="p-9 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border-l-8 border-blue-600">
+                            <div class="p-9 bg-blue-50 dark:bg-blue-900/20 rounded-3xl">
                                 <span class="material-symbols-outlined text-5xl text-blue-600 mb-3">church</span>
                                 <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-2"><?php echo slsOut($pageContent, 'officer_profile', 'highlight_1_title', 'Ordained Minister'); ?></h4>
                                 <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo slsOut($pageContent, 'officer_profile', 'highlight_1_text', ''); ?></p>
                             </div>
-                            <div class="p-9 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl border-l-8 border-yellow-500">
+                            <div class="p-9 bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl">
                                 <span class="material-symbols-outlined text-5xl text-yellow-500 mb-3">interests</span>
                                 <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-2"><?php echo slsOut($pageContent, 'officer_profile', 'highlight_2_title', 'Personal Interests'); ?></h4>
                                 <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo slsOut($pageContent, 'officer_profile', 'highlight_2_text', ''); ?></p>
