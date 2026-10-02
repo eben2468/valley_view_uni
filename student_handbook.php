@@ -118,39 +118,28 @@ include 'includes/header.php';
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                    <!-- Feature 1 -->
-                    <div class="handbook-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-blue-600">
-                        <div class="w-24 h-24 rounded-3xl bg-blue-600 flex items-center justify-center text-white shadow-lg mb-10">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card1_icon'] ?? 'school'); ?></span>
+                <!-- Rows (icon left) on phones, cards from md up -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-10">
+                    <?php
+                    $feature_defaults = [
+                        1 => ['school', 'Academic Policies'],
+                        2 => ['gavel', 'Student Conduct'],
+                        3 => ['diversity_3', 'Campus Life'],
+                    ];
+                    foreach ($feature_defaults as $n => [$default_icon, $default_title]):
+                    ?>
+                    <div class="handbook-card glass flex md:block items-start gap-4 p-[18px] md:p-10 rounded-2xl md:rounded-[2.5rem] shadow-xl">
+                        <div class="w-[44px] h-[44px] md:w-20 md:h-20 shrink-0 rounded-xl md:rounded-2xl bg-[#1e3a8a] flex items-center justify-center text-white md:mb-8">
+                            <span class="material-symbols-outlined text-[24px] md:text-4xl text-white"><?php echo strip_tags($features["card{$n}_icon"] ?? $default_icon); ?></span>
                         </div>
-                        <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($features['card1_title'] ?? 'Academic Policies'); ?></h3>
-                        <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                            <?php echo strip_tags($features['card1_desc'] ?? ''); ?>
-                        </p>
-                    </div>
-
-                    <!-- Feature 2 -->
-                    <div class="handbook-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-green-600">
-                        <div class="w-24 h-24 rounded-3xl bg-green-600 flex items-center justify-center text-white shadow-lg mb-10">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card2_icon'] ?? 'gavel'); ?></span>
+                        <div class="min-w-0">
+                            <h3 class="text-[18px] md:text-3xl font-black text-gray-900 dark:text-white mb-1 md:mb-4"><?php echo strip_tags($features["card{$n}_title"] ?? $default_title); ?></h3>
+                            <p class="text-[14px] md:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+                                <?php echo strip_tags($features["card{$n}_desc"] ?? ''); ?>
+                            </p>
                         </div>
-                        <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($features['card2_title'] ?? 'Student Conduct'); ?></h3>
-                        <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                            <?php echo strip_tags($features['card2_desc'] ?? ''); ?>
-                        </p>
                     </div>
-
-                    <!-- Feature 3 -->
-                    <div class="handbook-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-purple-600">
-                        <div class="w-24 h-24 rounded-3xl bg-purple-600 flex items-center justify-center text-white shadow-lg mb-10">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card3_icon'] ?? 'diversity_3'); ?></span>
-                        </div>
-                        <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($features['card3_title'] ?? 'Campus Life'); ?></h3>
-                        <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                            <?php echo strip_tags($features['card3_desc'] ?? ''); ?>
-                        </p>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
