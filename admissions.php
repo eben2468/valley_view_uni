@@ -539,16 +539,16 @@ include 'includes/header.php';
                 <p class="text-2xl text-blue-100 font-medium leading-relaxed"><?php echo strip_tags($sections_map['process']['section_subtitle'] ?? 'Follow these simple steps to join our vibrant academic community.'); ?></p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                 <?php 
                 $process_items = $items_map['process'] ?? [];
                 $step_num = 1;
                 foreach ($process_items as $step): 
                 ?>
-                <div class="relative p-10 bg-white/10 backdrop-blur-md rounded-[2.5rem] border border-white/10 text-center group">
-                    <div class="w-20 h-20 rounded-3xl bg-yellow-400 flex items-center justify-center text-blue-900 text-4xl font-black mx-auto mb-8 group-hover:scale-110 transition-transform"><?php echo strip_tags($step['item_stat_value'] ?? $step_num); ?></div>
-                    <h4 class="text-3xl font-black text-white mb-4"><?php echo strip_tags($step['item_title']); ?></h4>
-                    <p class="text-2xl text-blue-100 leading-relaxed"><?php echo strip_tags($step['item_description']); ?></p>
+                <div class="relative p-6 md:p-10 bg-white/10 backdrop-blur-md rounded-3xl md:rounded-[2.5rem] border border-white/10 text-center group">
+                    <div class="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-3xl bg-yellow-400 flex items-center justify-center text-blue-900 text-2xl md:text-4xl font-black mx-auto mb-4 md:mb-8 group-hover:scale-110 transition-transform"><?php echo strip_tags($step['item_stat_value'] ?? $step_num); ?></div>
+                    <h4 class="text-2xl md:text-3xl font-black text-white mb-2 md:mb-4"><?php echo strip_tags($step['item_title']); ?></h4>
+                    <p class="text-lg md:text-2xl text-blue-100 leading-relaxed"><?php echo strip_tags($step['item_description']); ?></p>
                 </div>
                 <?php 
                 $step_num++;
