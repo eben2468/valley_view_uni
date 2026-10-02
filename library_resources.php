@@ -663,18 +663,18 @@ include 'includes/header.php';
     <section class="py-28 bg-white dark:bg-gray-900">
         <div class="container">
             <div class="max-w-7xl mx-auto">
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 px-4">
-                    <div class="stat-card text-center p-8 lg:p-10 bg-gray-50 dark:bg-gray-800 rounded-3xl shadow-xl">
-                        <div class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black text-blue-600 mb-4"><?php echo strip_tags($statsSection['stat1_val'] ?? ''); ?></div>
-                        <div class="text-lg sm:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 font-black uppercase tracking-wide"><?php echo strip_tags($statsSection['stat1_label'] ?? ''); ?></div>
+                <div class="grid grid-cols-3 gap-3 sm:gap-6 lg:gap-8 px-4">
+                    <div class="stat-card text-center px-2 py-4 sm:p-8 lg:p-10 bg-gray-50 dark:bg-gray-800 rounded-2xl sm:rounded-3xl shadow-xl">
+                        <div class="text-[26px] sm:text-6xl lg:text-7xl xl:text-8xl font-black text-[#1e3a8a] dark:text-blue-300 mb-1 sm:mb-4"><?php echo strip_tags($statsSection['stat1_val'] ?? ''); ?></div>
+                        <div class="text-[11px] leading-tight sm:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 font-bold uppercase tracking-wide"><?php echo strip_tags($statsSection['stat1_label'] ?? ''); ?></div>
                     </div>
-                    <div class="stat-card text-center p-8 lg:p-10 bg-gray-50 dark:bg-gray-800 rounded-3xl shadow-xl">
-                        <div class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black text-green-600 mb-4"><?php echo strip_tags($statsSection['stat2_val'] ?? ''); ?></div>
-                        <div class="text-lg sm:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 font-black uppercase tracking-wide"><?php echo strip_tags($statsSection['stat2_label'] ?? ''); ?></div>
+                    <div class="stat-card text-center px-2 py-4 sm:p-8 lg:p-10 bg-gray-50 dark:bg-gray-800 rounded-2xl sm:rounded-3xl shadow-xl">
+                        <div class="text-[26px] sm:text-6xl lg:text-7xl xl:text-8xl font-black text-[#1e3a8a] dark:text-blue-300 mb-1 sm:mb-4"><?php echo strip_tags($statsSection['stat2_val'] ?? ''); ?></div>
+                        <div class="text-[11px] leading-tight sm:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 font-bold uppercase tracking-wide"><?php echo strip_tags($statsSection['stat2_label'] ?? ''); ?></div>
                     </div>
-                    <div class="stat-card text-center p-8 lg:p-10 bg-gray-50 dark:bg-gray-800 rounded-3xl shadow-xl">
-                        <div class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black text-purple-600 mb-4"><?php echo strip_tags($statsSection['stat3_val'] ?? ''); ?></div>
-                        <div class="text-lg sm:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 font-black uppercase tracking-wide"><?php echo strip_tags($statsSection['stat3_label'] ?? ''); ?></div>
+                    <div class="stat-card text-center px-2 py-4 sm:p-8 lg:p-10 bg-gray-50 dark:bg-gray-800 rounded-2xl sm:rounded-3xl shadow-xl">
+                        <div class="text-[26px] sm:text-6xl lg:text-7xl xl:text-8xl font-black text-[#1e3a8a] dark:text-blue-300 mb-1 sm:mb-4"><?php echo strip_tags($statsSection['stat3_val'] ?? ''); ?></div>
+                        <div class="text-[11px] leading-tight sm:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 font-bold uppercase tracking-wide"><?php echo strip_tags($statsSection['stat3_label'] ?? ''); ?></div>
                     </div>
                 </div>
             </div>
