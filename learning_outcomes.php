@@ -90,12 +90,6 @@ include 'includes/header.php';
     .outcome-card:hover {
         transform: translateY(-10px) scale(1.02);
     }
-    .outcome-card:hover .outcome-icon {
-        transform: scale(1.15) rotate(5deg);
-    }
-    .outcome-icon {
-        transition: all 0.4s ease;
-    }
     
     .pillar-card {
         transition: all 0.3s ease;
@@ -111,16 +105,22 @@ include 'includes/header.php';
         transform: translateY(-5px);
     }
     
+    /* Outcome number: VVU blue circle, white numeral */
     .number-badge {
-        width: 60px;
-        height: 60px;
-        min-width: 60px;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 900;
-        font-size: 1.75rem;
+        font-weight: 700;
+        font-size: 18px;
         border-radius: 50%;
+        background: #1e3a8a;
+        color: #fff;
+    }
+    @media (max-width: 767px) {
+        .number-badge { width: 40px; height: 40px; min-width: 40px; font-size: 16px; }
     }
 </style>
 
@@ -188,15 +188,12 @@ include 'includes/header.php';
                 foreach ($pillars as $pillar): 
                     $border_color = $pillar['item_color'] ?? 'blue-600';
                 ?>
-                <div class="outcome-card glass rounded-3xl shadow-xl p-10 border-t-8 border-<?php echo strip_tags($border_color); ?>">
-                    <div class="flex items-center gap-5 mb-8">
-                        <div class="number-badge bg-<?php echo strip_tags($border_color); ?> text-white"><?php echo $count; ?></div>
-                        <div class="outcome-icon w-20 h-20 rounded-2xl bg-<?php echo strip_tags($border_color); ?> flex items-center justify-center">
-                            <span class="material-symbols-outlined text-white text-5xl"><?php echo strip_tags($pillar['item_icon'] ?? 'star'); ?></span>
-                        </div>
+                <div class="outcome-card glass rounded-3xl shadow-xl p-6 md:p-10">
+                    <div class="flex items-center gap-4 mb-3 md:mb-5">
+                        <div class="number-badge"><?php echo $count; ?></div>
+                        <h3 class="text-2xl md:text-4xl font-black text-gray-900 dark:text-white leading-tight"><?php echo strip_tags($pillar['item_title']); ?></h3>
                     </div>
-                    <h3 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-5"><?php echo strip_tags($pillar['item_title']); ?></h3>
-                    <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                    <p class="text-lg md:text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
                         <?php echo strip_tags($pillar['item_description']); ?>
                     </p>
                 </div>
@@ -274,11 +271,11 @@ include 'includes/header.php';
                     <div class="h-2 w-40 bg-yellow-400 mx-auto rounded-full"></div>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                     <?php foreach ($stats as $stat): ?>
-                    <div class="stat-card text-center p-8 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20">
-                        <div class="text-6xl font-black text-yellow-400 mb-4"><?php echo strip_tags($stat['stat_value']); ?><?php echo strip_tags($stat['stat_suffix'] ?? ''); ?></div>
-                        <div class="text-2xl text-white font-bold uppercase tracking-wider"><?php echo strip_tags($stat['stat_label']); ?></div>
+                    <div class="stat-card text-center p-4 md:p-6 bg-white/10 backdrop-blur-md rounded-2xl md:rounded-3xl border border-white/20">
+                        <div class="text-[28px] md:text-5xl font-black text-yellow-400 mb-1 md:mb-2"><?php echo strip_tags($stat['stat_value']); ?><?php echo strip_tags($stat['stat_suffix'] ?? ''); ?></div>
+                        <div class="text-[12px] md:text-xl text-white font-semibold uppercase tracking-wide leading-tight"><?php echo strip_tags($stat['stat_label']); ?></div>
                     </div>
                     <?php endforeach; ?>
                 </div>
