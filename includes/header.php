@@ -217,7 +217,7 @@ if (!function_exists('vvu_split_sections')) {
     <!-- RESPONSIVE.CSS ONLY FOR MOBILE AND TABLET VIEWS -->
     <link href="<?php echo $vvu_root; ?>Education-Website-and-AdminPanel/css/style-mob.css" rel="stylesheet" />
     <!-- CUSTOM FIXES -->
-    <link href="<?php echo $vvu_root; ?>css/custom-fixes.css?v=1.2" rel="stylesheet" />
+    <link href="<?php echo $vvu_root; ?>css/custom-fixes.css?v=1.3" rel="stylesheet" />
     <!-- HERO SLIDER BUTTONS (placement + styling, see includes/slider_buttons.php) -->
     <link href="<?php echo $vvu_root; ?>css/slider-buttons.css?v=1.2" rel="stylesheet" />
     <!-- MASTHEAD & NAVIGATION (loads last so it wins over the legacy theme) -->
