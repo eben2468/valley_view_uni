@@ -143,7 +143,7 @@ $has_filters = ($search !== '' || $unit !== '' || $category !== '');
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
 </style>
-<?php vvu_dir_styles('#002147', '#00366f'); ?>
+<?php vvu_dir_styles('#1e3a8a', '#172f6e'); ?>
 
 <main class="flex-grow bg-gray-50 dark:bg-gray-900 pb-20 dir-scope">
     <!-- Hero Section (Directly from faqs_about_vvu.php design) -->

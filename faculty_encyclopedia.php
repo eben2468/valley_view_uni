@@ -98,7 +98,7 @@ $ranks = ['Professor', 'Senior Lecturer', 'Lecturer', 'Assistant Lecturer'];
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
 </style>
-<?php vvu_dir_styles('#800000', '#5c0000'); ?>
+<?php vvu_dir_styles('#1e3a8a', '#172f6e'); ?>
 
 <main class="flex-grow bg-gray-50 dark:bg-gray-900 pb-20 dir-scope">
     <!-- Hero Section (Directly from faqs_about_vvu.php design) -->
@@ -171,7 +171,7 @@ $ranks = ['Professor', 'Senior Lecturer', 'Lecturer', 'Assistant Lecturer'];
 
                     <div class="dir-panel__foot">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="font-black uppercase tracking-wider" style="font-size:11px;" style="color:var(--muted)">Rank:</span>
+                            <span class="dir-panel__label">Rank</span>
                             <?php
                             $rank_options = array_merge([''], $ranks);
                             foreach ($rank_options as $r):
