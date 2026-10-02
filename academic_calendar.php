@@ -105,36 +105,28 @@ include 'includes/header.php';
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                    <div class="calendar-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-blue-600">
-                        <div class="w-24 h-24 rounded-3xl bg-blue-600 flex items-center justify-center text-white shadow-lg mb-10">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card1_icon'] ?? 'app_registration'); ?></span>
+                <!-- Rows (icon left) on phones, cards from md up -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10">
+                    <?php
+                    $feature_defaults = [
+                        1 => ['app_registration', 'Registration'],
+                        2 => ['history_edu', 'Lectures & Exams'],
+                        3 => ['celebration', 'Holidays & Events'],
+                    ];
+                    foreach ($feature_defaults as $n => [$default_icon, $default_title]):
+                    ?>
+                    <div class="calendar-card glass flex md:block items-start gap-4 p-[18px] md:p-10 rounded-2xl md:rounded-[2.5rem] shadow-xl">
+                        <div class="w-[44px] h-[44px] md:w-20 md:h-20 shrink-0 rounded-xl md:rounded-2xl bg-[#1e3a8a] flex items-center justify-center text-white md:mb-8">
+                            <span class="material-symbols-outlined text-[24px] md:text-4xl text-white"><?php echo strip_tags($features["card{$n}_icon"] ?? $default_icon); ?></span>
                         </div>
-                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(strip_tags($features['card1_title'] ?? 'Registration')); ?></h3>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                            <?php echo strip_tags(strip_tags($features['card1_desc'] ?? '')); ?>
-                        </p>
-                    </div>
-
-                    <div class="calendar-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-yellow-500">
-                        <div class="w-24 h-24 rounded-3xl bg-yellow-500 flex items-center justify-center text-white shadow-lg mb-10">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card2_icon'] ?? 'history_edu'); ?></span>
+                        <div class="min-w-0">
+                            <h3 class="text-[18px] md:text-3xl font-black text-gray-900 dark:text-white mb-1 md:mb-4"><?php echo strip_tags($features["card{$n}_title"] ?? $default_title); ?></h3>
+                            <p class="text-[14px] md:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+                                <?php echo strip_tags($features["card{$n}_desc"] ?? ''); ?>
+                            </p>
                         </div>
-                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(strip_tags($features['card2_title'] ?? 'Lectures & Exams')); ?></h3>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                            <?php echo strip_tags(strip_tags($features['card2_desc'] ?? '')); ?>
-                        </p>
                     </div>
-
-                    <div class="calendar-card glass p-12 rounded-[3rem] shadow-xl border-t-[12px] border-purple-600">
-                        <div class="w-24 h-24 rounded-3xl bg-purple-600 flex items-center justify-center text-white shadow-lg mb-10">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($features['card3_icon'] ?? 'celebration'); ?></span>
-                        </div>
-                        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags(strip_tags($features['card3_title'] ?? 'Holidays & Events')); ?></h3>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                            <?php echo strip_tags(strip_tags($features['card3_desc'] ?? '')); ?>
-                        </p>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
@@ -194,19 +186,22 @@ include 'includes/header.php';
                         <p class="text-xl text-gray-600 dark:text-gray-400 font-medium mb-10 leading-relaxed">
                             <?php echo strip_tags(strip_tags($support['description'] ?? '')); ?>
                         </p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                            <?php for($i=1; $i<=4; $i++): 
+                        <!-- Rows (icon left) on phones, 2 x 2 cards from sm up -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+                            <?php for($i=1; $i<=4; $i++):
                                 $s_title = $support["item{$i}_title"] ?? '';
                                 $s_desc = $support["item{$i}_desc"] ?? '';
                                 $s_icon = $support["item{$i}_icon"] ?? 'school';
                                 if(empty($s_title)) continue;
                             ?>
-                            <div class="p-8 bg-white dark:bg-gray-900 rounded-3xl shadow-sm">
-                                <div class="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-6">
-                                    <span class="material-symbols-outlined text-blue-600 text-3xl"><?php echo strip_tags($s_icon); ?></span>
+                            <div class="flex sm:block items-start gap-4 p-[18px] sm:p-8 bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl shadow-sm">
+                                <div class="w-[44px] h-[44px] sm:w-16 sm:h-16 shrink-0 rounded-xl sm:rounded-2xl bg-[#1e3a8a] flex items-center justify-center sm:mb-6">
+                                    <span class="material-symbols-outlined text-white text-[24px] sm:text-3xl"><?php echo strip_tags($s_icon); ?></span>
                                 </div>
-                                <h4 class="text-xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags(strip_tags($s_title)); ?></h4>
-                                <p class="text-lg text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags(strip_tags($s_desc)); ?></p>
+                                <div class="min-w-0">
+                                    <h4 class="text-[18px] sm:text-xl font-black text-gray-900 dark:text-white mb-1 sm:mb-2"><?php echo strip_tags(strip_tags($s_title)); ?></h4>
+                                    <p class="text-[14px] sm:text-lg text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags(strip_tags($s_desc)); ?></p>
+                                </div>
                             </div>
                             <?php endfor; ?>
                         </div>
