@@ -401,18 +401,18 @@ include 'includes/header.php';
                     </a>
                 </div>
                 
-                <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8 border-t border-white/10 pt-10">
+                <div class="mt-10 sm:mt-12 grid grid-cols-3 gap-3 sm:gap-8 border-t border-white/10 pt-8 sm:pt-10">
                     <div>
-                        <div class="text-5xl font-black text-yellow-400 mb-1"><?php echo strip_tags($cta['stat1_value'] ?? ''); ?></div>
-                        <div class="text-blue-200 uppercase tracking-widest text-base font-bold"><?php echo strip_tags($cta['stat1_label'] ?? ''); ?></div>
+                        <div class="text-[32px] sm:text-5xl font-black text-yellow-400 mb-1 sm:mb-1"><?php echo strip_tags($cta['stat1_value'] ?? ''); ?></div>
+                        <div class="text-blue-200 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-base font-bold"><?php echo strip_tags($cta['stat1_label'] ?? ''); ?></div>
                     </div>
                     <div>
-                        <div class="text-5xl font-black text-yellow-400 mb-1"><?php echo strip_tags($cta['stat2_value'] ?? ''); ?></div>
-                        <div class="text-blue-200 uppercase tracking-widest text-base font-bold"><?php echo strip_tags($cta['stat2_label'] ?? ''); ?></div>
+                        <div class="text-[32px] sm:text-5xl font-black text-yellow-400 mb-1 sm:mb-1"><?php echo strip_tags($cta['stat2_value'] ?? ''); ?></div>
+                        <div class="text-blue-200 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-base font-bold"><?php echo strip_tags($cta['stat2_label'] ?? ''); ?></div>
                     </div>
                     <div>
-                        <div class="text-5xl font-black text-yellow-400 mb-1"><?php echo strip_tags($cta['stat3_value'] ?? ''); ?></div>
-                        <div class="text-blue-200 uppercase tracking-widest text-lg font-bold"><?php echo strip_tags($cta['stat3_label'] ?? ''); ?></div>
+                        <div class="text-[32px] sm:text-5xl font-black text-yellow-400 mb-1 sm:mb-1"><?php echo strip_tags($cta['stat3_value'] ?? ''); ?></div>
+                        <div class="text-blue-200 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-lg font-bold"><?php echo strip_tags($cta['stat3_label'] ?? ''); ?></div>
                     </div>
                 </div>
             </div>

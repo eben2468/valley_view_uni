@@ -328,11 +328,11 @@ $hero_image = $page_data['hero_image'] ?? 'images/freshmen_hero_bg.png';
                 $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 ?>
                 <?php if (!empty($stats)): ?>
-                <div class="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-12 border-t border-white/10 pt-16">
+                <div class="mt-14 sm:mt-20 grid grid-cols-3 gap-3 sm:gap-12 border-t border-white/10 pt-10 sm:pt-16">
                     <?php foreach ($stats as $stat): ?>
                     <div>
-                        <div class="text-6xl font-black text-yellow-400 mb-2"><?php echo strip_tags($stat['stat_value']); ?></div>
-                        <div class="text-blue-200 uppercase tracking-widest text-2xl font-black"><?php echo strip_tags($stat['stat_label']); ?></div>
+                        <div class="text-[32px] sm:text-6xl font-black text-yellow-400 mb-1 sm:mb-2"><?php echo strip_tags($stat['stat_value']); ?></div>
+                        <div class="text-blue-200 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-2xl font-black"><?php echo strip_tags($stat['stat_label']); ?></div>
                     </div>
                     <?php endforeach; ?>
                 </div>

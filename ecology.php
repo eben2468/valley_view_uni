@@ -160,11 +160,11 @@ include 'includes/header.php';
         <div class="container relative z-10">
             <div class="max-w-5xl mx-auto text-center">
                 <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mb-12">Our Ecological Impact</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-10">
+                <div class="grid grid-cols-3 gap-3 sm:gap-10">
                     <?php foreach ($stats as $index => $stat): ?>
                     <div class="animate-fadeInUp" style="animation-delay: <?php echo (0.1 * ($index + 1)); ?>s;">
-                        <div class="text-6xl md:text-7xl font-black text-green-400 mb-2"><?php echo strip_tags($stat['stat_value']); ?></div>
-                        <div class="text-xl md:text-2xl uppercase tracking-widest font-black text-green-100"><?php echo strip_tags($stat['stat_label']); ?></div>
+                        <div class="text-[32px] sm:text-6xl md:text-7xl font-black text-green-400 mb-1 sm:mb-2"><?php echo strip_tags($stat['stat_value']); ?></div>
+                        <div class="text-[13px] leading-tight sm:text-xl md:text-2xl uppercase tracking-wide sm:tracking-widest font-black text-green-100"><?php echo strip_tags($stat['stat_label']); ?></div>
                     </div>
                     <?php endforeach; ?>
                 </div>

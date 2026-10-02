@@ -348,18 +348,18 @@ $content += [
                     </a>
                 </div>
                 
-                <div class="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-12 border-t border-gray-200 dark:border-gray-800 pt-16">
+                <div class="mt-14 sm:mt-20 grid grid-cols-3 gap-3 sm:gap-12 border-t border-gray-200 dark:border-gray-800 pt-10 sm:pt-16">
                     <div>
-                        <div class="text-6xl font-black text-blue-600 mb-2"><?php echo strip_tags($content['minimum_hours']); ?>hrs</div>
-                        <div class="text-gray-600 dark:text-gray-400 uppercase tracking-widest text-2xl font-black">Minimum Per Week</div>
+                        <div class="text-[32px] sm:text-6xl font-black text-blue-600 mb-1 sm:mb-2"><?php echo strip_tags($content['minimum_hours']); ?>hrs</div>
+                        <div class="text-gray-600 dark:text-gray-400 uppercase tracking-normal sm:tracking-widest text-[12px] leading-tight sm:text-2xl font-black">Minimum Per Week</div>
                     </div>
                     <div>
-                        <div class="text-6xl font-black text-blue-600 mb-2"><?php echo strip_tags($content['stats_opportunities']); ?></div>
-                        <div class="text-gray-600 dark:text-gray-400 uppercase tracking-widest text-2xl font-black">Job Opportunities</div>
+                        <div class="text-[32px] sm:text-6xl font-black text-blue-600 mb-1 sm:mb-2"><?php echo strip_tags($content['stats_opportunities']); ?></div>
+                        <div class="text-gray-600 dark:text-gray-400 uppercase tracking-normal sm:tracking-widest text-[12px] leading-tight sm:text-2xl font-black">Job Opportunities</div>
                     </div>
                     <div>
-                        <div class="text-6xl font-black text-blue-600 mb-2">∞</div>
-                        <div class="text-gray-600 dark:text-gray-400 uppercase tracking-widest text-2xl font-black">Skills Developed</div>
+                        <div class="text-[32px] sm:text-6xl font-black text-blue-600 mb-1 sm:mb-2">∞</div>
+                        <div class="text-gray-600 dark:text-gray-400 uppercase tracking-normal sm:tracking-widest text-[12px] leading-tight sm:text-2xl font-black">Skills Developed</div>
                     </div>
                 </div>
             </div>
