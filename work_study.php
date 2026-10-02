@@ -161,18 +161,20 @@ $content += [
                 <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($content['benefits_text'] ?: 'Experience comprehensive personal and professional development through our work study program.'); ?></p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                <?php 
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+                <?php
                 $benefits = getWorkStudyBenefits($pdo);
-                foreach ($benefits as $benefit): 
+                foreach ($benefits as $benefit):
                 ?>
-                <!-- Benefit -->
-                <div class="work-card group p-10 bg-white dark:bg-gray-900 rounded-3xl shadow-xl border-t-8 border-<?php echo $benefit['color'] ?? 'blue'; ?>-600 hover:shadow-2xl">
-                    <div class="w-24 h-24 rounded-3xl bg-<?php echo $benefit['color'] ?? 'blue'; ?>-600 flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($benefit['icon']); ?></span>
+                <!-- Benefit: icon and title share a row, description below -->
+                <div class="work-card group p-6 md:p-10 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-xl hover:border-blue-900/30">
+                    <div class="flex items-center gap-4 md:gap-5 mb-3 md:mb-6">
+                        <div class="w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-xl md:rounded-2xl bg-blue-900 flex items-center justify-center text-white">
+                            <span class="material-symbols-outlined text-2xl md:text-4xl text-white"><?php echo strip_tags($benefit['icon']); ?></span>
+                        </div>
+                        <h3 class="text-2xl md:text-4xl font-black text-gray-900 dark:text-white leading-tight"><?php echo strip_tags($benefit['title']); ?></h3>
                     </div>
-                    <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($benefit['title']); ?></h3>
-                    <p class="text-3xl text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                    <p class="text-lg md:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed">
                         <?php echo strip_tags($benefit['description']); ?>
                     </p>
                 </div>
@@ -300,17 +302,20 @@ $content += [
                 ?></p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                <?php 
+            <!-- Steps: a row each on phones (number left, text right), four columns from md up -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-8 max-w-6xl mx-auto">
+                <?php
                 $steps = getWorkStudySteps($pdo);
-                foreach ($steps as $step): 
+                foreach ($steps as $step):
                 ?>
-                <div class="relative text-center group">
-                    <div class="w-28 h-28 rounded-3xl bg-<?php echo $step['color'] ?? 'blue'; ?>-600 flex items-center justify-center text-white text-5xl font-black mx-auto mb-8 group-hover:scale-110 transition-transform shadow-xl">
+                <div class="relative flex md:block items-start gap-4 text-left md:text-center group">
+                    <div class="w-14 h-14 md:w-28 md:h-28 shrink-0 rounded-2xl md:rounded-3xl bg-<?php echo $step['color'] ?? 'blue'; ?>-600 flex items-center justify-center text-white text-2xl md:text-5xl font-black md:mx-auto md:mb-8 group-hover:scale-110 transition-transform shadow-xl">
                         <?php echo $step['step_number']; ?>
                     </div>
-                    <h4 class="text-3xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($step['title']); ?></h4>
-                    <p class="text-xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium"><?php echo strip_tags($step['description']); ?></p>
+                    <div class="min-w-0">
+                        <h4 class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mb-1 md:mb-4"><?php echo strip_tags($step['title']); ?></h4>
+                        <p class="text-lg md:text-xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium"><?php echo strip_tags($step['description']); ?></p>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             </div>
