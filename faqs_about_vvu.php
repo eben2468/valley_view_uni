@@ -236,15 +236,15 @@ include 'includes/header.php';
                     <p class="text-2xl text-blue-100 font-medium max-w-3xl mx-auto">Our support networks are active 24/7 to ensure your university experience is smooth and rewarding.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-10">
                     <?php foreach ($faq_support as $sup): ?>
-                    <div class="bg-white/10 backdrop-blur-xl p-12 rounded-[3.5rem] border border-white/10 hover:border-white/30 hover:bg-white/15 transition-all group">
-                        <div class="w-20 h-20 rounded-3xl <?php echo strip_tags($sup['icon_bg_color']); ?> flex items-center justify-center text-blue-900 mb-10 group-hover:scale-110 group-hover:rotate-6 transition-all">
-                            <span class="material-symbols-outlined text-4xl font-bold"><?php echo strip_tags($sup['icon']); ?></span>
+                    <div class="bg-white/10 backdrop-blur-xl p-6 md:p-12 rounded-3xl md:rounded-[3.5rem] border border-white/10 hover:border-white/30 hover:bg-white/15 transition-all group">
+                        <div class="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-3xl <?php echo strip_tags($sup['icon_bg_color']); ?> flex items-center justify-center text-blue-900 mb-4 md:mb-10 group-hover:scale-110 group-hover:rotate-6 transition-all">
+                            <span class="material-symbols-outlined text-2xl md:text-4xl font-bold"><?php echo strip_tags($sup['icon']); ?></span>
                         </div>
-                        <h4 class="text-4xl font-black text-white mb-6"><?php echo strip_tags($sup['title']); ?></h4>
-                        <p class="text-xl text-blue-100/80 mb-10 leading-relaxed"><?php echo strip_tags($sup['description']); ?></p>
-                        <a href="<?php echo strip_tags($sup['btn_link']); ?>" class="<?php echo strip_tags($sup['btn_color_class']); ?> font-black text-2xl flex items-center gap-3 hover:gap-6 transition-all">
+                        <h4 class="text-3xl md:text-4xl font-black text-white mb-2 md:mb-6"><?php echo strip_tags($sup['title']); ?></h4>
+                        <p class="text-lg md:text-xl text-blue-100/80 mb-4 md:mb-10 leading-relaxed"><?php echo strip_tags($sup['description']); ?></p>
+                        <a href="<?php echo strip_tags($sup['btn_link']); ?>" class="<?php echo strip_tags($sup['btn_color_class']); ?> font-black text-xl md:text-2xl flex items-center gap-3 hover:gap-6 transition-all">
                             <?php echo strip_tags($sup['btn_text']); ?> <span class="material-symbols-outlined">chevron_right</span>
                         </a>
                     </div>
