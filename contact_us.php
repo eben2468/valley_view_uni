@@ -125,7 +125,7 @@ include 'includes/header.php';
                         </div>
                         <div class="space-y-2">
                             <label class="text-xl font-bold text-gray-700 dark:text-gray-300 ml-1" for="email">Email Address</label>
-                            <input type="email" id="email" name="email" placeholder="john@example.com" required
+                            <input type="email" id="email" name="email" placeholder="ebenezer@example.com" required
                                    class="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xl font-medium transition-all outline-none">
                         </div>
                     </div>
