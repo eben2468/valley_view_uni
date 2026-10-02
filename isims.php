@@ -218,12 +218,12 @@ include 'includes/header.php';
 
                 <?php if ($stats): ?>
                 <!-- Quick Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 mt-12 sm:mt-20 max-w-5xl mx-auto">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 mt-10 sm:mt-20 max-w-5xl mx-auto">
                     <?php foreach ($stats as $stat): ?>
-                    <div class="px-4 py-6 sm:px-8 sm:py-10 bg-white/5 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/10 shadow-xl group hover:bg-white/10 transition-all">
-                        <span class="material-symbols-outlined text-yellow-400 text-4xl mb-3 group-hover:scale-110 transition-transform"><?php echo strip_tags($stat['stat_icon'] ?? 'star'); ?></span>
-                        <p class="text-2xl sm:text-3xl font-black text-white mb-1 break-words"><?php echo strip_tags($stat['stat_value']); ?></p>
-                        <p class="text-lg text-blue-200 font-bold uppercase tracking-widest"><?php echo strip_tags($stat['stat_label']); ?></p>
+                    <div class="px-3 py-4 sm:px-8 sm:py-10 bg-white/5 backdrop-blur-md rounded-2xl sm:rounded-[2.5rem] border border-white/10 shadow-xl group hover:bg-white/10 transition-all">
+                        <span class="material-symbols-outlined text-yellow-400 text-2xl sm:text-4xl mb-1 sm:mb-3 group-hover:scale-110 transition-transform"><?php echo strip_tags($stat['stat_icon'] ?? 'star'); ?></span>
+                        <p class="text-xl sm:text-3xl font-black text-white mb-0.5 sm:mb-1 break-words"><?php echo strip_tags($stat['stat_value']); ?></p>
+                        <p class="text-xs sm:text-lg text-blue-200 font-bold uppercase tracking-wider sm:tracking-widest"><?php echo strip_tags($stat['stat_label']); ?></p>
                     </div>
                     <?php endforeach; ?>
                 </div>
