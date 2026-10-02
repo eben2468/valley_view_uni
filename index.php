@@ -172,6 +172,18 @@ function vvuDiscoverIcon($title) {
     background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 55%, #ffffff 100%);
 }
 .vvu-discover .con-title { margin-bottom: 45px; }
+/* "More" keeps its accent colour but uses the same typeface as "Discover" */
+.vvu-discover .con-title h2 span {
+    font-family: inherit;
+    font-weight: inherit;
+    font-variant: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+}
+@media (max-width: 767px) {
+    .vvu-discover .con-title h2,
+    .vvu-discover .con-title h2 span { font-size: 32px; line-height: 38px; }
+}
 
 .vvu-discover-grid {
     display: grid;
