@@ -179,18 +179,18 @@ include 'includes/header.php';
                     </a>
                 </div>
                 
-                <div class="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-12 border-t border-white/10 pt-16">
+                <div class="mt-14 sm:mt-20 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-12 border-t border-white/10 pt-10 sm:pt-16">
                     <div>
-                        <div class="text-6xl font-black text-yellow-400 mb-2">100%</div>
-                        <div class="text-blue-200 uppercase tracking-widest text-2xl font-black">Commitment</div>
+                        <div class="text-4xl sm:text-6xl font-black text-yellow-400 mb-1 sm:mb-2">100%</div>
+                        <div class="text-blue-200 uppercase tracking-widest text-base sm:text-2xl font-black">Commitment</div>
                     </div>
                     <div>
-                        <div class="text-6xl font-black text-yellow-400 mb-2">Values</div>
-                        <div class="text-blue-200 uppercase tracking-widest text-2xl font-black">Driven Culture</div>
+                        <div class="text-4xl sm:text-6xl font-black text-yellow-400 mb-1 sm:mb-2">Values</div>
+                        <div class="text-blue-200 uppercase tracking-widest text-base sm:text-2xl font-black">Driven Culture</div>
                     </div>
                     <div>
-                        <div class="text-6xl font-black text-yellow-400 mb-2">24/7</div>
-                        <div class="text-blue-200 uppercase tracking-widest text-2xl font-black">Living Principles</div>
+                        <div class="text-4xl sm:text-6xl font-black text-yellow-400 mb-1 sm:mb-2">24/7</div>
+                        <div class="text-blue-200 uppercase tracking-widest text-base sm:text-2xl font-black">Living Principles</div>
                     </div>
                 </div>
             </div>
