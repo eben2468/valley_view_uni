@@ -147,6 +147,15 @@ include 'includes/header.php';
         color: #fff !important;
         font-size: 40px;
     }
+    @media (max-width: 639px) {
+        .icon-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
+        }
+        .icon-container span { font-size: 30px; }
+    }
     .doc-cover {
         background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18) 0, transparent 45%),
                           linear-gradient(135deg, rgba(255,255,255,0.08) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.08) 75%, transparent 75%);
@@ -186,17 +195,17 @@ include 'includes/header.php';
                 </p>
 
                 <!-- Primary portal call to action -->
-                <div class="mt-12 flex flex-col sm:flex-row gap-6 justify-center animate-fadeInUp" style="animation-delay: 0.3s;">
+                <div class="mt-12 flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center animate-fadeInUp" style="animation-delay: 0.3s;">
                     <a href="<?php echo htmlspecialchars(isims_link($hero['cta_button_link'] ?? '') ?: $portal_url); ?>" target="_blank" rel="noopener"
-                       class="inline-flex items-center justify-center gap-4 px-12 py-6 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-2xl font-black rounded-2xl transition-all transform hover:scale-105 shadow-2xl">
-                        <span class="material-symbols-outlined text-3xl">login</span>
+                       class="inline-flex items-center justify-center gap-3 sm:gap-4 px-6 py-3.5 sm:px-12 sm:py-6 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-lg sm:text-2xl font-black rounded-xl sm:rounded-2xl transition-all transform hover:scale-105 shadow-2xl">
+                        <span class="material-symbols-outlined text-2xl sm:text-3xl">login</span>
                         <?php echo strip_tags($hero['cta_button_text'] ?? 'Log In to ISIMS'); ?>
-                        <span class="material-symbols-outlined text-3xl">open_in_new</span>
+                        <span class="material-symbols-outlined text-2xl sm:text-3xl">open_in_new</span>
                     </a>
                     <?php if (!empty($hero['cta_button_link_2'])): ?>
                     <a href="<?php echo htmlspecialchars(isims_link($hero['cta_button_link_2'])); ?>" target="_blank" rel="noopener"
-                       class="inline-flex items-center justify-center gap-4 px-12 py-6 bg-white/10 backdrop-blur-md border border-white/25 hover:bg-white/20 text-white text-2xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-2xl">
-                        <span class="material-symbols-outlined text-3xl">menu_book</span>
+                       class="inline-flex items-center justify-center gap-3 sm:gap-4 px-6 py-3.5 sm:px-12 sm:py-6 bg-white/10 backdrop-blur-md border border-white/25 hover:bg-white/20 text-white text-lg sm:text-2xl font-bold rounded-xl sm:rounded-2xl transition-all transform hover:scale-105 shadow-2xl">
+                        <span class="material-symbols-outlined text-2xl sm:text-3xl">menu_book</span>
                         <?php echo strip_tags($hero['cta_button_text_2'] ?? 'Student User Guide'); ?>
                     </a>
                     <?php endif; ?>
@@ -209,11 +218,11 @@ include 'includes/header.php';
 
                 <?php if ($stats): ?>
                 <!-- Quick Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 max-w-5xl mx-auto">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 mt-12 sm:mt-20 max-w-5xl mx-auto">
                     <?php foreach ($stats as $stat): ?>
-                    <div class="px-8 py-10 bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/10 shadow-xl group hover:bg-white/10 transition-all">
+                    <div class="px-4 py-6 sm:px-8 sm:py-10 bg-white/5 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/10 shadow-xl group hover:bg-white/10 transition-all">
                         <span class="material-symbols-outlined text-yellow-400 text-4xl mb-3 group-hover:scale-110 transition-transform"><?php echo strip_tags($stat['stat_icon'] ?? 'star'); ?></span>
-                        <p class="text-3xl font-black text-white mb-1 break-words"><?php echo strip_tags($stat['stat_value']); ?></p>
+                        <p class="text-2xl sm:text-3xl font-black text-white mb-1 break-words"><?php echo strip_tags($stat['stat_value']); ?></p>
                         <p class="text-lg text-blue-200 font-bold uppercase tracking-widest"><?php echo strip_tags($stat['stat_label']); ?></p>
                     </div>
                     <?php endforeach; ?>
@@ -244,11 +253,11 @@ include 'includes/header.php';
 
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 md:gap-10">
                 <?php foreach ($items['services'] as $item): $color = isims_color($item); ?>
-                <div class="isims-card group p-10 bg-gray-50 dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center">
+                <div class="isims-card group p-6 sm:p-10 bg-gray-50 dark:bg-gray-800 rounded-3xl sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center">
                     <div class="icon-container bg-<?php echo $color; ?>">
                         <span class="material-symbols-outlined"><?php echo strip_tags($item['item_icon'] ?: 'apps'); ?></span>
                     </div>
-                    <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-5"><?php echo strip_tags($item['item_title']); ?></h3>
+                    <h3 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-3 sm:mb-5"><?php echo strip_tags($item['item_title']); ?></h3>
                     <p class="text-xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium"><?php echo strip_tags($item['item_description']); ?></p>
                 </div>
                 <?php endforeach; ?>
@@ -567,16 +576,16 @@ include 'includes/header.php';
                     <?php echo strip_tags($hero['cta_subtitle'] ?? ''); ?>
                 </p>
 
-                <div class="flex flex-col sm:flex-row gap-6 justify-center mb-20">
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-14 sm:mb-20">
                     <a href="<?php echo htmlspecialchars(isims_link($hero['cta_button_link'] ?? '') ?: $portal_url); ?>" target="_blank" rel="noopener"
-                       class="inline-flex items-center justify-center gap-4 px-12 py-6 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-2xl font-black rounded-2xl transition-all transform hover:scale-105 shadow-xl">
-                        <span class="material-symbols-outlined text-3xl">login</span>
+                       class="inline-flex items-center justify-center gap-3 sm:gap-4 px-6 py-3.5 sm:px-12 sm:py-6 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-lg sm:text-2xl font-black rounded-xl sm:rounded-2xl transition-all transform hover:scale-105 shadow-xl">
+                        <span class="material-symbols-outlined text-2xl sm:text-3xl">login</span>
                         <?php echo strip_tags($hero['cta_button_text'] ?? 'Log In to ISIMS'); ?>
                     </a>
                     <?php if (!empty($items['guides'])): ?>
                     <a href="#guides"
-                       class="inline-flex items-center justify-center gap-4 px-12 py-6 bg-white/10 backdrop-blur-md border border-white/25 hover:bg-white/20 text-white text-2xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-xl">
-                        <span class="material-symbols-outlined text-3xl">menu_book</span>
+                       class="inline-flex items-center justify-center gap-3 sm:gap-4 px-6 py-3.5 sm:px-12 sm:py-6 bg-white/10 backdrop-blur-md border border-white/25 hover:bg-white/20 text-white text-lg sm:text-2xl font-bold rounded-xl sm:rounded-2xl transition-all transform hover:scale-105 shadow-xl">
+                        <span class="material-symbols-outlined text-2xl sm:text-3xl">menu_book</span>
                         View the Guides
                     </a>
                     <?php endif; ?>
