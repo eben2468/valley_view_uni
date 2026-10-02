@@ -249,22 +249,22 @@ include 'includes/header.php';
                         ? 'sm:grid-cols-3'
                         : 'sm:grid-cols-2';
                     ?>
-                    <div class="grid grid-cols-1 <?php echo $cta_col_class; ?> gap-8">
+                    <div class="grid grid-cols-1 <?php echo $cta_col_class; ?> gap-4 sm:gap-8">
                         <?php foreach ($cta_links as $link): ?>
                         <a href="<?php echo htmlspecialchars($link['link_url']); ?>"
-                           class="group flex h-full flex-col items-center gap-5 p-10 rounded-[2rem] bg-white/10 backdrop-blur-sm border border-white/15 shadow-xl transition-all duration-300 hover:bg-white/20 hover:border-yellow-400/60 hover:-translate-y-2 hover:shadow-2xl">
-                            <span class="flex items-center justify-center w-28 h-28 rounded-[1.5rem] bg-white/15 border border-white/25 transition-all duration-300 group-hover:bg-yellow-400 group-hover:border-yellow-400 group-hover:scale-110">
-                                <span class="material-symbols-outlined text-white text-6xl transition-colors duration-300 group-hover:text-blue-900"><?php echo htmlspecialchars($link['icon']); ?></span>
+                           class="group flex h-full flex-col items-center gap-3 sm:gap-5 p-6 sm:p-10 rounded-2xl sm:rounded-[2rem] bg-white/10 backdrop-blur-sm border border-white/15 shadow-xl transition-all duration-300 hover:bg-white/20 hover:border-yellow-400/60 hover:-translate-y-2 hover:shadow-2xl">
+                            <span class="flex items-center justify-center w-16 h-16 sm:w-28 sm:h-28 rounded-xl sm:rounded-[1.5rem] bg-white/15 border border-white/25 transition-all duration-300 group-hover:bg-yellow-400 group-hover:border-yellow-400 group-hover:scale-110">
+                                <span class="material-symbols-outlined text-white text-4xl sm:text-6xl transition-colors duration-300 group-hover:text-blue-900"><?php echo htmlspecialchars($link['icon']); ?></span>
                             </span>
-                            <span class="text-white text-2xl font-black uppercase tracking-[0.12em] leading-snug">
+                            <span class="text-white text-xl sm:text-2xl font-black uppercase tracking-[0.12em] leading-snug">
                                 <?php echo htmlspecialchars($link['title']); ?>
                             </span>
                             <?php if (trim($link['description'] ?? '') !== ''): ?>
-                            <span class="text-white/75 text-lg leading-relaxed max-w-xs">
+                            <span class="text-white/75 text-base sm:text-lg leading-relaxed max-w-xs">
                                 <?php echo htmlspecialchars($link['description']); ?>
                             </span>
                             <?php endif; ?>
-                            <span class="mt-auto pt-4 inline-flex items-center gap-2 text-yellow-400 text-base font-black uppercase tracking-widest">
+                            <span class="mt-auto pt-1 sm:pt-4 inline-flex items-center gap-2 text-yellow-400 text-base font-black uppercase tracking-widest">
                                 Explore
                                 <span class="material-symbols-outlined text-xl transition-transform duration-300 group-hover:translate-x-1">arrow_forward</span>
                             </span>
