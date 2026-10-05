@@ -99,8 +99,9 @@ $ranks = ['Professor', 'Senior Lecturer', 'Lecturer', 'Assistant Lecturer'];
     }
 </style>
 <?php vvu_dir_styles('#1e3a8a', '#172f6e'); ?>
+<link rel="stylesheet" href="css/vvu-modern.css?v=1.0">
 
-<main class="flex-grow bg-gray-50 dark:bg-gray-900 pb-20 dir-scope">
+<main class="flex-grow bg-gray-50 dark:bg-gray-900 dir-scope">
     <!-- Hero Section (Directly from faqs_about_vvu.php design) -->
     <section class="relative min-h-[60vh] flex items-center overflow-hidden bg-gray-900">
         <div class="absolute inset-0 z-0">
@@ -316,19 +317,14 @@ $ranks = ['Professor', 'Senior Lecturer', 'Lecturer', 'Assistant Lecturer'];
         </div>
     </section>
 
-    <!-- CTA Section (Directly from faqs_about_vvu.php design) -->
-    <section class="py-24 bg-white dark:bg-gray-900 mt-20">
+    <!-- Call to action -->
+    <section class="vm-cta" style="margin-top: 72px;">
         <div class="container">
-            <div class="max-w-5xl mx-auto text-center glass p-20 rounded-[4rem] shadow-2xl">
-                <h2 class="text-5xl sm:text-6xl font-black text-gray-900 dark:text-white mb-8"><?php echo strip_tags($page_content['cta_title']); ?></h2>
-                <p class="text-2xl text-gray-600 dark:text-gray-400 mb-12 font-medium leading-relaxed">
-                    <?php echo strip_tags($page_content['cta_subtitle']); ?>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                    <a href="contact_us.php" class="px-12 py-6 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-4">
-                        <span class="material-symbols-outlined text-3xl">mail</span>
-                        Contact Faculty Office
-                    </a>
+            <div class="vm-cta-head">
+                <div class="vm-cta-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(strip_tags($page_content['cta_title'])); ?></div>
+                <p class="vm-cta-lead"><?php echo htmlspecialchars(strip_tags($page_content['cta_subtitle'])); ?></p>
+                <div class="vm-actions">
+                    <a href="contact_us.php" class="vm-btn vm-btn--gold"><span class="material-symbols-outlined">mail</span>Contact Faculty Office</a>
                 </div>
             </div>
         </div>

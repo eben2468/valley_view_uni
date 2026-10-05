@@ -14,6 +14,7 @@ $cta = $pdo->query("SELECT * FROM accreditation_cta WHERE is_active=1 ORDER BY i
 include 'includes/header.php';
 ?>
 
+<link rel="stylesheet" href="css/vvu-modern.css?v=1.0">
 <style>
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -83,131 +84,122 @@ include 'includes/header.php';
         </div>
     </section>
 
-    <!-- Accreditation Section -->
-    <section class="py-24 bg-white dark:bg-gray-900">
+    <?php
+    // Stored descriptions carry <strong> tags with old theme colour classes.
+    // Keep the emphasis, drop everything else.
+    $vm_rich = static function ($html) {
+        $html = strip_tags((string) $html, '<strong><b><em><br>');
+        return preg_replace('/<(strong|b|em)\b[^>]*>/i', '<$1>', $html);
+    };
+    ?>
+    <!-- Official Accreditation -->
+    <section class="vm-section vm-section--white">
         <div class="container">
-            <div class="max-w-4xl mx-auto text-center mb-20">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6">Official Accreditation</h2>
-                <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
-                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Our programs are rigorously evaluated and accredited by leading educational authorities.</p>
+            <div class="vm-head">
+                <span class="vm-kicker">Quality Assured</span>
+                <div class="vm-heading" role="heading" aria-level="2">Official Accreditation</div>
+                <p class="vm-lead">Our programs are rigorously evaluated and accredited by leading educational authorities.</p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            <div class="vm-grid vm-wrap <?php echo count($cards) === 2 ? 'vm-grid--2' : (count($cards) >= 4 ? 'vm-grid--4' : ''); ?>">
                 <?php foreach ($cards as $card): ?>
-                <div class="accreditation-card relative group">
-                    <div class="relative h-full glass p-10 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($card['border_color']); ?> flex flex-col">
-                        <div class="w-24 h-24 rounded-3xl bg-<?php echo strip_tags($card['border_color']); ?> flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($card['icon']); ?></span>
-                        </div>
-                        <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($card['title']); ?></h3>
-                        <p class="text-3xl text-gray-700 dark:text-gray-300 mb-8 flex-grow leading-relaxed">
-                            <?php echo $card['description']; ?>
-                        </p>
-                    </div>
+                <div class="vm-card vm-card--corner">
+                    <div class="vm-card-title" role="heading" aria-level="3"><?php echo htmlspecialchars(strip_tags($card['title'])); ?></div>
+                    <p class="vm-card-text"><?php echo $vm_rich($card['description']); ?></p>
+                    <span class="vm-card-corner" aria-hidden="true"><span class="material-symbols-outlined"><?php echo strip_tags($card['icon']); ?></span></span>
                 </div>
                 <?php endforeach; ?>
             </div>
         </div>
     </section>
 
-    <!-- Presidential Charter Section -->
-    <section class="py-24 bg-gray-50 dark:bg-gray-950 relative overflow-hidden">
-        <div class="container relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                <div class="animate-fadeInUp">
-                    <div class="inline-flex items-center gap-3 px-6 py-2 mb-6 rounded-full bg-yellow-500/10 border border-yellow-500/20">
-                        <span class="text-lg font-bold text-yellow-600 uppercase tracking-widest"><?php echo $charter ? strip_tags($charter['badge_text']) : 'A Historic Milestone'; ?></span>
+    <!-- Presidential Charter -->
+    <section class="vm-section vm-section--tint">
+        <div class="container">
+            <div class="vm-split">
+                <div>
+                    <span class="vm-kicker"><?php echo htmlspecialchars($charter ? strip_tags($charter['badge_text']) : 'A Historic Milestone'); ?></span>
+                    <div class="vm-heading vm-heading--left" role="heading" aria-level="2"><?php echo htmlspecialchars($charter ? strip_tags($charter['section_title']) : 'The Presidential Charter'); ?></div>
+                    <div style="margin-top: 28px;">
+                        <p class="vm-body"><?php echo $charter ? nl2br(htmlspecialchars(strip_tags($charter['paragraph_1']))) : 'In January 2006, Valley View University was granted a Presidential Charter by His Excellency, Mr. J. A. Kufuor, President of the Republic of Ghana.'; ?></p>
+                        <p class="vm-body"><?php echo $charter ? nl2br($vm_rich($charter['paragraph_2'])) : 'This historic achievement made VVU the <strong>first Chartered Private University in Ghana</strong>, granting us the rights and privileges to operate as an autonomous degree-granting institution.'; ?></p>
                     </div>
-                    <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-8"><?php echo $charter ? $charter['section_title'] : 'The Presidential <span class="text-blue-600">Charter</span>'; ?></h2>
-                    <p class="text-3xl text-gray-700 dark:text-gray-300 leading-relaxed mb-6 font-medium">
-                        <?php echo $charter ? nl2br(strip_tags($charter['paragraph_1'])) : 'In January 2006, Valley View University was granted a Presidential Charter by His Excellency, Mr. J. A. Kufuor, President of the Republic of Ghana.'; ?>
-                    </p>
-                    <p class="text-3xl text-gray-700 dark:text-gray-300 leading-relaxed mb-8 font-medium">
-                        <?php echo $charter ? nl2br($charter['paragraph_2']) : 'This historic achievement made VVU the <strong class="text-blue-600">first Chartered Private University in Ghana</strong>, granting us the rights and privileges to operate as an autonomous degree-granting institution.'; ?>
-                    </p>
-                    <div class="glass p-8 rounded-2xl border-l-8 border-yellow-500">
-                        <p class="text-2xl text-gray-600 dark:text-gray-400 italic font-medium">
-                            <?php echo $charter ? strip_tags($charter['quote']) : '"Chartered status is granted after careful scrutiny of an institution\'s statutes, examination procedures, and quality assurance standards."'; ?>
-                        </p>
-                    </div>
+                    <p class="vm-quote" style="margin-top: 26px; font-size: 18px;"><?php echo htmlspecialchars($charter ? strip_tags($charter['quote']) : '"Chartered status is granted after careful scrutiny of an institution\'s statutes, examination procedures, and quality assurance standards."'); ?></p>
                 </div>
-                <div class="relative animate-fadeInUp" style="animation-delay: 0.2s;">
-                    <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-3xl blur-2xl opacity-20"></div>
-                    <div class="relative bg-white dark:bg-gray-900 p-12 rounded-3xl shadow-2xl text-center">
-                        <span class="material-symbols-outlined text-9xl text-yellow-500 mb-6">workspace_premium</span>
-                        <h4 class="text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo $charter ? strip_tags($charter['achievement_text']) : 'First Chartered Private University'; ?></h4>
-                        <p class="text-2xl text-gray-500 font-bold uppercase tracking-widest"><?php echo $charter ? strip_tags($charter['achievement_location']) : 'Ghana • 2006'; ?></p>
-                    </div>
+                <div class="vm-panel">
+                    <span class="vm-panel-icon"><span class="material-symbols-outlined">workspace_premium</span></span>
+                    <div class="vm-panel-title" role="heading" aria-level="3"><?php echo htmlspecialchars($charter ? strip_tags($charter['achievement_text']) : 'First Chartered Private University'); ?></div>
+                    <span class="vm-panel-text"><?php echo htmlspecialchars($charter ? strip_tags($charter['achievement_location']) : 'Ghana • 2006'); ?></span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Memberships & Linkages -->
-    <section class="py-24 bg-white dark:bg-gray-900">
+    <section class="vm-section vm-section--white">
         <div class="container">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                <!-- Memberships -->
+            <div class="vm-head">
+                <span class="vm-kicker">Our Network</span>
+                <div class="vm-heading" role="heading" aria-level="2">Memberships &amp; Linkages</div>
+                <p class="vm-lead">The professional bodies we belong to and the universities we partner with around the world.</p>
+            </div>
+
+            <div class="vm-grid vm-grid--2 vm-wrap" style="align-items: start;">
                 <div>
-                    <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-10 flex items-center gap-4">
-                        <span class="material-symbols-outlined text-blue-600 text-6xl">groups</span>
-                        Professional Memberships
-                    </h3>
-                    <ul class="space-y-6">
+                    <div class="vm-group-head">
+                        <span class="vm-icon"><span class="material-symbols-outlined">groups</span></span>
+                        <div class="vm-group-title" role="heading" aria-level="3">Professional Memberships</div>
+                    </div>
+                    <ul class="vm-list">
                         <?php foreach ($memberships as $membership): ?>
-                        <li class="flex items-start gap-4 group">
-                            <span class="material-symbols-outlined text-yellow-500 text-4xl group-hover:scale-125 transition-transform">check_circle</span>
-                            <div>
-                                <h5 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo strip_tags($membership['organization_name']); ?></h5>
-                                <p class="text-2xl text-gray-600 dark:text-gray-400"><?php echo strip_tags($membership['organization_description']); ?></p>
-                            </div>
+                        <li>
+                            <span class="vm-icon vm-icon--soft"><span class="material-symbols-outlined">check</span></span>
+                            <span>
+                                <span class="vm-list-title"><?php echo htmlspecialchars(strip_tags($membership['organization_name'])); ?></span>
+                                <?php if (trim(strip_tags((string) $membership['organization_description'])) !== ''): ?>
+                                <span class="vm-list-text"><?php echo htmlspecialchars(strip_tags($membership['organization_description'])); ?></span>
+                                <?php endif; ?>
+                            </span>
                         </li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
 
-                <!-- Linkages -->
                 <div>
-                    <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-10 flex items-center gap-4">
-                        <span class="material-symbols-outlined text-blue-600 text-6xl">link</span>
-                        Global Linkages
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <?php foreach ($linkages as $linkage): ?>
-                        <div class="glass p-6 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                            <h5 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo strip_tags($linkage['organization_name']); ?></h5>
-                            <p class="text-lg text-gray-500 font-bold uppercase"><?php echo strip_tags($linkage['location']); ?></p>
-                        </div>
-                        <?php endforeach; ?>
+                    <div class="vm-group-head">
+                        <span class="vm-icon"><span class="material-symbols-outlined">link</span></span>
+                        <div class="vm-group-title" role="heading" aria-level="3">Global Linkages</div>
                     </div>
+                    <ul class="vm-list">
+                        <?php foreach ($linkages as $linkage): ?>
+                        <li>
+                            <span class="vm-icon vm-icon--soft"><span class="material-symbols-outlined">school</span></span>
+                            <span>
+                                <span class="vm-list-title"><?php echo htmlspecialchars(strip_tags($linkage['organization_name'])); ?></span>
+                                <?php if (trim(strip_tags((string) $linkage['location'])) !== ''): ?>
+                                <span class="vm-list-text"><?php echo htmlspecialchars(strip_tags($linkage['location'])); ?></span>
+                                <?php endif; ?>
+                            </span>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="relative py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-blue-900"></div>
-        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[150px] -mr-72 -mt-72"></div>
-        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -ml-72 -mb-72"></div>
-        
-        <div class="container relative z-10">
-            <div class="max-w-5xl mx-auto text-center">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight tracking-tight">
-                    <?php echo $cta ? strip_tags($cta['cta_title_1']) : 'Committed to'; ?> <br><span class="text-yellow-400 text-6xl sm:text-7xl md:text-8xl lg:text-6xl block mt-2"><?php echo $cta ? strip_tags($cta['cta_title_2']) : 'Academic Excellence'; ?></span>
-                </h2>
-                <p class="text-2xl sm:text-3xl md:text-4xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
-                    <?php echo $cta ? strip_tags($cta['cta_description']) : 'Our accreditation ensures that your degree is recognized and valued globally.'; ?>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                    <a href="<?php echo $cta ? strip_tags($cta['button_1_url']) : 'academic_programs_overview.php'; ?>" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">school</span>
-                        <?php echo $cta ? strip_tags($cta['button_1_text']) : 'Explore Programs'; ?>
+    <!-- Call to action -->
+    <section class="vm-cta">
+        <div class="container">
+            <div class="vm-cta-head">
+                <div class="vm-cta-heading" role="heading" aria-level="2"><?php echo htmlspecialchars($cta ? trim(strip_tags($cta['cta_title_1']) . ' ' . strip_tags($cta['cta_title_2'])) : 'Committed to Academic Excellence'); ?></div>
+                <p class="vm-cta-lead"><?php echo htmlspecialchars($cta ? strip_tags($cta['cta_description']) : 'Our accreditation ensures that your degree is recognized and valued globally.'); ?></p>
+                <div class="vm-actions">
+                    <a href="<?php echo $cta ? strip_tags($cta['button_1_url']) : 'academic_programs_overview.php'; ?>" class="vm-btn vm-btn--gold">
+                        <span class="material-symbols-outlined">school</span><?php echo htmlspecialchars($cta ? strip_tags($cta['button_1_text']) : 'Explore Programs'); ?>
                     </a>
-                    <a href="<?php echo $cta ? strip_tags($cta['button_2_url']) : 'contact_us.php'; ?>" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">mail</span>
-                        <?php echo $cta ? strip_tags($cta['button_2_text']) : 'Contact Us'; ?>
+                    <a href="<?php echo $cta ? strip_tags($cta['button_2_url']) : 'contact_us.php'; ?>" class="vm-btn vm-btn--ghost">
+                        <span class="material-symbols-outlined">mail</span><?php echo htmlspecialchars($cta ? strip_tags($cta['button_2_text']) : 'Contact Us'); ?>
                     </a>
                 </div>
             </div>

@@ -416,9 +416,153 @@ function vvuSectionSubtitle($sections, $key, $default) {
     color: #fff;
 }
 
-/* ── Popular programs: original list layout, new text colours ── */
-.pop-cour .home-top-cour-desc h3 { color: #1e3a8a; }
-.pop-cour .home-top-cour-desc h4 { color: #b45309; }
+/* ── Popular programs: compact split cards of one fixed size. The photo
+   panel (about 8:9, the cropper's programme shape) always fills its space,
+   so the card never grows; it carries a small level chip. On the right:
+   title + rating pill, a one-line description, the faculty, and the
+   Learn More / View Details / Apply buttons. ── */
+.hp-progs {
+    display: grid;
+    grid-template-columns: minmax(0, 480px) minmax(0, 1fr) minmax(0, 480px);
+    gap: 18px 24px;
+}
+.hp-prog--left  { grid-column: 1; grid-row: var(--row); }
+.hp-prog--right { grid-column: 3; grid-row: var(--row); }
+
+/* Centre column: line, a dot per row, and the sticky programme-count hub */
+.hp-progs-mid { grid-column: 2; position: relative; display: flex; justify-content: center; min-width: 0; }
+.hp-progs-line {
+    position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; transform: translateX(-50%);
+    border-radius: 2px; background: linear-gradient(180deg, rgba(30, 58, 138, .15) 0%, #1e3a8a 30%, #f59e0b 100%);
+}
+.hp-progs-dots {
+    position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-around;
+    align-items: center; pointer-events: none;
+}
+.hp-progs-dots span {
+    width: 14px; height: 14px; border-radius: 50%; background: #fbbf24;
+    border: 3px solid #fff; box-shadow: 0 0 0 2px #1e3a8a;
+}
+/* "Not sure what to study?" help card, sticky in the centre column */
+.hp-progs-hub {
+    position: sticky; top: 140px; align-self: flex-start; z-index: 1; margin-top: 40px;
+    width: 100%; max-width: 210px; padding: 22px 18px 18px; text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+    background: #fff; border: 1px solid #e8edf5; border-radius: 18px;
+    box-shadow: 0 18px 36px -22px rgba(23, 37, 84, .45);
+}
+/* Navy cap along the top edge */
+.hp-progs-hub::before {
+    content: ""; position: absolute; left: 18px; right: 18px; top: -1px; height: 4px;
+    border-radius: 0 0 4px 4px; background: #1e3a8a;
+}
+.hp-progs-hub-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px; border-radius: 50%; background: #1e3a8a;
+}
+.hp-progs-hub-icon .material-symbols-outlined {
+    font-size: 26px; color: #fbbf24;
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+.hp-progs-hub-title { margin-top: 12px; color: #1e3a8a; font-size: 15px; font-weight: 700; line-height: 1.3; }
+.hp-progs-hub-text { margin: 6px 0 0; color: #6b7280; font-size: 12.5px; line-height: 1.5; }
+.hp-progs-hub-btn {
+    display: block; width: 100%; margin-top: 14px; padding: 9px 12px; border-radius: 10px;
+    background: #1e3a8a; color: #fff !important; font-size: 12.5px; font-weight: 700;
+    text-decoration: none !important; transition: background-color .25s ease;
+}
+.hp-progs-hub-btn:hover { background: #172554; }
+.hp-progs-hub-link {
+    display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
+    color: #b45309 !important; font-size: 12px; font-weight: 700; text-decoration: none !important;
+}
+.hp-progs-hub-link .fa { color: inherit; transition: transform .25s ease; }
+.hp-progs-hub-link:hover .fa { transform: translateX(3px); }
+/* The hub needs room; on narrower desktops keep just the line and dots */
+@media (max-width: 1279px) {
+    .hp-progs-hub { display: none; }
+}
+.hp-prog {
+    position: relative; display: flex; height: 168px; overflow: hidden; border-radius: 16px;
+    background: #fff; border: 1px solid #e8edf5;
+    box-shadow: 0 10px 26px -20px rgba(15, 23, 42, .4);
+    transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+}
+.hp-prog:hover {
+    transform: translateY(-4px); border-color: #c7d2e6;
+    box-shadow: 0 20px 38px -24px rgba(30, 58, 138, .45);
+}
+.hp-prog-media {
+    flex: 0 0 150px; position: relative; display: block; overflow: hidden; background: #eef1f6;
+}
+.hp-prog-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s ease; }
+.hp-prog:hover .hp-prog-media img { transform: scale(1.07); }
+/* Soft shade at the bottom of the photo so the level chip reads */
+.hp-prog-media::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to top, rgba(23, 37, 84, .45) 0%, transparent 45%);
+}
+.hp-prog-level {
+    position: absolute; left: 8px; bottom: 8px; z-index: 1;
+    padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, .92);
+    color: #1e3a8a; font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+}
+.hp-prog-body {
+    flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;
+    padding: 13px 15px 13px 16px;
+}
+.hp-prog-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.hp-prog-title {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    color: #111827 !important; font-size: 15px; font-weight: 700; line-height: 1.3;
+    text-decoration: none !important; transition: color .25s ease;
+}
+.hp-prog:hover .hp-prog-title { color: #1e3a8a !important; }
+.hp-prog-rating {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 999px; background: #fef3c7;
+    color: #92400e; font-size: 11.5px; font-weight: 700; line-height: 1.3;
+}
+.hp-prog-rating .fa { color: #f59e0b; font-size: 10px; }
+.hp-prog-desc {
+    margin: 3px 0 0; color: #6b7280; font-size: 12.5px; line-height: 1.4;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hp-prog-spec { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 9px; }
+.hp-prog-spec-icon {
+    flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%; background: rgba(30, 58, 138, .08);
+}
+.hp-prog-spec-icon .material-symbols-outlined {
+    font-size: 15px; color: #1e3a8a;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+.hp-prog-spec-value {
+    min-width: 0; color: #374151; font-size: 12px; font-weight: 600; line-height: 1.35;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hp-prog-foot {
+    margin-top: auto; padding-top: 10px; border-top: 1px solid #f0f3f8;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.hp-prog-more {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: #1e3a8a !important; font-size: 12px; font-weight: 700; text-decoration: none !important;
+    white-space: nowrap;
+}
+.hp-prog-more .fa { color: inherit; font-size: 11px; transition: transform .25s ease; }
+.hp-prog-more:hover .fa { transform: translateX(3px); }
+.hp-prog-btns { display: flex; gap: 6px; }
+.hp-prog-btn {
+    display: inline-flex; align-items: center; padding: 6px 11px; border-radius: 8px;
+    font-size: 11.5px; font-weight: 700; text-decoration: none !important; white-space: nowrap;
+    transition: background-color .25s ease, color .25s ease;
+}
+.hp-prog-btn--light { background: #f1f4f9; color: #1f2937 !important; }
+.hp-prog-btn--light:hover { background: #e2e8f0; }
+.hp-prog-btn--main { background: #1e3a8a; color: #fff !important; }
+.hp-prog-btn--main:hover { background: #172554; }
+
 
 /* ── Campus life: original gallery and video cards, new labels ── */
 .hp-media-label {
@@ -433,6 +577,11 @@ function vvuSectionSubtitle($sections, $key, $default) {
 .media-container .video-info p { color: #4b5563; }
 
 /* ── Responsive ── */
+@media (max-width: 1100px) {
+    .hp-progs { grid-template-columns: minmax(0, 560px); justify-content: center; }
+    .hp-progs-mid { display: none; }
+    .hp-prog--left, .hp-prog--right { grid-column: 1; grid-row: auto; }
+}
 @media (max-width: 1199px) {
     .vvu-discover-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
@@ -442,6 +591,7 @@ function vvuSectionSubtitle($sections, $key, $default) {
 @media (max-width: 768px) {
     .vvu-stats-grid { grid-template-columns: repeat(2, 1fr); }
     .vvu-study-grid { grid-template-columns: 1fr; gap: 28px; }
+
     .vvu-stats-text { font-size: 1.05rem; padding: 0 15px; }
     .vvu-stat-value { font-size: 2rem; }
 }
@@ -463,6 +613,13 @@ function vvuSectionSubtitle($sections, $key, $default) {
     .vvu-study-front { padding: 28px 24px 24px; clip-path: polygon(44px 0, 100% 0, 100% 100%, 0 100%, 0 44px); }
     .vvu-study-title { font-size: 1.5rem; }
     .vvu-study-desc { font-size: 1.2rem; }
+    .hp-prog { height: auto; min-height: 156px; }
+    .hp-prog-media { flex: 0 0 116px; }
+    .hp-prog-body { padding: 12px 12px 12px 13px; }
+    .hp-prog-title { font-size: 14px; }
+    .hp-prog-foot { flex-wrap: wrap; row-gap: 8px; }
+    .hp-prog-btns { width: 100%; }
+    .hp-prog-btn { flex: 1 1 0; justify-content: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -614,48 +771,74 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- POPULAR PROGRAMS -->
 <?php require_once 'includes/image_helper.php'; ?>
-<section class="pop-cour hp-section hp-section--tint">
+<section class="hp-section hp-section--tint">
     <div class="container">
         <div class="hp-head">
             <span class="hp-kicker">Academics</span>
             <div class="hp-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(vvuSectionTitle($sections, 'popular_programs', 'Popular Programs')); ?></div>
             <p class="hp-lead"><?php echo htmlspecialchars(vvuSectionSubtitle($sections, 'popular_programs', 'Explore our most sought-after academic programs designed to prepare you for success in your chosen field.')); ?></p>
         </div>
-        <div class="row">
-            <?php
-            $half = ceil(count($programs) / 2);
-            $program_columns = [array_slice($programs, 0, $half), array_slice($programs, $half)];
-            foreach ($program_columns as $column):
-            ?>
-            <div class="col-md-6">
-                <div>
-                    <?php foreach ($column as $prog):
-                        $p_title = strip_tags($prog['title']);
-                        $p_desc  = trim(strip_tags($prog['description']));
-                        // Skip descriptions that just repeat the title or are a stray label
-                        $show_desc = $p_desc !== '' && strcasecmp($p_desc, $p_title) !== 0 && strcasecmp($p_desc, 'Apply Now') !== 0;
-                    ?>
-                    <!--POPULAR PROGRAMS-->
-                    <div class="home-top-cour">
-                        <!--POPULAR PROGRAMS IMAGE-->
-                        <div class="col-md-3"> <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($prog['image_url']), 400, 450)); ?>" width="400" height="450" loading="lazy" decoding="async" alt="<?php echo htmlspecialchars($p_title); ?>"> </div>
-                        <!--POPULAR PROGRAMS: CONTENT-->
-                        <div class="col-md-9 home-top-cour-desc">
-                            <h3><?php echo htmlspecialchars($p_title); ?></h3>
-                            <h4><?php echo strip_tags($prog['category']); ?></h4>
-                            <?php if ($show_desc): ?><p><?php echo htmlspecialchars($p_desc); ?></p><?php endif; ?> <span class="home-top-cour-rat"><?php echo $prog['rating']; ?></span>
-                            <div class="hom-list-share">
-                                <ul>
-                                    <li><a href="<?php echo strip_tags($prog['button1_link']); ?>"><i class="fa fa-bar-chart" aria-hidden="true"></i> <?php echo strip_tags($prog['button1_text']); ?></a> </li>
-                                    <li><a href="<?php echo strip_tags($prog['button2_link']); ?>"><i class="fa fa-eye" aria-hidden="true"></i> <?php echo strip_tags($prog['button2_text']); ?></a> </li>
-                                    <li><a href="<?php echo strip_tags($prog['button3_link']); ?>"><i class="fa fa-share-alt" aria-hidden="true"></i> <?php echo strip_tags($prog['button3_text']); ?></a> </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
+        <?php $prog_rows = max(1, (int) ceil(count($programs) / 2)); ?>
+        <div class="hp-progs">
+            <!-- Centre column (wide screens only): a navy-to-gold line with a
+                 dot level with each row, and a hub showing the programme count -->
+            <div class="hp-progs-mid" style="grid-row: 1 / span <?php echo $prog_rows; ?>;">
+                <span class="hp-progs-line" aria-hidden="true"></span>
+                <div class="hp-progs-dots" aria-hidden="true">
+                    <?php for ($r = 0; $r < $prog_rows; $r++): ?><span></span><?php endfor; ?>
+                </div>
+                <div class="hp-progs-hub">
+                    <span class="hp-progs-hub-icon" aria-hidden="true"><span class="material-symbols-outlined">support_agent</span></span>
+                    <div class="hp-progs-hub-title" role="heading" aria-level="3">Not sure what to study?</div>
+                    <p class="hp-progs-hub-text">Our admissions team will help you choose the right programme.</p>
+                    <a class="hp-progs-hub-btn" href="contact_us.php">Talk to Admissions</a>
+                    <a class="hp-progs-hub-link" href="academic_programs_overview.php">View all programmes <i class="fa fa-long-arrow-right" aria-hidden="true"></i></a>
                 </div>
             </div>
+            <?php foreach ($programs as $prog_i => $prog):
+                $p_title = strip_tags($prog['title']);
+                $p_desc  = trim(strip_tags($prog['description']));
+                // Skip descriptions that just repeat the title or are a stray label
+                $show_desc = $p_desc !== '' && strcasecmp($p_desc, $p_title) !== 0 && strcasecmp($p_desc, 'Apply Now') !== 0;
+                $learn   = strip_tags($prog['button1_link'] ?: '#');
+                $details = strip_tags($prog['button2_link'] ?: $learn);
+                // Study level, read from the programme name and faculty
+                // Whole words, case-sensitive, so "Mathematics" is not read as "MA"
+                $level = preg_match('/\b(MBA|MSc|MA|MPhil|PhD|Masters?|Doctor(ate)?|Graduate)\b/', $p_title . ' ' . $prog['category'])
+                       ? 'Postgraduate' : 'Undergraduate';
+            ?>
+            <article class="hp-prog <?php echo $prog_i % 2 === 0 ? 'hp-prog--left' : 'hp-prog--right'; ?>" style="--row: <?php echo intdiv($prog_i, 2) + 1; ?>;">
+                <a class="hp-prog-media" href="<?php echo htmlspecialchars($details); ?>" tabindex="-1" aria-hidden="true">
+                    <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($prog['image_url']), 300, 336)); ?>" width="300" height="336" loading="lazy" decoding="async" alt="">
+                    <span class="hp-prog-level"><?php echo $level; ?></span>
+                </a>
+                <div class="hp-prog-body">
+                    <div class="hp-prog-top">
+                        <a class="hp-prog-title" href="<?php echo htmlspecialchars($learn); ?>"><?php echo htmlspecialchars($p_title); ?></a>
+                        <?php if (trim((string) $prog['rating']) !== ''): ?>
+                        <span class="hp-prog-rating" title="Rating"><i class="fa fa-star" aria-hidden="true"></i><?php echo htmlspecialchars(strip_tags($prog['rating'])); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($show_desc): ?>
+                    <p class="hp-prog-desc" title="<?php echo htmlspecialchars($p_desc); ?>"><?php echo htmlspecialchars($p_desc); ?></p>
+                    <?php endif; ?>
+
+                    <div class="hp-prog-spec" title="<?php echo htmlspecialchars(strip_tags($prog['category'])); ?>">
+                        <span class="hp-prog-spec-icon"><span class="material-symbols-outlined" aria-hidden="true">account_balance</span></span>
+                        <span class="hp-prog-spec-value"><?php echo htmlspecialchars(strip_tags($prog['category'])); ?></span>
+                    </div>
+
+                    <div class="hp-prog-foot">
+                        <a class="hp-prog-more" href="<?php echo htmlspecialchars($learn); ?>"><?php echo htmlspecialchars(strip_tags($prog['button1_text'] ?: 'Learn More')); ?> <i class="fa fa-long-arrow-right" aria-hidden="true"></i></a>
+                        <div class="hp-prog-btns">
+                            <a class="hp-prog-btn hp-prog-btn--light" href="<?php echo htmlspecialchars($details); ?>"><?php echo htmlspecialchars(strip_tags($prog['button2_text'] ?: 'View Details')); ?></a>
+                            <?php if (!empty($prog['button3_text'])): ?>
+                            <a class="hp-prog-btn hp-prog-btn--main" href="<?php echo htmlspecialchars(strip_tags($prog['button3_link'])); ?>"><?php echo htmlspecialchars(strip_tags($prog['button3_text'])); ?></a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </article>
             <?php endforeach; ?>
         </div>
     </div>

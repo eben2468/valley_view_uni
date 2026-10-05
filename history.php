@@ -13,6 +13,7 @@ $cta = $pdo->query("SELECT * FROM history_cta WHERE is_active=1 ORDER BY id DESC
 include 'includes/header.php';
 ?>
 
+<link rel="stylesheet" href="css/vvu-modern.css?v=1.0">
 <style>
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -97,125 +98,101 @@ include 'includes/header.php';
     </section>
 
     <!-- Historical Overview -->
-    <section class="py-24 bg-white dark:bg-gray-900">
+    <section class="vm-section vm-section--white">
         <div class="container">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                <div class="animate-fadeInUp">
-                    <h2 class="text-5xl sm:text-6xl font-black text-gray-900 dark:text-white mb-8"><?php echo $overview ? strip_tags($overview['section_title']) : 'A Visionary <span class="text-blue-600">Beginning</span>'; ?></h2>
-                    <p class="text-3xl text-gray-700 dark:text-gray-300 leading-relaxed mb-6 font-medium">
-                        <?php echo $overview ? nl2br(strip_tags($overview['paragraph_1'])) : 'Valley View University was established in 1979 by the West African Union Mission of Seventh-day Adventists. What started as a focused mission to provide quality Christian education has grown into a beacon of higher learning in West Africa.'; ?>
-                    </p>
-                    <p class="text-3xl text-gray-700 dark:text-gray-300 leading-relaxed mb-8 font-medium">
-                        <?php echo $overview ? nl2br(strip_tags($overview['paragraph_2'])) : 'In 1997, the institution was absorbed into the Adventist University system operated by the West Central African Division of Seventh-day Adventists, headquartered in Abidjan, Cote d\'Ivoire, further strengthening its global academic ties.'; ?>
-                    </p>
-                    <div class="flex gap-6">
-                        <div class="flex flex-col">
-                            <span class="text-6xl font-black text-blue-600"><?php echo $overview ? strip_tags($overview['founded_year']) : '1979'; ?></span>
-                            <span class="text-2xl font-bold text-gray-500 uppercase tracking-widest">Founded</span>
+            <div class="vm-split">
+                <div>
+                    <span class="vm-kicker">Where It Began</span>
+                    <div class="vm-heading vm-heading--left" role="heading" aria-level="2"><?php echo htmlspecialchars($overview ? strip_tags($overview['section_title']) : 'A Visionary Beginning'); ?></div>
+                    <div style="margin-top: 28px;">
+                        <p class="vm-body"><?php echo $overview ? nl2br(htmlspecialchars(strip_tags($overview['paragraph_1']))) : 'Valley View University was established in 1979 by the West African Union Mission of Seventh-day Adventists. What started as a focused mission to provide quality Christian education has grown into a beacon of higher learning in West Africa.'; ?></p>
+                        <p class="vm-body"><?php echo $overview ? nl2br(htmlspecialchars(strip_tags($overview['paragraph_2']))) : 'In 1997, the institution was absorbed into the Adventist University system operated by the West Central African Division of Seventh-day Adventists, headquartered in Abidjan, Cote d\'Ivoire, further strengthening its global academic ties.'; ?></p>
+                    </div>
+                    <div class="vm-figures">
+                        <div class="vm-figure">
+                            <span class="vm-figure-value"><?php echo htmlspecialchars($overview ? strip_tags($overview['founded_year']) : '1979'); ?></span>
+                            <span class="vm-figure-label">Founded</span>
                         </div>
-                        <div class="w-px h-16 bg-gray-200 dark:bg-gray-700"></div>
-                        <div class="flex flex-col">
-                            <span class="text-6xl font-black text-yellow-500"><?php echo $overview ? strip_tags($overview['chartered_year']) : '2006'; ?></span>
-                            <span class="text-2xl font-bold text-gray-500 uppercase tracking-widest">Chartered</span>
+                        <div class="vm-figure">
+                            <span class="vm-figure-value"><?php echo htmlspecialchars($overview ? strip_tags($overview['chartered_year']) : '2006'); ?></span>
+                            <span class="vm-figure-label">Chartered</span>
                         </div>
                     </div>
                 </div>
-                <div class="relative animate-fadeInUp" style="animation-delay: 0.2s;">
-                    <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-3xl blur-2xl opacity-20"></div>
-                    <img src="<?php echo strip_tags($overview['overview_image_url'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlpqAxUpsNTDcRAQIlxSNJQ8SojHcCq-EJUtGi1fL4Ks81Fov4uUGjJrsaziEer_Gb2EzOGjNFYzIvSXn8BgUcJTOJ60Ln7ogU_UGxoqMGsnyt1wEkW1636dKPzO17EdOyoT7GZLZ7-VADxDD39JsJ31e3yOzPXyo_69Va5FW22seP0WfrtmjXil3J2I1YDq8D9rg2aEcx572kdiJMjcAlfXPO3bQ46H2PtAA2WpbTZN8cvvoWSPdLKzgJaKL0f6lY99R4t-07NQsh'); ?>" 
-                         alt="Founding Era" class="relative rounded-3xl shadow-2xl object-cover w-full h-[500px]">
+                <div class="vm-frame">
+                    <div class="vm-frame-media">
+                        <img src="<?php echo strip_tags($overview['overview_image_url'] ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlpqAxUpsNTDcRAQIlxSNJQ8SojHcCq-EJUtGi1fL4Ks81Fov4uUGjJrsaziEer_Gb2EzOGjNFYzIvSXn8BgUcJTOJ60Ln7ogU_UGxoqMGsnyt1wEkW1636dKPzO17EdOyoT7GZLZ7-VADxDD39JsJ31e3yOzPXyo_69Va5FW22seP0WfrtmjXil3J2I1YDq8D9rg2aEcx572kdiJMjcAlfXPO3bQ46H2PtAA2WpbTZN8cvvoWSPdLKzgJaKL0f6lY99R4t-07NQsh'); ?>"
+                             alt="Valley View University in its founding era" loading="lazy">
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Timeline Section -->
-    <section class="py-24 bg-gray-50 dark:bg-gray-950 relative overflow-hidden">
-        <div class="container relative z-10">
-            <div class="max-w-4xl mx-auto text-center mb-20">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6">Historical <span class="text-blue-600 text-6xl font-black">Milestones</span></h2>
-                <div class="h-2 w-40 bg-yellow-500 mx-auto rounded-full mb-8"></div>
-                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Tracing our path from a mission-driven college to a premier chartered university.</p>
-            </div>
-
-            <div class="relative">
-                <!-- Timeline Line -->
-                <div class="timeline-line"></div>
-
-                <div class="space-y-24">
-                    <?php $index = 0; foreach ($milestones as $milestone): $index++; ?>
-                    <div class="relative flex flex-col md:flex-<?php echo $index % 2 == 1 ? 'row' : 'row-reverse'; ?> items-center justify-between">
-                        <div class="md:w-5/12 mb-8 md:mb-0">
-                            <div class="glass p-8 rounded-3xl shadow-xl history-card border-<?php echo $index % 2 == 1 ? 'l' : 'r'; ?>-8 border-<?php echo strip_tags($milestone['border_color']); ?>">
-                                <span class="text-5xl font-black text-<?php echo strip_tags($milestone['dot_color']); ?> mb-4 block"><?php echo strip_tags($milestone['year']); ?></span>
-                                <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($milestone['milestone_title']); ?></h3>
-                                <p class="text-2xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
-                                    <?php echo strip_tags($milestone['milestone_description']); ?>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="absolute left-1/2 transform -translate-x-1/2 w-8 h-8 bg-<?php echo strip_tags($milestone['dot_color']); ?> rounded-full border-4 border-white dark:border-gray-900 z-20 hidden md:block"></div>
-                        <div class="md:w-5/12"></div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Values & Inclusivity -->
-    <section class="py-24 bg-white dark:bg-gray-900">
+    <!-- Historical Milestones -->
+    <?php if (!empty($milestones)): ?>
+    <section class="vm-section vm-section--tint">
         <div class="container">
-            <div class="glass p-12 md:p-20 rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800 text-center relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full -mr-32 -mt-32"></div>
-                <div class="absolute bottom-0 left-0 w-64 h-64 bg-yellow-500/5 rounded-full -ml-32 -mb-32"></div>
-                
-                <span class="material-symbols-outlined text-7xl text-blue-600 mb-8 animate-float">public</span>
-                <h2 class="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-8"><?php echo $community ? $community['section_title'] : 'A Global <span class="text-blue-600">Community</span>'; ?></h2>
-                <p class="text-3xl md:text-4xl text-gray-700 dark:text-gray-300 leading-relaxed font-medium mb-12">
-                    <?php echo $community ? strip_tags($community['section_description']) : 'Today, Valley View University serves undergraduate and graduate students from all over the world. We admit qualified students regardless of their religious background, provided they accept the Christian principles and lifestyle that form the basis of our operations.'; ?>
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
-                        <h4 class="text-5xl font-black text-blue-600 mb-2"><?php echo $community ? strip_tags($community['feature_1_title']) : 'Global'; ?></h4>
-                        <p class="text-2xl font-bold text-gray-500 uppercase"><?php echo $community ? strip_tags($community['feature_1_label']) : 'Reach'; ?></p>
-                    </div>
-                    <div class="p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl">
-                        <h4 class="text-5xl font-black text-yellow-500 mb-2"><?php echo $community ? strip_tags($community['feature_2_title']) : 'Inclusive'; ?></h4>
-                        <p class="text-2xl font-bold text-gray-500 uppercase"><?php echo $community ? strip_tags($community['feature_2_label']) : 'Community'; ?></p>
-                    </div>
-                    <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
-                        <h4 class="text-5xl font-black text-blue-600 mb-2"><?php echo $community ? strip_tags($community['feature_3_title']) : 'Chartered'; ?></h4>
-                        <p class="text-2xl font-bold text-gray-500 uppercase"><?php echo $community ? strip_tags($community['feature_3_label']) : 'Excellence'; ?></p>
+            <div class="vm-head">
+                <span class="vm-kicker">Our Journey</span>
+                <div class="vm-heading" role="heading" aria-level="2">Historical Milestones</div>
+                <p class="vm-lead">Tracing our path from a mission-driven college to a premier chartered university.</p>
+            </div>
+
+            <div class="vm-timeline">
+                <?php foreach ($milestones as $milestone): ?>
+                <div class="vm-tl-item">
+                    <span class="vm-tl-dot" aria-hidden="true"></span>
+                    <div class="vm-card vm-tl-card">
+                        <span class="vm-tl-year"><?php echo htmlspecialchars(strip_tags($milestone['year'])); ?></span>
+                        <div class="vm-card-title" role="heading" aria-level="3"><?php echo htmlspecialchars(strip_tags($milestone['milestone_title'])); ?></div>
+                        <p class="vm-card-text"><?php echo htmlspecialchars(strip_tags($milestone['milestone_description'])); ?></p>
                     </div>
                 </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- A Global Community -->
+    <section class="vm-section vm-section--white">
+        <div class="container">
+            <div class="vm-head" style="margin-bottom: 40px;">
+                <span class="vm-kicker"><span class="material-symbols-outlined">public</span>Today</span>
+                <div class="vm-heading" role="heading" aria-level="2"><?php echo htmlspecialchars($community ? strip_tags($community['section_title']) : 'A Global Community'); ?></div>
+                <p class="vm-lead"><?php echo htmlspecialchars($community ? strip_tags($community['section_description']) : 'Today, Valley View University serves undergraduate and graduate students from all over the world. We admit qualified students regardless of their religious background, provided they accept the Christian principles and lifestyle that form the basis of our operations.'); ?></p>
+            </div>
+            <div class="vm-grid vm-wrap">
+                <?php
+                $community_features = [
+                    ['title' => $community['feature_1_title'] ?? 'Global',    'label' => $community['feature_1_label'] ?? 'Reach',      'icon' => 'public'],
+                    ['title' => $community['feature_2_title'] ?? 'Inclusive', 'label' => $community['feature_2_label'] ?? 'Community',  'icon' => 'diversity_3'],
+                    ['title' => $community['feature_3_title'] ?? 'Chartered', 'label' => $community['feature_3_label'] ?? 'Excellence', 'icon' => 'workspace_premium'],
+                ];
+                foreach ($community_features as $feat): ?>
+                <div class="vm-card" style="align-items: center; text-align: center;">
+                    <span class="vm-icon" style="margin-bottom: 16px;"><span class="material-symbols-outlined"><?php echo $feat['icon']; ?></span></span>
+                    <div class="vm-card-title vm-card-title--plain" role="heading" aria-level="3" style="font-size: 26px; margin-bottom: 4px;"><?php echo htmlspecialchars(strip_tags($feat['title'])); ?></div>
+                    <span class="vm-card-label" style="margin: 0;"><?php echo htmlspecialchars(strip_tags($feat['label'])); ?></span>
+                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="relative py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-blue-900"></div>
-        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[150px] -mr-72 -mt-72"></div>
-        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -ml-72 -mb-72"></div>
-        
-        <div class="container relative z-10">
-            <div class="max-w-5xl mx-auto text-center">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight tracking-tight">
-                    <?php echo $cta ? strip_tags($cta['cta_title_1']) : 'Be Part of Our'; ?> <br><span class="text-yellow-400 text-6xl sm:text-7xl md:text-8xl lg:text-6xl block mt-2"><?php echo $cta ? strip_tags($cta['cta_title_2']) : 'Future History'; ?></span>
-                </h2>
-                <p class="text-2xl sm:text-3xl md:text-4xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
-                    <?php echo $cta ? strip_tags($cta['cta_description']) : 'Join a legacy of excellence and innovation. Your journey at Valley View University starts here.'; ?>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                    <a href="<?php echo $cta ? strip_tags($cta['button_1_url']) : 'admissions.php'; ?>" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">school</span>
-                        <?php echo $cta ? strip_tags($cta['button_1_text']) : 'Apply Now'; ?>
+    <!-- Call to action -->
+    <section class="vm-cta">
+        <div class="container">
+            <div class="vm-cta-head">
+                <div class="vm-cta-heading" role="heading" aria-level="2"><?php echo htmlspecialchars($cta ? trim(strip_tags($cta['cta_title_1']) . ' ' . strip_tags($cta['cta_title_2'])) : 'Be Part of Our Future History'); ?></div>
+                <p class="vm-cta-lead"><?php echo htmlspecialchars($cta ? strip_tags($cta['cta_description']) : 'Join a legacy of excellence and innovation. Your journey at Valley View University starts here.'); ?></p>
+                <div class="vm-actions">
+                    <a href="<?php echo $cta ? strip_tags($cta['button_1_url']) : 'admissions.php'; ?>" class="vm-btn vm-btn--gold">
+                        <span class="material-symbols-outlined">school</span><?php echo htmlspecialchars($cta ? strip_tags($cta['button_1_text']) : 'Apply Now'); ?>
                     </a>
-                    <a href="<?php echo $cta ? strip_tags($cta['button_2_url']) : 'contact_us.php'; ?>" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">mail</span>
-                        <?php echo $cta ? strip_tags($cta['button_2_text']) : 'Contact Us'; ?>
+                    <a href="<?php echo $cta ? strip_tags($cta['button_2_url']) : 'contact_us.php'; ?>" class="vm-btn vm-btn--ghost">
+                        <span class="material-symbols-outlined">mail</span><?php echo htmlspecialchars($cta ? strip_tags($cta['button_2_text']) : 'Contact Us'); ?>
                     </a>
                 </div>
             </div>

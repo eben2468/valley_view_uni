@@ -70,6 +70,7 @@ if ($q !== '') {
 include 'includes/header.php';
 ?>
 
+<link rel="stylesheet" href="css/vvu-modern.css?v=1.0">
 <style>
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -174,44 +175,40 @@ include 'includes/header.php';
         </div>
     </section>
 
-    <!-- Policy Categories Section -->
-    <?php 
+    <!-- Policy Framework -->
+    <?php
     $framework_section = array_values(array_filter($sections, fn($s) => $s['section_key'] === 'framework'))[0] ?? null;
-    if ($framework_section): 
+    if ($framework_section):
     ?>
-    <section class="py-24 bg-white dark:bg-gray-900">
-        <div class="container text-center">
-            <div class="max-w-4xl mx-auto mb-20">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($framework_section['section_title']); ?></h2>
-                <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
-                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($framework_section['section_subtitle']); ?></p>
+    <section class="vm-section vm-section--white">
+        <div class="container">
+            <div class="vm-head">
+                <span class="vm-kicker">Governance</span>
+                <div class="vm-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(strip_tags($framework_section['section_title'])); ?></div>
+                <?php if (trim(strip_tags((string) $framework_section['section_subtitle'])) !== ''): ?>
+                <p class="vm-lead"><?php echo htmlspecialchars(strip_tags($framework_section['section_subtitle'])); ?></p>
+                <?php endif; ?>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            <div class="vm-grid">
                 <?php foreach ($grouped_items['framework'] ?? [] as $category): ?>
-                <div class="policy-card relative group<?php echo vvu_policy_hidden($category, $q) ? ' hidden' : ''; ?>"
+                <div class="vm-card<?php echo vvu_policy_hidden($category, $q) ? ' hidden' : ''; ?>"
                      data-policy-searchable
                      data-search-text="<?php echo htmlspecialchars(vvu_policy_haystack($category)); ?>">
-                    <div class="relative h-full glass p-10 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($category['item_color']); ?> flex flex-col text-left">
-                        <div class="w-24 h-24 rounded-3xl bg-<?php echo strip_tags($category['item_color']); ?> flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($category['item_icon']); ?></span>
-                        </div>
-                        <h3 class="text-5xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($category['item_title']); ?></h3>
-                        <p class="text-3xl text-gray-700 dark:text-gray-300 mb-8 flex-grow leading-relaxed">
-                            <?php echo strip_tags($category['item_description']); ?>
-                        </p>
-                        <div class="space-y-4">
-                            <?php if (!empty($category['documents'])): ?>
-                                <?php foreach ($category['documents'] as $doc): ?>
-                                <a href="<?php echo strip_tags($doc['url']); ?>" download class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group/link">
-                                    <span class="material-symbols-outlined text-<?php echo strip_tags($doc['color'] ?? 'blue-600'); ?> text-4xl"><?php echo strip_tags($doc['icon'] ?? 'picture_as_pdf'); ?></span>
-                                    <span class="text-2xl text-gray-700 dark:text-gray-300 font-bold"><?php echo strip_tags($doc['title']); ?></span>
-                                    <span class="ml-auto text-sm bg-<?php echo strip_tags($category['item_color']); ?> text-white px-3 py-1 rounded-full opacity-0 group-hover/link:opacity-100 transition-opacity">Download PDF</span>
-                                </a>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
+                    <span class="vm-icon" style="margin-bottom: 18px;"><span class="material-symbols-outlined"><?php echo strip_tags($category['item_icon']); ?></span></span>
+                    <div class="vm-card-title" role="heading" aria-level="3"><?php echo htmlspecialchars(strip_tags($category['item_title'])); ?></div>
+                    <p class="vm-card-text"><?php echo htmlspecialchars(strip_tags($category['item_description'])); ?></p>
+                    <?php if (!empty($category['documents'])): ?>
+                    <div class="vm-docs">
+                        <?php foreach ($category['documents'] as $doc): ?>
+                        <a href="<?php echo strip_tags($doc['url']); ?>" download class="vm-doc">
+                            <span class="material-symbols-outlined"><?php echo strip_tags($doc['icon'] ?? 'picture_as_pdf'); ?></span>
+                            <span><?php echo htmlspecialchars(strip_tags($doc['title'])); ?></span>
+                            <span class="material-symbols-outlined vm-doc-go" aria-hidden="true">download</span>
+                        </a>
+                        <?php endforeach; ?>
                     </div>
+                    <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -219,80 +216,64 @@ include 'includes/header.php';
     </section>
     <?php endif; ?>
 
-    <!-- Search & Quick Access Section -->
-    <?php 
+    <!-- Search & Quick Access -->
+    <?php
     $links_section = array_values(array_filter($sections, fn($s) => $s['section_key'] === 'quick_links'))[0] ?? null;
-    if ($links_section): 
+    if ($links_section):
     ?>
-    <section class="py-24 bg-gray-50 dark:bg-gray-950">
-        <div class="container text-center">
-            <div class="max-w-4xl mx-auto mb-16">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($links_section['section_title']); ?></h2>
-                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($links_section['section_subtitle']); ?></p>
+    <section class="vm-section vm-section--tint">
+        <div class="container">
+            <div class="vm-head" style="margin-bottom: 32px;">
+                <span class="vm-kicker">Find a Policy</span>
+                <div class="vm-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(strip_tags($links_section['section_title'])); ?></div>
+                <?php if (trim(strip_tags((string) $links_section['section_subtitle'])) !== ''): ?>
+                <p class="vm-lead"><?php echo htmlspecialchars(strip_tags($links_section['section_subtitle'])); ?></p>
+                <?php endif; ?>
             </div>
 
-            <!-- Explicit px width: this page sets a 10px root font, so Tailwind's
-                 max-w-4xl resolves to 560px and left the bar looking pinched. -->
-            <div class="max-w-[860px] mx-auto">
-                <form method="GET" action="policies.php" id="policySearchForm" role="search" class="relative group">
-                    <label for="policySearch" class="sr-only">Search policies</label>
-                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-full blur opacity-25 group-focus-within:opacity-60 group-hover:opacity-50 transition duration-500"></div>
-                    <div class="relative flex items-center gap-2 bg-white dark:bg-gray-900 rounded-full p-2 pl-6 shadow-2xl">
-                        <span class="material-symbols-outlined text-3xl text-gray-400 flex-shrink-0" aria-hidden="true">search</span>
+            <form method="GET" action="policies.php" id="policySearchForm" role="search" class="vm-search">
+                <label for="policySearch" class="sr-only">Search policies</label>
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                <input type="search" id="policySearch" name="q" autocomplete="off"
+                       value="<?php echo htmlspecialchars($q); ?>"
+                       placeholder="Search policies — try Governance, Academic, Staff…">
+                <!-- Clear button: only shown once there is something to clear -->
+                <button type="button" id="policySearchClear" class="vm-search-clear <?php echo $q === '' ? 'hidden' : 'flex'; ?>" aria-label="Clear search">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+                <button type="submit" class="vm-btn vm-btn--navy">Search</button>
+            </form>
 
-                        <input type="search" id="policySearch" name="q" autocomplete="off"
-                               value="<?php echo htmlspecialchars($q); ?>"
-                               placeholder="Search policies — try Governance, Academic, Staff…"
-                               class="policy-search-input flex-grow min-w-0 bg-transparent text-xl py-4 px-3 text-gray-900 dark:text-white placeholder-gray-400">
+            <!-- Live result summary -->
+            <p id="policySearchStatus" role="status" aria-live="polite" class="vm-search-status <?php echo $q === '' ? 'hidden' : ''; ?>">
+                <?php if ($q !== ''): ?>
+                    <?php echo $search_total; ?> result<?php echo $search_total === 1 ? '' : 's'; ?>
+                    for &ldquo;<span class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($q); ?></span>&rdquo;
+                <?php endif; ?>
+            </p>
 
-                        <!-- Clear button: only shown once there is something to clear -->
-                        <button type="button" id="policySearchClear"
-                                class="flex-shrink-0 w-10 h-10 rounded-full items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors <?php echo $q === '' ? 'hidden' : 'flex'; ?>"
-                                aria-label="Clear search">
-                            <span class="material-symbols-outlined text-2xl">close</span>
-                        </button>
-
-                        <button type="submit"
-                                class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-xl font-bold transition-all hover:scale-105 shadow-lg">
-                            Search
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Live result summary -->
-                <p id="policySearchStatus" role="status" aria-live="polite"
-                   class="mt-5 text-lg text-gray-600 dark:text-gray-400 font-medium <?php echo $q === '' ? 'hidden' : ''; ?>">
-                    <?php if ($q !== ''): ?>
-                        <?php echo $search_total; ?> result<?php echo $search_total === 1 ? '' : 's'; ?>
-                        for &ldquo;<span class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($q); ?></span>&rdquo;
-                    <?php endif; ?>
-                </p>
-
-                <!-- Empty state -->
-                <div id="policySearchEmpty" class="<?php echo ($q !== '' && $search_total === 0) ? '' : 'hidden'; ?> mt-10 p-12 rounded-3xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
-                    <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700">search_off</span>
-                    <h4 class="mt-4 text-3xl font-black text-gray-900 dark:text-white">No policies matched</h4>
-                    <p class="mt-3 text-xl text-gray-600 dark:text-gray-400">
-                        Try a broader word, or <button type="button" id="policySearchReset" class="text-blue-600 font-bold underline hover:text-blue-700">clear the search</button> to see everything.
-                    </p>
-                </div>
+            <!-- Empty state -->
+            <div id="policySearchEmpty" class="vm-empty <?php echo ($q !== '' && $search_total === 0) ? '' : 'hidden'; ?>">
+                <span class="material-symbols-outlined">search_off</span>
+                <div class="vm-empty-title">No policies matched</div>
+                <p class="vm-empty-text">Try a broader word, or <button type="button" id="policySearchReset">clear the search</button> to see everything.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20 text-left">
+            <div class="vm-grid" style="margin-top: 48px;">
                 <?php foreach ($grouped_items['quick_links'] ?? [] as $link): ?>
-                <div class="group p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:-translate-y-2<?php echo vvu_policy_hidden($link, $q) ? ' hidden' : ''; ?>"
+                <div class="vm-card vm-card--corner<?php echo vvu_policy_hidden($link, $q) ? ' hidden' : ''; ?>"
                      data-policy-searchable
                      data-search-text="<?php echo htmlspecialchars(vvu_policy_haystack($link)); ?>">
-                    <div class="w-16 h-16 rounded-2xl bg-<?php echo strip_tags($link['item_color']); ?> flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-3xl text-white"><?php echo strip_tags($link['item_icon']); ?></span>
+                    <div class="vm-card-title" role="heading" aria-level="3"><?php echo htmlspecialchars(strip_tags($link['item_title'])); ?></div>
+                    <p class="vm-card-text"><?php echo htmlspecialchars(strip_tags($link['item_description'])); ?></p>
+                    <?php if (!empty($link['item_link'])): ?>
+                    <div class="vm-card-foot">
+                        <a href="<?php echo strip_tags($link['item_link']); ?>" class="vm-link">
+                            <?php echo htmlspecialchars(strip_tags($link['item_subtitle'] ?: 'Read more')); ?> <span class="material-symbols-outlined">arrow_forward</span>
+                        </a>
                     </div>
-                    <h4 class="text-4xl font-black text-gray-900 dark:text-white mb-4"><?php echo strip_tags($link['item_title']); ?></h4>
-                    <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed mb-6">
-                        <?php echo strip_tags($link['item_description']); ?>
-                    </p>
-                    <a href="<?php echo strip_tags($link['item_link']); ?>" class="text-<?php echo strip_tags($link['item_color']); ?> font-bold text-xl flex items-center gap-2 hover:gap-4 transition-all">
-                        <?php echo strip_tags($link['item_subtitle']); ?> <span class="material-symbols-outlined">arrow_forward</span>
-                    </a>
+                    <?php endif; ?>
+                    <span class="vm-card-corner" aria-hidden="true"><span class="material-symbols-outlined"><?php echo strip_tags($link['item_icon']); ?></span></span>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -300,29 +281,18 @@ include 'includes/header.php';
     </section>
     <?php endif; ?>
 
-    <!-- CTA Section -->
-    <section class="relative py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-blue-900"></div>
-        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[150px] -mr-72 -mt-72"></div>
-        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -ml-72 -mb-72"></div>
-        
-        <div class="container relative z-10 text-center">
-            <div class="max-w-5xl mx-auto">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight tracking-tight">
-                    <?php echo strip_tags($hero['cta_title'] ?? 'Committed to'); ?> <br><span class="text-yellow-400 text-6xl sm:text-7xl md:text-8xl lg:text-6xl block mt-2"><?php echo strip_tags($hero['cta_subtitle'] ?? 'Integrity & Transparency'); ?></span>
-                </h2>
-                <p class="text-2xl sm:text-3xl md:text-4xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
-                    Our policies are designed to protect and empower every member of the Valley View University family.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                    <a href="mission_and_vision.php" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">visibility</span>
-                        <?php echo strip_tags($hero['cta_button_text'] ?? 'Our Mission'); ?>
+    <!-- Call to action -->
+    <section class="vm-cta">
+        <div class="container">
+            <div class="vm-cta-head">
+                <div class="vm-cta-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(trim(strip_tags($hero['cta_title'] ?? 'Committed to') . ' ' . strip_tags($hero['cta_subtitle'] ?? 'Integrity & Transparency'))); ?></div>
+                <p class="vm-cta-lead">Our policies are designed to protect and empower every member of the Valley View University family.</p>
+                <div class="vm-actions">
+                    <a href="mission_and_vision.php" class="vm-btn vm-btn--gold">
+                        <span class="material-symbols-outlined">visibility</span><?php echo htmlspecialchars(strip_tags($hero['cta_button_text'] ?? 'Our Mission')); ?>
                     </a>
-                    <a href="core_values.php" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">verified</span>
-                        Our Values
+                    <a href="core_values.php" class="vm-btn vm-btn--ghost">
+                        <span class="material-symbols-outlined">verified</span>Our Values
                     </a>
                 </div>
             </div>

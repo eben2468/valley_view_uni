@@ -64,6 +64,7 @@ $category_colors = [
 ];
 ?>
 
+<link rel="stylesheet" href="css/vvu-modern.css?v=1.0">
 <style>
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slowZoom { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
@@ -77,8 +78,6 @@ $category_colors = [
     .member-card-hover { transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
     .member-card-hover:hover { transform: translateY(-8px); }
     .search-glow:focus { box-shadow: 0 0 0 4px rgba(0, 33, 71, 0.15); }
-    .category-section { opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out; }
-    .category-section.visible { opacity: 1; transform: translateY(0); }
 </style>
 
 <main class="flex-grow bg-gray-50 dark:bg-gray-900">
@@ -105,220 +104,153 @@ $category_colors = [
         </div>
     </section>
 
-    <!-- Search Bar -->
-    <section class="relative z-20 -mt-10">
-        <div class="container mx-auto px-4">
-            <div class="max-w-3xl mx-auto">
-                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-3 flex items-center gap-4 border border-gray-100 dark:border-gray-700">
-                    <div class="w-14 h-14 rounded-2xl vvu-gradient flex items-center justify-center text-white shadow-lg shrink-0">
-                        <span class="material-symbols-outlined text-3xl text-white">search</span>
-                    </div>
-                    <input type="text" id="dirSearch" placeholder="Search by name, title, or department..." class="w-full text-xl font-medium text-gray-700 dark:text-gray-200 bg-transparent border-none outline-none search-glow rounded-xl px-4 py-4" style="box-shadow: none !important; border: none !important;">
-                    <div id="searchCount" class="hidden shrink-0 px-5 py-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-blue-700 dark:text-blue-300 font-bold text-lg whitespace-nowrap"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Quick Stats -->
-    <section class="py-20 bg-white dark:bg-gray-900">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                <div class="text-center">
-                    <div class="text-5xl md:text-6xl font-black text-blue-900 dark:text-white mb-2"><?php echo count($directory_data); ?></div>
-                    <div class="text-lg md:text-xl font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Leaders</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-5xl md:text-6xl font-black text-blue-900 dark:text-white mb-2"><?php echo count($grouped_directory); ?></div>
-                    <div class="text-lg md:text-xl font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Categories</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-5xl md:text-6xl font-black text-blue-900 dark:text-white mb-2">3</div>
-                    <div class="text-lg md:text-xl font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Campuses</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-5xl md:text-6xl font-black text-blue-900 dark:text-white mb-2">30+</div>
-                    <div class="text-lg md:text-xl font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Departments</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Directory Groups -->
-    <?php $groupIndex = 0; foreach ($grouped_directory as $category => $members): 
-        $icon = $category_icons[$category] ?? 'badge';
-        $gradient = $category_colors[$category] ?? 'from-blue-600 to-blue-800';
-        $bgClass = $groupIndex % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800/50' : 'bg-white dark:bg-gray-900';
-    ?>
-    <section class="py-24 <?php echo $bgClass; ?> category-section" data-category="<?php echo strip_tags($category); ?>">
-        <div class="container mx-auto px-4">
-            <!-- Section Header -->
-            <div class="max-w-5xl mx-auto text-center mb-20">
-                <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br <?php echo $gradient; ?> text-white shadow-xl mb-8">
-                    <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($icon); ?></span>
-                </div>
-                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($category); ?></h2>
-                <div class="h-2 w-40 bg-gradient-to-r <?php echo $gradient; ?> mx-auto rounded-full mb-8"></div>
-                <p class="text-2xl md:text-[1.75rem] text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                    <?php echo count($members); ?> member<?php echo count($members) > 1 ? 's' : ''; ?> serving the university community
-                </p>
-            </div>
-
-            <!-- Members Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 max-w-[90rem] mx-auto">
-                <?php foreach ($members as $member): ?>
-                <div class="member-card-hover directory-item" data-search="<?php echo strtolower($member['name'] . ' ' . $member['title'] . ' ' . $member['category']); ?>">
-                    <div class="relative h-full glass p-8 md:p-10 rounded-3xl shadow-xl border-t-4 border-transparent hover:border-t-4 hover:border-blue-900 group">
-                        <!-- Initials Avatar -->
-                        <div class="flex items-start gap-6 mb-6">
-                            <div class="w-16 h-16 shrink-0 rounded-2xl bg-gradient-to-br <?php echo $gradient; ?> flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
-                                <span class="text-2xl font-black" style="color: #fff !important;">
-                                    <?php 
-                                    $parts = explode(' ', trim($member['name']));
-                                    $initials = '';
-                                    // Get last meaningful word as initial
-                                    foreach ($parts as $p) {
-                                        $p = trim($p, '.,');
-                                        if (strlen($p) > 2 && !in_array(strtolower($p), ['pr.', 'dr.', 'prof.', 'mrs.', 'mr.', 'esq.'])) {
-                                            $initials .= strtoupper($p[0]);
-                                        }
-                                    }
-                                    echo substr($initials, 0, 2);
-                                    ?>
-                                </span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-2xl md:text-[1.65rem] font-black text-gray-900 dark:text-white leading-tight mb-2"><?php echo strip_tags($member['name']); ?></h3>
-                                <p class="text-lg md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r <?php echo $gradient; ?> leading-snug"><?php echo strip_tags($member['title']); ?></p>
-                            </div>
-                        </div>
-                        
-                        <?php if (!empty($member['email'])): ?>
-                        <div class="flex items-center gap-3 mt-auto pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <span class="material-symbols-outlined text-2xl text-gray-400">mail</span>
-                            <a href="mailto:<?php echo strip_tags($member['email']); ?>" class="text-lg text-gray-500 dark:text-gray-400 hover:text-blue-700 transition-colors font-medium truncate"><?php echo strip_tags($member['email']); ?></a>
-                        </div>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($member['phone'])): ?>
-                        <div class="flex items-center gap-3 mt-3">
-                            <span class="material-symbols-outlined text-2xl text-gray-400">call</span>
-                            <a href="tel:<?php echo strip_tags($member['phone']); ?>" class="text-lg text-gray-500 dark:text-gray-400 hover:text-blue-700 transition-colors font-medium"><?php echo strip_tags($member['phone']); ?></a>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </section>
-    <?php $groupIndex++; endforeach; ?>
-
-    <!-- No Results -->
-    <div id="noResults" class="hidden py-24 text-center">
-        <div class="container mx-auto px-4">
-            <div class="w-24 h-24 mx-auto rounded-3xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-8">
-                <span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">person_search</span>
-            </div>
-            <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-4">No Results Found</h3>
-            <p class="text-2xl text-gray-500 dark:text-gray-400">Try adjusting your search terms.</p>
+    <!-- Search (overlaps the hero) -->
+    <div class="container" style="position: relative; z-index: 20; margin-top: -34px;">
+        <div class="vm-search" role="search">
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <label for="dirSearch" class="sr-only">Search the directory</label>
+            <input type="search" id="dirSearch" autocomplete="off" placeholder="Search by name, title or department…">
+            <span id="searchCount" class="vm-search-count hidden"></span>
         </div>
     </div>
 
-    <!-- CTA -->
-    <section class="relative py-24 overflow-hidden">
-        <div class="absolute inset-0 vvu-gradient"></div>
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-            <div class="absolute bottom-10 right-10 w-96 h-96 bg-amber-400 rounded-full blur-3xl"></div>
+    <!-- Quick figures -->
+    <section class="vm-section vm-section--white" style="padding: 56px 0 24px;">
+        <div class="container">
+            <div class="vm-figures vm-wrap" style="justify-content: center; margin-top: 0; gap: 18px 56px;">
+                <div class="vm-figure" style="text-align: center;">
+                    <span class="vm-figure-value"><?php echo count($directory_data); ?></span>
+                    <span class="vm-figure-label">Total Leaders</span>
+                </div>
+                <div class="vm-figure" style="text-align: center;">
+                    <span class="vm-figure-value"><?php echo count($grouped_directory); ?></span>
+                    <span class="vm-figure-label">Categories</span>
+                </div>
+                <div class="vm-figure" style="text-align: center;">
+                    <span class="vm-figure-value">3</span>
+                    <span class="vm-figure-label">Campuses</span>
+                </div>
+                <div class="vm-figure" style="text-align: center;">
+                    <span class="vm-figure-value">30+</span>
+                    <span class="vm-figure-label">Departments</span>
+                </div>
+            </div>
         </div>
-        <div class="container relative z-10">
-            <div class="max-w-5xl mx-auto text-center">
-                <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight tracking-tight">
-                    <?php echo strip_tags($hero['cta_heading']); ?> <br>
-                    <span class="text-5xl sm:text-6xl md:text-7xl lg:text-6xl text-amber-300 block mt-2"><?php echo strip_tags($hero['cta_subtitle']); ?></span>
-                </h2>
-                <p class="text-2xl sm:text-3xl md:text-4xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
-                    <?php echo strip_tags($hero['cta_text']); ?>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                    <a href="<?php echo strip_tags($hero['cta_btn1_url']); ?>" class="px-10 py-5 bg-white hover:bg-gray-100 text-blue-900 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">school</span> <?php echo strip_tags($hero['cta_btn1_text']); ?>
-                    </a>
-                    <a href="<?php echo strip_tags($hero['cta_btn2_url']); ?>" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">mail</span> <?php echo strip_tags($hero['cta_btn2_text']); ?>
-                    </a>
+    </section>
+
+    <!-- Directory groups -->
+    <section class="vm-section vm-section--white" style="padding-top: 40px;">
+        <div class="container">
+            <div class="vm-wrap" style="max-width: 1280px;">
+                <?php foreach ($grouped_directory as $category => $members):
+                    $icon = $category_icons[$category] ?? 'badge';
+                ?>
+                <div class="vm-group category-section" data-category="<?php echo htmlspecialchars(strip_tags($category)); ?>">
+                    <div class="vm-group-head">
+                        <span class="vm-icon"><span class="material-symbols-outlined"><?php echo strip_tags($icon); ?></span></span>
+                        <div>
+                            <div class="vm-group-title" role="heading" aria-level="2"><?php echo htmlspecialchars(strip_tags($category)); ?></div>
+                            <span class="vm-group-meta"><?php echo count($members); ?> member<?php echo count($members) === 1 ? '' : 's'; ?></span>
+                        </div>
+                        <span class="vm-group-rule"></span>
+                    </div>
+
+                    <div class="vm-grid">
+                        <?php foreach ($members as $member):
+                            $parts = explode(' ', trim($member['name']));
+                            $initials = '';
+                            foreach ($parts as $p) {
+                                $p = trim($p, '.,');
+                                if (strlen($p) > 2 && !in_array(strtolower($p), ['pr.', 'dr.', 'prof.', 'mrs.', 'mr.', 'esq.'])) {
+                                    $initials .= strtoupper($p[0]);
+                                }
+                            }
+                        ?>
+                        <div class="vm-card vm-person directory-item" data-search="<?php echo htmlspecialchars(strtolower($member['name'] . ' ' . $member['title'] . ' ' . $member['category'])); ?>">
+                            <div class="vm-person-head">
+                                <span class="vm-avatar"><?php echo htmlspecialchars(substr($initials, 0, 2)); ?></span>
+                                <div>
+                                    <div class="vm-person-name" role="heading" aria-level="3"><?php echo htmlspecialchars(strip_tags($member['name'])); ?></div>
+                                    <span class="vm-person-role"><?php echo htmlspecialchars(strip_tags($member['title'])); ?></span>
+                                </div>
+                            </div>
+                            <?php if (!empty($member['email']) || !empty($member['phone'])): ?>
+                            <div class="vm-person-links">
+                                <?php if (!empty($member['email'])): ?>
+                                <a href="mailto:<?php echo htmlspecialchars(strip_tags($member['email'])); ?>"><span class="material-symbols-outlined">mail</span><?php echo htmlspecialchars(strip_tags($member['email'])); ?></a>
+                                <?php endif; ?>
+                                <?php if (!empty($member['phone'])): ?>
+                                <a href="tel:<?php echo htmlspecialchars(preg_replace('/[^\d+]/', '', strip_tags($member['phone']))); ?>"><span class="material-symbols-outlined">call</span><?php echo htmlspecialchars(strip_tags($member['phone'])); ?></a>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-                <div class="mt-14 sm:mt-20 grid grid-cols-3 gap-3 sm:gap-12 border-t border-white/10 pt-10 sm:pt-16">
-                    <div>
-                        <div class="text-[32px] sm:text-6xl font-black text-white mb-1 sm:mb-2"><?php echo strip_tags($hero['stat1_value']); ?></div>
-                        <div class="text-amber-300 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-2xl font-black"><?php echo strip_tags($hero['stat1_label']); ?></div>
-                    </div>
-                    <div>
-                        <div class="text-[32px] sm:text-6xl font-black text-white mb-1 sm:mb-2"><?php echo strip_tags($hero['stat2_value']); ?></div>
-                        <div class="text-amber-300 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-2xl font-black"><?php echo strip_tags($hero['stat2_label']); ?></div>
-                    </div>
-                    <div>
-                        <div class="text-[32px] sm:text-6xl font-black text-white mb-1 sm:mb-2"><?php echo strip_tags($hero['stat3_value']); ?></div>
-                        <div class="text-amber-300 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-2xl font-black"><?php echo strip_tags($hero['stat3_label']); ?></div>
-                    </div>
+                <?php endforeach; ?>
+
+                <!-- No Results -->
+                <div id="noResults" class="vm-empty hidden">
+                    <span class="material-symbols-outlined">person_search</span>
+                    <div class="vm-empty-title">No results found</div>
+                    <p class="vm-empty-text">Try a different name, title or department.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to action -->
+    <section class="vm-cta">
+        <div class="container">
+            <div class="vm-cta-head">
+                <div class="vm-cta-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(trim(strip_tags($hero['cta_heading']) . ' ' . strip_tags($hero['cta_subtitle']))); ?></div>
+                <p class="vm-cta-lead"><?php echo htmlspecialchars(strip_tags($hero['cta_text'])); ?></p>
+                <div class="vm-actions">
+                    <a href="<?php echo strip_tags($hero['cta_btn1_url']); ?>" class="vm-btn vm-btn--gold"><span class="material-symbols-outlined">school</span><?php echo htmlspecialchars(strip_tags($hero['cta_btn1_text'])); ?></a>
+                    <a href="<?php echo strip_tags($hero['cta_btn2_url']); ?>" class="vm-btn vm-btn--ghost"><span class="material-symbols-outlined">mail</span><?php echo htmlspecialchars(strip_tags($hero['cta_btn2_text'])); ?></a>
+                </div>
+            </div>
+            <div class="vm-stats">
+                <?php foreach ([1, 2, 3] as $n): ?>
+                <div class="vm-stat">
+                    <span class="vm-stat-value"><?php echo htmlspecialchars(strip_tags($hero["stat{$n}_value"])); ?></span>
+                    <span class="vm-stat-label"><?php echo htmlspecialchars(strip_tags($hero["stat{$n}_label"])); ?></span>
+                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
 </main>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Search functionality
-    const searchInput = document.getElementById('dirSearch');
-    const items = document.querySelectorAll('.directory-item');
-    const sections = document.querySelectorAll('.category-section');
-    const noResults = document.getElementById('noResults');
-    const searchCount = document.getElementById('searchCount');
+// Live directory search: hides non-matching people, then empty groups
+document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('dirSearch');
+    var groups = document.querySelectorAll('.category-section');
+    var noResults = document.getElementById('noResults');
+    var count = document.getElementById('searchCount');
+    if (!input) return;
 
-    searchInput.addEventListener('input', function() {
-        const query = this.value.toLowerCase().trim();
-        let totalVisible = 0;
+    input.addEventListener('input', function () {
+        var query = this.value.toLowerCase().trim();
+        var total = 0;
 
-        sections.forEach(section => {
-            let sectionVisible = false;
-            const sectionItems = section.querySelectorAll('.directory-item');
-            
-            sectionItems.forEach(item => {
-                const searchText = item.getAttribute('data-search');
-                if (!query || searchText.includes(query)) {
-                    item.style.display = '';
-                    sectionVisible = true;
-                    totalVisible++;
-                } else {
-                    item.style.display = 'none';
-                }
+        Array.prototype.forEach.call(groups, function (group) {
+            var shown = 0;
+            Array.prototype.forEach.call(group.querySelectorAll('.directory-item'), function (item) {
+                var hit = !query || (item.getAttribute('data-search') || '').indexOf(query) !== -1;
+                item.classList.toggle('hidden', !hit);
+                if (hit) shown++;
             });
-
-            section.style.display = sectionVisible ? '' : 'none';
+            group.classList.toggle('hidden', shown === 0);
+            total += shown;
         });
 
-        if (query) {
-            searchCount.classList.remove('hidden');
-            searchCount.textContent = totalVisible + ' found';
-        } else {
-            searchCount.classList.add('hidden');
-        }
-
-        noResults.style.display = totalVisible === 0 && query ? '' : 'none';
+        count.textContent = total + ' found';
+        count.classList.toggle('hidden', !query);
+        noResults.classList.toggle('hidden', !(query && total === 0));
     });
-
-    // Scroll reveal for sections
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
-
-    sections.forEach(section => observer.observe(section));
 });
 </script>
 

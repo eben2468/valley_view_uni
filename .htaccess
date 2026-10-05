@@ -100,6 +100,36 @@ Options -Indexes -MultiViews
 </IfModule>
 
 # ══════════════════════════════════════════════════════════════════════════
+# CLEAN URLS — hide the .php extension
+# ══════════════════════════════════════════════════════════════════════════
+# /contact_us serves contact_us.php, and anyone who asks for contact_us.php
+# (old links, bookmarks, the hrefs still in the code) is redirected to
+# /contact_us. Mirrored for nginx in nginx-vvu-alpha.conf.
+#
+# These come after the security rules on purpose: an internal rewrite re-runs
+# this file, so /dev-tools/foo -> dev-tools/foo.php is still refused by them.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Redirect /path/index.php -> /path/  and  /path/page.php -> /path/page
+    #    THE_REQUEST is the browser's original request line, so the internal
+    #    rewrite in step 2 can never trigger this and loop. GET/HEAD only:
+    #    redirecting a POST would make the browser drop the form data.
+    RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+    RewriteCond %{THE_REQUEST} \s(/(?:[^\s?]*/)?)index\.php[\s?] [NC]
+    RewriteRule ^ %1 [R=301,NE,L]
+
+    RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+    RewriteCond %{THE_REQUEST} \s(/[^\s?]+?)\.php[\s?] [NC]
+    RewriteRule ^ %1 [R=301,NE,L]
+
+    # 2. Serve /path/page from page.php when that file exists.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.+)$ $1.php [L]
+</IfModule>
+
+# ══════════════════════════════════════════════════════════════════════════
 # UPLOAD LIMITS (original contents — unchanged)
 # ══════════════════════════════════════════════════════════════════════════
 #

@@ -25,6 +25,7 @@ if (!function_exists('spHeading')) {
 include 'includes/header.php';
 ?>
 
+<link rel="stylesheet" href="css/vvu-modern.css?v=1.0">
 <style>
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -77,6 +78,92 @@ include 'includes/header.php';
     }
     .pillar-card:hover {
         transform: translateY(-10px);
+    }
+
+    /* Strategic pillars: wide white cards with a curved colour panel on the
+       right, a white icon circle on the panel's edge and an accent line round
+       the top-left corner, all in navy (--pc). */
+    .sp-pillars {
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px; max-width: 1200px; margin: 0 auto;
+    }
+    .sp-pillar {
+        --pc: #1e3a8a; --pc-text: #1e3a8a;
+        position: relative; overflow: hidden; display: flex; align-items: center;
+        min-height: 240px; padding: 34px 190px 34px 38px; border-radius: 26px;
+        background: #fff; box-shadow: 0 18px 40px -26px rgba(15, 23, 42, .45);
+        transition: transform .35s ease, box-shadow .35s ease;
+    }
+    .sp-pillar:hover { transform: translateY(-5px); box-shadow: 0 28px 50px -26px rgba(15, 23, 42, .5); }
+    .dark .sp-pillar { background: #1f2937; }
+    /* Accent line round the top-left corner */
+    .sp-pillar::before {
+        content: ""; position: absolute; left: 0; top: 0; width: 42%; height: 58%;
+        border-top: 5px solid var(--pc); border-left: 5px solid var(--pc);
+        /* Only the top and left sides: a stray right/bottom border showed as
+           a grey line cutting across the text on phones */
+        border-right: 0 !important; border-bottom: 0 !important;
+        border-top-left-radius: 26px; pointer-events: none;
+    }
+    /* Curved colour panel */
+    .sp-pillar-side {
+        position: absolute; top: 0; right: 0; bottom: 0; width: 120px;
+        background: var(--pc); border-radius: 50% 0 0 50% / 62% 0 0 62%;
+    }
+    .sp-pillar-badge {
+        position: absolute; top: 50%; right: 72px; transform: translateY(-50%);
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 92px; height: 92px; border-radius: 50%; background: #fff;
+        box-shadow: 0 10px 26px -10px rgba(15, 23, 42, .45);
+        transition: transform .35s ease;
+    }
+    .sp-pillar-badge .material-symbols-outlined {
+        font-size: 42px; color: var(--pc-text);
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+    }
+    .sp-pillar:hover .sp-pillar-badge { transform: translateY(-50%) scale(1.06); }
+    .sp-pillar-body { position: relative; z-index: 1; }
+    .sp-pillar-title {
+        color: var(--pc-text); font-size: 19px; font-weight: 600; line-height: 1.3;
+        letter-spacing: .04em; text-transform: uppercase;
+    }
+    .sp-pillar-text { margin: 10px 0 0; color: #4b5563; font-size: 16px; line-height: 1.65; }
+    .dark .sp-pillar-text { color: #d1d5db; }
+    .sp-pillar-points { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 6px; }
+    .sp-pillar-points li { display: flex; align-items: center; gap: 8px; margin: 0; color: #1f2937; font-size: 14.5px; font-weight: 600; }
+    .sp-pillar-points .material-symbols-outlined { font-size: 18px; color: var(--pc); }
+    .dark .sp-pillar-points li { color: #e5e7eb; }
+
+    @media (max-width: 1023px) {
+        .sp-pillars { grid-template-columns: 1fr; max-width: 720px; }
+    }
+    @media (max-width: 560px) {
+        .sp-pillar { min-height: 0; padding: 26px 104px 26px 24px; border-radius: 22px; }
+        .sp-pillar::before { border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 22px; }
+        .sp-pillar-side { width: 70px; }
+        .sp-pillar-badge { width: 64px; height: 64px; right: 38px; }
+        .sp-pillar-badge .material-symbols-outlined { font-size: 30px; }
+        .sp-pillar-title { font-size: 16px; }
+        .sp-pillar-text { font-size: 14.5px; }
+    }
+    /* Closing band (CTA + foundation figures): a more compact scale than
+       the shared vvu-modern.css defaults */
+    .sp-cta { padding: 52px 0 46px; }
+    .sp-cta .vm-cta-heading { font-size: clamp(22px, 2.6vw, 32px); }
+    .sp-cta .vm-cta-heading::after { width: 44px; height: 3px; margin-top: 16px; }
+    .sp-cta .vm-cta-lead { font-size: 16px; margin-top: 16px; }
+    .sp-cta .vm-actions { margin-top: 24px; gap: 12px; }
+    .sp-cta .vm-btn { padding: 11px 22px; font-size: 14.5px; }
+    .sp-cta .vm-btn .material-symbols-outlined { font-size: 19px; }
+    .sp-cta .vm-kicker { font-size: 12px; margin-bottom: 10px; }
+    .sp-cta .vm-stats { max-width: 880px; gap: 10px 28px; }
+    .sp-cta .vm-stat { padding-top: 14px; }
+    .sp-cta .vm-stat-value { font-size: clamp(24px, 2.6vw, 34px); }
+    .sp-cta .vm-stat-label { font-size: 11.5px; letter-spacing: .14em; line-height: 1.5; }
+    @media (max-width: 767px) {
+        .sp-cta { padding: 40px 0 36px; }
+        .sp-cta .vm-cta-lead { font-size: 15px; }
+        .sp-cta .vm-stat-label { font-size: 10.5px; letter-spacing: .06em; }
     }
 </style>
 
@@ -175,34 +262,25 @@ include 'includes/header.php';
                 <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo spHeading($headings, 'pillars', 'subheading'); ?></p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-<?php echo max(1, min(count($pillars), 4)); ?> gap-8 lg:gap-10">
+            <!-- Wide cards: copy on the left, a coloured curved panel on the
+                 right with the icon in a white circle on its edge, and an
+                 accent line round the top-left corner, all in navy. -->
+            <div class="sp-pillars">
                 <?php foreach ($pillars as $pillar): ?>
-                <div class="pillar-card relative group">
-                    <div class="relative h-full glass p-10 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($pillar['border_color']); ?> flex flex-col">
-                        <div class="w-24 h-24 rounded-3xl bg-<?php echo strip_tags($pillar['border_color']); ?> flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined text-5xl text-white"><?php echo strip_tags($pillar['icon']); ?></span>
-                        </div>
-                        <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($pillar['title']); ?></h3>
-                        <p class="text-2xl text-gray-700 dark:text-gray-300 mb-8 flex-grow leading-relaxed">
-                            <?php echo strip_tags($pillar['description']); ?>
-                        </p>
+                <div class="sp-pillar">
+                    <div class="sp-pillar-body">
+                        <div class="sp-pillar-title" role="heading" aria-level="3"><?php echo htmlspecialchars(strip_tags($pillar['title'])); ?></div>
+                        <p class="sp-pillar-text"><?php echo htmlspecialchars(strip_tags($pillar['description'])); ?></p>
                         <?php if ($pillar['feature_1'] || $pillar['feature_2']): ?>
-                        <ul class="space-y-4 mb-8">
-                            <?php if ($pillar['feature_1']): ?>
-                            <li class="flex items-center gap-4">
-                                <span class="material-symbols-outlined text-<?php echo strip_tags($pillar['border_color']); ?> text-3xl">check_circle</span>
-                                <span class="text-2xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags($pillar['feature_1']); ?></span>
-                            </li>
-                            <?php endif; ?>
-                            <?php if ($pillar['feature_2']): ?>
-                            <li class="flex items-center gap-4">
-                                <span class="material-symbols-outlined text-<?php echo strip_tags($pillar['border_color']); ?> text-3xl">check_circle</span>
-                                <span class="text-2xl text-gray-600 dark:text-gray-400 font-bold"><?php echo strip_tags($pillar['feature_2']); ?></span>
-                            </li>
-                            <?php endif; ?>
+                        <ul class="sp-pillar-points">
+                            <?php foreach (['feature_1', 'feature_2'] as $f): if (empty($pillar[$f])) continue; ?>
+                            <li><span class="material-symbols-outlined">check_circle</span><?php echo htmlspecialchars(strip_tags($pillar[$f])); ?></li>
+                            <?php endforeach; ?>
                         </ul>
                         <?php endif; ?>
                     </div>
+                    <span class="sp-pillar-side" aria-hidden="true"></span>
+                    <span class="sp-pillar-badge" aria-hidden="true"><span class="material-symbols-outlined"><?php echo strip_tags($pillar['icon']); ?></span></span>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -247,57 +325,48 @@ include 'includes/header.php';
         </div>
     </section>
 
-    <!-- Impact Stats Section -->
-    <section class="py-24 bg-blue-900 text-white overflow-hidden relative">
-        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div class="container relative z-10">
-            <div class="max-w-5xl mx-auto text-center">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mb-4"><?php echo spHeading($headings, 'stats', 'heading', 'Our Foundation'); ?></h2>
-                <?php $stats_sub = spHeading($headings, 'stats', 'subheading'); ?>
-                <?php if ($stats_sub !== ''): ?>
-                <p class="text-xl sm:text-2xl text-blue-100 font-medium leading-relaxed mb-12"><?php echo $stats_sub; ?></p>
+    <!-- Call to action, with the foundation figures underneath -->
+    <section class="vm-cta sp-cta">
+        <div class="container">
+            <?php if ($cta): ?>
+            <div class="vm-cta-head">
+                <div class="vm-cta-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(trim(strip_tags($cta['cta_title_1']) . ' ' . strip_tags($cta['cta_title_2']))); ?></div>
+                <?php if (trim(strip_tags($cta['cta_description'])) !== ''): ?>
+                <p class="vm-cta-lead"><?php echo htmlspecialchars(strip_tags($cta['cta_description'])); ?></p>
                 <?php endif; ?>
-                <div class="grid grid-cols-2 lg:grid-cols-<?php echo max(1, min(count($stats), 4)); ?> gap-10 lg:gap-12 mt-12">
-                    <?php foreach ($stats as $index => $stat): ?>
-                    <div class="animate-fadeInUp" style="animation-delay: <?php echo ($index * 0.1); ?>s;">
-                        <div class="text-6xl md:text-7xl font-black text-yellow-400 mb-4"><?php echo strip_tags($stat['stat_value']); ?></div>
-                        <div class="text-xl md:text-2xl uppercase tracking-widest font-black text-blue-100"><?php echo strip_tags($stat['stat_label']); ?></div>
-                    </div>
-                    <?php endforeach; ?>
+                <div class="vm-actions">
+                    <?php if (!empty($cta['button_1_text'])): ?>
+                    <a href="<?php echo strip_tags($cta['button_1_url']); ?>" download class="vm-btn vm-btn--gold">
+                        <span class="material-symbols-outlined">download</span><?php echo htmlspecialchars(strip_tags($cta['button_1_text'])); ?>
+                    </a>
+                    <?php endif; ?>
+                    <?php if (!empty($cta['button_2_text'])): ?>
+                    <a href="<?php echo strip_tags($cta['button_2_url']); ?>" class="vm-btn vm-btn--ghost">
+                        <span class="material-symbols-outlined">mail</span><?php echo htmlspecialchars(strip_tags($cta['button_2_text'])); ?>
+                    </a>
+                    <?php endif; ?>
                 </div>
             </div>
-        </div>
-    </section>
+            <?php endif; ?>
 
-    <!-- CTA Section -->
-    <?php if ($cta): ?>
-    <section class="relative py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-gray-900"></div>
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -mr-72 -mt-72"></div>
-        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[150px] -ml-72 -mb-72"></div>
-        
-        <div class="container relative z-10">
-            <div class="max-w-5xl mx-auto text-center">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-8 leading-tight tracking-tight">
-                    <?php echo strip_tags($cta['cta_title_1']); ?> <br><span class="text-yellow-400 text-5xl sm:text-6xl md:text-7xl lg:text-5xl block mt-2"><?php echo strip_tags($cta['cta_title_2']); ?></span>
-                </h2>
-                <p class="text-lg sm:text-xl md:text-2xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
-                    <?php echo strip_tags($cta['cta_description']); ?>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                    <a href="<?php echo strip_tags($cta['button_1_url']); ?>" download class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-lg font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">download</span>
-                        <?php echo strip_tags($cta['button_1_text']); ?>
-                    </a>
-                    <a href="<?php echo strip_tags($cta['button_2_url']); ?>" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-lg font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl">mail</span>
-                        <?php echo strip_tags($cta['button_2_text']); ?>
-                    </a>
-                </div>
+            <?php if (!empty($stats)): ?>
+            <div class="vm-cta-head" style="margin-top: <?php echo $cta ? '52px' : '0'; ?>;">
+                <span class="vm-kicker"><?php echo spHeading($headings, 'stats', 'heading', 'Our Foundation'); ?></span>
+                <?php $stats_sub = spHeading($headings, 'stats', 'subheading'); if ($stats_sub !== ''): ?>
+                <p class="vm-cta-lead" style="margin-top: 0;"><?php echo $stats_sub; ?></p>
+                <?php endif; ?>
             </div>
+            <div class="vm-stats" style="--vm-cols: <?php echo max(1, min(count($stats), 4)); ?>; margin-top: 20px;">
+                <?php foreach ($stats as $stat): ?>
+                <div class="vm-stat">
+                    <span class="vm-stat-value"><?php echo htmlspecialchars(strip_tags($stat['stat_value'])); ?></span>
+                    <span class="vm-stat-label"><?php echo htmlspecialchars(strip_tags($stat['stat_label'])); ?></span>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
         </div>
     </section>
-    <?php endif; ?>
 </main>
 
 <?php
