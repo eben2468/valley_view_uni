@@ -442,7 +442,12 @@ $stats = [
                                                 <?php foreach ($discover_cards as $card): ?>
                                                 <tr>
                                                     <td><?php echo $card['display_order']; ?></td>
-                                                    <td><strong><?php echo htmlspecialchars($card['title']); ?></strong></td>
+                                                    <td>
+                                                        <strong><?php echo htmlspecialchars($card['title']); ?></strong>
+                                                        <?php if (trim($card['description'] ?? '') !== ''): ?>
+                                                        <br><small class="text-muted"><?php echo htmlspecialchars($card['description']); ?></small>
+                                                        <?php endif; ?>
+                                                    </td>
                                                     <td><?php echo htmlspecialchars($card['link_url']); ?></td>
                                                     <td>
                                                         <?php if ($card['is_active']): ?>

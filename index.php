@@ -114,7 +114,8 @@ include 'includes/header.php';
 
 <!-- DISCOVER MORE -->
 <?php
-// A short line under each discover card title, picked by keyword
+// Fallback line under each discover card title, picked by keyword. Only used
+// until discover_card_descriptions.sql adds the editable description column.
 function vvuDiscoverTagline($title) {
     $map = [
         'admission' => 'Entry requirements and how to apply',
@@ -481,7 +482,11 @@ function vvuSectionSubtitle($sections, $key, $default) {
             <p class="hp-lead"><?php echo htmlspecialchars(vvuSectionSubtitle($sections, 'discover_more', "Explore Valley View University's comprehensive academic programs, vibrant student life, and cutting-edge research opportunities.")); ?></p>
         </div>
         <div class="vvu-discover-grid">
-            <?php $d_i = 0; foreach ($discover_cards as $card): $d_i++; $d_title = strip_tags($card['title']); ?>
+            <?php $d_i = 0; foreach ($discover_cards as $card): $d_i++; $d_title = strip_tags($card['title']);
+                // Editable in the admin panel (discover_card_descriptions.sql adds the
+                // column). Before that migration runs, fall back to the built-in line.
+                $d_text = array_key_exists('description', $card) ? trim(strip_tags((string) $card['description'])) : vvuDiscoverTagline($d_title);
+            ?>
             <a class="vvu-dcard" href="<?php echo strip_tags($card['link_url']); ?>" style="--d:<?php echo ($d_i % 4) * 90 + intval(($d_i - 1) / 4) * 60; ?>ms">
                 <div class="vvu-dcard-media">
                     <img src="<?php echo strip_tags($card['image_url']); ?>" alt="<?php echo htmlspecialchars($d_title, ENT_QUOTES); ?>" loading="lazy">
@@ -489,7 +494,7 @@ function vvuSectionSubtitle($sections, $key, $default) {
                 <div class="vvu-dcard-body">
                     <div class="vvu-dcard-title" role="heading" aria-level="3"><?php echo htmlspecialchars($d_title); ?></div>
                     <span class="vvu-dcard-meta">
-                        <span class="vvu-dcard-text"><?php echo htmlspecialchars(vvuDiscoverTagline($d_title)); ?></span>
+                        <span class="vvu-dcard-text"><?php echo htmlspecialchars($d_text); ?></span>
                         <span class="vvu-dcard-more">Explore <i class="fa fa-long-arrow-right"></i></span>
                     </span>
                 </div>

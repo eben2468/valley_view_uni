@@ -11,6 +11,10 @@ if (!isset($_SESSION['admin_id'])) {
 $action = $_GET['action'] ?? 'edit';
 $id = $_GET['id'] ?? null;
 
+// The short description column is added by discover_card_descriptions.sql.
+// Until that has been imported, the form hides the field and saves without it.
+$has_description = (bool) $pdo->query("SHOW COLUMNS FROM homepage_discover_cards LIKE 'description'")->fetch();
+
 if (isset($_GET['delete'])) {
     $pdo->prepare("DELETE FROM homepage_discover_cards WHERE id = ?")->execute([$_GET['delete']]);
     header("Location: manage_homepage_content.php?tab=discover");
@@ -27,7 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $data = [$image_url, $_POST['title'], $_POST['link_url'], $_POST['display_order'], isset($_POST['is_active']) ? 1 : 0];
-    if ($action === 'add') {
+    if ($has_description) {
+        $description = mb_substr(trim($_POST['description'] ?? ''), 0, 255);
+        $data[] = $description !== '' ? $description : null;
+        if ($action === 'add') {
+            $pdo->prepare("INSERT INTO homepage_discover_cards (image_url, title, link_url, display_order, is_active, description) VALUES (?, ?, ?, ?, ?, ?)")->execute($data);
+        } else {
+            $pdo->prepare("UPDATE homepage_discover_cards SET image_url=?, title=?, link_url=?, display_order=?, is_active=?, description=? WHERE id=?")->execute([...$data, $id]);
+        }
+    } elseif ($action === 'add') {
         $pdo->prepare("INSERT INTO homepage_discover_cards (image_url, title, link_url, display_order, is_active) VALUES (?, ?, ?, ?, ?)")->execute($data);
     } else {
         $pdo->prepare("UPDATE homepage_discover_cards SET image_url=?, title=?, link_url=?, display_order=?, is_active=? WHERE id=?")->execute([...$data, $id]);
@@ -51,6 +63,15 @@ include 'sidebar.php';
     <div class="row mt-4"><div class="col-lg-8"><div class="dashboard-card"><div class="card-body">
         <form method="POST" enctype="multipart/form-data">
             <div class="mb-3"><label>Title *</label><input type="text" name="title" class="form-control" value="<?= htmlspecialchars($item['title'] ?? '') ?>" required></div>
+            <?php if ($has_description): ?>
+            <div class="mb-3">
+                <label>Short Description</label>
+                <input type="text" name="description" class="form-control" maxlength="255" value="<?= htmlspecialchars($item['description'] ?? '') ?>" placeholder="e.g. Entry requirements and how to apply">
+                <small class="text-muted">Shown in small grey text under the card title on the homepage. Keep it short (a few words). Leave empty to show nothing.</small>
+            </div>
+            <?php else: ?>
+            <div class="alert alert-warning py-2 small">To add a short description to this card, import <code>discover_card_descriptions.sql</code> into the database first.</div>
+            <?php endif; ?>
             <div class="mb-3">
                 <label>Image URL</label>
                 <input type="text" name="image_url" class="form-control" value="<?= htmlspecialchars($item['image_url'] ?? '') ?>" placeholder="Enter image URL">

@@ -9,6 +9,10 @@ require_once('../includes/video_helper.php');
 // adds the columns that record which, on the first load after deploying.
 vvu_video_install($pdo);
 
+// Discover cards' short description column is added by
+// discover_card_descriptions.sql; until then the field is hidden.
+$discover_has_description = (bool) $pdo->query("SHOW COLUMNS FROM homepage_discover_cards LIKE 'description'")->fetch();
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -61,13 +65,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($uploaded) $image_url = $uploaded;
             }
             
+            $card_description = mb_substr(trim($_POST['description'] ?? ''), 0, 255);
+            $card_description = $card_description !== '' ? $card_description : null;
+
             if ($action === 'add_discover_card') {
-                $stmt = $pdo->prepare("INSERT INTO homepage_discover_cards (image_url, title, link_url, display_order, is_active) VALUES (?, ?, ?, ?, ?)");
-                $stmt->execute([$image_url, $_POST['title'], $_POST['link_url'], $_POST['display_order'], $_POST['is_active'] ?? 1]);
+                if ($discover_has_description) {
+                    $stmt = $pdo->prepare("INSERT INTO homepage_discover_cards (image_url, title, description, link_url, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$image_url, $_POST['title'], $card_description, $_POST['link_url'], $_POST['display_order'], $_POST['is_active'] ?? 1]);
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO homepage_discover_cards (image_url, title, link_url, display_order, is_active) VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$image_url, $_POST['title'], $_POST['link_url'], $_POST['display_order'], $_POST['is_active'] ?? 1]);
+                }
                 $success = "Discover card added successfully!";
             } else {
-                $stmt = $pdo->prepare("UPDATE homepage_discover_cards SET image_url=?, title=?, link_url=?, display_order=?, is_active=? WHERE id=?");
-                $stmt->execute([$image_url, $_POST['title'], $_POST['link_url'], $_POST['display_order'], $_POST['is_active'] ?? 1, $_POST['id']]);
+                if ($discover_has_description) {
+                    $stmt = $pdo->prepare("UPDATE homepage_discover_cards SET image_url=?, title=?, description=?, link_url=?, display_order=?, is_active=? WHERE id=?");
+                    $stmt->execute([$image_url, $_POST['title'], $card_description, $_POST['link_url'], $_POST['display_order'], $_POST['is_active'] ?? 1, $_POST['id']]);
+                } else {
+                    $stmt = $pdo->prepare("UPDATE homepage_discover_cards SET image_url=?, title=?, link_url=?, display_order=?, is_active=? WHERE id=?");
+                    $stmt->execute([$image_url, $_POST['title'], $_POST['link_url'], $_POST['display_order'], $_POST['is_active'] ?? 1, $_POST['id']]);
+                }
                 $success = "Discover card updated successfully!";
             }
         }
@@ -505,6 +522,15 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                                     <label>Link URL</label>
                                 </div>
                             </div>
+                            <?php if ($discover_has_description): ?>
+                            <div class="row">
+                                <div class="input-field col s12">
+                                    <input type="text" name="description" maxlength="255" value="<?php echo htmlspecialchars($edit_data['description'] ?? ''); ?>">
+                                    <label>Short Description</label>
+                                    <p class="help-block">Shown in small grey text under the card title. Keep it to a few words, or leave empty.</p>
+                                </div>
+                            </div>
+                            <?php endif; ?>
                             <div class="row">
                                 <div class="input-field col s6">
                                     <input type="number" name="display_order" value="<?php echo $edit_data['display_order'] ?? '0'; ?>" required>
