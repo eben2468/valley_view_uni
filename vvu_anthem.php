@@ -47,56 +47,257 @@ include 'includes/header.php';
         background: rgba(31, 41, 55, 0.7);
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .verse-card {
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+    /* ============================================================
+       Lyrics section, in the style of the Mission & Vision page.
+       Palette: navy #1e3a8a / #172554, gold #fbbf24 / #f59e0b, greys.
+       ============================================================ */
+    main .an-heading {
+        font-family: var(--vvu-title-font);
+        font-weight: var(--vvu-title-weight);
+        letter-spacing: normal;
     }
-    .verse-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+    .an-section { padding: 88px 0; }
+    .an-head { max-width: 820px; margin: 0 auto 56px; text-align: center; }
+    .an-kicker {
+        display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
+        font-size: 1rem; font-weight: 700; letter-spacing: .28em;
+        text-transform: uppercase; color: #b45309;
     }
-    .verse-card:hover::before {
-        opacity: 1;
+    .an-kicker .material-symbols-outlined { font-size: 20px; letter-spacing: 0; color: inherit; }
+    .dark .an-kicker { color: #fbbf24; }
+    .an-heading {
+        color: #1e3a8a; font-size: clamp(2.25rem, 4.5vw, 3.5rem); line-height: 1.15;
     }
-    .verse-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    .dark .an-heading { color: #fff; }
+    .an-heading::after {
+        content: ""; display: block; width: 56px; height: 4px; border-radius: 4px;
+        background: #fbbf24; margin: 20px auto 0;
     }
-    .verse-number {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    .an-lead {
+        margin: 22px 0 0; color: #4b5563;
+        font-size: 1.4rem; line-height: 1.6; font-weight: 400;
     }
-    .lyrics-line, .anthem-content-wrapper p {
-        font-size: 1.4rem;
-        line-height: 2;
-        letter-spacing: 0.02em;
+    .dark .an-lead { color: #9ca3af; }
+
+    /* Stanza bands: alternate dark/light; the number column and the
+       lyrics swap sides on each band. */
+    .an-stanzas { display: flex; flex-direction: column; gap: 20px; }
+    .an-stanza { position: relative; overflow: hidden; padding: 64px 0; }
+    .an-stanza--dark { background: linear-gradient(120deg, #1d4ed8 0%, #1e3a8a 55%, #172554 100%); }
+    .an-stanza--light { background: linear-gradient(120deg, #e0e7f1 0%, #cfd9e8 100%); }
+    .dark .an-stanza--light { background: linear-gradient(120deg, #1f2937 0%, #111827 100%); }
+    /* Faint music note watermark */
+    .an-stanza::after {
+        content: "\266A"; position: absolute; right: 4%; bottom: -60px;
+        font-size: 260px; line-height: 1; pointer-events: none;
+        color: rgba(255, 255, 255, .05);
     }
-    @media (min-width: 768px) {
-        .lyrics-line, .anthem-content-wrapper p {
-            font-size: 1.5rem;
-            line-height: 2.1;
+    .an-stanza--light::after { color: rgba(30, 58, 138, .06); }
+    .an-stanza--flip::after { right: auto; left: 4%; }
+
+    .an-stanza-inner {
+        position: relative; z-index: 1;
+        display: flex; align-items: center; justify-content: center;
+        gap: 64px; max-width: 1100px; margin: 0 auto;
+    }
+    .an-stanza--flip .an-stanza-inner { flex-direction: row-reverse; }
+
+    .an-stanza-mark { flex: 0 0 auto; text-align: center; }
+    .an-stanza-num {
+        display: block; font-size: clamp(5.5rem, 11vw, 9rem);
+        font-weight: 800; line-height: 1; letter-spacing: -.04em;
+        color: transparent; -webkit-text-fill-color: transparent;
+    }
+    .an-stanza--dark .an-stanza-num { -webkit-text-stroke: 2px #fbbf24; }
+    .an-stanza--light .an-stanza-num { -webkit-text-stroke: 2px #1e3a8a; }
+    .dark .an-stanza--light .an-stanza-num { -webkit-text-stroke-color: #93c5fd; }
+    .an-stanza-label {
+        display: block; margin-top: 12px;
+        font-size: 1rem; font-weight: 700; letter-spacing: .3em; text-transform: uppercase;
+    }
+    .an-stanza--dark .an-stanza-label { color: rgba(255, 255, 255, .75); }
+    .an-stanza--light .an-stanza-label { color: #1e3a8a; }
+    .dark .an-stanza--light .an-stanza-label { color: #93c5fd; }
+
+    /* Lyrics. Every line is shown the same way, as one continuous stanza:
+       the stored paragraphs get no gap between them and bold is ignored. */
+    .an-lyrics { flex: 1 1 0; max-width: 620px; }
+    .an-lyrics p {
+        margin: 0; font-size: 1.4rem; line-height: 1.9; font-weight: 500;
+    }
+    .an-lyrics strong, .an-lyrics b, .an-lyrics em, .an-lyrics i {
+        font-weight: inherit; font-style: normal; color: inherit;
+    }
+    .an-stanza--dark .an-lyrics p { color: rgba(255, 255, 255, .92); }
+    .an-stanza--light .an-lyrics p { color: #1f2937; }
+    .dark .an-stanza--light .an-lyrics p { color: #e5e7eb; }
+
+    @media (max-width: 767px) {
+        .an-section { padding: 60px 0; }
+        .an-head { margin-bottom: 36px; }
+        .an-kicker { font-size: .85rem; }
+        .an-lead { font-size: 1.15rem; }
+        .an-stanzas { gap: 14px; }
+        .an-stanza { padding: 44px 0; }
+        .an-stanza-inner, .an-stanza--flip .an-stanza-inner {
+            flex-direction: column; align-items: flex-start; gap: 20px;
         }
+        .an-stanza-mark { display: flex; align-items: baseline; gap: 14px; text-align: left; }
+        .an-stanza-num { font-size: 4rem; }
+        .an-stanza-label { margin-top: 0; font-size: .9rem; }
+        .an-lyrics { max-width: none; }
+        .an-lyrics p { font-size: 1.15rem; line-height: 1.85; }
+        .an-stanza::after { font-size: 160px; bottom: -40px; }
     }
-    @media (min-width: 1024px) {
-        .lyrics-line, .anthem-content-wrapper p {
-            font-size: 1.65rem;
-            line-height: 2.2;
-        }
+
+    /* ---- Shared section bits for the rest of the page ---- */
+    main .an-card-title, main .an-cta-heading {
+        font-family: var(--vvu-title-font);
+        font-weight: var(--vvu-title-weight);
+        letter-spacing: normal;
     }
-    .anthem-content-wrapper strong {
-        font-weight: 800;
-        color: #1e3a8a; /* deep blue */
+    .an-section--white { background: #fff; }
+    .dark .an-section--white { background: #111827; }
+
+    /* Player: white mat with an offset navy panel and gold dots behind it
+       (same treatment as the Mission & Vision photo) */
+    .an-player-frame {
+        position: relative; isolation: isolate;
+        max-width: 960px; margin: 0 auto; padding: 0 24px 24px 0;
     }
-    .dark .anthem-content-wrapper strong {
-        color: #93c5fd;
+    .an-player-frame::before {
+        content: ""; position: absolute; z-index: -1;
+        top: 24px; left: 24px; right: 0; bottom: 0; border-radius: 28px;
+        background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);
+    }
+    .an-player-frame::after {
+        content: ""; position: absolute; z-index: -1;
+        top: -22px; left: -22px; width: 130px; height: 130px;
+        background-image: radial-gradient(#f59e0b 2px, transparent 2.5px);
+        background-size: 16px 16px; opacity: .7;
+    }
+    .an-player {
+        position: relative; overflow: hidden; aspect-ratio: 16 / 9;
+        border-radius: 26px; border: 8px solid #fff; background: #000;
+        box-shadow: 0 30px 60px -30px rgba(15, 23, 42, .55);
+    }
+    .dark .an-player { border-color: #1f2937; }
+    .an-player video, .an-player > img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 18px; }
+    .an-player-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, .75) 0%, rgba(0, 0, 0, .15) 45%, transparent 100%); }
+    .an-player-audio { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px; }
+    .an-player-audio audio { width: 100%; }
+
+    /* About cards: white cards with a navy corner icon (as on M&V) */
+    .an-meta {
+        display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+        margin-top: 22px;
+    }
+    .an-meta span {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 16px; border-radius: 999px;
+        background: rgba(30, 58, 138, .08); color: #1e3a8a;
+        font-size: 1.05rem; font-weight: 600;
+    }
+    .an-meta .material-symbols-outlined { font-size: 20px; color: #f59e0b; }
+    .dark .an-meta span { background: rgba(147, 197, 253, .12); color: #bfdbfe; }
+
+    .an-cards {
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px; max-width: 1100px; margin: 0 auto;
+    }
+    .an-card {
+        position: relative; overflow: hidden;
+        padding: 36px 36px 120px; border-radius: 22px;
+        background: #fff; border: 1px solid #e5e7eb;
+        box-shadow: 0 18px 40px -30px rgba(15, 23, 42, .45);
+        transition: transform .35s ease, box-shadow .35s ease;
+    }
+    .an-card:hover { transform: translateY(-6px); box-shadow: 0 28px 50px -28px rgba(15, 23, 42, .5); }
+    .dark .an-card { background: #1f2937; border-color: #374151; }
+    .an-card-title { color: #1e3a8a; font-size: 2rem; line-height: 1.2; margin-bottom: 16px; }
+    .an-card-title::after {
+        content: ""; display: block; width: 40px; height: 3px;
+        border-radius: 3px; background: #fbbf24; margin-top: 12px;
+    }
+    .dark .an-card-title { color: #bfdbfe; }
+    .an-card-text { margin: 0; color: #4b5563; font-size: 1.3rem; line-height: 1.7; font-weight: 400; }
+    .dark .an-card-text { color: #d1d5db; }
+    .an-card-corner {
+        position: absolute; right: 0; bottom: 0;
+        width: 104px; height: 104px; background: #1e3a8a;
+        border-top-left-radius: 100%;
+        display: flex; align-items: flex-end; justify-content: flex-end;
+        padding: 0 20px 20px 0;
+    }
+    .an-card-corner .material-symbols-outlined {
+        font-size: 40px; width: 40px; height: 40px; line-height: 1; color: #fff;
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+        transition: transform .35s ease;
+    }
+    .an-card:hover .an-card-corner .material-symbols-outlined { transform: scale(1.08) rotate(-4deg); }
+    .dark .an-card-corner { background: #3b82f6; }
+
+    /* Call to action: Vision-band gradient with soft circles */
+    .an-cta {
+        position: relative; overflow: hidden; padding: 64px 0 56px;
+        background: linear-gradient(120deg, #1d4ed8 0%, #1e3a8a 55%, #172554 100%);
+    }
+    .an-cta::before, .an-cta::after {
+        content: ""; position: absolute; border-radius: 50%; pointer-events: none;
+        background: rgba(255, 255, 255, .05);
+    }
+    .an-cta::before { width: 520px; height: 520px; right: -180px; top: -200px; }
+    .an-cta::after { width: 360px; height: 360px; left: -140px; bottom: -180px; }
+    .an-cta .container { position: relative; z-index: 1; }
+    .an-cta-head { max-width: 820px; margin: 0 auto; text-align: center; }
+    .an-cta-heading { color: #fff; font-size: clamp(2.25rem, 4.5vw, 3.5rem); line-height: 1.15; }
+    .an-cta-heading::after {
+        content: ""; display: block; width: 56px; height: 4px; border-radius: 4px;
+        background: #fbbf24; margin: 20px auto 0;
+    }
+    .an-cta-lead { margin: 22px 0 0; color: rgba(255, 255, 255, .85); font-size: 1.35rem; line-height: 1.6; font-weight: 400; }
+    .an-cta-actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 34px; }
+    .an-btn {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 14px 28px; border-radius: 999px;
+        font-size: 1.1rem; font-weight: 700; text-decoration: none;
+        transition: background-color .25s ease, color .25s ease, transform .25s ease;
+    }
+    .an-btn .material-symbols-outlined { font-size: 22px; color: inherit; }
+    .an-btn:hover { transform: translateY(-2px); }
+    .an-btn--gold { background: #fbbf24; color: #172554; box-shadow: 0 12px 24px -14px rgba(251, 191, 36, .9); }
+    .an-btn--gold:hover { background: #fcd34d; color: #172554; }
+    .an-btn--ghost { color: #fff; border: 1.5px solid rgba(255, 255, 255, .6); }
+    .an-btn--ghost:hover { background: #fff; color: #1e3a8a; }
+    .an-stats {
+        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px 36px; max-width: 1000px; margin: 48px auto 0;
+    }
+    .an-stat { padding: 20px 4px 4px; text-align: center; border-top: 1px solid rgba(255, 255, 255, .25); }
+    .an-stat-value { display: block; color: #fbbf24; font-size: clamp(1.75rem, 3.5vw, 2.75rem); font-weight: 700; line-height: 1.1; }
+    .an-stat-label {
+        display: block; margin-top: 8px; color: rgba(255, 255, 255, .75);
+        font-size: .95rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    }
+
+    @media (max-width: 767px) {
+        .an-player-frame { padding: 0 14px 14px 0; }
+        .an-player-frame::before { top: 14px; left: 14px; border-radius: 22px; }
+        .an-player-frame::after { top: -14px; left: -14px; width: 90px; height: 90px; }
+        .an-player { border-width: 6px; border-radius: 20px; }
+        .an-player video, .an-player > img { border-radius: 14px; }
+        .an-player-audio { padding: 14px; }
+        .an-cards { grid-template-columns: 1fr; gap: 16px; }
+        .an-card { padding: 28px 24px 100px; }
+        .an-card-title { font-size: 1.6rem; }
+        .an-card-text { font-size: 1.15rem; }
+        .an-card-corner { width: 84px; height: 84px; padding: 0 16px 16px 0; }
+        .an-card-corner .material-symbols-outlined { font-size: 32px; width: 32px; height: 32px; }
+        .an-cta { padding: 48px 0 44px; }
+        .an-cta-lead { font-size: 1.15rem; }
+        .an-cta-actions .an-btn { width: 100%; justify-content: center; }
+        .an-stats { gap: 12px; margin-top: 36px; }
+        .an-stat-label { font-size: .7rem; letter-spacing: .08em; }
     }
 </style>
 
@@ -130,36 +331,39 @@ include 'includes/header.php';
     </section>
 
     <!-- Anthem Lyrics Section -->
-    <section class="py-20 bg-gray-50 dark:bg-gray-950">
+    <section class="an-section">
         <div class="container">
-            <div class="max-w-4xl mx-auto text-center mb-16">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-6">Official Anthem Lyrics</h2>
-                <div class="h-2 w-32 bg-blue-600 mx-auto rounded-full mb-8"></div>
-                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Composed by Pastor Emmanuel O. Abbey, September 2011</p>
+            <div class="an-head">
+                <span class="an-kicker"><span class="material-symbols-outlined">music_note</span>Sing With Us</span>
+                <div class="an-heading" role="heading" aria-level="2">Official Anthem Lyrics</div>
+                <p class="an-lead">Composed by Pastor Emmanuel O. Abbey, September 2011</p>
             </div>
+        </div>
 
-            <!-- Horizontal 3-Column Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
-                <?php foreach ($stanzas as $stanza): ?>
-                <!-- Stanza <?php echo $stanza['stanza_number']; ?> -->
-                <div class="verse-card glass p-8 lg:p-10 rounded-3xl shadow-xl border-t-8 border-<?php echo strip_tags($stanza['border_color'] ?? 'blue-600'); ?> flex flex-col h-full">
-                    <div class="text-center mb-6">
-                        <div class="verse-number inline-flex w-14 h-14 rounded-xl items-center justify-center text-white text-2xl font-black mb-4">
-                            <?php echo $stanza['stanza_number']; ?>
+        <!-- One full-width band per stanza, alternating dark/light -->
+        <div class="an-stanzas">
+            <?php foreach ($stanzas as $i => $stanza):
+                $is_dark = ($i % 2 === 0);
+            ?>
+            <div class="an-stanza <?php echo $is_dark ? 'an-stanza--dark' : 'an-stanza--light an-stanza--flip'; ?>">
+                <div class="container">
+                    <div class="an-stanza-inner">
+                        <div class="an-stanza-mark" role="heading" aria-level="3">
+                            <span class="an-stanza-num" aria-hidden="true"><?php echo str_pad((int) $stanza['stanza_number'], 2, '0', STR_PAD_LEFT); ?></span>
+                            <span class="an-stanza-label"><?php echo strip_tags($stanza['stanza_title']); ?></span>
                         </div>
-                        <h3 class="text-2xl font-black text-gray-900 dark:text-white"><?php echo strip_tags($stanza['stanza_title']); ?></h3>
-                    </div>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-2 flex-grow anthem-content-wrapper">
-                        <?php echo $stanza['content']; ?>
+                        <div class="an-lyrics">
+                            <?php echo $stanza['content']; ?>
+                        </div>
                     </div>
                 </div>
-                <?php endforeach; ?>
             </div>
+            <?php endforeach; ?>
         </div>
     </section>
 
     <!-- Video Section (Below Lyrics) -->
-    <section class="py-20 bg-white dark:bg-gray-900">
+    <section class="an-section an-section--white">
         <div class="container">
             <?php
             // `video_url` holds either an audio recording or a video clip. The
@@ -171,134 +375,94 @@ include 'includes/header.php';
             $anthem_poster = trim(strip_tags((string) ($video['video_poster_url'] ?? ''))) ?: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCO7K3MdvhJBsjnRN7t5ahbUnpEsN6IBzUuZZwH7CLb_OOZoqM3pwpXrQV7wTMDVY18bMLximB5Zpi0iNvsgzXDtOrZt20qiq3aKc6ohFAZ7FtlLVdEfxa6mSjbk6EnoF25ccqAEmVf4y-AF3Xq6laGg5Oxwl6WoCqTAcdqgl5ZHKssfYqfv0_HJmwgVa0RIAiC8lKcDETXxxgrOLnYn8C_ELq9y7H2k5L_YYT2-KC8QAIpSMdEOtygPw4fv94jht34itrHs6p5i4rl';
             $anthem_mime   = vvu_media_mime($anthem_media);
             ?>
-            <div class="max-w-4xl mx-auto text-center mb-12">
-                <h2 class="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4"><?php echo htmlspecialchars($anthem_title); ?></h2>
-                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium"><?php echo htmlspecialchars($anthem_desc); ?></p>
+            <div class="an-head">
+                <span class="an-kicker"><span class="material-symbols-outlined">headphones</span>Listen</span>
+                <div class="an-heading" role="heading" aria-level="2"><?php echo htmlspecialchars($anthem_title); ?></div>
+                <p class="an-lead"><?php echo htmlspecialchars($anthem_desc); ?></p>
             </div>
-            <div class="max-w-4xl mx-auto relative aspect-video rounded-3xl overflow-hidden shadow-2xl shadow-primary/20 dark:shadow-primary/10 bg-black">
-                <?php if (vvu_media_is_audio($anthem_media)): ?>
-                    <img
-                        src="<?php echo htmlspecialchars($anthem_poster); ?>"
-                        alt="<?php echo htmlspecialchars($anthem_title); ?>"
-                        class="absolute inset-0 w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
-                    <div class="absolute inset-x-0 bottom-0 p-5 sm:p-8">
-                        <audio class="w-full" controls preload="metadata">
+            <div class="an-player-frame">
+                <div class="an-player">
+                    <?php if (vvu_media_is_audio($anthem_media)): ?>
+                        <img src="<?php echo htmlspecialchars($anthem_poster); ?>" alt="<?php echo htmlspecialchars($anthem_title); ?>">
+                        <div class="an-player-shade"></div>
+                        <div class="an-player-audio">
+                            <audio controls preload="metadata">
+                                <source src="<?php echo htmlspecialchars($anthem_media); ?>"<?php echo $anthem_mime ? ' type="' . htmlspecialchars($anthem_mime) . '"' : ''; ?>>
+                                Your browser does not support the audio tag.
+                                <a href="<?php echo htmlspecialchars($anthem_media); ?>" class="underline">Download the anthem</a>.
+                            </audio>
+                        </div>
+                    <?php else: ?>
+                        <video controls poster="<?php echo htmlspecialchars($anthem_poster); ?>">
                             <source src="<?php echo htmlspecialchars($anthem_media); ?>"<?php echo $anthem_mime ? ' type="' . htmlspecialchars($anthem_mime) . '"' : ''; ?>>
-                            Your browser does not support the audio tag.
-                            <a href="<?php echo htmlspecialchars($anthem_media); ?>" class="underline">Download the anthem</a>.
-                        </audio>
-                    </div>
-                <?php else: ?>
-                    <video
-                        class="w-full h-full"
-                        controls
-                        poster="<?php echo htmlspecialchars($anthem_poster); ?>">
-                        <source src="<?php echo htmlspecialchars($anthem_media); ?>"<?php echo $anthem_mime ? ' type="' . htmlspecialchars($anthem_mime) . '"' : ''; ?>>
-                        Your browser does not support the video tag.
-                    </video>
-                <?php endif; ?>
+                            Your browser does not support the video tag.
+                        </video>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- About the Anthem Section -->
-    <section class="py-20 bg-gray-50 dark:bg-gray-950">
+    <section class="an-section">
         <div class="container">
-            <div class="max-w-4xl mx-auto text-center mb-16">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-6">About the Anthem</h2>
-                <div class="h-2 w-32 bg-blue-600 mx-auto rounded-full mb-8"></div>
-                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">Learn about the history and the talented composer behind the VVU anthem.</p>
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 max-w-7xl mx-auto">
-                <!-- History Card -->
-                <div class="group glass p-10 lg:p-14 rounded-3xl shadow-2xl border-t-8 border-blue-600 hover:-translate-y-2 transition-all duration-300">
-                    <div class="inline-flex w-24 h-24 rounded-2xl bg-blue-600 items-center justify-center text-white shadow-xl mb-10 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-5xl text-white">history_edu</span>
-                    </div>
-                    <h3 class="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-8"><?php echo strip_tags($about['history_title'] ?? 'History of the Anthem'); ?></h3>
-                    <div class="text-2xl lg:text-3xl text-gray-700 dark:text-gray-300 leading-relaxed mb-6 space-y-8">
-                        <?php if (!empty($about['history_content'])): ?>
-                            <p><?php echo nl2br(strip_tags($about['history_content'])); ?></p>
-                        <?php else: ?>
-                            <p>
-                                The Valley View University anthem was composed by <strong class="text-blue-600 dark:text-blue-400">Pastor Emmanuel O. Abbey</strong> in September 2011. This inspiring piece encapsulates the university's enduring values of excellence, integrity, and service.
-                            </p>
-                            <p>
-                                The anthem beautifully expresses VVU's commitment to providing balanced education grounded in Christian principles, training students to serve humanity and bring hope and light to the world.
-                            </p>
-                        <?php endif; ?>
-                    </div>
+            <div class="an-head">
+                <span class="an-kicker">The Story</span>
+                <div class="an-heading" role="heading" aria-level="2">About the Anthem</div>
+                <p class="an-lead">Learn about the history and the talented composer behind the VVU anthem.</p>
+                <div class="an-meta">
+                    <span><span class="material-symbols-outlined">edit_note</span><?php echo strip_tags($about['composer_name'] ?? 'Pastor Emmanuel O. Abbey'); ?></span>
+                    <span><span class="material-symbols-outlined">calendar_month</span><?php echo strip_tags($about['composition_date'] ?? 'September 2011'); ?></span>
                 </div>
+            </div>
 
-                <!-- Composer Card -->
-                <div class="group glass p-10 lg:p-14 rounded-3xl shadow-2xl border-t-8 border-yellow-500 hover:-translate-y-2 transition-all duration-300">
-                    <div class="inline-flex w-24 h-24 rounded-2xl bg-yellow-500 items-center justify-center text-white shadow-xl mb-10 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-5xl text-white">person</span>
-                    </div>
-                    <h3 class="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-8"><?php echo strip_tags($about['composer_title'] ?? 'About the Composer'); ?></h3>
-                    <div class="text-2xl lg:text-3xl text-gray-700 dark:text-gray-300 leading-relaxed mb-6 space-y-8">
-                        <?php if (!empty($about['composer_content'])): ?>
-                            <p><?php echo nl2br(strip_tags($about['composer_content'])); ?></p>
-                        <?php else: ?>
-                            <p>
-                                <strong class="text-yellow-600 dark:text-yellow-400">Pastor Emmanuel O. Abbey</strong> crafted this anthem with deep relevance for the university's mission and vision. His composition masterfully weaves together themes of faith, education, and service.
-                            </p>
-                            <p>
-                                The anthem has become a cherished symbol of VVU's identity, sung with pride at graduation ceremonies, convocations, and other significant university events.
-                            </p>
-                        <?php endif; ?>
-                    </div>
+            <div class="an-cards">
+                <div class="an-card">
+                    <div class="an-card-title" role="heading" aria-level="3"><?php echo strip_tags($about['history_title'] ?? 'History of the Anthem'); ?></div>
+                    <p class="an-card-text"><?php echo nl2br(strip_tags($about['history_content'] ?? "The Valley View University anthem was composed by Pastor Emmanuel O. Abbey in September 2011. This inspiring piece encapsulates the university's enduring values of excellence, integrity, and service.")); ?></p>
+                    <span class="an-card-corner" aria-hidden="true"><span class="material-symbols-outlined">history_edu</span></span>
+                </div>
+                <div class="an-card">
+                    <div class="an-card-title" role="heading" aria-level="3"><?php echo strip_tags($about['composer_title'] ?? 'About the Composer'); ?></div>
+                    <p class="an-card-text"><?php echo nl2br(strip_tags($about['composer_content'] ?? "Pastor Emmanuel O. Abbey crafted this anthem with deep reverence for the university's mission and vision. The anthem has become a cherished symbol of VVU's identity.")); ?></p>
+                    <span class="an-card-corner" aria-hidden="true"><span class="material-symbols-outlined">person</span></span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
+    <!-- CTA Section: same dark-blue gradient as the dark stanza bands -->
     <?php if ($cta): ?>
-    <section class="relative py-24 overflow-hidden">
-        <div class="absolute inset-0 bg-blue-900"></div>
-        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-yellow-500/10 rounded-full blur-[120px] -mr-60 -mt-60"></div>
-        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -ml-60 -mb-60"></div>
-        
-        <div class="container relative z-10">
-            <div class="max-w-5xl mx-auto text-center">
-                <div class="flex justify-center mb-8">
-                    <span class="material-symbols-outlined text-7xl text-yellow-400 animate-float">music_note</span>
-                </div>
-                <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-white mb-8 leading-tight tracking-tight">
-                    <?php echo strip_tags($cta['title_line_1'] ?? ''); ?> <br><span class="text-yellow-400 text-6xl sm:text-5xl md:text-6xl lg:text-7xl font-medium block mt-2"><?php echo strip_tags($cta['title_line_2'] ?? ''); ?></span>
-                </h2>
-                <p class="text-lg sm:text-xl md:text-2xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
-                    <?php echo strip_tags($cta['description'] ?? ''); ?>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                    <a href="<?php echo strip_tags($cta['btn1_url'] ?? '#'); ?>" class="px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl"><?php echo strip_tags($cta['btn1_icon'] ?? 'download'); ?></span>
-                        <?php echo strip_tags($cta['btn1_text'] ?? ''); ?>
+    <section class="an-cta">
+        <div class="container">
+            <div class="an-cta-head">
+                <div class="an-cta-heading" role="heading" aria-level="2"><?php echo strip_tags(trim(($cta['title_line_1'] ?? '') . ' ' . ($cta['title_line_2'] ?? ''))); ?></div>
+                <?php if (trim($cta['description'] ?? '') !== ''): ?>
+                <p class="an-cta-lead"><?php echo strip_tags($cta['description']); ?></p>
+                <?php endif; ?>
+                <div class="an-cta-actions">
+                    <?php if (trim($cta['btn1_text'] ?? '') !== ''): ?>
+                    <a href="<?php echo strip_tags($cta['btn1_url'] ?? '#'); ?>" class="an-btn an-btn--gold">
+                        <span class="material-symbols-outlined"><?php echo strip_tags($cta['btn1_icon'] ?? 'download'); ?></span>
+                        <?php echo strip_tags($cta['btn1_text']); ?>
                     </a>
-                    <a href="<?php echo strip_tags($cta['btn2_url'] ?? '#'); ?>" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white text-xl font-bold rounded-2xl transition-all backdrop-blur-md border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                        <span class="material-symbols-outlined text-3xl"><?php echo strip_tags($cta['btn2_icon'] ?? 'share'); ?></span>
-                        <?php echo strip_tags($cta['btn2_text'] ?? ''); ?>
+                    <?php endif; ?>
+                    <?php if (trim($cta['btn2_text'] ?? '') !== ''): ?>
+                    <a href="<?php echo strip_tags($cta['btn2_url'] ?? '#'); ?>" class="an-btn an-btn--ghost">
+                        <span class="material-symbols-outlined"><?php echo strip_tags($cta['btn2_icon'] ?? 'share'); ?></span>
+                        <?php echo strip_tags($cta['btn2_text']); ?>
                     </a>
+                    <?php endif; ?>
                 </div>
-                
-                <div class="mt-14 sm:mt-20 grid grid-cols-3 gap-3 sm:gap-10 border-t border-white/10 pt-10 sm:pt-16">
-                    <div>
-                        <div class="text-[32px] sm:text-5xl font-black text-yellow-400 mb-1 sm:mb-2"><?php echo strip_tags($cta['stat1_value'] ?? ''); ?></div>
-                        <div class="text-blue-200 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-lg font-black"><?php echo strip_tags($cta['stat1_label'] ?? ''); ?></div>
-                    </div>
-                    <div>
-                        <div class="text-[32px] sm:text-5xl font-black text-yellow-400 mb-1 sm:mb-2"><?php echo strip_tags($cta['stat2_value'] ?? ''); ?></div>
-                        <div class="text-blue-200 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-lg font-black"><?php echo strip_tags($cta['stat2_label'] ?? ''); ?></div>
-                    </div>
-                    <div>
-                        <div class="text-[32px] sm:text-5xl font-black text-yellow-400 mb-1 sm:mb-2"><?php echo strip_tags($cta['stat3_value'] ?? ''); ?></div>
-                        <div class="text-blue-200 uppercase tracking-wide sm:tracking-widest text-[13px] leading-tight sm:text-lg font-black"><?php echo strip_tags($cta['stat3_label'] ?? ''); ?></div>
-                    </div>
+            </div>
+
+            <div class="an-stats">
+                <?php foreach ([1, 2, 3] as $n): ?>
+                <div class="an-stat">
+                    <span class="an-stat-value"><?php echo strip_tags($cta["stat{$n}_value"] ?? ''); ?></span>
+                    <span class="an-stat-label"><?php echo strip_tags($cta["stat{$n}_label"] ?? ''); ?></span>
                 </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>

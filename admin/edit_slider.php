@@ -242,7 +242,7 @@ include 'sidebar.php';
                                     <?php if (!empty($slider['image_url'])): ?>
                                         <p class="small text-muted mb-2">Current image: <?php echo htmlspecialchars($slider['image_url']); ?></p>
                                     <?php endif; ?>
-                                    <input type="file" name="slider_image" id="sliderImageInput" class="form-control" accept="image/*" <?php echo $action === 'add' ? 'required' : ''; ?>>
+                                    <input type="file" name="slider_image" id="sliderImageInput" class="form-control" accept="image/*" data-crop="16/9" <?php echo $action === 'add' ? 'required' : ''; ?>>
                                     <input type="hidden" name="current_image" value="<?php echo htmlspecialchars($slider['image_url'] ?? ''); ?>">
                                     <small class="text-muted">Recommended size: 1920x1080px. Allowed formats: JPG, PNG, WEBP. The preview updates as soon as you pick a file.</small>
                                 </div>

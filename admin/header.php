@@ -45,6 +45,8 @@ require_once('../includes/upload_helper.php');
     <!-- Shrinks oversized photos in the browser so uploads can't trip the
          server's request-size limit (HTTP 413) -->
     <script src="js/upload-guard.js?v=1.1" defer></script>
+    <!-- Crop dialog for file inputs marked data-crop (homepage images) -->
+    <script src="js/image-cropper.js?v=1.0" defer></script>
 
     <!-- Page search (Ctrl+K). The index is built from the manager files by
          includes/page_index.php, so nested "?page=" editors are findable

@@ -87,7 +87,7 @@ include 'sidebar.php';
                                 
                                 <div class="mb-3">
                                     <label class="form-label">Or Upload New Background</label>
-                                    <input type="file" name="bg_image_file" class="form-control" accept="image/*">
+                                    <input type="file" name="bg_image_file" class="form-control" accept="image/*" data-crop="16/9">
                                     <?php if (!empty($banner['bg_image'])): ?>
                                         <div class="mt-2">
                                             <small>Current Image:</small><br>

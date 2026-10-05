@@ -114,283 +114,390 @@ include 'includes/header.php';
 
 <!-- DISCOVER MORE -->
 <?php
-// Pick a contextual icon for each discover card based on its title
-function vvuDiscoverIcon($title) {
+// A short line under each discover card title, picked by keyword
+function vvuDiscoverTagline($title) {
     $map = [
-        'admission'  => 'fa-graduation-cap',
-        'academic'   => 'fa-book',
-        'student'    => 'fa-users',
-        'research'   => 'fa-flask',
-        'faculty'    => 'fa-user-circle',
-        'library'    => 'fa-university',
-        'campus'     => 'fa-map-marker',
-        'facilit'    => 'fa-map-marker',
-        'event'      => 'fa-calendar',
-        'news'       => 'fa-calendar',
-        'sport'      => 'fa-trophy',
-        'alumni'     => 'fa-handshake-o',
-        'contact'    => 'fa-envelope',
+        'admission' => 'Entry requirements and how to apply',
+        'academic'  => 'Schools, faculties and programmes',
+        'student'   => 'Clubs, halls and campus community',
+        'research'  => 'Projects, publications and units',
+        'faculty'   => 'Find lecturers and staff contacts',
+        'library'   => 'Books, journals and e-resources',
+        'campus'    => 'Our grounds, halls and facilities',
+        'facilit'   => 'Our grounds, halls and facilities',
+        'event'     => "What's happening around VVU",
+        'news'      => "What's happening around VVU",
+        'sport'     => 'Teams, fitness and recreation',
+        'alumni'    => 'Stay connected with VVU',
+        'contact'   => 'Get in touch with the university',
     ];
     $t = strtolower($title);
-    foreach ($map as $needle => $icon) {
-        if (strpos($t, $needle) !== false) return $icon;
+    foreach ($map as $needle => $text) {
+        if (strpos($t, $needle) !== false) return $text;
     }
-    return 'fa-compass';
+    return '';
+}
+
+// Section titles are stored with markup ("Discover <span>More</span>");
+// the new headings show them as plain text in one style.
+function vvuSectionTitle($sections, $key, $default) {
+    return isset($sections[$key]) ? trim(strip_tags($sections[$key]['section_title'])) : $default;
+}
+function vvuSectionSubtitle($sections, $key, $default) {
+    return isset($sections[$key]) ? trim(strip_tags($sections[$key]['section_subtitle'])) : $default;
 }
 ?>
-<section class="vvu-discover">
-    <div class="container com-sp pad-bot-70">
-        <div class="row">
-            <div class="con-title">
-                <h2><?php echo isset($sections['discover_more']) ? $sections['discover_more']['section_title'] : 'Discover <span>More</span>'; ?></h2>
-                <p><?php echo isset($sections['discover_more']) ? strip_tags($sections['discover_more']['section_subtitle']) : 'Explore Valley View University\'s comprehensive academic programs, vibrant student life, and cutting-edge research opportunities.'; ?></p>
-            </div>
-        </div>
-        <div class="vvu-discover-grid">
-            <?php $d_i = 0; foreach ($discover_cards as $card): $d_i++; ?>
-            <a class="vvu-dcard" href="<?php echo strip_tags($card['link_url']); ?>" style="--d:<?php echo ($d_i % 4) * 90 + intval(($d_i - 1) / 4) * 60; ?>ms">
-                <div class="vvu-dcard-media">
-                    <img src="<?php echo strip_tags($card['image_url']); ?>" alt="<?php echo htmlspecialchars(strip_tags($card['title']), ENT_QUOTES); ?>" loading="lazy">
-                    <span class="vvu-dcard-scrim"></span>
-                    <span class="vvu-dcard-sheen"></span>
-                </div>
-                <div class="vvu-dcard-body">
-                    <span class="vvu-dcard-icon"><i class="fa <?php echo vvuDiscoverIcon($card['title']); ?>"></i></span>
-                    <h3 class="vvu-dcard-title"><?php echo strip_tags($card['title']); ?></h3>
-                    <span class="vvu-dcard-cta">Explore <i class="fa fa-long-arrow-right"></i></span>
-                </div>
-                <span class="vvu-dcard-ring"></span>
-            </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
 
 <style>
-/* ── Discover More (modern cards) ── */
-.vvu-discover {
-    background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 55%, #ffffff 100%);
+/* ==========================================================================
+   Homepage sections, in the style of the About pages (Mission & Vision etc.)
+   Palette: navy #1e3a8a / #172554, gold #fbbf24 / #f59e0b, greys.
+   Headings are divs with role="heading" given the site's title font
+   (Cinzel). The universal `*` rule in custom-fixes.css sets the body font
+   on every element, and the legacy theme paints every <span> grey, so
+   spans get explicit colours below.
+   ========================================================================== */
+.hp-heading, .hp-glance-title {
+    font-family: var(--vvu-title-font);
+    font-weight: var(--vvu-title-weight);
+    letter-spacing: normal;
 }
-.vvu-discover .con-title { margin-bottom: 45px; }
-/* Section headings: the accent word ("More", "Programs", "Events") keeps its
-   colour but uses the same typeface as the rest of the heading */
-.vvu-discover .con-title h2 span,
-.pop-cour .con-title h2 span,
-.modern-news-section .con-title h2 span {
-    font-family: inherit;
-    font-weight: inherit;
-    font-variant: inherit;
-    text-transform: inherit;
-    letter-spacing: inherit;
-}
-@media (max-width: 767px) {
-    .vvu-discover .con-title h2,
-    .vvu-discover .con-title h2 span,
-    .pop-cour .con-title h2,
-    .pop-cour .con-title h2 span,
-    .modern-news-section .con-title h2,
-    .modern-news-section .con-title h2 span { font-size: 32px; line-height: 38px; }
-}
+.hp-section { padding: 88px 0; }
+.hp-section--white { background: #fff; }
+.hp-section--tint { background: #f5f7fb; }
 
+.hp-head { max-width: 820px; margin: 0 auto 52px; text-align: center; }
+.hp-kicker {
+    display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    font-size: 14px; font-weight: 700; letter-spacing: .28em;
+    text-transform: uppercase; color: #b45309;
+}
+.hp-kicker .fa { letter-spacing: 0; color: inherit; }
+.hp-heading { color: #1e3a8a; font-size: clamp(28px, 3.5vw, 42px); line-height: 1.15; }
+.hp-heading::after {
+    content: ""; display: block; width: 56px; height: 4px; border-radius: 4px;
+    background: #fbbf24; margin: 20px auto 0;
+}
+.hp-lead { margin: 20px 0 0; color: #4b5563; font-size: 19px; line-height: 1.65; font-weight: 400; }
+
+
+/* ── Discover More: white cards with the photo full-bleed on top, a bold
+   title and one small grey meta row (description left, "Explore" right) ── */
+.vvu-discover { background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 55%, #ffffff 100%); }
 .vvu-discover-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 24px;
 }
-
 .vvu-dcard {
     position: relative;
-    display: block;
-    height: 260px;
-    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    background: #0b1c3a;
-    text-decoration: none;
-    box-shadow: 0 10px 30px rgba(12, 26, 60, 0.10);
+    border-radius: 12px;
+    background: #fff;
+    text-decoration: none !important;
+    box-shadow: 0 6px 22px rgba(15, 23, 42, .09);
     transform: translateY(28px);
     opacity: 0;
     transition: transform .55s cubic-bezier(.2,.7,.3,1),
                 opacity .55s ease,
-                box-shadow .45s ease;
+                box-shadow .35s ease;
     will-change: transform, opacity;
 }
-.vvu-dcard:hover,
-.vvu-dcard:focus { text-decoration: none; }
-
 /* Scroll reveal */
 .vvu-dcard.is-visible {
     opacity: 1;
     transform: translateY(0);
     transition-delay: var(--d, 0ms);
 }
-
 .vvu-dcard-media {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    background: #e5e7eb;
 }
 .vvu-dcard-media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
-    transform: scale(1.02);
-    transition: transform 1.1s cubic-bezier(.2,.7,.3,1), filter .5s ease;
-}
-.vvu-dcard-scrim {
-    position: absolute;
-    inset: 0;
-    background:
-        linear-gradient(180deg, rgba(4, 16, 40, 0) 30%, rgba(4, 16, 40, .55) 62%, rgba(3, 12, 32, .92) 100%),
-        linear-gradient(135deg, rgba(31, 44, 115, .45) 0%, rgba(31, 44, 115, 0) 60%);
-    transition: opacity .4s ease;
-}
-/* Diagonal light sweep on hover */
-.vvu-dcard-sheen {
-    position: absolute;
-    top: -60%;
-    left: -75%;
-    width: 45%;
-    height: 220%;
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.28) 50%, rgba(255,255,255,0) 100%);
-    transform: rotate(18deg);
-    opacity: 0;
-    pointer-events: none;
-}
-.vvu-dcard:hover .vvu-dcard-sheen {
-    opacity: 1;
-    animation: vvuSheen .9s ease forwards;
-}
-@keyframes vvuSheen {
-    from { left: -75%; }
-    to   { left: 130%; }
-}
-
-.vvu-dcard-body {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 22px 20px 20px;
-    z-index: 2;
-}
-.vvu-dcard-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, .14);
-    border: 1px solid rgba(255, 255, 255, .28);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    color: #fff;
-    font-size: 17px;
-    transform: translateY(6px);
-    opacity: .92;
-    transition: background .35s ease, transform .45s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease;
-}
-.vvu-dcard-title {
-    margin: 0;
-    font-size: 18px;
-    line-height: 1.3;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: .3px;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, .35);
-}
-.vvu-dcard-cta {
     display: block;
-    margin-top: 6px;
-    font-size: 12.5px;
-    font-weight: 600;
-    letter-spacing: 1.4px;
-    text-transform: uppercase;
-    color: #ffb692;
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transform: translateY(8px);
-    transition: max-height .4s ease, opacity .35s ease, transform .45s cubic-bezier(.2,.7,.3,1);
+    transition: transform .8s cubic-bezier(.2,.7,.3,1);
 }
-.vvu-dcard-cta .fa { margin-left: 6px; transition: transform .35s ease; }
-
-/* Animated border ring */
-.vvu-dcard-ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 18px;
-    border: 2px solid transparent;
-    pointer-events: none;
-    z-index: 3;
-    transition: border-color .4s ease, box-shadow .4s ease;
+.vvu-dcard-body {
+    display: flex; flex-direction: column; flex: 1 1 auto;
+    padding: 14px 16px 16px;
 }
+/* A div, not h3, so the site-wide heading font rule doesn't apply */
+.vvu-dcard-title {
+    color: #111827;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+.vvu-dcard-meta {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-top: auto; padding-top: 10px;
+}
+.vvu-dcard-text { min-width: 0; color: #8a94a6; font-size: 12.5px; line-height: 1.4; }
+.vvu-dcard-more {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px;
+    color: #8a94a6; font-size: 12.5px; white-space: nowrap;
+    transition: color .3s ease;
+}
+.vvu-dcard-more .fa { color: inherit; font-size: 11px; transition: transform .3s ease; }
 
-/* Hover / focus state */
+/* Hover / focus */
 .vvu-dcard:hover,
 .vvu-dcard:focus-visible {
-    transform: translateY(-10px);
-    box-shadow: 0 22px 46px rgba(12, 26, 60, .28);
+    transform: translateY(-6px);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, .16);
+    outline: none;
 }
 .vvu-dcard:hover .vvu-dcard-media img,
-.vvu-dcard:focus-visible .vvu-dcard-media img { transform: scale(1.12); }
-.vvu-dcard:hover .vvu-dcard-scrim,
-.vvu-dcard:focus-visible .vvu-dcard-scrim { opacity: .95; }
-.vvu-dcard:hover .vvu-dcard-icon,
-.vvu-dcard:focus-visible .vvu-dcard-icon {
-    background: #f26838;
-    border-color: #f26838;
-    transform: translateY(0);
-    box-shadow: 0 8px 20px rgba(242, 104, 56, .45);
-}
-.vvu-dcard:hover .vvu-dcard-cta,
-.vvu-dcard:focus-visible .vvu-dcard-cta {
-    max-height: 30px;
-    opacity: 1;
-    transform: translateY(0);
-}
-.vvu-dcard:hover .vvu-dcard-cta .fa { transform: translateX(5px); }
-.vvu-dcard:hover .vvu-dcard-ring,
-.vvu-dcard:focus-visible .vvu-dcard-ring {
-    border-color: rgba(242, 104, 56, .85);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12);
-}
-.vvu-dcard:focus-visible { outline: none; }
+.vvu-dcard:focus-visible .vvu-dcard-media img { transform: scale(1.06); }
+.vvu-dcard:hover .vvu-dcard-title { color: #1e3a8a; }
+.vvu-dcard:hover .vvu-dcard-more { color: #b45309; }
+.vvu-dcard:hover .vvu-dcard-more .fa { transform: translateX(3px); }
+.vvu-dcard:focus-visible { box-shadow: 0 0 0 3px #fbbf24, 0 18px 36px rgba(15, 23, 42, .16); }
 
-/* Make the first card a wide feature tile on large screens */
-@media (min-width: 1200px) {
-    .vvu-dcard:first-child { grid-column: span 2; }
-    .vvu-dcard:first-child .vvu-dcard-title { font-size: 24px; }
-    .vvu-dcard:first-child .vvu-dcard-icon { width: 48px; height: 48px; font-size: 19px; }
+/* ── VVU at a glance (stats): original centred layout with white stat
+   cards, on the navy gradient ── */
+.vvu-stats-banner {
+    position: relative;
+    background-color: #1e3a8a;
+    background-size: cover;
+    background-position: center;
+    padding: 60px 0 50px;
+    overflow: hidden;
+}
+.vvu-stats-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(29, 78, 216, .92) 0%, rgba(30, 58, 138, .94) 55%, rgba(23, 37, 84, .97) 100%);
+}
+.vvu-stats-inner {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+.vvu-stats-banner .hp-kicker { color: #fbbf24; }
+.hp-glance-title { color: #fff; font-size: clamp(26px, 3vw, 38px); line-height: 1.2; }
+.hp-glance-title::after {
+    content: ""; display: block; width: 56px; height: 4px; border-radius: 4px;
+    background: #fbbf24; margin: 20px auto 0;
+}
+.vvu-stats-text {
+    color: rgba(255, 255, 255, .86);
+    font-size: 1.8rem;
+    line-height: 1.5;
+    text-align: center;
+    max-width: 1050px;
+    margin: 22px auto 50px;
+    font-weight: 500;
+}
+.vvu-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: left;
+}
+.vvu-stat-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.3s;
+}
+.vvu-stat-card:hover {
+    transform: translateY(-4px);
+}
+.vvu-stat-label {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: capitalize;
+}
+.vvu-stat-value {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #1e3a8a;
+    line-height: 1;
 }
 
+/* ── Study options: a coloured back panel shows along the left and bottom
+   of a white card that sits over it, with its top-left corner cut on a
+   slant. ── */
+.vvu-study-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.vvu-study-card {
+    position: relative;
+    padding: 0 0 18px 44px;
+}
+.vvu-study-back {
+    position: absolute;
+    left: 0; right: 18px; top: 34px; bottom: 0;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 60%, #172554 100%);
+    box-shadow: 0 22px 40px -26px rgba(23, 37, 84, .7);
+}
+.vvu-study-card:nth-child(even) .vvu-study-back {
+    background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 45%, #f59e0b 100%);
+    box-shadow: 0 22px 40px -26px rgba(180, 83, 9, .6);
+}
+/* drop-shadow (not box-shadow) so the shadow follows the slanted corner */
+.vvu-study-front {
+    position: relative; z-index: 2;
+    padding: 34px 40px 32px;
+    text-align: center;
+    background: #fff;
+    border-radius: 24px;
+    clip-path: polygon(64px 0, 100% 0, 100% 100%, 0 100%, 0 64px);
+}
+.vvu-study-card { filter: drop-shadow(0 18px 26px rgba(15, 23, 42, .14)); }
+
+.vvu-study-title {
+    margin: 0 0 16px;
+    color: #1e3a8a;
+    font-size: 1.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+.vvu-study-desc {
+    font-size: 1.35rem;
+    color: #444;
+    line-height: 1.7;
+    margin: 0 0 24px;
+}
+.vvu-study-btns {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.vvu-study-btn {
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    border-radius: 999px;
+    transition: all 0.3s;
+    display: inline-block;
+}
+.vvu-study-btn-outline {
+    background: transparent;
+    border: 2px solid #1e3a8a;
+    color: #1e3a8a;
+}
+.vvu-study-btn-outline:hover {
+    background: #1e3a8a;
+    color: #fff !important;
+}
+.vvu-study-btn-filled {
+    background: #1e3a8a;
+    color: #fff;
+    border: 2px solid #1e3a8a;
+}
+.vvu-study-btn-filled:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+/* ── Popular programs: original list layout, new text colours ── */
+.pop-cour .home-top-cour-desc h3 { color: #1e3a8a; }
+.pop-cour .home-top-cour-desc h4 { color: #b45309; }
+
+/* ── Campus life: original gallery and video cards, new labels ── */
+.hp-media-label {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    color: #1e3a8a; font-size: 20px; font-weight: 700;
+}
+.hp-media-label .fa {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%; background: #1e3a8a; color: #fff; font-size: 16px;
+}
+.media-container .video-info h5 { color: #1e3a8a; }
+.media-container .video-info p { color: #4b5563; }
+
+/* ── Responsive ── */
 @media (max-width: 1199px) {
     .vvu-discover-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 900px) {
     .vvu-discover-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-    .vvu-dcard { height: 210px; }
+}
+@media (max-width: 768px) {
+    .vvu-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .vvu-study-grid { grid-template-columns: 1fr; gap: 28px; }
+    .vvu-stats-text { font-size: 1.05rem; padding: 0 15px; }
+    .vvu-stat-value { font-size: 2rem; }
+}
+@media (max-width: 767px) {
+    .hp-section { padding: 60px 0; }
+    .hp-head { margin-bottom: 34px; }
+    .hp-kicker { font-size: 12px; }
+    .hp-lead { font-size: 16px; }
 }
 @media (max-width: 480px) {
     .vvu-discover-grid { gap: 14px; }
-    .vvu-dcard { height: 170px; border-radius: 14px; }
-    .vvu-dcard-body { padding: 14px 13px 13px; }
-    .vvu-dcard-icon { width: 34px; height: 34px; font-size: 14px; margin-bottom: 8px; border-radius: 10px; }
+    .vvu-dcard-body { padding: 10px 11px 12px; }
     .vvu-dcard-title { font-size: 14px; }
-    .vvu-dcard-cta { display: none; }
+    .vvu-dcard-text { display: none; }
+    .vvu-stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .vvu-study-btns { flex-direction: column; }
+    .vvu-study-btn { text-align: center; }
+    .vvu-study-card { padding-left: 28px; }
+    .vvu-study-front { padding: 28px 24px 24px; clip-path: polygon(44px 0, 100% 0, 100% 100%, 0 100%, 0 44px); }
+    .vvu-study-title { font-size: 1.5rem; }
+    .vvu-study-desc { font-size: 1.2rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .vvu-dcard,
     .vvu-dcard-media img,
-    .vvu-dcard-icon,
-    .vvu-dcard-cta { transition: none !important; }
+    .vvu-dcard-more { transition: none !important; }
     .vvu-dcard { opacity: 1; transform: none; }
     .vvu-dcard:hover { transform: none; }
-    .vvu-dcard-sheen { display: none; }
 }
 </style>
+
+<section class="vvu-discover hp-section">
+    <div class="container">
+        <div class="hp-head">
+            <span class="hp-kicker">Explore VVU</span>
+            <div class="hp-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(vvuSectionTitle($sections, 'discover_more', 'Discover More')); ?></div>
+            <p class="hp-lead"><?php echo htmlspecialchars(vvuSectionSubtitle($sections, 'discover_more', "Explore Valley View University's comprehensive academic programs, vibrant student life, and cutting-edge research opportunities.")); ?></p>
+        </div>
+        <div class="vvu-discover-grid">
+            <?php $d_i = 0; foreach ($discover_cards as $card): $d_i++; $d_title = strip_tags($card['title']); ?>
+            <a class="vvu-dcard" href="<?php echo strip_tags($card['link_url']); ?>" style="--d:<?php echo ($d_i % 4) * 90 + intval(($d_i - 1) / 4) * 60; ?>ms">
+                <div class="vvu-dcard-media">
+                    <img src="<?php echo strip_tags($card['image_url']); ?>" alt="<?php echo htmlspecialchars($d_title, ENT_QUOTES); ?>" loading="lazy">
+                </div>
+                <div class="vvu-dcard-body">
+                    <div class="vvu-dcard-title" role="heading" aria-level="3"><?php echo htmlspecialchars($d_title); ?></div>
+                    <span class="vvu-dcard-meta">
+                        <span class="vvu-dcard-text"><?php echo htmlspecialchars(vvuDiscoverTagline($d_title)); ?></span>
+                        <span class="vvu-dcard-more">Explore <i class="fa fa-long-arrow-right"></i></span>
+                    </span>
+                </div>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
 
 <script>
 // Staggered scroll reveal for the Discover More cards
@@ -415,12 +522,14 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<!-- STATS BANNER -->
+<!-- VVU AT A GLANCE (STATS BANNER) -->
 <?php if ($stats_banner): ?>
-<section class="vvu-stats-banner" <?php if (!empty($stats_banner['bg_image'])): ?>style="background-image:url('<?php echo strip_tags($stats_banner['bg_image']); ?>')"<?php endif; ?>>
+<section class="vvu-stats-banner" <?php if (!empty($stats_banner['bg_image'])): ?>style="background-image:url('<?php echo htmlspecialchars(strip_tags($stats_banner['bg_image'])); ?>')"<?php endif; ?>>
     <div class="vvu-stats-overlay"></div>
     <div class="container">
         <div class="vvu-stats-inner">
+            <span class="hp-kicker">VVU at a Glance</span>
+            <div class="hp-glance-title" role="heading" aria-level="2">A Community That Shapes the World</div>
             <p class="vvu-stats-text"><?php echo strip_tags($stats_banner['banner_text']); ?></p>
             <div class="vvu-stats-grid">
                 <?php foreach ($stats_items as $stat): ?>
@@ -435,168 +544,11 @@ document.addEventListener('DOMContentLoaded', function () {
 </section>
 <?php endif; ?>
 
-<!-- STUDY OPTIONS -->
-<?php if (!empty($study_options)): ?>
-<section class="vvu-study-options">
-    <div class="container">
-        <div class="vvu-study-grid">
-            <?php foreach ($study_options as $opt): ?>
-            <div class="vvu-study-card">
-                <h3 class="vvu-study-title" style="color:<?php echo strip_tags($opt['accent_color']); ?>"><?php echo strip_tags($opt['title']); ?></h3>
-                <p class="vvu-study-desc"><?php echo strip_tags($opt['description']); ?></p>
-                <div class="vvu-study-btns">
-                    <?php if (!empty($opt['btn1_text'])): ?>
-                    <a href="<?php echo strip_tags($opt['btn1_link']); ?>" class="vvu-study-btn vvu-study-btn-outline" style="border-color:<?php echo strip_tags($opt['accent_color']); ?>;color:<?php echo strip_tags($opt['accent_color']); ?>"><?php echo strip_tags($opt['btn1_text']); ?></a>
-                    <?php endif; ?>
-                    <?php if (!empty($opt['btn2_text'])): ?>
-                    <a href="<?php echo strip_tags($opt['btn2_link']); ?>" class="vvu-study-btn vvu-study-btn-filled" style="background:<?php echo strip_tags($opt['accent_color']); ?>;border-color:<?php echo strip_tags($opt['accent_color']); ?>"><?php echo strip_tags($opt['btn2_text']); ?></a>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-<?php endif; ?>
-
-<style>
-/* ── Stats Banner ── */
-.vvu-stats-banner {
-    position: relative;
-    background: #2c3e8c;
-    background-size: cover;
-    background-position: center;
-    padding: 60px 0 50px;
-    overflow: hidden;
-}
-.vvu-stats-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(30, 40, 100, 0.85);
-}
-.vvu-stats-inner {
-    position: relative;
-    z-index: 2;
-}
-.vvu-stats-text {
-    color: #fff;
-    font-size: 1.8rem;
-    line-height: 1.5;
-    text-align: center;
-    max-width: 1050px;
-    margin: 0 auto 50px;
-    font-weight: 500;
-}
-.vvu-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    max-width: 1100px;
-    margin: 0 auto;
-}
-.vvu-stat-card {
-    background: #fff;
-    border-radius: 10px;
-    padding: 22px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transition: transform 0.3s;
-}
-.vvu-stat-card:hover {
-    transform: translateY(-4px);
-}
-.vvu-stat-label {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #555;
-    text-transform: capitalize;
-}
-.vvu-stat-value {
-    font-size: 4rem;
-    font-weight: 900;
-    color: #1a1a2e;
-    line-height: 1;
-}
-
-/* ── Study Options ── */
-.vvu-study-options {
-    padding: 60px 0;
-    background: #fff;
-    border-top: 1px solid #eee;
-}
-.vvu-study-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 50px;
-}
-.vvu-study-card {
-    padding: 5px 0;
-}
-.vvu-study-title {
-    font-size: 2.2rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    margin-bottom: 18px;
-}
-.vvu-study-desc {
-    font-size: 1.35rem;
-    color: #444;
-    line-height: 1.7;
-    margin-bottom: 35px;
-}
-.vvu-study-btns {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-}
-.vvu-study-btn {
-    padding: 16px 36px;
-    font-size: 1.1rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: all 0.3s;
-    display: inline-block;
-}
-.vvu-study-btn-outline {
-    background: transparent;
-    border: 2px solid;
-}
-.vvu-study-btn-outline:hover {
-    background: currentColor;
-    color: #fff !important;
-}
-.vvu-study-btn-filled {
-    color: #fff;
-    border: 2px solid transparent;
-}
-.vvu-study-btn-filled:hover {
-    opacity: 0.85;
-    transform: translateY(-2px);
-    color: #fff;
-}
-
-/* ── Responsive ── */
-@media (max-width: 768px) {
-    .vvu-stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .vvu-study-grid { grid-template-columns: 1fr; gap: 35px; }
-    .vvu-stats-text { font-size: 1.05rem; padding: 0 15px; }
-    .vvu-stat-value { font-size: 2rem; }
-}
-@media (max-width: 480px) {
-    .vvu-stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-    .vvu-study-btns { flex-direction: column; }
-    .vvu-study-btn { text-align: center; }
-}
-</style>
-
 <script>
-// Animate stat numbers on scroll
+// Count the stat numbers up when they scroll into view
 document.addEventListener('DOMContentLoaded', function() {
+    const grid = document.querySelector('.vvu-stats-grid');
+    if (!grid || !('IntersectionObserver' in window)) return;
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -615,39 +567,78 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }, { threshold: 0.3 });
-    const banner = document.querySelector('.vvu-stats-grid');
-    if (banner) observer.observe(banner);
+    observer.observe(grid);
 });
 </script>
 
-<!-- POPULAR PROGRAMS -->
-<section class="pop-cour">
-    <div class="container com-sp pad-bot-70">
-        <div class="row">
-            <div class="con-title">
-                <h2><?php echo isset($sections['popular_programs']) ? $sections['popular_programs']['section_title'] : 'Popular <span>Programs</span>'; ?></h2>
-                <p><?php echo isset($sections['popular_programs']) ? strip_tags($sections['popular_programs']['section_subtitle']) : 'Explore our most sought-after academic programs designed to prepare you for success in your chosen field.'; ?></p>
+<!-- STUDY OPTIONS -->
+<?php if (!empty($study_options)): ?>
+<section class="hp-section hp-section--white">
+    <div class="container">
+        <div class="hp-head">
+            <span class="hp-kicker">Study With Us</span>
+            <div class="hp-heading" role="heading" aria-level="2">Choose Your Path</div>
+        </div>
+        <!-- Each path: a coloured back panel with a white card laid over it
+             whose top-left corner is cut on a slant -->
+        <div class="vvu-study-grid">
+            <?php foreach ($study_options as $i => $opt):
+                // A mis-encoded em dash is stored as " ù " in some descriptions
+                $desc = str_replace(' ù ', ' — ', strip_tags($opt['description']));
+            ?>
+            <div class="vvu-study-card">
+                <span class="vvu-study-back" aria-hidden="true"></span>
+                <div class="vvu-study-front">
+                    <h3 class="vvu-study-title"><?php echo strip_tags($opt['title']); ?></h3>
+                    <p class="vvu-study-desc"><?php echo htmlspecialchars($desc); ?></p>
+                    <div class="vvu-study-btns">
+                        <?php if (!empty($opt['btn1_text'])): ?>
+                        <a href="<?php echo strip_tags($opt['btn1_link']); ?>" class="vvu-study-btn vvu-study-btn-outline"><?php echo htmlspecialchars(ucwords(strtolower(strip_tags($opt['btn1_text'])))); ?></a>
+                        <?php endif; ?>
+                        <?php if (!empty($opt['btn2_text'])): ?>
+                        <a href="<?php echo strip_tags($opt['btn2_link']); ?>" class="vvu-study-btn vvu-study-btn-filled"><?php echo htmlspecialchars(ucwords(strtolower(strip_tags($opt['btn2_text'])))); ?></a>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- POPULAR PROGRAMS -->
+<?php require_once 'includes/image_helper.php'; ?>
+<section class="pop-cour hp-section hp-section--tint">
+    <div class="container">
+        <div class="hp-head">
+            <span class="hp-kicker">Academics</span>
+            <div class="hp-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(vvuSectionTitle($sections, 'popular_programs', 'Popular Programs')); ?></div>
+            <p class="hp-lead"><?php echo htmlspecialchars(vvuSectionSubtitle($sections, 'popular_programs', 'Explore our most sought-after academic programs designed to prepare you for success in your chosen field.')); ?></p>
         </div>
         <div class="row">
             <?php
-            require_once 'includes/image_helper.php';
             $half = ceil(count($programs) / 2);
-            $first_column = array_slice($programs, 0, $half);
-            $second_column = array_slice($programs, $half);
+            $program_columns = [array_slice($programs, 0, $half), array_slice($programs, $half)];
+            foreach ($program_columns as $column):
             ?>
             <div class="col-md-6">
                 <div>
-                    <?php foreach ($first_column as $prog): ?>
+                    <?php foreach ($column as $prog):
+                        $p_title = strip_tags($prog['title']);
+                        $p_desc  = trim(strip_tags($prog['description']));
+                        // Skip descriptions that just repeat the title or are a stray label
+                        $show_desc = $p_desc !== '' && strcasecmp($p_desc, $p_title) !== 0 && strcasecmp($p_desc, 'Apply Now') !== 0;
+                    ?>
                     <!--POPULAR PROGRAMS-->
                     <div class="home-top-cour">
                         <!--POPULAR PROGRAMS IMAGE-->
-                        <div class="col-md-3"> <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($prog['image_url']), 400, 450)); ?>" width="400" height="450" loading="lazy" decoding="async" alt="<?php echo htmlspecialchars(strip_tags($prog['title'])); ?>"> </div>
+                        <div class="col-md-3"> <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($prog['image_url']), 400, 450)); ?>" width="400" height="450" loading="lazy" decoding="async" alt="<?php echo htmlspecialchars($p_title); ?>"> </div>
                         <!--POPULAR PROGRAMS: CONTENT-->
                         <div class="col-md-9 home-top-cour-desc">
-                            <h3><?php echo strip_tags($prog['title']); ?></h3>
+                            <h3><?php echo htmlspecialchars($p_title); ?></h3>
                             <h4><?php echo strip_tags($prog['category']); ?></h4>
-                            <p><?php echo strip_tags($prog['description']); ?></p> <span class="home-top-cour-rat"><?php echo $prog['rating']; ?></span>
+                            <?php if ($show_desc): ?><p><?php echo htmlspecialchars($p_desc); ?></p><?php endif; ?> <span class="home-top-cour-rat"><?php echo $prog['rating']; ?></span>
                             <div class="hom-list-share">
                                 <ul>
                                     <li><a href="<?php echo strip_tags($prog['button1_link']); ?>"><i class="fa fa-bar-chart" aria-hidden="true"></i> <?php echo strip_tags($prog['button1_text']); ?></a> </li>
@@ -660,46 +651,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     <?php endforeach; ?>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div>
-                    <?php foreach ($second_column as $prog): ?>
-                    <!--POPULAR PROGRAMS-->
-                    <div class="home-top-cour">
-                        <!--POPULAR PROGRAMS IMAGE-->
-                        <div class="col-md-3"> <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags($prog['image_url']), 400, 450)); ?>" width="400" height="450" loading="lazy" decoding="async" alt="<?php echo htmlspecialchars(strip_tags($prog['title'])); ?>"> </div>
-                        <!--POPULAR PROGRAMS: CONTENT-->
-                        <div class="col-md-9 home-top-cour-desc">
-                            <h3><?php echo strip_tags($prog['title']); ?></h3>
-                            <h4><?php echo strip_tags($prog['category']); ?></h4>
-                            <p><?php echo strip_tags($prog['description']); ?></p> <span class="home-top-cour-rat"><?php echo $prog['rating']; ?></span>
-                            <div class="hom-list-share">
-                                <ul>
-                                    <li><a href="<?php echo strip_tags($prog['button1_link']); ?>"><i class="fa fa-bar-chart" aria-hidden="true"></i> <?php echo strip_tags($prog['button1_text']); ?></a> </li>
-                                    <li><a href="<?php echo strip_tags($prog['button2_link']); ?>"><i class="fa fa-eye" aria-hidden="true"></i> <?php echo strip_tags($prog['button2_text']); ?></a> </li>
-                                    <li><a href="<?php echo strip_tags($prog['button3_link']); ?>"><i class="fa fa-share-alt" aria-hidden="true"></i> <?php echo strip_tags($prog['button3_text']); ?></a> </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
 
 <?php
-// Fetch latest news, events, and notices for the modern cards
+// Fetch latest news, events, and notices for the update columns
 try {
-    // Latest News (3 items)
     $stmt_news = $pdo->query("SELECT * FROM news_articles WHERE status='published' AND category='news' ORDER BY publish_date DESC LIMIT 3");
     $home_news = $stmt_news->fetchAll();
 
-    // Upcoming Events (3 items)
     $stmt_events = $pdo->query("SELECT * FROM news_articles WHERE status='published' AND category='events' ORDER BY publish_date DESC LIMIT 3");
     $home_events = $stmt_events->fetchAll();
 
-    // Latest Notices (3 items)
     $stmt_notices = $pdo->query("SELECT * FROM news_articles WHERE status='published' AND category='announcements' ORDER BY publish_date DESC LIMIT 3");
     $home_notices = $stmt_notices->fetchAll();
 } catch (Exception $e) {
@@ -721,11 +686,10 @@ function getHImg($path, $cat) {
 <!-- MODERN NEWS, EVENTS & NOTICES SECTION -->
 <section class="modern-news-section">
     <div class="container com-sp">
-        <div class="row">
-            <div class="con-title">
-                <h2><?php echo isset($sections['news_events']) ? $sections['news_events']['section_title'] : 'Explore <span>Latest Updates</span>'; ?></h2>
-                <p>Stay informed with the most recent news, upcoming institutional events, and official announcements from Valley View University.</p>
-            </div>
+        <div class="hp-head">
+            <span class="hp-kicker">What's Happening</span>
+            <div class="hp-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(vvuSectionTitle($sections, 'news_events', 'Latest News & Events')); ?></div>
+            <p class="hp-lead"><?php echo htmlspecialchars(vvuSectionSubtitle($sections, 'news_events', 'Stay informed with the most recent news, upcoming institutional events, and official announcements from Valley View University.')); ?></p>
         </div>
         <div class="row">
             <!-- COLUMN 1: LATEST NEWS -->
@@ -800,9 +764,8 @@ function getHImg($path, $cat) {
     </div>
 </section>
 
-<!-- MODERN MEDIA SECTION (GALLERY & VIDEO) -->
+<!-- CAMPUS LIFE: GALLERY & VIDEO -->
 <?php
-require_once 'includes/image_helper.php';
 require_once 'includes/video_helper.php';
 
 // The video box plays either an uploaded file (uploads/videos/...) or a
@@ -815,13 +778,15 @@ $video_playable  = $video && ($video_is_upload || $video_embed !== '');
 ?>
 <section class="modern-media-section">
     <div class="container">
+        <div class="hp-head">
+            <span class="hp-kicker">Campus Life</span>
+            <div class="hp-heading" role="heading" aria-level="2">Life at VVU</div>
+            <p class="hp-lead">Moments from the Oyibi campus, and the university through our lens.</p>
+        </div>
         <div class="media-container">
             <!-- PHOTO GALLERY -->
             <div class="modern-gallery-box">
-                <div class="media-head">
-                    <h4>Campus Photo Gallery</h4>
-                    <p>Moments from life on the Oyibi campus</p>
-                </div>
+                <div class="hp-media-label"><i class="fa fa-camera"></i>Campus Photo Gallery</div>
                 <div class="modern-gallery-grid" id="vvuGallery">
                     <?php foreach ($gallery as $i => $img):
                         $full    = strip_tags($img['image_url']);
@@ -846,10 +811,7 @@ $video_playable  = $video && ($video_is_upload || $video_embed !== '');
 
             <!-- CAMPUS VIDEO -->
             <div class="modern-video-box">
-                <div class="media-head">
-                    <h4>Latest Campus Video</h4>
-                    <p>See the university through our lens</p>
-                </div>
+                <div class="hp-media-label"><i class="fa fa-play"></i>Latest Campus Video</div>
                 <?php if ($video_playable): ?>
                     <div class="modern-video-wrapper">
                         <div class="video-frame">

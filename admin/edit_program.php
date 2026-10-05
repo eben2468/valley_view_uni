@@ -40,7 +40,7 @@ include 'header.php'; include 'sidebar.php';
 </div>
 <div class="mb-3">
     <label>Or Upload Image</label>
-    <input type="file" name="image_file" class="form-control" accept="image/*">
+    <input type="file" name="image_file" class="form-control" accept="image/*" data-crop="8/9">
     <small class="text-muted">Uploading a file will override the URL above.</small>
 </div>
 

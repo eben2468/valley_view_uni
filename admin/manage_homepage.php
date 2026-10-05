@@ -345,7 +345,7 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             </div>
                             <div class="row">
                                 <div class="input-field col s12">
-                                    <input type="file" name="image_file" accept="image/*">
+                                    <input type="file" name="image_file" accept="image/*" data-crop="16/9">
                                     <p class="help-block">Or upload a file (overrides URL)</p>
                                 </div>
                             </div>
@@ -491,7 +491,7 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             </div>
                             <div class="row">
                                 <div class="input-field col s12">
-                                    <input type="file" name="image_file" accept="image/*">
+                                    <input type="file" name="image_file" accept="image/*" data-crop="16/10">
                                     <p class="help-block">Or upload a file (overrides URL)</p>
                                 </div>
                             </div>
@@ -593,7 +593,7 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             </div>
                             <div class="row">
                                 <div class="input-field col s12">
-                                    <input type="file" name="image_file" accept="image/*">
+                                    <input type="file" name="image_file" accept="image/*" data-crop="8/9">
                                     <p class="help-block">Or upload a file (overrides URL)</p>
                                 </div>
                             </div>
@@ -738,7 +738,7 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             </div>
                             <div class="row">
                                 <div class="input-field col s12">
-                                    <input type="file" name="image_file" accept="image/*">
+                                    <input type="file" name="image_file" accept="image/*" data-crop="1/1">
                                     <p class="help-block">Or upload a file (overrides URL)</p>
                                 </div>
                             </div>
@@ -1204,7 +1204,7 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             </div>
                             <div class="row">
                                 <div class="input-field col s12">
-                                    <input type="file" name="bg_image_file" accept="image/*">
+                                    <input type="file" name="bg_image_file" accept="image/*" data-crop="16/9">
                                     <p class="help-block">Or upload a background image</p>
                                 </div>
                             </div>
