@@ -478,8 +478,21 @@ function vvuSectionSubtitle($sections, $key, $default) {
 }
 .hp-progs-hub-link .fa { color: inherit; transition: transform .25s ease; }
 .hp-progs-hub-link:hover .fa { transform: translateX(3px); }
-/* The hub needs room; on narrower desktops keep just the line and dots */
-@media (max-width: 1279px) {
+/* Narrower desktops (1101-1279px, e.g. 1920px screens at 150% scaling):
+   a slimmer centre column and a compact hub, so the help card stays visible.
+   The cards get a little narrower, so their footer may wrap to two lines. */
+@media (min-width: 1101px) and (max-width: 1279px) {
+    .hp-progs { grid-template-columns: minmax(0, 1fr) 170px minmax(0, 1fr); gap: 18px 20px; }
+    .hp-progs-hub { max-width: 162px; padding: 18px 12px 14px; margin-top: 24px; }
+    .hp-progs-hub-icon { width: 40px; height: 40px; }
+    .hp-progs-hub-icon .material-symbols-outlined { font-size: 22px; }
+    .hp-progs-hub-title { font-size: 14px; }
+    .hp-progs-hub-text { font-size: 12px; }
+    .hp-progs-hub-btn { padding: 8px 8px; font-size: 12px; }
+    .hp-progs .hp-prog { height: auto; min-height: 168px; }
+    .hp-progs .hp-prog-foot { flex-wrap: wrap; row-gap: 8px; }
+}
+@media (max-width: 1100px) {
     .hp-progs-hub { display: none; }
 }
 .hp-prog {
@@ -668,7 +681,7 @@ function vvuSectionSubtitle($sections, $key, $default) {
     .hp-prog-media { flex: 0 0 116px; }
     .hp-prog-body { padding: 12px 12px 12px 13px; }
     .hp-prog-title { font-size: 14px; }
-    .hp-prog-foot { flex-wrap: wrap; row-gap: 8px; }
+    .hp-progs .hp-prog-foot { flex-wrap: wrap; row-gap: 8px; }
     .hp-prog-btns { width: 100%; }
     .hp-prog-btn { flex: 1 1 0; justify-content: center; }
 }
