@@ -66,6 +66,7 @@ $active_page = "about";
 include 'includes/header.php';
 ?>
 
+<link rel="stylesheet" href="css/vvu-office.css?v=1.0">
 <style>
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -383,19 +384,22 @@ include 'includes/header.php';
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 reg-wrap">
-                <?php for ($n = 1; $n <= 6; $n++):
+            <div class="of-mandate">
+                <?php $mk = 0;
+                for ($n = 1; $n <= 6; $n++):
                     $ititle = getContent($pageContent, 'office_mandate', "item_{$n}_title");
-                    if ($ititle === '') continue; ?>
-                <div class="reg-card group p-10 bg-gray-50 dark:bg-gray-800/50 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-800">
-                    <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-5 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                        <span class="material-symbols-outlined text-4xl"><?php echo regIcon($pageContent, 'office_mandate', "item_{$n}_icon"); ?></span>
+                    if ($ititle === '') continue;
+                    $mk++; ?>
+                <article class="of-md">
+                    <div class="of-md-icon">
+                        <span class="material-symbols-outlined"><?php echo regIcon($pageContent, 'office_mandate', "item_{$n}_icon"); ?></span>
                     </div>
-                    <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3 leading-tight"><?php echo htmlspecialchars($ititle, ENT_QUOTES, 'UTF-8'); ?></h4>
-                    <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-                        <?php echo regOut($pageContent, 'office_mandate', "item_{$n}_text", ''); ?>
-                    </p>
-                </div>
+                    <div class="of-md-body">
+                        <div class="of-md-title" role="heading" aria-level="3"><?php echo htmlspecialchars($ititle, ENT_QUOTES, 'UTF-8'); ?></div>
+                        <p class="of-md-text"><?php echo regOut($pageContent, 'office_mandate', "item_{$n}_text", ''); ?></p>
+                    </div>
+                    <span class="of-md-num" aria-hidden="true"><?php echo str_pad($mk, 2, '0', STR_PAD_LEFT); ?></span>
+                </article>
                 <?php endfor; ?>
             </div>
         </div>
@@ -414,22 +418,20 @@ include 'includes/header.php';
                 <div class="h-2 w-32 bg-blue-600 mx-auto rounded-full"></div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 reg-wrap">
+            <div class="of-related">
                 <?php for ($n = 1; $n <= 4; $n++):
                     $ltitle = getContent($pageContent, 'related_offices', "link_{$n}_title");
                     if ($ltitle === '') continue;
                     $lurl = getContent($pageContent, 'related_offices', "link_{$n}_url", '#');
                     $external = (bool) preg_match('#^https?://#i', $lurl); ?>
-                <a href="<?php echo htmlspecialchars($lurl, ENT_QUOTES, 'UTF-8'); ?>"
-                   <?php echo $external ? 'target="_blank" rel="noopener"' : ''; ?>
-                   class="reg-card group block p-9 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 no-underline shadow-lg">
-                    <div class="w-14 h-14 rounded-xl bg-gray-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow mb-5 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                        <span class="material-symbols-outlined text-3xl"><?php echo regIcon($pageContent, 'related_offices', "link_{$n}_icon", 'link'); ?></span>
-                    </div>
-                    <h4 class="text-xl font-black text-gray-900 dark:text-white mb-2 leading-snug"><?php echo htmlspecialchars($ltitle, ENT_QUOTES, 'UTF-8'); ?></h4>
-                    <p class="text-base text-gray-600 dark:text-gray-400 leading-relaxed mb-4"><?php echo regOut($pageContent, 'related_offices', "link_{$n}_text", ''); ?></p>
-                    <span class="inline-flex items-center gap-1 text-base font-black text-blue-600 dark:text-blue-400">
-                        Visit <span class="material-symbols-outlined text-lg transition-transform group-hover:translate-x-1"><?php echo $external ? 'open_in_new' : 'arrow_forward'; ?></span>
+                <a href="<?php echo htmlspecialchars($lurl, ENT_QUOTES, 'UTF-8'); ?>" class="of-rel"<?php echo $external ? ' target="_blank" rel="noopener"' : ''; ?>>
+                    <span class="of-rel-tab">
+                        <span class="material-symbols-outlined"><?php echo regIcon($pageContent, 'related_offices', "link_{$n}_icon", 'link'); ?></span>
+                    </span>
+                    <span class="of-rel-card">
+                        <span class="of-rel-title" role="heading" aria-level="3"><?php echo htmlspecialchars($ltitle, ENT_QUOTES, 'UTF-8'); ?></span>
+                        <span class="of-rel-text"><?php echo regOut($pageContent, 'related_offices', "link_{$n}_text", ''); ?></span>
+                        <span class="of-rel-link">Visit <span class="material-symbols-outlined"><?php echo $external ? 'open_in_new' : 'arrow_forward'; ?></span></span>
                     </span>
                 </a>
                 <?php endfor; ?>

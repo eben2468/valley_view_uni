@@ -573,6 +573,57 @@ function vvuSectionSubtitle($sections, $key, $default) {
     display: inline-flex; align-items: center; justify-content: center;
     width: 40px; height: 40px; border-radius: 50%; background: #1e3a8a; color: #fff; font-size: 16px;
 }
+/* Photo gallery panel: mosaic grid (styles over css/custom-fixes.css) */
+.hp-gal-panel {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 22px 44px -34px rgba(15, 23, 42, .5);
+}
+.hp-gal-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.hp-gal-count { color: #6b7280; font-size: 12.5px; font-weight: 500; }
+.hp-gal-all { border: 0; background: none; padding: 0; cursor: pointer; font-family: inherit; }
+.hp-gal { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 14px; }
+.hp-gal .modern-gallery-item { border-radius: 12px; box-shadow: none; }
+.hp-gal .modern-gallery-item:hover { transform: none; }
+.hp-gal .hp-gal-item--lead { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; }
+.hp-gal .hp-gal-item--extra { display: none !important; }
+
+.hp-gal .gallery-item-overlay {
+    justify-content: flex-end; align-items: flex-start; text-align: left; padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0) 40%, rgba(15, 23, 42, .82) 100%);
+}
+.hp-gal-zoom {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(.85);
+    width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, .92); color: #1e3a8a; font-size: 22px; transition: transform .3s ease;
+}
+.hp-gal .modern-gallery-item:hover .hp-gal-zoom { transform: translate(-50%, -50%) scale(1); }
+.hp-gal .gallery-item-caption {
+    color: #fff; font-size: 12px; font-weight: 600; line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* Lead photo: caption always shown, a little larger */
+.hp-gal .hp-gal-item--lead .gallery-item-overlay { opacity: 1; padding: 16px 18px; }
+.hp-gal .hp-gal-item--lead .gallery-item-caption { font-size: 15px; }
+.hp-gal .hp-gal-item--lead .hp-gal-zoom { opacity: 0; transition: opacity .3s ease, transform .3s ease; }
+.hp-gal .hp-gal-item--lead:hover .hp-gal-zoom { opacity: 1; }
+
+/* "+N more photos" tile */
+.hp-gal-more {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(23, 37, 84, .72); transition: background .3s ease;
+}
+.hp-gal-item--more:hover .hp-gal-more { background: rgba(23, 37, 84, .82); }
+.hp-gal-more-num { color: #fff; font-size: 26px; font-weight: 700; line-height: 1; }
+.hp-gal-more-text { margin-top: 4px; color: #fbbf24; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+
+.dark .hp-gal-panel { background: #1f2937; border-color: #374151; }
+
+@media (max-width: 600px) {
+    .hp-gal { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 10px; }
+    .hp-gal .gallery-item-caption { display: none; }
+    .hp-gal .hp-gal-item--lead .gallery-item-caption { display: -webkit-box; font-size: 13px; }
+}
+
 .media-container .video-info h5 { color: #1e3a8a; }
 .media-container .video-info p { color: #4b5563; }
 
@@ -622,6 +673,115 @@ function vvuSectionSubtitle($sections, $key, $default) {
     .hp-prog-btn { flex: 1 1 0; justify-content: center; }
 }
 
+
+/* ---- News, events & notices: three matching panels ---------------------- */
+.hp-upd {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;
+    max-width: 1240px; margin: 0 auto; align-items: start;
+}
+.hp-upd-panel {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 22px 44px -34px rgba(15, 23, 42, .5);
+}
+.hp-upd-head {
+    display: flex; align-items: center; gap: 12px; padding: 16px 18px;
+    border-bottom: 1px solid #eef1f5; background: linear-gradient(180deg, #f8fafc, #fff);
+}
+.hp-upd-icon {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 12px; background: #1e3a8a;
+}
+.hp-upd-icon .material-symbols-outlined { font-size: 21px; color: #fff; }
+.hp-upd-title {
+    flex: 1; min-width: 0; color: #1e3a8a; font-family: var(--vvu-title-font); font-weight: var(--vvu-title-weight);
+    font-size: 19px; line-height: 1.2; letter-spacing: normal;
+}
+.hp-upd-all {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 3px;
+    color: #b45309 !important; font-size: 13px; font-weight: 700; text-decoration: none !important;
+}
+.hp-upd-all .material-symbols-outlined { font-size: 17px; color: inherit; transition: transform .25s ease; }
+.hp-upd-all:hover .material-symbols-outlined { transform: translateX(3px); }
+
+.hp-upd-list { display: flex; flex-direction: column; padding: 8px; }
+
+/* Shared text pieces */
+.hp-upd-name {
+    color: #172554; font-size: 15px; font-weight: 600; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    transition: color .25s ease;
+}
+.hp-upd-name--lg { font-size: 17px; }
+.hp-upd-label { color: #b45309; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.hp-upd-date { display: inline-flex; align-items: center; gap: 5px; color: #6b7280; font-size: 13px; font-weight: 400; }
+.hp-upd-date .material-symbols-outlined { font-size: 15px; color: #9ca3af; }
+
+/* Featured news story */
+.hp-upd-feature {
+    display: block; margin-bottom: 4px; border-radius: 14px; overflow: hidden;
+    text-decoration: none !important; transition: background .25s ease;
+}
+.hp-upd-feature-media { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 14px; background: #e5e7eb; }
+.hp-upd-feature-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
+.hp-upd-feature:hover .hp-upd-feature-media img { transform: scale(1.05); }
+.hp-upd-chip {
+    position: absolute; left: 12px; top: 12px; padding: 4px 10px; border-radius: 999px;
+    background: #fbbf24; color: #172554; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+.hp-upd-feature-body { display: flex; flex-direction: column; gap: 6px; padding: 14px 10px 12px; }
+.hp-upd-feature:hover .hp-upd-name { color: #1d4ed8; }
+
+/* Compact rows */
+.hp-upd-row {
+    display: flex; align-items: center; gap: 14px; padding: 12px 10px; border-radius: 14px;
+    text-decoration: none !important; transition: background .25s ease;
+}
+.hp-upd-row + .hp-upd-row, .hp-upd-feature + .hp-upd-row { border-top: 1px solid #f1f4f8; border-radius: 0 0 14px 14px; }
+.hp-upd-row:hover { background: #f5f7fb; border-radius: 14px; }
+.hp-upd-row:hover .hp-upd-name { color: #1d4ed8; }
+.hp-upd-row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.hp-upd-thumb { flex: 0 0 76px; height: 64px; border-radius: 10px; overflow: hidden; background: #e5e7eb; }
+.hp-upd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+.hp-upd-row:hover .hp-upd-thumb img { transform: scale(1.08); }
+
+/* Event date tile */
+.hp-upd-cal {
+    flex: 0 0 64px; height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 14px; background: linear-gradient(150deg, #1e3a8a, #172554);
+    box-shadow: 0 10px 20px -14px rgba(15, 23, 42, .8);
+}
+.hp-upd-cal-day { color: #fff; font-size: 24px; font-weight: 700; line-height: 1; }
+.hp-upd-cal-mon { margin-top: 4px; color: #fbbf24; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+
+/* Notice pin */
+.hp-upd-pin {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%; background: rgba(251, 191, 36, .16);
+    align-self: flex-start; margin-top: 2px;
+}
+.hp-upd-pin .material-symbols-outlined { font-size: 19px; color: #b45309; }
+.hp-upd-go { flex: 0 0 auto; font-size: 22px; color: #9ca3af; transition: transform .25s ease, color .25s ease; }
+.hp-upd-row:hover .hp-upd-go { color: #1e3a8a; transform: translateX(3px); }
+
+.hp-upd-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 16px; text-align: center; }
+.hp-upd-empty .material-symbols-outlined { font-size: 36px; color: #cbd5e1; }
+.hp-upd-empty-text { color: #6b7280; font-size: 14px; }
+
+.dark .hp-upd-panel { background: #1f2937; border-color: #374151; }
+.dark .hp-upd-head { background: #1f2937; border-color: #374151; }
+.dark .hp-upd-title { color: #fff; }
+.dark .hp-upd-name { color: #f3f4f6; }
+.dark .hp-upd-row + .hp-upd-row, .dark .hp-upd-feature + .hp-upd-row { border-color: #374151; }
+.dark .hp-upd-row:hover { background: #111827; }
+
+@media (max-width: 1100px) {
+    .hp-upd { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hp-upd-panel:first-child { grid-row: span 2; }
+}
+@media (max-width: 767px) {
+    .hp-upd { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+    .hp-upd-panel:first-child { grid-row: auto; }
+}
 @media (prefers-reduced-motion: reduce) {
     .vvu-dcard,
     .vvu-dcard-media img,
@@ -879,71 +1039,95 @@ function getHImg($path, $cat) {
             <div class="hp-heading" role="heading" aria-level="2"><?php echo htmlspecialchars(vvuSectionTitle($sections, 'news_events', 'Latest News & Events')); ?></div>
             <p class="hp-lead"><?php echo htmlspecialchars(vvuSectionSubtitle($sections, 'news_events', 'Stay informed with the most recent news, upcoming institutional events, and official announcements from Valley View University.')); ?></p>
         </div>
-        <div class="row">
+        <div class="hp-upd">
             <!-- COLUMN 1: LATEST NEWS -->
-            <div class="col-md-4 modern-news-column">
-                <h4>Latest News</h4>
-                <div class="modern-card-list">
+            <div class="hp-upd-panel">
+                <div class="hp-upd-head">
+                    <span class="hp-upd-icon"><span class="material-symbols-outlined">newspaper</span></span>
+                    <div class="hp-upd-title" role="heading" aria-level="3">Latest News</div>
+                    <a href="news_&_events.php" class="hp-upd-all">View all <span class="material-symbols-outlined">arrow_forward</span></a>
+                </div>
+                <div class="hp-upd-list">
                     <?php if (empty($home_news)): ?>
-                        <p>No news articles available.</p>
-                    <?php else: foreach ($home_news as $item): ?>
-                        <a href="news_detail.php?slug=<?php echo urlencode($item['slug']); ?>" class="modern-news-card">
-                            <div class="card-img-box">
-                                <img src="<?php echo htmlspecialchars(vvu_thumb(strip_tags(getHImg($item['featured_image'], 'news')), 300, 300)); ?>"
-                                     width="300" height="300" loading="lazy" decoding="async"
-                                     alt="<?php echo htmlspecialchars(strip_tags($item['title'])); ?>">
-                            </div>
-                            <div class="card-body-box">
-                                <span class="card-category-badge">University News</span>
-                                <h5 class="card-title-text"><?php echo strip_tags($item['title']); ?></h5>
-                                <div class="card-meta-info">
-                                    <span><i class="fa fa-calendar"></i> <?php echo date('M d, Y', strtotime($item['publish_date'])); ?></span>
-                                </div>
-                            </div>
+                        <div class="hp-upd-empty"><span class="material-symbols-outlined">article</span><span class="hp-upd-empty-text">No news articles available.</span></div>
+                    <?php else: foreach ($home_news as $i => $item):
+                        $n_img = strip_tags(getHImg($item['featured_image'], 'news'));
+                        $n_title = strip_tags($item['title']);
+                        $n_date = date('M d, Y', strtotime($item['publish_date']));
+                        if ($i === 0): ?>
+                        <a href="news_detail.php?slug=<?php echo urlencode($item['slug']); ?>" class="hp-upd-feature">
+                            <span class="hp-upd-feature-media">
+                                <img src="<?php echo htmlspecialchars(vvu_thumb($n_img, 640, 360)); ?>" width="640" height="360"
+                                     loading="lazy" decoding="async" alt="<?php echo htmlspecialchars($n_title); ?>">
+                                <span class="hp-upd-chip">University News</span>
+                            </span>
+                            <span class="hp-upd-feature-body">
+                                <span class="hp-upd-date"><span class="material-symbols-outlined">calendar_today</span><?php echo $n_date; ?></span>
+                                <span class="hp-upd-name hp-upd-name--lg"><?php echo htmlspecialchars($n_title); ?></span>
+                            </span>
                         </a>
+                        <?php else: ?>
+                        <a href="news_detail.php?slug=<?php echo urlencode($item['slug']); ?>" class="hp-upd-row">
+                            <span class="hp-upd-thumb">
+                                <img src="<?php echo htmlspecialchars(vvu_thumb($n_img, 300, 300)); ?>" width="300" height="300"
+                                     loading="lazy" decoding="async" alt="<?php echo htmlspecialchars($n_title); ?>">
+                            </span>
+                            <span class="hp-upd-row-body">
+                                <span class="hp-upd-name"><?php echo htmlspecialchars($n_title); ?></span>
+                                <span class="hp-upd-date"><span class="material-symbols-outlined">calendar_today</span><?php echo $n_date; ?></span>
+                            </span>
+                        </a>
+                        <?php endif; ?>
                     <?php endforeach; endif; ?>
                 </div>
             </div>
 
             <!-- COLUMN 2: UPCOMING EVENTS -->
-            <div class="col-md-4 modern-news-column">
-                <h4>Upcoming Events</h4>
-                <div class="modern-card-list">
+            <div class="hp-upd-panel">
+                <div class="hp-upd-head">
+                    <span class="hp-upd-icon"><span class="material-symbols-outlined">event</span></span>
+                    <div class="hp-upd-title" role="heading" aria-level="3">Upcoming Events</div>
+                    <a href="events.php" class="hp-upd-all">View all <span class="material-symbols-outlined">arrow_forward</span></a>
+                </div>
+                <div class="hp-upd-list">
                     <?php if (empty($home_events)): ?>
-                        <p>No upcoming events.</p>
-                    <?php else: foreach ($home_events as $item): ?>
-                        <a href="event_detail.php?slug=<?php echo urlencode($item['slug']); ?>" class="modern-news-card">
-                            <div class="event-date-box">
-                                <span class="event-day"><?php echo date('d', strtotime($item['event_date'] ?? $item['publish_date'])); ?></span>
-                                <span class="event-month"><?php echo date('M', strtotime($item['event_date'] ?? $item['publish_date'])); ?></span>
-                            </div>
-                            <div class="card-body-box">
-                                <span class="card-category-badge">Events</span>
-                                <h5 class="card-title-text"><?php echo strip_tags($item['title']); ?></h5>
-                                <div class="card-meta-info">
-                                    <span><i class="fa fa-map-marker"></i> <?php echo strip_tags($item['event_location'] ?: 'VVU Campus'); ?></span>
-                                </div>
-                            </div>
+                        <div class="hp-upd-empty"><span class="material-symbols-outlined">event_busy</span><span class="hp-upd-empty-text">No upcoming events.</span></div>
+                    <?php else: foreach ($home_events as $item):
+                        $e_ts = strtotime($item['event_date'] ?? $item['publish_date']); ?>
+                        <a href="event_detail.php?slug=<?php echo urlencode($item['slug']); ?>" class="hp-upd-row hp-upd-row--event">
+                            <span class="hp-upd-cal">
+                                <span class="hp-upd-cal-day"><?php echo date('d', $e_ts); ?></span>
+                                <span class="hp-upd-cal-mon"><?php echo date('M', $e_ts); ?></span>
+                            </span>
+                            <span class="hp-upd-row-body">
+                                <span class="hp-upd-label">Event</span>
+                                <span class="hp-upd-name"><?php echo htmlspecialchars(strip_tags($item['title'])); ?></span>
+                                <span class="hp-upd-date"><span class="material-symbols-outlined">location_on</span><?php echo htmlspecialchars(strip_tags($item['event_location'] ?: 'VVU Campus')); ?></span>
+                            </span>
                         </a>
                     <?php endforeach; endif; ?>
                 </div>
             </div>
 
             <!-- COLUMN 3: OFFICIAL NOTICES -->
-            <div class="col-md-4 modern-news-column">
-                <h4>Notices</h4>
-                <div class="modern-card-list">
+            <div class="hp-upd-panel">
+                <div class="hp-upd-head">
+                    <span class="hp-upd-icon"><span class="material-symbols-outlined">campaign</span></span>
+                    <div class="hp-upd-title" role="heading" aria-level="3">Notices</div>
+                    <a href="notices.php" class="hp-upd-all">View all <span class="material-symbols-outlined">arrow_forward</span></a>
+                </div>
+                <div class="hp-upd-list">
                     <?php if (empty($home_notices)): ?>
-                        <p>No official notices.</p>
+                        <div class="hp-upd-empty"><span class="material-symbols-outlined">notifications_off</span><span class="hp-upd-empty-text">No official notices.</span></div>
                     <?php else: foreach ($home_notices as $item): ?>
-                        <a href="notices_detail.php?slug=<?php echo urlencode($item['slug']); ?>" class="modern-news-card">
-                            <div class="card-body-box" style="padding-left: 20px;">
-                                <span class="card-category-badge" style="color: #002147;">Announcement</span>
-                                <h5 class="card-title-text"><?php echo strip_tags($item['title']); ?></h5>
-                                <div class="card-meta-info">
-                                    <span><i class="fa fa-clock-o"></i> Posted on <?php echo date('M d, Y', strtotime($item['publish_date'])); ?></span>
-                                </div>
-                            </div>
+                        <a href="notices_detail.php?slug=<?php echo urlencode($item['slug']); ?>" class="hp-upd-row hp-upd-row--notice">
+                            <span class="hp-upd-pin"><span class="material-symbols-outlined">push_pin</span></span>
+                            <span class="hp-upd-row-body">
+                                <span class="hp-upd-label">Announcement</span>
+                                <span class="hp-upd-name"><?php echo htmlspecialchars(strip_tags($item['title'])); ?></span>
+                                <span class="hp-upd-date"><span class="material-symbols-outlined">schedule</span>Posted <?php echo date('M d, Y', strtotime($item['publish_date'])); ?></span>
+                            </span>
+                            <span class="material-symbols-outlined hp-upd-go">chevron_right</span>
                         </a>
                     <?php endforeach; endif; ?>
                 </div>
@@ -973,25 +1157,51 @@ $video_playable  = $video && ($video_is_upload || $video_embed !== '');
         </div>
         <div class="media-container">
             <!-- PHOTO GALLERY -->
-            <div class="modern-gallery-box">
-                <div class="hp-media-label"><i class="fa fa-camera"></i>Campus Photo Gallery</div>
-                <div class="modern-gallery-grid" id="vvuGallery">
+            <div class="modern-gallery-box hp-gal-panel">
+                <?php
+                // Mosaic: one large tile + 8 small ones fill a 4 x 3 grid. Photos
+                // beyond that stay in the DOM (hidden) so the lightbox still pages
+                // through all of them; the last visible tile says how many remain.
+                $gal_total   = count($gallery);
+                $gal_visible = 9;
+                $gal_extra   = max(0, $gal_total - $gal_visible);
+                ?>
+                <div class="hp-upd-head hp-gal-head">
+                    <span class="hp-upd-icon"><span class="material-symbols-outlined">photo_camera</span></span>
+                    <div class="hp-gal-titles">
+                        <div class="hp-upd-title" role="heading" aria-level="3">Campus Photo Gallery</div>
+                        <?php if ($gal_total): ?><span class="hp-gal-count"><?php echo $gal_total; ?> photo<?php echo $gal_total === 1 ? '' : 's'; ?></span><?php endif; ?>
+                    </div>
+                    <?php if ($gal_total): ?>
+                    <button type="button" class="hp-upd-all hp-gal-all" id="vvuGalleryAll">View all <span class="material-symbols-outlined">arrow_forward</span></button>
+                    <?php endif; ?>
+                </div>
+                <div class="modern-gallery-grid hp-gal" id="vvuGallery">
                     <?php foreach ($gallery as $i => $img):
                         $full    = strip_tags($img['image_url']);
                         $caption = strip_tags($img['caption']);
+                        $is_more  = ($gal_extra > 0 && $i === $gal_visible - 1);
+                        $is_extra = ($i >= $gal_visible);
+                        $cls = 'modern-gallery-item' . ($i === 0 ? ' hp-gal-item--lead' : '') . ($is_more ? ' hp-gal-item--more' : '') . ($is_extra ? ' hp-gal-item--extra' : '');
                     ?>
-                        <button type="button" class="modern-gallery-item"
+                        <button type="button" class="<?php echo $cls; ?>"
                                 data-index="<?php echo $i; ?>"
                                 data-full="<?php echo htmlspecialchars($full); ?>"
                                 data-caption="<?php echo htmlspecialchars($caption); ?>"
                                 aria-label="View photo: <?php echo htmlspecialchars($caption); ?>">
-                            <img src="<?php echo htmlspecialchars(vvu_thumb($full, 500, 500)); ?>"
+                            <?php if (!$is_extra): ?>
+                            <img src="<?php echo htmlspecialchars(vvu_thumb($full, $i === 0 ? 800 : 500, $i === 0 ? 800 : 500)); ?>"
                                  alt="<?php echo htmlspecialchars($caption); ?>"
                                  width="500" height="500" loading="lazy" decoding="async">
+                            <?php endif; ?>
+                            <?php if ($is_more): ?>
+                            <span class="hp-gal-more"><span class="hp-gal-more-num">+<?php echo $gal_extra; ?></span><span class="hp-gal-more-text">more photos</span></span>
+                            <?php elseif (!$is_extra): ?>
                             <span class="gallery-item-overlay">
-                                <i class="fa fa-search-plus" aria-hidden="true"></i>
-                                <span class="gallery-item-caption"><?php echo htmlspecialchars($caption); ?></span>
+                                <span class="material-symbols-outlined hp-gal-zoom" aria-hidden="true">zoom_in</span>
+                                <?php if ($caption !== ''): ?><span class="gallery-item-caption"><?php echo htmlspecialchars($caption); ?></span><?php endif; ?>
                             </span>
+                            <?php endif; ?>
                         </button>
                     <?php endforeach; ?>
                 </div>
@@ -1109,6 +1319,9 @@ $video_playable  = $video && ($video_is_upload || $video_embed !== '');
     items.forEach(function (el, i) {
         el.addEventListener('click', function () { open(i); });
     });
+
+    var viewAll = document.getElementById('vvuGalleryAll');
+    if (viewAll) viewAll.addEventListener('click', function () { open(0); });
 
     box.addEventListener('click', function (e) {
         var action = e.target.closest('[data-lb]');

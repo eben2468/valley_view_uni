@@ -467,7 +467,8 @@
 
 .news-detail-page .article-body blockquote:before {
     content: '\f10d';
-    font-family: FontAwesome;
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
     position: absolute;
     left: 26px;
     top: 28px;

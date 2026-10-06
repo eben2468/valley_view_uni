@@ -150,7 +150,7 @@ include 'includes/header.php';
 <!-- News Portal CSS -->
 <link rel="stylesheet" href="css/news-portal.css">
 <link rel="stylesheet" href="css/news-modern.css">
-<link rel="stylesheet" href="css/news-editorial.css">
+<link rel="stylesheet" href="css/news-editorial.css?v=3">
 <script src="js/news-modern.js" defer></script>
 
 <!-- SEO Meta Tags -->
@@ -521,25 +521,25 @@ include 'includes/header.php';
                                target="_blank" 
                                class="share-btn share-facebook"
                                title="Share on Facebook">
-                                <i class="fa fa-facebook"></i>
+                                <i class="fa-brands fa-facebook-f"></i>
                             </a>
                             <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>&text=<?php echo urlencode($article['title']); ?>" 
                                target="_blank" 
                                class="share-btn share-twitter"
                                title="Share on Twitter">
-                                <i class="fa fa-twitter"></i>
+                                <i class="fa-brands fa-x-twitter"></i>
                             </a>
                             <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?php echo urlencode('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>&title=<?php echo urlencode($article['title']); ?>" 
                                target="_blank" 
                                class="share-btn share-linkedin"
                                title="Share on LinkedIn">
-                                <i class="fa fa-linkedin"></i>
+                                <i class="fa-brands fa-linkedin-in"></i>
                             </a>
                             <a href="https://wa.me/?text=<?php echo urlencode($article['title'] . ' - ' . 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" 
                                target="_blank" 
                                class="share-btn share-whatsapp"
                                title="Share on WhatsApp">
-                                <i class="fa fa-whatsapp"></i>
+                                <i class="fa-brands fa-whatsapp"></i>
                             </a>
                             <button class="share-btn share-copy" onclick="copyLink()" title="Copy Link">
                                 <i class="fa fa-link"></i>

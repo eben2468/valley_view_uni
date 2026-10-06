@@ -76,13 +76,91 @@ include 'includes/header.php';
 
     /* Keep long tenure strings from wrapping awkwardly */
     .pvc-tenure { font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+    /* ---- Roll of Honour ---- */
+    .pvc-honour {
+        max-width: 920px; margin: 0 auto; overflow: hidden;
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 18px;
+        box-shadow: 0 24px 50px -34px rgba(15, 23, 42, .45);
+    }
+    .pvc-honour-head {
+        display: flex; justify-content: space-between; padding: 14px 26px 14px 92px;
+        background: linear-gradient(120deg, #1e3a8a, #172554);
+    }
+    .pvc-honour-col {
+        color: rgba(255, 255, 255, .85); font-size: 11.5px; font-weight: 700;
+        letter-spacing: .2em; text-transform: uppercase;
+    }
+    .pvc-honour-list { list-style: none; margin: 0; padding: 0; }
+    .pvc-hr {
+        position: relative; display: flex; align-items: center; gap: 16px;
+        margin: 0; padding: 14px 26px; border-top: 1px solid #eef1f5;
+        transition: background .25s ease;
+    }
+    .pvc-hr:first-child { border-top: 0; }
+    .pvc-hr::before {
+        content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+        background: #fbbf24; transform: scaleY(0); transition: transform .25s ease;
+    }
+    .pvc-hr:hover { background: #f8fafc; }
+    .pvc-hr:hover::before { transform: scaleY(1); }
 
-    /* Roll of honour table -> stacked cards on small screens */
+    .pvc-hr-num {
+        flex: 0 0 30px; color: #b45309; font-family: var(--vvu-title-font, 'Cinzel', serif);
+        font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;
+    }
+    .pvc-hr-photo {
+        flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%;
+        object-fit: cover; object-position: top;
+        border: 2px solid #fff; box-shadow: 0 0 0 1px #dbe3f0;
+    }
+    .pvc-hr-who { flex: 1; min-width: 0; }
+    .pvc-hr-name {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+        color: #172554; font-size: 16px; font-weight: 600; line-height: 1.3;
+    }
+    .pvc-hr-role { margin-top: 2px; color: #6b7280; font-size: 13.5px; font-weight: 400; line-height: 1.4; }
+    .pvc-hr-chip {
+        padding: 2px 9px; border-radius: 999px; background: #fbbf24; color: #172554;
+        font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    }
+
+    .pvc-hr-period {
+        flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+        padding: 6px 12px; border-radius: 999px;
+        background: rgba(30, 58, 138, .07); color: #1e3a8a;
+    }
+    .pvc-hr-period .material-symbols-outlined { font-size: 16px; color: #1e3a8a; }
+    .pvc-hr-years {
+        color: #1e3a8a; font-size: 13.5px; font-weight: 600; white-space: nowrap;
+        font-variant-numeric: tabular-nums; letter-spacing: .02em;
+    }
+
+    /* Current office holder */
+    .pvc-hr.is-current { background: linear-gradient(90deg, rgba(251, 191, 36, .12), rgba(251, 191, 36, 0) 70%); }
+    .pvc-hr.is-current::before { transform: scaleY(1); }
+    .pvc-hr.is-current .pvc-hr-photo { box-shadow: 0 0 0 2px #fbbf24; }
+    .pvc-hr.is-current .pvc-hr-period { background: rgba(251, 191, 36, .2); }
+    .pvc-hr.is-current .pvc-hr-period .material-symbols-outlined,
+    .pvc-hr.is-current .pvc-hr-years { color: #92400e; }
+
+    .dark .pvc-honour { background: #111827; border-color: #1f2937; }
+    .dark .pvc-hr { border-color: #1f2937; }
+    .dark .pvc-hr:hover { background: #1f2937; }
+    .dark .pvc-hr-name { color: #f3f4f6; }
+    .dark .pvc-hr-role { color: #9ca3af; }
+    .dark .pvc-hr-photo { border-color: #111827; box-shadow: 0 0 0 1px #374151; }
+    .dark .pvc-hr-period { background: rgba(147, 197, 253, .1); }
+    .dark .pvc-hr-period .material-symbols-outlined, .dark .pvc-hr-years { color: #93c5fd; }
+
     @media (max-width: 640px) {
-        .pvc-roll thead { display: none; }
-        .pvc-roll tr { display: block; padding: 14px 4px; border-bottom: 1px solid rgba(148,163,184,.25); }
-        .pvc-roll td { display: flex; justify-content: space-between; gap: 16px; padding: 4px 0; border: 0; }
-        .pvc-roll td::before { content: attr(data-label); font-weight: 700; color: #64748b; flex: 0 0 auto; }
+        .pvc-honour-head { padding: 12px 18px; }
+        .pvc-honour-col + .pvc-honour-col { display: none; }
+        .pvc-hr { flex-wrap: wrap; gap: 12px; padding: 14px 18px; }
+        .pvc-hr-num { flex-basis: 24px; font-size: 14px; }
+        .pvc-hr-photo { width: 42px; height: 42px; }
+        .pvc-hr-who { flex-basis: calc(100% - 90px); }
+        .pvc-hr-period { margin-left: 78px; padding: 4px 10px; }
+        .pvc-hr-years { font-size: 12.5px; }
     }
 </style>
 
@@ -249,25 +327,32 @@ include 'includes/header.php';
                 <div class="h-1.5 w-24 bg-blue-600 mx-auto rounded-full"></div>
             </div>
 
-            <div class="max-w-4xl mx-auto overflow-x-auto rounded-3xl border border-gray-100 dark:border-gray-800 shadow-lg">
-                <table class="pvc-roll w-full text-left border-collapse bg-white dark:bg-gray-900">
-                    <thead>
-                        <tr class="bg-gray-50 dark:bg-gray-800">
-                            <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">Name</th>
-                            <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">Designation</th>
-                            <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">Period</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($leaders as $l): ?>
-                        <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-blue-50/50 dark:hover:bg-gray-800/50 transition-colors">
-                            <td data-label="Name" class="px-6 py-4 font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($l['name']); ?></td>
-                            <td data-label="Designation" class="px-6 py-4 text-gray-600 dark:text-gray-400"><?php echo htmlspecialchars($l['title']); ?></td>
-                            <td data-label="Period" class="pvc-tenure px-6 py-4 font-semibold text-blue-700 dark:text-blue-300 whitespace-nowrap"><?php echo htmlspecialchars($l['tenure']); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+            <div class="pvc-honour">
+                <div class="pvc-honour-head" aria-hidden="true">
+                    <span class="pvc-honour-col">Leader</span>
+                    <span class="pvc-honour-col">Period of Service</span>
+                </div>
+                <ol class="pvc-honour-list">
+                    <?php foreach ($leaders as $i => $l):
+                        $current = (stripos($l['tenure'], 'present') !== false || stripos($l['tenure'], 'current') !== false); ?>
+                    <li class="pvc-hr<?php echo $current ? ' is-current' : ''; ?>">
+                        <span class="pvc-hr-num"><?php echo str_pad($i + 1, 2, '0', STR_PAD_LEFT); ?></span>
+                        <img class="pvc-hr-photo" src="<?php echo htmlspecialchars($l['photo']); ?>" alt="" loading="lazy"
+                             onerror="this.onerror=null;this.src='images/past-vice-chancellors/dummy.jpg';">
+                        <div class="pvc-hr-who">
+                            <div class="pvc-hr-name">
+                                <?php echo htmlspecialchars($l['name']); ?>
+                                <?php if ($current): ?><span class="pvc-hr-chip">In Office</span><?php endif; ?>
+                            </div>
+                            <div class="pvc-hr-role"><?php echo htmlspecialchars($l['title']); ?></div>
+                        </div>
+                        <span class="pvc-hr-period">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                            <span class="pvc-hr-years"><?php echo htmlspecialchars($l['tenure']); ?></span>
+                        </span>
+                    </li>
+                    <?php endforeach; ?>
+                </ol>
             </div>
         </div>
     </section>

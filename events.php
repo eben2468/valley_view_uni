@@ -100,7 +100,7 @@ include 'includes/header.php';
 ?>
 
 <!-- Newsroom styles -->
-<link rel="stylesheet" href="css/news-editorial.css">
+<link rel="stylesheet" href="css/news-editorial.css?v=3">
 <script src="js/news-modern.js" defer></script>
 
 <main class="ed-news">

@@ -56,6 +56,16 @@ include 'includes/header.php';
     details summary::-webkit-details-marker {
         display: none;
     }
+    /* "Need Immediate Help?" support cards — compact */
+    .fq-support { max-width: 1040px; gap: 18px; }
+    .fq-support .vm-card { padding: 22px 22px; border-radius: 16px; }
+    .fq-support .vm-icon { width: 40px; height: 40px; }
+    .fq-support .vm-icon .material-symbols-outlined { font-size: 20px; }
+    .fq-support .vm-card-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .fq-support .vm-card-text { font-size: 14.5px; line-height: 1.6; }
+    .fq-support .vm-card-foot { padding-top: 14px; }
+    .fq-support .vm-link { font-size: 14px; }
+    .fq-support .vm-link .material-symbols-outlined { font-size: 18px; }
 </style>
 
 <main class="flex-grow bg-gray-50 dark:bg-gray-900">
@@ -198,10 +208,10 @@ include 'includes/header.php';
             </div>
 
             <?php if (!empty($faq_support)): ?>
-            <div class="vm-grid vm-wrap" style="margin-top: 40px;">
+            <div class="vm-grid vm-wrap fq-support" style="margin-top: 32px;">
                 <?php foreach ($faq_support as $sup): ?>
                 <div class="vm-card vm-card--glass">
-                    <span class="vm-icon" style="margin-bottom: 18px;"><span class="material-symbols-outlined"><?php echo strip_tags($sup['icon']); ?></span></span>
+                    <span class="vm-icon" style="margin-bottom: 12px;"><span class="material-symbols-outlined"><?php echo strip_tags($sup['icon']); ?></span></span>
                     <div class="vm-card-title vm-card-title--plain" role="heading" aria-level="3"><?php echo htmlspecialchars(strip_tags($sup['title'])); ?></div>
                     <p class="vm-card-text"><?php echo htmlspecialchars(strip_tags($sup['description'])); ?></p>
                     <div class="vm-card-foot">

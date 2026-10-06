@@ -139,9 +139,15 @@ function getProgramBadgeColor($category) {
     return $colors[$category] ?? 'bg-blue-600';
 }
 
+// Plain text from admin-entered content, safe for HTML output
+function ad_t($s) {
+    return htmlspecialchars(strip_tags((string) $s), ENT_QUOTES, 'UTF-8');
+}
+
 include 'includes/header.php';
 ?>
 
+<link rel="stylesheet" href="css/vvu-modern.css?v=1.0">
 <style>
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -183,54 +189,332 @@ include 'includes/header.php';
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    .admission-card {
-        transition: all 0.3s ease;
+
+    /* ==== Admissions page (below the hero) — builds on css/vvu-modern.css ==== */
+
+    /* Stats strip overlapping the hero */
+    .ad-stats {
+        display: grid; grid-template-columns: repeat(var(--ad-cols, 4), minmax(0, 1fr));
+        max-width: 1040px; margin: 0 auto; overflow: hidden;
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 18px;
+        box-shadow: 0 28px 50px -30px rgba(15, 23, 42, .45);
     }
-    .admission-card:hover {
-        transform: translateY(-10px);
+    .ad-stat {
+        display: flex; flex-direction: column; align-items: center; text-align: center;
+        padding: 24px 14px 22px; border-left: 1px solid #eef1f5;
     }
-    .notice-item {
-        transition: all 0.3s ease;
+    .ad-stat:first-child { border-left: 0; }
+    .ad-stat-icon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 42px; height: 42px; margin-bottom: 10px; border-radius: 50%;
+        background: rgba(30, 58, 138, .08);
     }
-    .notice-item:hover {
-        transform: translateX(5px);
+    .ad-stat-icon .material-symbols-outlined { font-size: 22px; color: #1e3a8a; }
+    .ad-stat-value { color: #1e3a8a; font-size: 30px; font-weight: 700; line-height: 1.1; }
+    .ad-stat-label {
+        margin-top: 6px; color: #6b7280; font-size: 12px; font-weight: 700;
+        letter-spacing: .14em; text-transform: uppercase;
     }
-    .stat-card {
-        transition: all 0.3s ease;
+    .dark .ad-stats { background: #1f2937; border-color: #374151; }
+    .dark .ad-stat { border-color: #374151; }
+    .dark .ad-stat-value { color: #fff; }
+
+    /* Get in touch + notice board */
+    .ad-touch { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; align-items: start; }
+    .ad-contact {
+        position: relative; overflow: hidden; padding: 34px 32px; border-radius: 20px;
+        background: linear-gradient(140deg, #1e3a8a 0%, #172554 100%); color: #fff;
     }
-    .stat-card:hover {
-        transform: scale(1.05);
+    .ad-contact::after {
+        content: ""; position: absolute; width: 260px; height: 260px; right: -110px; top: -110px;
+        border-radius: 50%; background: rgba(255, 255, 255, .06); pointer-events: none;
     }
-    .requirement-card {
-        transition: all 0.3s ease;
+    .ad-contact > * { position: relative; z-index: 1; }
+    .ad-contact .vm-kicker { color: #fbbf24; margin-bottom: 10px; }
+    .ad-contact-title {
+        color: #fff; font-family: var(--vvu-title-font); font-weight: var(--vvu-title-weight);
+        font-size: 30px; line-height: 1.2;
     }
-    .requirement-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    .ad-contact-sub { margin: 6px 0 0; color: rgba(255, 255, 255, .7); font-size: 15px; font-weight: 400; }
+    .ad-contact-text { margin: 18px 0 0; color: rgba(255, 255, 255, .88); font-size: 16px; font-weight: 400; line-height: 1.65; }
+    .ad-contact-rows { display: grid; gap: 10px; margin-top: 22px; }
+    .ad-contact-row {
+        display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px;
+        background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .14);
+        text-decoration: none !important; transition: background .25s ease;
     }
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        left: -30px;
-        top: 0;
-        width: 20px;
-        height: 20px;
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        border-radius: 50%;
-        border: 4px solid #fff;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    .ad-contact-row:hover { background: rgba(255, 255, 255, .14); }
+    .ad-contact-row .material-symbols-outlined { font-size: 20px; color: #fbbf24; }
+    .ad-contact-val { color: #fff; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+    .ad-contact-btn { margin-top: 22px; width: 100%; justify-content: center; }
+
+    .ad-notices-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .ad-notices-head .vm-kicker { margin-bottom: 6px; }
+    .ad-notices-title {
+        color: #1e3a8a; font-family: var(--vvu-title-font); font-weight: var(--vvu-title-weight);
+        font-size: 30px; line-height: 1.2;
     }
-    .timeline-item::after {
-        content: '';
-        position: absolute;
-        left: -21px;
-        top: 20px;
-        width: 2px;
-        height: calc(100% + 20px);
-        background: linear-gradient(to bottom, #3b82f6, #dbeafe);
+    .ad-notice {
+        display: flex; align-items: center; gap: 18px; margin-bottom: 12px; padding: 16px 18px;
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 14px;
+        text-decoration: none !important; transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
     }
-    .timeline-item:last-child::after {
-        display: none;
+    .ad-notice:hover { border-color: #1e3a8a; transform: translateX(4px); box-shadow: 0 14px 30px -24px rgba(15, 23, 42, .5); }
+    .ad-date {
+        flex: 0 0 64px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        height: 64px; border-radius: 12px; background: #1e3a8a;
+    }
+    .ad-date-day { color: #fbbf24; font-size: 22px; font-weight: 700; line-height: 1; }
+    .ad-date-mon { margin-top: 4px; color: rgba(255, 255, 255, .85); font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .ad-notice-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .ad-notice-title {
+        color: #172554; font-size: 16px; font-weight: 600; line-height: 1.4;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .ad-notice-text {
+        color: #6b7280; font-size: 14px; font-weight: 400; line-height: 1.55;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .ad-notice-go { flex: 0 0 auto; font-size: 24px; color: #b45309; transition: transform .25s ease; }
+    .ad-notice:hover .ad-notice-go { transform: translateX(3px); }
+    .ad-notice--empty { color: #6b7280; }
+    .ad-notice--empty:hover { transform: none; border-color: #e5e7eb; box-shadow: none; }
+    .ad-notice--empty .material-symbols-outlined { font-size: 26px; color: #9ca3af; }
+    .dark .ad-notices-title { color: #fff; }
+    .dark .ad-notice { background: #1f2937; border-color: #374151; }
+    .dark .ad-notice-title { color: #f3f4f6; }
+    .dark .ad-notice-text { color: #9ca3af; }
+
+    /* Why choose: compact corner cards */
+    .ad-why .vm-card--corner { padding: 26px 24px 96px; }
+    .ad-why .vm-card-title { font-size: 19px; font-weight: 600; }
+    .ad-why .vm-card-text { font-size: 15.5px; }
+    .ad-why .vm-card-corner { width: 84px; height: 84px; padding: 0 16px 16px 0; }
+    .ad-why .vm-card-corner .material-symbols-outlined { font-size: 32px; width: 32px; height: 32px; }
+
+    /* Featured programmes */
+    .ad-prog {
+        display: flex; flex-direction: column; overflow: hidden;
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 20px;
+        box-shadow: 0 18px 40px -30px rgba(15, 23, 42, .45);
+        text-decoration: none !important; transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+    }
+    .ad-prog:hover { transform: translateY(-6px); border-color: #c7d2fe; box-shadow: 0 30px 54px -30px rgba(15, 23, 42, .55); }
+    .ad-prog-media { position: relative; display: block; height: 210px; overflow: hidden; background: #e5e7eb; }
+    .ad-prog-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .7s ease; }
+    .ad-prog:hover .ad-prog-media img { transform: scale(1.07); }
+    /* Fade at the bottom so the faculty line reads over any photo */
+    .ad-prog-media::after {
+        content: ""; position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(15, 23, 42, .78) 0%, rgba(15, 23, 42, .1) 50%, rgba(15, 23, 42, 0) 70%);
+    }
+    .ad-prog-chip {
+        position: absolute; z-index: 1; top: 14px; left: 14px; padding: 5px 12px; border-radius: 999px;
+        background: rgba(255, 255, 255, .94); color: #1e3a8a; font-size: 11.5px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 6px 14px -8px rgba(15, 23, 42, .6);
+    }
+    .ad-prog-faculty {
+        position: absolute; z-index: 1; left: 18px; right: 84px; bottom: 14px;
+        display: flex; align-items: center; gap: 6px;
+        color: #fff; font-size: 13px; font-weight: 600; line-height: 1.35;
+    }
+    .ad-prog-faculty .material-symbols-outlined { font-size: 17px; color: #fbbf24; flex: 0 0 auto; }
+    .ad-prog-body { position: relative; flex: 1; display: flex; flex-direction: column; padding: 22px 22px 20px; }
+    /* Icon badge sitting on the photo's lower edge */
+    .ad-prog-badge {
+        position: absolute; top: -28px; right: 20px; display: flex; align-items: center; justify-content: center;
+        width: 56px; height: 56px; border-radius: 50%; background: #1e3a8a;
+        border: 4px solid #fff; box-shadow: 0 10px 20px -10px rgba(15, 23, 42, .6);
+        transition: background .3s ease, transform .3s ease;
+    }
+    .ad-prog-badge .material-symbols-outlined { font-size: 24px; color: #fbbf24; transition: color .3s ease; }
+    .ad-prog:hover .ad-prog-badge { background: #fbbf24; transform: rotate(-8deg); }
+    .ad-prog:hover .ad-prog-badge .material-symbols-outlined { color: #172554; }
+    .ad-prog-title { padding-right: 56px; color: #172554; font-size: 19px; font-weight: 600; line-height: 1.3; }
+    .ad-prog-text {
+        margin: 10px 0 18px; color: #6b7280; font-size: 15px; font-weight: 400; line-height: 1.6;
+        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .ad-prog-foot {
+        margin-top: auto; padding-top: 16px; display: flex; align-items: center; justify-content: space-between;
+        border-top: 1px solid #eef1f5;
+    }
+    .ad-prog-cta { color: #1e3a8a; font-size: 14.5px; font-weight: 700; }
+    .ad-prog-go {
+        display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(30, 58, 138, .08); transition: background .3s ease, transform .3s ease;
+    }
+    .ad-prog-go .material-symbols-outlined { font-size: 19px; color: #1e3a8a; transition: color .3s ease; }
+    .ad-prog:hover .ad-prog-go { background: #1e3a8a; transform: translateX(3px); }
+    .ad-prog:hover .ad-prog-go .material-symbols-outlined { color: #fff; }
+    .dark .ad-prog { background: #1f2937; border-color: #374151; }
+    .dark .ad-prog-badge { border-color: #1f2937; }
+    .dark .ad-prog-title { color: #f3f4f6; }
+    .dark .ad-prog-text { color: #9ca3af; }
+    .dark .ad-prog-foot { border-color: #374151; }
+    .dark .ad-prog-cta { color: #93c5fd; }
+
+    /* Requirements: navy header + checklist */
+    .ad-req {
+        display: flex; flex-direction: column; overflow: hidden;
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 20px;
+        box-shadow: 0 18px 40px -30px rgba(15, 23, 42, .45);
+        transition: transform .35s ease, box-shadow .35s ease;
+    }
+    .ad-req:hover { transform: translateY(-6px); box-shadow: 0 30px 54px -30px rgba(15, 23, 42, .55); }
+    .ad-req-head {
+        position: relative; overflow: hidden; display: flex; align-items: center; gap: 14px;
+        padding: 22px 22px; background: linear-gradient(135deg, #1e3a8a, #172554);
+    }
+    .ad-req-head::after {
+        content: ""; position: absolute; right: -40px; top: -60px; width: 150px; height: 150px;
+        border-radius: 50%; background: rgba(255, 255, 255, .06);
+    }
+    .ad-req-icon {
+        position: relative; z-index: 1; flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+        width: 48px; height: 48px; border-radius: 14px; background: #fbbf24;
+    }
+    .ad-req-icon .material-symbols-outlined { font-size: 26px; color: #172554; }
+    .ad-req-head > div { position: relative; z-index: 1; }
+    .ad-req-title { color: #fff; font-size: 20px; font-weight: 600; line-height: 1.25; }
+    .ad-req-sub { display: block; margin-top: 3px; color: #fcd34d; font-size: 13px; font-weight: 600; }
+    .ad-req-list { list-style: none; margin: 0; padding: 20px 22px 6px; display: grid; gap: 12px; }
+    .ad-req-list li { display: flex; align-items: flex-start; gap: 10px; margin: 0; }
+    .ad-req-list .material-symbols-outlined {
+        flex: 0 0 auto; margin-top: 1px; font-size: 20px; color: #b45309;
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .ad-req-point { color: #4b5563; font-size: 15px; font-weight: 400; line-height: 1.6; }
+    .ad-req-foot {
+        margin: auto 22px 0; padding: 14px 0 18px; border-top: 1px solid #eef1f5;
+        display: inline-flex; align-items: center; gap: 6px;
+        color: #1e3a8a !important; font-size: 14.5px; font-weight: 700; text-decoration: none !important;
+    }
+    .ad-req-foot .material-symbols-outlined { font-size: 19px; color: inherit; transition: transform .3s ease; }
+    .ad-req-foot:hover .material-symbols-outlined { transform: translateX(4px); }
+    .dark .ad-req { background: #1f2937; border-color: #374151; }
+    .dark .ad-req-point { color: #d1d5db; }
+    .dark .ad-req-foot { color: #93c5fd !important; border-color: #374151; }
+
+    /* Admission process steps on the navy band */
+    .ad-process { padding: 72px 0 68px; }
+    .ad-steps {
+        position: relative; list-style: none; margin: 44px auto 0; padding: 0; max-width: 1160px;
+        display: grid; grid-template-columns: repeat(var(--ad-cols, 4), minmax(0, 1fr)); gap: 22px;
+    }
+    /* Connector through the number circles */
+    .ad-steps::before {
+        content: ""; position: absolute; top: 24px; left: 12%; right: 12%; height: 2px;
+        background: repeating-linear-gradient(90deg, rgba(251, 191, 36, .7) 0 8px, transparent 8px 16px);
+    }
+    .ad-step { position: relative; margin: 0; display: flex; flex-direction: column; align-items: center; }
+    .ad-step-num {
+        position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
+        width: 50px; height: 50px; border-radius: 50%; background: #fbbf24; color: #172554;
+        font-size: 18px; font-weight: 700; box-shadow: 0 0 0 6px rgba(251, 191, 36, .18);
+    }
+    .ad-step-card {
+        flex: 1; width: 100%; margin-top: 18px; padding: 22px 20px; text-align: center;
+        background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); border-radius: 16px;
+        transition: background .3s ease, transform .3s ease;
+    }
+    .ad-step:hover .ad-step-card { background: rgba(255, 255, 255, .11); transform: translateY(-4px); }
+    .ad-step-icon { font-size: 28px; color: #fbbf24; }
+    .ad-step-title { margin-top: 8px; color: #fff; font-size: 18px; font-weight: 600; line-height: 1.3; }
+    .ad-step-text { margin: 8px 0 0; color: rgba(255, 255, 255, .78); font-size: 14.5px; font-weight: 400; line-height: 1.6; }
+
+    /* Latest news: featured story + compact list */
+    .ad-news { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 24px; align-items: stretch; }
+    .ad-news--single { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
+    .ad-lead {
+        position: relative; display: flex; align-items: flex-end; min-height: 440px; overflow: hidden;
+        border-radius: 22px; background: #172554; text-decoration: none !important;
+        box-shadow: 0 26px 50px -30px rgba(15, 23, 42, .6);
+    }
+    .ad-lead img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .8s ease; }
+    .ad-lead::after {
+        content: ""; position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(15, 23, 42, .92) 0%, rgba(15, 23, 42, .55) 45%, rgba(15, 23, 42, .05) 80%);
+    }
+    .ad-lead:hover img { transform: scale(1.05); }
+    .ad-lead-body { position: relative; z-index: 1; display: flex; flex-direction: column; padding: 28px 28px 26px; }
+    .ad-lead-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+    .ad-lead .ad-news-chip { margin: 0; background: #fbbf24; color: #172554; }
+    .ad-lead-date { display: inline-flex; align-items: center; gap: 6px; color: rgba(255, 255, 255, .8); font-size: 13px; font-weight: 500; }
+    .ad-lead-date .material-symbols-outlined { font-size: 16px; color: #fbbf24; }
+    .ad-lead-title {
+        color: #fff; font-size: 24px; font-weight: 600; line-height: 1.3;
+        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .ad-lead-text {
+        margin-top: 10px; color: rgba(255, 255, 255, .82); font-size: 15px; font-weight: 400; line-height: 1.6;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .ad-lead-more { margin-top: 16px; display: inline-flex; align-items: center; gap: 6px; color: #fbbf24; font-size: 14.5px; font-weight: 700; }
+    .ad-lead-more .material-symbols-outlined { font-size: 19px; color: inherit; transition: transform .3s ease; }
+    .ad-lead:hover .ad-lead-more .material-symbols-outlined { transform: translateX(4px); }
+
+    .ad-news-chip {
+        align-self: flex-start; padding: 4px 11px; border-radius: 999px;
+        background: rgba(30, 58, 138, .08); color: #1e3a8a; font-size: 11.5px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase;
+    }
+
+    .ad-more { display: flex; flex-direction: column; gap: 14px; }
+    .ad-row {
+        flex: 1; display: flex; align-items: center; gap: 16px; padding: 14px;
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 18px;
+        text-decoration: none !important; transition: border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+    }
+    .ad-row:hover { border-color: #1e3a8a; transform: translateX(4px); box-shadow: 0 18px 36px -28px rgba(15, 23, 42, .5); }
+    .ad-row-media { flex: 0 0 116px; height: 100px; position: relative; overflow: hidden; border-radius: 12px; background: #e5e7eb; }
+    .ad-row-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+    .ad-row:hover .ad-row-media img { transform: scale(1.08); }
+    .ad-row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .ad-row-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .ad-row-chip { color: #b45309; font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .ad-row-date { color: #9ca3af; font-size: 12.5px; }
+    .ad-row-chip + .ad-row-date::before { content: "•"; margin-right: 10px; color: #d1d5db; }
+    .ad-row-title {
+        color: #172554; font-size: 16px; font-weight: 600; line-height: 1.4;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .ad-row-text {
+        margin-top: 4px; color: #6b7280; font-size: 13.5px; font-weight: 400; line-height: 1.5;
+        display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .ad-row-go { flex: 0 0 auto; font-size: 20px; color: #1e3a8a; transition: transform .3s ease; }
+    .ad-row:hover .ad-row-go { transform: translateX(3px); }
+    .dark .ad-row { background: #1f2937; border-color: #374151; }
+    .dark .ad-row-title { color: #f3f4f6; }
+    .dark .ad-row-text { color: #9ca3af; }
+    .dark .ad-row-go { color: #93c5fd; }
+
+    @media (max-width: 1023px) {
+        .ad-touch { grid-template-columns: 1fr; }
+        .ad-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 30px; }
+        .ad-steps::before { display: none; }
+        .ad-news { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 767px) {
+        .ad-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ad-stat:nth-child(odd) { border-left: 0; }
+        .ad-stat:nth-child(n+3) { border-top: 1px solid #eef1f5; }
+        .ad-stat { padding: 18px 10px; }
+        .ad-stat-value { font-size: 24px; }
+        .ad-contact { padding: 28px 22px; }
+        .ad-contact-title, .ad-notices-title { font-size: 25px; }
+        .ad-notices-head { flex-direction: column; align-items: flex-start; }
+        .ad-notice { gap: 14px; padding: 14px; }
+        .ad-date { flex-basis: 56px; height: 56px; }
+        .ad-process { padding: 52px 0 48px; }
+    }
+    @media (max-width: 560px) {
+        .ad-steps { grid-template-columns: 1fr; }
+        .ad-lead { min-height: 360px; }
+        .ad-lead-title { font-size: 20px; }
+        .ad-row-media { flex-basis: 92px; height: 84px; }
+        .ad-row-go { display: none; }
     }
 </style>
 
@@ -280,30 +564,24 @@ include 'includes/header.php';
         </div>
     </section>
 
-    <!-- Quick Stats Section -->
-    <section class="relative z-20 -mt-16 pb-12">
+    <!-- Quick Stats -->
+    <?php if (!empty($page_stats)): ?>
+    <section class="relative z-20 -mt-16 pb-4">
         <div class="container">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-                <?php 
-                $stat_colors = ['blue', 'green', 'yellow', 'purple'];
-                $stat_index = 0;
-                foreach ($page_stats as $stat): 
-                    $color = $stat_colors[$stat_index % 4];
-                    $stat_index++;
-                ?>
-                <div class="stat-card text-center p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700">
-                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-<?php echo $color; ?>-500 to-<?php echo $color; ?>-700 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white text-3xl"><?php echo strip_tags($stat['stat_icon'] ?? 'star'); ?></span>
-                    </div>
-                    <h3 class="text-4xl font-black text-gray-900 dark:text-white mb-2"><?php echo strip_tags($stat['stat_value']); ?></h3>
-                    <p class="text-lg text-gray-600 dark:text-gray-400 font-medium"><?php echo strip_tags($stat['stat_label']); ?></p>
+            <div class="ad-stats" style="--ad-cols: <?php echo min(4, count($page_stats)); ?>;">
+                <?php foreach ($page_stats as $stat): ?>
+                <div class="ad-stat">
+                    <span class="ad-stat-icon"><span class="material-symbols-outlined"><?php echo ad_t($stat['stat_icon'] ?: 'star'); ?></span></span>
+                    <span class="ad-stat-value"><?php echo ad_t($stat['stat_value']); ?></span>
+                    <span class="ad-stat-label"><?php echo ad_t($stat['stat_label']); ?></span>
                 </div>
                 <?php endforeach; ?>
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
-    <!-- Quick Contact & Notices -->
+    <!-- Get in Touch & Notice Board -->
     <?php
     $contact_section = $sections_map['contact'] ?? ['section_title' => 'Get in Touch', 'section_subtitle' => 'Your first point of contact'];
     $contact_items = $items_map['contact'] ?? [];
@@ -321,342 +599,294 @@ include 'includes/header.php';
         elseif ($ci['item_title'] === 'Button Text') { $contact_btn_text = $ci['item_description']; $contact_btn_link = $ci['item_link']; }
     }
     ?>
-    <section class="py-24 bg-white dark:bg-gray-800 relative z-20 mx-auto max-w-7xl rounded-[3rem] shadow-2xl overflow-hidden">
+    <section class="vm-section vm-section--white">
         <div class="container">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                <!-- Contact Form Area -->
-                <div class="p-10 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800">
-                    <div class="flex items-center gap-6 mb-10">
-                        <div class="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg">
-                            <span class="material-symbols-outlined text-3xl">contact_support</span>
-                        </div>
-                        <div>
-                            <h2 class="text-4xl font-black text-gray-900 dark:text-white"><?php echo strip_tags($contact_section['section_title']); ?></h2>
-                            <p class="text-xl text-gray-500 dark:text-gray-400 font-medium"><?php echo strip_tags($contact_section['section_subtitle']); ?></p>
-                        </div>
-                    </div>
-                    <p class="text-3xl text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">
-                        <?php echo strip_tags($contact_desc); ?>
-                    </p>
-                    <div class="space-y-6">
-                        <a href="<?php echo strip_tags($contact_btn_link); ?>" class="inline-flex items-center gap-4 px-10 py-5 bg-blue-600 text-white text-xl font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg w-full justify-center">
-                            <?php echo strip_tags($contact_btn_text); ?>
-                            <span class="material-symbols-outlined">send</span>
+            <div class="ad-touch vm-wrap">
+                <!-- Contact panel -->
+                <div class="ad-contact">
+                    <span class="vm-kicker">Admissions Office</span>
+                    <div class="ad-contact-title" role="heading" aria-level="2"><?php echo ad_t($contact_section['section_title']); ?></div>
+                    <p class="ad-contact-sub"><?php echo ad_t($contact_section['section_subtitle']); ?></p>
+                    <?php if ($contact_desc !== ''): ?>
+                    <p class="ad-contact-text"><?php echo ad_t($contact_desc); ?></p>
+                    <?php endif; ?>
+                    <div class="ad-contact-rows">
+                        <a href="<?php echo ad_t($contact_phone_link); ?>" class="ad-contact-row">
+                            <span class="material-symbols-outlined">call</span>
+                            <span class="ad-contact-val"><?php echo ad_t($contact_phone); ?></span>
                         </a>
-                        <div class="grid grid-cols-2 gap-4">
-                            <a href="<?php echo strip_tags($contact_phone_link); ?>" class="flex items-center gap-3 px-6 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all">
-                                <span class="material-symbols-outlined text-blue-600">call</span>
-                                <span class="text-gray-700 dark:text-gray-300 font-medium"><?php echo strip_tags($contact_phone); ?></span>
-                            </a>
-                            <a href="<?php echo strip_tags($contact_email_link); ?>" class="flex items-center gap-3 px-6 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all">
-                                <span class="material-symbols-outlined text-blue-600">mail</span>
-                                <span class="text-gray-700 dark:text-gray-300 font-medium truncate"><?php echo strip_tags($contact_email); ?></span>
-                            </a>
-                        </div>
+                        <a href="<?php echo ad_t($contact_email_link); ?>" class="ad-contact-row">
+                            <span class="material-symbols-outlined">mail</span>
+                            <span class="ad-contact-val"><?php echo ad_t($contact_email); ?></span>
+                        </a>
                     </div>
+                    <a href="<?php echo ad_t($contact_btn_link); ?>" class="vm-btn vm-btn--gold ad-contact-btn">
+                        <span class="material-symbols-outlined">send</span><?php echo ad_t(ucwords(strtolower($contact_btn_text))); ?>
+                    </a>
                 </div>
 
-                <!-- Notice Board - Dynamic -->
-                <div class="p-10">
-                    <div class="flex items-center gap-6 mb-10">
-                        <div class="w-16 h-16 rounded-2xl bg-yellow-500 flex items-center justify-center text-white shadow-lg">
-                            <span class="material-symbols-outlined text-3xl">campaign</span>
+                <!-- Notice board -->
+                <div class="ad-notices">
+                    <div class="ad-notices-head">
+                        <div>
+                            <span class="vm-kicker">Stay Informed</span>
+                            <div class="ad-notices-title" role="heading" aria-level="2">Notice Board</div>
                         </div>
-                        <h2 class="text-4xl font-black text-gray-900 dark:text-white">Notice Board</h2>
+                        <a href="notices.php" class="vm-link">See All Notices <span class="material-symbols-outlined">arrow_forward</span></a>
                     </div>
-                    <div class="space-y-6">
-                        <?php if (empty($notices)): ?>
-                            <p class="text-2xl text-gray-500 dark:text-gray-400 italic">No notices available at this time.</p>
-                        <?php else: ?>
-                            <?php foreach ($notices as $notice): ?>
-                            <a href="notices_detail.php?slug=<?php echo urlencode($notice['slug']); ?>" class="notice-item block group">
-                                <div class="flex gap-6 items-start p-6 rounded-3xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-all border border-transparent hover:border-gray-100 dark:hover:border-gray-800">
-                                    <div class="text-blue-600 dark:text-blue-400 flex-shrink-0">
-                                        <span class="material-symbols-outlined text-4xl">event_note</span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h4 class="text-2xl font-bold text-gray-800 dark:text-white group-hover:text-blue-600 transition-colors line-clamp-2">
-                                            <?php echo strip_tags($notice['title']); ?>
-                                        </h4>
-                                        <p class="text-xl text-gray-500 mt-2 line-clamp-2">
-                                            <?php echo vvu_excerpt($notice['excerpt'], '', 165) ?: 'Click to read more about this notice.'; ?>
-                                        </p>
-                                        <span class="text-base text-gray-400 mt-2 inline-block">
-                                            <span class="material-symbols-outlined text-base align-middle">schedule</span>
-                                            <?php echo formatAdmissionDate($notice['publish_date']); ?>
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        
-                        <a href="notices.php" class="inline-flex items-center gap-2 text-xl font-bold text-blue-600 hover:gap-4 transition-all mt-4">
-                            See All Notices <span class="material-symbols-outlined">arrow_forward</span>
+
+                    <?php if (empty($notices)): ?>
+                        <div class="ad-notice ad-notice--empty">
+                            <span class="material-symbols-outlined">notifications_off</span>
+                            <span class="ad-notice-text">No notices available at this time.</span>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($notices as $notice): $ts = strtotime($notice['publish_date']); ?>
+                        <a href="notices_detail.php?slug=<?php echo urlencode($notice['slug']); ?>" class="ad-notice">
+                            <span class="ad-date">
+                                <span class="ad-date-day"><?php echo date('d', $ts); ?></span>
+                                <span class="ad-date-mon"><?php echo date('M Y', $ts); ?></span>
+                            </span>
+                            <span class="ad-notice-body">
+                                <span class="ad-notice-title"><?php echo ad_t($notice['title']); ?></span>
+                                <span class="ad-notice-text"><?php echo vvu_excerpt($notice['excerpt'], '', 140) ?: 'Click to read more about this notice.'; ?></span>
+                            </span>
+                            <span class="material-symbols-outlined ad-notice-go">chevron_right</span>
                         </a>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Why Choose VVU Section -->
-    <section class="py-24 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+    <!-- Why Choose VVU -->
+    <?php $why_items = $items_map['why_choose'] ?? []; ?>
+    <section class="vm-section vm-section--tint">
         <div class="container">
-            <div class="max-w-4xl mx-auto text-center mb-20 px-4">
-                <div class="inline-flex items-center gap-4 px-6 py-2.5 mb-8 rounded-2xl bg-gradient-to-r from-blue-700 to-blue-500 shadow-xl text-white mx-auto">
-                    <span class="material-symbols-outlined text-2xl text-white">verified</span>
-                    <span class="text-base font-black uppercase tracking-[0.2em] text-white"><?php echo strip_tags($sections_map['why_choose']['section_title'] ?? 'Why Choose VVU?'); ?></span>
-                </div>
-                <!-- Sized just under the page's other section headings (37.5px/900).
-                     This one is a full sentence, not a short label, so it reads
-                     better a little smaller and lighter. -->
-                <h2 class="text-[20px] md:text-[30px] font-bold text-gray-900 dark:text-white mb-8 tracking-tight leading-snug">
-                    <?php echo strip_tags($sections_map['why_choose']['section_subtitle'] ?? 'Our Unique Value'); ?>
-                </h2>
-                <div class="h-2 w-24 bg-blue-600 mx-auto rounded-full mb-8"></div>
+            <div class="vm-head">
+                <span class="vm-kicker">Our Unique Value</span>
+                <div class="vm-heading" role="heading" aria-level="2"><?php echo ad_t($sections_map['why_choose']['section_title'] ?? 'Why Choose VVU?'); ?></div>
+                <?php if (!empty($sections_map['why_choose']['section_subtitle'])): ?>
+                <p class="vm-lead"><?php echo ad_t($sections_map['why_choose']['section_subtitle']); ?></p>
+                <?php endif; ?>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                <?php 
-                $benefit_colors = ['blue', 'green', 'indigo', 'purple', 'red', 'teal'];
-                $benefit_index = 0;
-                $why_items = $items_map['why_choose'] ?? [];
-                foreach ($why_items as $item): 
-                    $color = $benefit_colors[$benefit_index % 6];
-                    $benefit_index++;
-                ?>
-                <div class="group p-10 bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-all hover:-translate-y-3">
-                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-<?php echo $color; ?>-500 to-<?php echo $color; ?>-700 flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform shadow-lg">
-                        <span class="material-symbols-outlined text-white text-4xl"><?php echo strip_tags($item['item_icon'] ?? 'star'); ?></span>
-                    </div>
-                    <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-5 transition-colors group-hover:text-blue-600"><?php echo strip_tags($item['item_title']); ?></h3>
-                    <p class="text-xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium"><?php echo strip_tags($item['item_description']); ?></p>
+            <div class="vm-grid vm-wrap ad-why">
+                <?php foreach ($why_items as $item): ?>
+                <div class="vm-card vm-card--corner">
+                    <div class="vm-card-title" role="heading" aria-level="3"><?php echo ad_t($item['item_title']); ?></div>
+                    <p class="vm-card-text"><?php echo ad_t($item['item_description']); ?></p>
+                    <span class="vm-card-corner"><span class="material-symbols-outlined"><?php echo ad_t($item['item_icon'] ?: 'star'); ?></span></span>
                 </div>
                 <?php endforeach; ?>
             </div>
         </div>
     </section>
 
-    <!-- Featured Programs - Dynamic from Admin -->
-    <?php 
+    <!-- Featured Programs -->
+    <?php
     $fp_section = $sections_map['programs'] ?? ['section_title' => 'Featured Programs', 'section_subtitle' => 'Discover our most popular and impactful degree programs designed for your success.'];
     $program_items = $items_map['programs'] ?? [];
-    $badge_colors = [
-        'Business' => 'bg-blue-600', 'Health' => 'bg-green-600', 'Technology' => 'bg-purple-600',
-        'Education' => 'bg-yellow-600', 'Theology' => 'bg-red-600', 'Arts' => 'bg-indigo-600',
-    ];
     ?>
-    <section class="py-24">
+    <section class="vm-section vm-section--white">
         <div class="container">
-            <div class="max-w-4xl mx-auto text-center mb-20">
-                <h2 class="text-5xl sm:text-6xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($fp_section['section_title']); ?></h2>
-                <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
-                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($fp_section['section_subtitle'] ?? ''); ?></p>
+            <div class="vm-head">
+                <span class="vm-kicker">Study at VVU</span>
+                <div class="vm-heading" role="heading" aria-level="2"><?php echo ad_t($fp_section['section_title']); ?></div>
+                <?php if (!empty($fp_section['section_subtitle'])): ?>
+                <p class="vm-lead"><?php echo ad_t($fp_section['section_subtitle']); ?></p>
+                <?php endif; ?>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                <?php foreach ($program_items as $program):
-                    $badge = $program['item_stat_value'] ?: 'Program';
-                    // Admin-set colour wins; otherwise fall back to the known
-                    // badge map, so a new badge name isn't stuck on blue.
-                    $badge_color = !empty($program['item_color'])
-                        ? 'bg-' . preg_replace('/[^a-z0-9\-]/i', '', $program['item_color'])
-                        : ($badge_colors[$badge] ?? 'bg-blue-600');
-                ?>
-                <div class="admission-card group bg-white dark:bg-gray-800 rounded-[2.5rem] overflow-hidden shadow-xl border border-gray-100 dark:border-gray-800">
-                    <div class="relative h-72 overflow-hidden">
-                        <img src="<?php echo strip_tags($program['item_image'] ?: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80'); ?>" 
-                             alt="<?php echo strip_tags($program['item_title']); ?>" 
-                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        <div class="absolute top-6 right-6 px-4 py-2 <?php echo $badge_color; ?> text-white rounded-full font-bold text-lg shadow-lg">
-                            <?php echo strip_tags($badge); ?>
-                        </div>
-                    </div>
-                    <div class="p-10">
-                        <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-4 line-clamp-2"><?php echo strip_tags($program['item_title']); ?></h3>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed line-clamp-3">
-                            <?php echo strip_tags($program['item_description'] ?: 'Explore this exciting program at Valley View University.'); ?>
-                        </p>
-                        <a href="<?php echo strip_tags($program['item_link'] ?: 'academic_programs_overview.php'); ?>" class="inline-flex items-center gap-3 text-xl font-bold text-blue-600 hover:gap-5 transition-all">
-                            View Course Details <span class="material-symbols-outlined">arrow_forward</span>
-                        </a>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-
-            <div class="text-center mt-16">
-                <a href="academic_programs_overview.php" class="inline-flex items-center gap-4 px-12 py-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-2xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-xl">
-                    <span class="material-symbols-outlined text-3xl">school</span>
-                    View All Programs
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Admission Requirements Section -->
-    <section class="py-24 bg-gray-50 dark:bg-gray-950">
-        <div class="container">
-            <div class="max-w-4xl mx-auto text-center mb-20">
-                <span class="inline-block px-6 py-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-bold text-lg mb-6">REQUIREMENTS</span>
-                <h2 class="text-5xl sm:text-6xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($sections_map['requirements']['section_title'] ?? 'Admission Requirements'); ?></h2>
-                <p class="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($sections_map['requirements']['section_subtitle'] ?? 'What you need to apply for admission to Valley View University.'); ?></p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
-                <?php 
-                $req_colors = ['blue', 'green', 'purple'];
-                $req_index = 0;
-                $req_items = $items_map['requirements'] ?? [];
-                foreach ($req_items as $item): 
-                    $color = $req_colors[$req_index % 3];
-                    $req_index++;
-                ?>
-                <div class="requirement-card bg-white dark:bg-gray-800 rounded-[2rem] p-10 shadow-xl border border-gray-100 dark:border-gray-700">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-<?php echo $color; ?>-500 to-<?php echo $color; ?>-700 flex items-center justify-center mb-8">
-                        <span class="material-symbols-outlined text-white text-3xl"><?php echo strip_tags($item['item_icon'] ?? 'school'); ?></span>
-                    </div>
-                    <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-3"><?php echo strip_tags($item['item_title']); ?></h3>
-                    <?php if (!empty($item['item_subtitle'])): ?>
-                    <p class="text-xl text-blue-600 dark:text-blue-400 font-semibold mb-4"><?php echo strip_tags($item['item_subtitle']); ?></p>
-                    <?php endif; ?>
-                    <p class="text-xl text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo strip_tags($item['item_description']); ?></p>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </section>
-
-    <!-- Admission Process Section -->
-    <section id="process" class="py-24 bg-blue-900 overflow-hidden relative">
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[150px] -mr-72 -mt-72"></div>
-        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -ml-72 -mb-72"></div>
-        
-        <div class="container relative z-10">
-            <div class="max-w-4xl mx-auto text-center mb-20">
-                <h2 class="text-5xl sm:text-6xl font-black text-white mb-6"><?php echo strip_tags($sections_map['process']['section_title'] ?? 'Admission Process'); ?></h2>
-                <p class="text-2xl text-blue-100 font-medium leading-relaxed"><?php echo strip_tags($sections_map['process']['section_subtitle'] ?? 'Follow these simple steps to join our vibrant academic community.'); ?></p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-                <?php 
-                $process_items = $items_map['process'] ?? [];
-                $step_num = 1;
-                foreach ($process_items as $step): 
-                ?>
-                <div class="relative p-6 md:p-10 bg-white/10 backdrop-blur-md rounded-3xl md:rounded-[2.5rem] border border-white/10 text-center group">
-                    <div class="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-3xl bg-yellow-400 flex items-center justify-center text-blue-900 text-2xl md:text-4xl font-black mx-auto mb-4 md:mb-8 group-hover:scale-110 transition-transform"><?php echo strip_tags($step['item_stat_value'] ?? $step_num); ?></div>
-                    <h4 class="text-2xl md:text-3xl font-black text-white mb-2 md:mb-4"><?php echo strip_tags($step['item_title']); ?></h4>
-                    <p class="text-lg md:text-2xl text-blue-100 leading-relaxed"><?php echo strip_tags($step['item_description']); ?></p>
-                </div>
-                <?php 
-                $step_num++;
-                endforeach; 
-                ?>
-            </div>
-        </div>
-    </section>
-
-    <!-- Latest News - Dynamic -->
-    <?php $ln_section = $sections_map['latest_news'] ?? ['section_title' => 'Latest from Campus', 'section_subtitle' => 'Stay updated with the latest events and stories from our community.']; ?>
-    <section class="py-24 bg-gray-50 dark:bg-gray-950">
-        <div class="container">
-            <div class="max-w-4xl mx-auto text-center mb-20">
-                <h2 class="text-5xl sm:text-6xl font-black text-gray-900 dark:text-white mb-6"><?php echo strip_tags($ln_section['section_title']); ?></h2>
-                <p class="text-3xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed"><?php echo strip_tags($ln_section['section_subtitle'] ?? ''); ?></p>
-            </div>
-
-            <?php if (empty($latest_news)): ?>
-            <!-- Fallback static content if no news -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <div class="flex flex-col md:flex-row gap-8 bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] shadow-lg border border-gray-100 dark:border-gray-800 group">
-                    <div class="md:w-1/3 h-48 rounded-3xl overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&q=80&w=400" alt="News" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    </div>
-                    <div class="md:w-2/3">
-                        <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 transition-colors">Business Plan Bootcamp and Seminar</h4>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Inspiring young entrepreneurs through transformative business planning sessions.</p>
-                        <a href="news_&_events.php" class="text-blue-600 font-bold text-xl flex items-center gap-2">Read More <span class="material-symbols-outlined">chevron_right</span></a>
-                    </div>
-                </div>
-
-                <div class="flex flex-col md:flex-row gap-8 bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] shadow-lg border border-gray-100 dark:border-gray-800 group">
-                    <div class="md:w-1/3 h-48 rounded-3xl overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=400" alt="News" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    </div>
-                    <div class="md:w-2/3">
-                        <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 transition-colors">Ellen Gould White Residence Hall Week</h4>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Celebrating community and culture at Valley View University residence halls.</p>
-                        <a href="news_&_events.php" class="text-blue-600 font-bold text-xl flex items-center gap-2">Read More <span class="material-symbols-outlined">chevron_right</span></a>
-                    </div>
-                </div>
-            </div>
-            <?php else: ?>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <?php foreach ($latest_news as $news_item): ?>
-                <div class="flex flex-col md:flex-row gap-8 bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] shadow-lg border border-gray-100 dark:border-gray-800 group">
-                    <div class="md:w-1/3 h-48 rounded-3xl overflow-hidden">
-                        <img src="<?php echo strip_tags(getAdmissionImage($news_item['featured_image'], 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&q=80')); ?>" 
-                             alt="<?php echo strip_tags($news_item['title']); ?>" 
-                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    </div>
-                    <div class="md:w-2/3">
-                        <span class="inline-block px-3 py-1 rounded-full text-base font-bold mb-3 <?php echo $news_item['category'] === 'events' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'; ?>">
-                            <?php echo ucfirst($news_item['category']); ?>
+            <div class="vm-grid vm-wrap">
+                <?php foreach ($program_items as $program): ?>
+                <a href="<?php echo ad_t($program['item_link'] ?: 'academic_programs_overview.php'); ?>" class="ad-prog">
+                    <span class="ad-prog-media">
+                        <img src="<?php echo ad_t($program['item_image'] ?: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80'); ?>"
+                             alt="<?php echo ad_t($program['item_title']); ?>" loading="lazy">
+                        <span class="ad-prog-chip"><?php echo ad_t($program['item_stat_value'] ?: 'Program'); ?></span>
+                        <?php if (!empty($program['item_subtitle'])): ?>
+                        <span class="ad-prog-faculty"><span class="material-symbols-outlined">account_balance</span><?php echo ad_t($program['item_subtitle']); ?></span>
+                        <?php endif; ?>
+                    </span>
+                    <span class="ad-prog-body">
+                        <span class="ad-prog-badge"><span class="material-symbols-outlined"><?php echo ad_t($program['item_icon'] ?: 'school'); ?></span></span>
+                        <span class="ad-prog-title" role="heading" aria-level="3"><?php echo ad_t($program['item_title']); ?></span>
+                        <span class="ad-prog-text"><?php echo ad_t($program['item_description'] ?: 'Explore this exciting program at Valley View University.'); ?></span>
+                        <span class="ad-prog-foot">
+                            <span class="ad-prog-cta">View Course Details</span>
+                            <span class="ad-prog-go"><span class="material-symbols-outlined">arrow_forward</span></span>
                         </span>
-                        <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 transition-colors line-clamp-2">
-                            <?php echo strip_tags($news_item['title']); ?>
-                        </h4>
-                        <p class="text-xl text-gray-600 dark:text-gray-400 mb-6 leading-relaxed line-clamp-2">
-                            <?php echo vvu_excerpt($news_item['excerpt'], '', 165) ?: 'Click to read more about this update.'; ?>
-                        </p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-base text-gray-500">
-                                <span class="material-symbols-outlined text-base align-middle">schedule</span>
-                                <?php echo formatAdmissionDate($news_item['publish_date']); ?>
-                            </span>
-                            <a href="<?php echo $news_item['category'] === 'events' ? 'event_detail.php' : 'news_detail.php'; ?>?slug=<?php echo urlencode($news_item['slug']); ?>" 
-                               class="text-blue-600 font-bold text-xl flex items-center gap-2">
-                                Read More <span class="material-symbols-outlined">chevron_right</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                    </span>
+                </a>
                 <?php endforeach; ?>
             </div>
-            <?php endif; ?>
 
-            <div class="text-center mt-16">
-                <a href="news_&_events.php" class="inline-flex items-center gap-4 px-10 py-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xl font-bold rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all shadow-lg">
-                    View All News & Events <span class="material-symbols-outlined">arrow_forward</span>
-                </a>
+            <div class="vm-actions">
+                <a href="academic_programs_overview.php" class="vm-btn vm-btn--navy"><span class="material-symbols-outlined">school</span>View All Programs</a>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="py-24 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-            <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-400 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+    <!-- Admission Requirements -->
+    <?php $req_items = $items_map['requirements'] ?? []; ?>
+    <section class="vm-section vm-section--tint">
+        <div class="container">
+            <div class="vm-head">
+                <span class="vm-kicker">Requirements</span>
+                <div class="vm-heading" role="heading" aria-level="2"><?php echo ad_t($sections_map['requirements']['section_title'] ?? 'Admission Requirements'); ?></div>
+                <p class="vm-lead"><?php echo ad_t($sections_map['requirements']['section_subtitle'] ?? 'What you need to apply for admission to Valley View University.'); ?></p>
+            </div>
+
+            <div class="vm-grid vm-wrap">
+                <?php foreach ($req_items as $item):
+                    // One checklist line per sentence of the admin text.
+                    $req_points = preg_split('/(?<=[.!?])\s+(?=[A-Z])/', trim(strip_tags((string) $item['item_description'])), -1, PREG_SPLIT_NO_EMPTY); ?>
+                <div class="ad-req">
+                    <div class="ad-req-head">
+                        <span class="ad-req-icon"><span class="material-symbols-outlined"><?php echo ad_t($item['item_icon'] ?: 'school'); ?></span></span>
+                        <div>
+                            <div class="ad-req-title" role="heading" aria-level="3"><?php echo ad_t($item['item_title']); ?></div>
+                            <?php if (!empty($item['item_subtitle'])): ?>
+                            <span class="ad-req-sub"><?php echo ad_t($item['item_subtitle']); ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <ul class="ad-req-list">
+                        <?php foreach ($req_points as $pt): ?>
+                        <li><span class="material-symbols-outlined">check_circle</span><span class="ad-req-point"><?php echo ad_t($pt); ?></span></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <a href="apply.php" class="ad-req-foot">Start Application <span class="material-symbols-outlined">arrow_forward</span></a>
+                </div>
+                <?php endforeach; ?>
+            </div>
         </div>
-        
-        <div class="container relative z-10">
-            <div class="max-w-5xl mx-auto text-center">
-                <h2 class="text-5xl sm:text-6xl font-black text-white mb-8"><?php echo strip_tags($page_data['cta_title'] ?? 'Ready to start your journey?'); ?></h2>
-                <p class="text-2xl text-blue-100 mb-12 font-medium leading-relaxed">
-                    <?php echo strip_tags($page_data['cta_subtitle'] ?? 'Join thousands of students who have chosen Valley View University for a life-changing educational experience.'); ?>
-                </p>
-                <?php $cta_extra = $items_map['cta_extra'] ?? []; ?>
-                <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                    <a href="<?php echo strip_tags($page_data['cta_button_link'] ?? 'apply.php'); ?>" class="px-12 py-6 bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-2xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-4">
-                        <span class="material-symbols-outlined text-3xl">rocket_launch</span>
-                        <?php echo strip_tags($page_data['cta_button_text'] ?? 'Apply Now'); ?>
+    </section>
+
+    <!-- Admission Process -->
+    <?php $process_items = $items_map['process'] ?? []; ?>
+    <section id="process" class="vm-cta ad-process">
+        <div class="container">
+            <div class="vm-cta-head">
+                <span class="vm-kicker">How to Apply</span>
+                <div class="vm-cta-heading" role="heading" aria-level="2"><?php echo ad_t($sections_map['process']['section_title'] ?? 'Admission Process'); ?></div>
+                <p class="vm-cta-lead"><?php echo ad_t($sections_map['process']['section_subtitle'] ?? 'Follow these simple steps to join our vibrant academic community.'); ?></p>
+            </div>
+
+            <ol class="ad-steps" style="--ad-cols: <?php echo max(1, min(4, count($process_items))); ?>;">
+                <?php foreach ($process_items as $i => $step):
+                    $num = trim((string) ($step['item_stat_value'] ?? ''));
+                    if ($num === '') $num = str_pad($i + 1, 2, '0', STR_PAD_LEFT); ?>
+                <li class="ad-step">
+                    <span class="ad-step-num"><?php echo ad_t($num); ?></span>
+                    <div class="ad-step-card">
+                        <?php if (!empty($step['item_icon'])): ?>
+                        <span class="material-symbols-outlined ad-step-icon"><?php echo ad_t($step['item_icon']); ?></span>
+                        <?php endif; ?>
+                        <div class="ad-step-title" role="heading" aria-level="3"><?php echo ad_t($step['item_title']); ?></div>
+                        <p class="ad-step-text"><?php echo ad_t($step['item_description']); ?></p>
+                    </div>
+                </li>
+                <?php endforeach; ?>
+            </ol>
+        </div>
+    </section>
+
+    <!-- Latest News -->
+    <?php
+    $ln_section = $sections_map['latest_news'] ?? ['section_title' => 'Latest from Campus', 'section_subtitle' => 'Stay updated with the latest events and stories from our community.'];
+    $news_cards = [];
+    if (empty($latest_news)) {
+        // Fallback static content if no news
+        $news_cards[] = ['img' => 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&q=80&w=400', 'chip' => '', 'title' => 'Business Plan Bootcamp and Seminar', 'text' => 'Inspiring young entrepreneurs through transformative business planning sessions.', 'date' => '', 'link' => 'news_&_events.php'];
+        $news_cards[] = ['img' => 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=400', 'chip' => '', 'title' => 'Ellen Gould White Residence Hall Week', 'text' => 'Celebrating community and culture at Valley View University residence halls.', 'date' => '', 'link' => 'news_&_events.php'];
+    } else {
+        foreach ($latest_news as $news_item) {
+            $news_cards[] = [
+                'img'   => getAdmissionImage($news_item['featured_image'], 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&q=80'),
+                'chip'  => ucfirst($news_item['category']),
+                'title' => $news_item['title'],
+                'text'  => vvu_excerpt($news_item['excerpt'], '', 140) ?: 'Click to read more about this update.',
+                'date'  => formatAdmissionDate($news_item['publish_date']),
+                'link'  => ($news_item['category'] === 'events' ? 'event_detail.php' : 'news_detail.php') . '?slug=' . urlencode($news_item['slug']),
+                'raw'   => true,
+            ];
+        }
+    }
+    ?>
+    <section class="vm-section vm-section--white">
+        <div class="container">
+            <div class="vm-head">
+                <span class="vm-kicker">News &amp; Events</span>
+                <div class="vm-heading" role="heading" aria-level="2"><?php echo ad_t($ln_section['section_title']); ?></div>
+                <?php if (!empty($ln_section['section_subtitle'])): ?>
+                <p class="vm-lead"><?php echo ad_t($ln_section['section_subtitle']); ?></p>
+                <?php endif; ?>
+            </div>
+
+            <?php $lead_story = array_shift($news_cards); ?>
+            <div class="ad-news vm-wrap<?php echo empty($news_cards) ? ' ad-news--single' : ''; ?>">
+                <!-- Featured story -->
+                <a href="<?php echo ad_t($lead_story['link']); ?>" class="ad-lead">
+                    <img src="<?php echo ad_t($lead_story['img']); ?>" alt="<?php echo ad_t($lead_story['title']); ?>" loading="lazy">
+                    <span class="ad-lead-body">
+                        <span class="ad-lead-meta">
+                            <?php if ($lead_story['chip'] !== ''): ?><span class="ad-news-chip"><?php echo ad_t($lead_story['chip']); ?></span><?php endif; ?>
+                            <?php if ($lead_story['date'] !== ''): ?>
+                            <span class="ad-lead-date"><span class="material-symbols-outlined">calendar_today</span><?php echo ad_t($lead_story['date']); ?></span>
+                            <?php endif; ?>
+                        </span>
+                        <span class="ad-lead-title"><?php echo ad_t($lead_story['title']); ?></span>
+                        <span class="ad-lead-text"><?php echo !empty($lead_story['raw']) ? $lead_story['text'] : ad_t($lead_story['text']); ?></span>
+                        <span class="ad-lead-more">Read Story <span class="material-symbols-outlined">arrow_forward</span></span>
+                    </span>
+                </a>
+
+                <?php if (!empty($news_cards)): ?>
+                <!-- More stories -->
+                <div class="ad-more">
+                    <?php foreach ($news_cards as $nc): ?>
+                    <a href="<?php echo ad_t($nc['link']); ?>" class="ad-row">
+                        <span class="ad-row-media">
+                            <img src="<?php echo ad_t($nc['img']); ?>" alt="<?php echo ad_t($nc['title']); ?>" loading="lazy">
+                        </span>
+                        <span class="ad-row-body">
+                            <span class="ad-row-meta">
+                                <?php if ($nc['chip'] !== ''): ?><span class="ad-row-chip"><?php echo ad_t($nc['chip']); ?></span><?php endif; ?>
+                                <?php if ($nc['date'] !== ''): ?><span class="ad-row-date"><?php echo ad_t($nc['date']); ?></span><?php endif; ?>
+                            </span>
+                            <span class="ad-row-title"><?php echo ad_t($nc['title']); ?></span>
+                            <span class="ad-row-text"><?php echo !empty($nc['raw']) ? $nc['text'] : ad_t($nc['text']); ?></span>
+                        </span>
+                        <span class="material-symbols-outlined ad-row-go">arrow_forward</span>
                     </a>
-                    <a href="<?php echo strip_tags($cta_extra[0]['item_link'] ?? 'contact_us.php'); ?>" class="px-12 py-6 bg-white/10 hover:bg-white/20 text-white text-2xl font-bold rounded-2xl transition-all border-2 border-white/30 transform hover:scale-105 shadow-lg flex items-center justify-center gap-4 backdrop-blur-md">
-                        <span class="material-symbols-outlined text-3xl"><?php echo strip_tags($cta_extra[0]['item_icon'] ?? 'chat'); ?></span>
-                        <?php echo strip_tags($cta_extra[0]['item_title'] ?? 'Talk to an Advisor'); ?>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="vm-actions">
+                <a href="news_&_events.php" class="vm-btn vm-btn--outline">View All News &amp; Events<span class="material-symbols-outlined">arrow_forward</span></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Closing call to action -->
+    <?php $cta_extra = $items_map['cta_extra'] ?? []; ?>
+    <section class="vm-cta">
+        <div class="container">
+            <div class="vm-cta-head">
+                <span class="vm-kicker">Take the Next Step</span>
+                <div class="vm-cta-heading" role="heading" aria-level="2"><?php echo ad_t($page_data['cta_title'] ?? 'Ready to start your journey?'); ?></div>
+                <p class="vm-cta-lead"><?php echo ad_t($page_data['cta_subtitle'] ?? 'Join thousands of students who have chosen Valley View University for a life-changing educational experience.'); ?></p>
+                <div class="vm-actions">
+                    <a href="<?php echo ad_t($page_data['cta_button_link'] ?? 'apply.php'); ?>" class="vm-btn vm-btn--gold">
+                        <span class="material-symbols-outlined">rocket_launch</span><?php echo ad_t($page_data['cta_button_text'] ?? 'Apply Now'); ?>
+                    </a>
+                    <a href="<?php echo ad_t($cta_extra[0]['item_link'] ?? 'contact_us.php'); ?>" class="vm-btn vm-btn--ghost">
+                        <span class="material-symbols-outlined"><?php echo ad_t($cta_extra[0]['item_icon'] ?? 'chat'); ?></span><?php echo ad_t($cta_extra[0]['item_title'] ?? 'Talk to an Advisor'); ?>
                     </a>
                 </div>
             </div>

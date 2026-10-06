@@ -51,7 +51,7 @@ try {
 // Fetch news articles
 try {
     $sql = "
-        SELECT id, title, slug, excerpt, featured_image, category, author, author_image, publish_date, event_date, event_time, event_location, is_featured
+        SELECT id, title, slug, excerpt, LEFT(content, 1500) AS content, featured_image, category, author, author_image, publish_date, event_date, event_time, event_location, is_featured
         FROM news_articles
         WHERE $where_sql 
         ORDER BY is_featured DESC, publish_date DESC 
@@ -134,7 +134,7 @@ include 'includes/header.php';
 ?>
 
 <!-- Newsroom styles -->
-<link rel="stylesheet" href="css/news-editorial.css">
+<link rel="stylesheet" href="css/news-editorial.css?v=3">
 <script src="js/news-modern.js" defer></script>
 
 <!-- Main Content -->
@@ -161,7 +161,7 @@ include 'includes/header.php';
     <!-- ============ FEATURED STORY ============ -->
     <?php if ($featured_article): ?>
     <?php
-        $f_url = 'news_detail.php?slug=' . urlencode($featured_article['slug']);
+        $f_url = ($featured_article['category'] === 'events' ? 'event_detail.php' : 'news_detail.php') . '?slug=' . urlencode($featured_article['slug']);
         $f_author = $featured_article['author'] ?: 'VVU Communications';
     ?>
     <section class="ed-featured">
@@ -265,7 +265,7 @@ include 'includes/header.php';
 
             <?php if (empty($articles)): ?>
             <div class="ed-empty">
-                <i class="fa fa-newspaper-o"></i>
+                <i class="fa-regular fa-newspaper"></i>
                 <h3>Nothing here yet</h3>
                 <p>We couldn&rsquo;t find any stories matching what you&rsquo;re looking for.
                    Try a different category, or browse everything we&rsquo;ve published.</p>
@@ -289,12 +289,12 @@ include 'includes/header.php';
             <div class="ed-grid">
                 <?php foreach ($articles as $index => $article): ?>
                 <?php
-                    $a_url = 'news_detail.php?slug=' . urlencode($article['slug']);
+                    $a_url = ($article['category'] === 'events' ? 'event_detail.php' : 'news_detail.php') . '?slug=' . urlencode($article['slug']);
                     $a_author = $article['author'] ?: 'VVU Communications';
                     $is_event = ($article['category'] === 'events' || !empty($article['event_date']));
                     $tile_date = !empty($article['event_date']) ? $article['event_date'] : $article['publish_date'];
-                    // First card runs full width when there is no featured panel above
-                    $wide = (!$featured_article && $index === 0);
+
+                    $wide = false; // every card the same size
                 ?>
                 <article class="ed-card ed-rise <?php echo $wide ? 'is-wide' : ''; ?>">
                     <a class="ed-card-media" href="<?php echo $a_url; ?>" tabindex="-1" aria-hidden="true">
@@ -308,6 +308,7 @@ include 'includes/header.php';
                         <?php elseif ($article['is_featured']): ?>
                         <span class="ed-flag"><i class="fa fa-star"></i> Featured</span>
                         <?php endif; ?>
+                        <span class="ed-card-chip"><?php echo strip_tags($category_labels[$article['category']] ?? $article['category']); ?></span>
                     </a>
 
                     <div class="ed-card-body">
@@ -332,7 +333,7 @@ include 'includes/header.php';
                         </div>
                         <?php endif; ?>
 
-                        <p class="ed-card-excerpt"><?php echo vvu_excerpt($article['excerpt'], '', $wide ? 220 : 130); ?></p>
+                        <?php $a_excerpt = vvu_excerpt($article['excerpt'], $article['content'] ?? '', $wide ? 200 : 120); if ($a_excerpt !== ''): ?><p class="ed-card-excerpt"><?php echo $a_excerpt; ?></p><?php endif; ?>
 
                         <div class="ed-card-foot">
                             <span class="ed-avatar sm" style="background:<?php echo vvu_avatar_tone($a_author); ?>">
@@ -343,6 +344,7 @@ include 'includes/header.php';
                                 <?php endif; ?>
                             </span>
                             <span class="ed-byline-meta"><?php echo strip_tags($a_author); ?></span>
+                            <a href="<?php echo $a_url; ?>" class="ed-card-more" tabindex="-1" aria-hidden="true">Read <i class="fa fa-arrow-right"></i></a>
                         </div>
                     </div>
                 </article>

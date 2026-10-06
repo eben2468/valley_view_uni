@@ -114,6 +114,18 @@ include 'includes/header.php';
 
 <!-- News Portal CSS -->
 <link rel="stylesheet" href="css/news-portal.css">
+<style>
+    /* Long notice titles: moderate size, wide measure, balanced lines
+       (the title font is Cinzel, which is all capitals). */
+    .news-detail-page .article-title {
+        font-size: clamp(21px, 2vw, 30px);
+        font-weight: 600;
+        line-height: 1.3;
+        letter-spacing: 0;
+        max-width: none;
+        text-wrap: balance;
+    }
+</style>
 
 <!-- SEO Meta Tags -->
 <meta name="description" content="<?php echo strip_tags($meta_description); ?>">
@@ -182,15 +194,15 @@ include 'includes/header.php';
                         <div class="share-buttons">
                             <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" 
                                target="_blank" class="share-btn share-facebook">
-                                <i class="fa fa-facebook"></i>
+                                <i class="fa-brands fa-facebook-f"></i>
                             </a>
                             <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>&text=<?php echo urlencode($article['title']); ?>" 
                                target="_blank" class="share-btn share-twitter">
-                                <i class="fa fa-twitter"></i>
+                                <i class="fa-brands fa-x-twitter"></i>
                             </a>
                             <a href="https://wa.me/?text=<?php echo urlencode($article['title'] . ' - ' . 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" 
                                target="_blank" class="share-btn share-whatsapp">
-                                <i class="fa fa-whatsapp"></i>
+                                <i class="fa-brands fa-whatsapp"></i>
                             </a>
                         </div>
                     </div>
