@@ -225,7 +225,8 @@ try {
                         ['Gallery', 'gallery.php'],
                         ['News Gallery', 'news_gallery.php'],
                         ['Strategic Planning - 2025', 'strategic_planning.php'],
-                        ['SRC Gallery', 'src_gallery.php']
+                        ['SRC Gallery', 'src_gallery.php'],
+                        ['Graduation 2026', 'graduation_gallery.php']
                     ]
                 ],
                 [

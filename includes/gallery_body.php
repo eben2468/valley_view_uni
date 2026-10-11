@@ -2,106 +2,164 @@
 /**
  * Shared gallery page body — everything after the hero.
  *
- * Renders either the album index or one album's photo grid, plus the stats
- * band, the closing CTA and the lightbox. Both gallery.php and
- * src_gallery.php include this after emitting their own hero, so the two
- * pages stay in lockstep while keeping their own hero markup.
+ * Renders either the album index or one album's photo grid, plus the closing
+ * band (copy, buttons, counters) and the lightbox. gallery.php,
+ * src_gallery.php and graduation_gallery.php include this after emitting
+ * their own hero, so the pages stay in lockstep while keeping their own hero.
+ *
+ * Styled on css/vvu-modern.css (the Mission & Vision design) plus the g-
+ * classes in includes/gallery_styles.php.
  *
  * Expects these to be set by the including page:
- *   $vvu_gallery_key  string  which gallery ('main' | 'src')
- *   $g_content        array   page copy
- *   $g_categories     array   filter pills
- *   $g_stats          array   stat tiles
- *   $active_album     array|null
- *   $album_images     array
- *   $g_albums         array
- *   $album_slug       string  the raw ?album= value
- *   $vvu_gallery_self string  this gallery's own page, for links
+ *   $vvu_gallery_key    string  which gallery ('main' | 'src' | 'graduation')
+ *   $g_content          array   page copy
+ *   $g_categories       array   filter pills
+ *   $g_stats            array   stat tiles
+ *   $active_album       array|null
+ *   $album_images       array
+ *   $g_albums           array
+ *   $album_slug         string  the raw ?album= value
+ *   $vvu_gallery_self   string  this gallery's own page, for links
+ *   $vvu_gallery_kicker string  small gold label above headings (optional)
  */
 if (!isset($vvu_gallery_self)) {
     $vvu_gallery_self = 'gallery.php';
 }
+if (!isset($vvu_gallery_kicker)) {
+    $vvu_gallery_kicker = 'Photo Gallery';
+}
+
+/** Resized copy for a card/tile when the server can make one, else the original. */
+$g_thumb = function ($path, $w, $h) {
+    $path = vvu_gallery_src($path);
+    return ($path !== '' && function_exists('vvu_thumb')) ? vvu_thumb($path, $w, $h) : $path;
+};
+
+/** "Google Photos" when the link points there, so the button says where it goes. */
+$g_host_label = function ($url) {
+    return preg_match('#^https?://(photos\.google\.com|photos\.app\.goo\.gl|goo\.gl/photos)#i', $url)
+        ? 'Google Photos' : 'the full album';
+};
 ?>
 
 
-<?php if ($active_album): ?>
+<?php if ($active_album):
+    $g_ext = vvu_gallery_external_url($active_album);
+?>
     <!-- ============================ ALBUM DETAIL VIEW ============================ -->
-    <section class="py-10 sm:py-14 bg-white dark:bg-gray-900">
+    <section class="vm-section vm-section--white g-detail">
         <div class="container">
-            <a href="<?php echo vvu_e($vvu_gallery_self); ?>"
-               class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-bold hover:bg-blue-600 hover:text-white transition-all">
-                <span class="material-symbols-outlined">arrow_back</span>
-                <?php echo vvu_e(vvu_gallery_text($g_content, 'detail_back_label', 'Back to all albums')); ?>
-            </a>
+            <div class="vm-wrap">
+                <a href="<?php echo vvu_e($vvu_gallery_self); ?>" class="g-back">
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                    <?php echo vvu_e(vvu_gallery_text($g_content, 'detail_back_label', 'Back to all albums')); ?>
+                </a>
 
-            <div class="mt-8 max-w-5xl">
-                <?php if (!empty($active_album['category_name'])): ?>
-                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white text-sm font-black uppercase tracking-wider">
-                        <span class="material-symbols-outlined text-white text-lg"><?php echo vvu_e($active_album['category_icon'] ?: 'photo_library'); ?></span>
-                        <?php echo vvu_e($active_album['category_name']); ?>
-                    </span>
-                <?php endif; ?>
+                <div class="g-detail__grid<?php echo $g_ext ? '' : ' g-detail__grid--solo'; ?>">
+                    <div>
+                        <div class="vm-kicker">
+                            <span class="material-symbols-outlined" aria-hidden="true"><?php echo vvu_e($active_album['category_icon'] ?: 'photo_library'); ?></span>
+                            <?php echo vvu_e(!empty($active_album['category_name']) ? $active_album['category_name'] : $vvu_gallery_kicker); ?>
+                        </div>
+                        <div class="vm-heading vm-heading--left g-detail__title" role="heading" aria-level="1">
+                            <?php echo vvu_e($active_album['title']); ?>
+                        </div>
 
-                <h1 class="mt-5 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
-                    <?php echo vvu_e($active_album['title']); ?>
-                </h1>
+                        <ul class="g-meta">
+                            <?php if ($d = vvu_gallery_date($active_album['event_date'])): ?>
+                                <li>
+                                    <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                                    <span class="g-meta__text"><?php echo vvu_e($d); ?></span>
+                                </li>
+                            <?php endif; ?>
+                            <li>
+                                <span class="material-symbols-outlined" aria-hidden="true">photo_library</span>
+                                <span class="g-meta__text">
+                                    <?php echo count($album_images); ?>
+                                    <?php echo vvu_e(vvu_gallery_text($g_content, 'detail_photos_label', 'photos in this album')); ?>
+                                </span>
+                            </li>
+                        </ul>
 
-                <div class="mt-5 flex flex-wrap items-center gap-x-7 gap-y-3 text-gray-600 dark:text-gray-400 text-base sm:text-lg font-semibold">
-                    <?php if ($d = vvu_gallery_date($active_album['event_date'])): ?>
-                        <span class="inline-flex items-center gap-2">
-                            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">calendar_month</span>
-                            <?php echo vvu_e($d); ?>
-                        </span>
+                        <?php if (trim((string) $active_album['description']) !== ''): ?>
+                            <p class="vm-lead g-detail__lead"><?php echo nl2br(vvu_e($active_album['description'])); ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if ($g_ext): ?>
+                        <aside class="g-full">
+                            <span class="g-full__icon" aria-hidden="true">
+                                <span class="material-symbols-outlined">collections</span>
+                            </span>
+                            <div class="g-full__title" role="heading" aria-level="2">See every photo</div>
+                            <p class="g-full__text">
+                                This page shows a selection of highlights. The complete album, with every
+                                photo in full resolution, is available on <?php echo vvu_e($g_host_label($g_ext)); ?>.
+                            </p>
+                            <a href="<?php echo vvu_e($g_ext); ?>" target="_blank" rel="noopener noreferrer" class="vm-btn vm-btn--gold">
+                                <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                                View all photos
+                            </a>
+                        </aside>
                     <?php endif; ?>
-                    <span class="inline-flex items-center gap-2">
-                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">photo_library</span>
-                        <?php echo count($album_images); ?>
-                        <?php echo vvu_e(vvu_gallery_text($g_content, 'detail_photos_label', 'photos in this album')); ?>
-                    </span>
                 </div>
-
-                <?php if (trim((string) $active_album['description']) !== ''): ?>
-                    <p class="mt-6 text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
-                        <?php echo nl2br(vvu_e($active_album['description'])); ?>
-                    </p>
-                <?php endif; ?>
-
-                <div class="h-1.5 w-28 bg-yellow-400 rounded-full mt-8"></div>
             </div>
         </div>
     </section>
 
-    <section class="pb-20 sm:pb-28 bg-white dark:bg-gray-900">
+    <section class="vm-section vm-section--tint g-photos-section">
         <div class="container">
-            <?php if (!$album_images): ?>
-                <div class="text-center py-20 rounded-3xl bg-gray-50 dark:bg-gray-800">
-                    <span class="material-symbols-outlined text-6xl text-gray-400">image_not_supported</span>
-                    <p class="mt-4 text-xl font-bold text-gray-600 dark:text-gray-300">No photos have been added to this album yet.</p>
-                </div>
-            <?php else: ?>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"
-                     id="galleryPhotoGrid">
-                    <?php foreach ($album_images as $i => $img):
-                        $full  = vvu_gallery_src($img['image_path']);
-                        $thumb = vvu_gallery_src($img['thumb_path'], $full);
-                        $cap   = trim((string) $img['title']);
-                        $alt   = $cap !== '' ? $cap : $active_album['title'] . ' — photo ' . ($i + 1);
-                    ?>
-                        <button type="button" class="g-photo"
-                                data-full="<?php echo vvu_e($full); ?>"
-                                data-caption="<?php echo vvu_e($cap); ?>"
-                                data-index="<?php echo $i; ?>"
-                                aria-label="Open photo <?php echo $i + 1; ?> of <?php echo count($album_images); ?>">
-                            <img src="<?php echo vvu_e($thumb); ?>"
-                                 alt="<?php echo vvu_e($alt); ?>"
-                                 loading="lazy" decoding="async">
-                            <span class="g-photo__zoom" aria-hidden="true">
-                                <span class="material-symbols-outlined text-4xl text-white">zoom_in</span>
-                            </span>
-                        </button>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+            <div class="vm-wrap">
+                <?php if (!$album_images): ?>
+                    <div class="vm-empty">
+                        <span class="material-symbols-outlined" aria-hidden="true"><?php echo $g_ext ? 'collections' : 'image_not_supported'; ?></span>
+                        <div class="vm-empty-title">
+                            <?php echo $g_ext ? 'Highlights coming soon' : 'No photos have been added to this album yet.'; ?>
+                        </div>
+                        <?php if ($g_ext): ?>
+                            <p class="vm-empty-text">In the meantime, every photo from this album is available online.</p>
+                            <div class="vm-actions">
+                                <a href="<?php echo vvu_e($g_ext); ?>" target="_blank" rel="noopener noreferrer" class="vm-btn vm-btn--navy">
+                                    <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                                    View all photos
+                                </a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="g-photos" id="galleryPhotoGrid">
+                        <?php foreach ($album_images as $i => $img):
+                            $full  = vvu_gallery_src($img['image_path']);
+                            $thumb = trim((string) $img['thumb_path']) !== '' ? vvu_gallery_src($img['thumb_path']) : $g_thumb($full, 480, 480);
+                            $cap   = trim((string) $img['title']);
+                            $alt   = $cap !== '' ? $cap : $active_album['title'] . ' — photo ' . ($i + 1);
+                        ?>
+                            <button type="button" class="g-photo"
+                                    data-full="<?php echo vvu_e($full); ?>"
+                                    data-caption="<?php echo vvu_e($cap); ?>"
+                                    data-index="<?php echo $i; ?>"
+                                    aria-label="Open photo <?php echo $i + 1; ?> of <?php echo count($album_images); ?>">
+                                <img src="<?php echo vvu_e($thumb); ?>"
+                                     alt="<?php echo vvu_e($alt); ?>"
+                                     loading="lazy" decoding="async">
+                                <span class="g-photo__zoom" aria-hidden="true">
+                                    <span class="material-symbols-outlined">zoom_in</span>
+                                </span>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <?php if ($g_ext): ?>
+                        <div class="g-more">
+                            <p class="g-more__text">Want to see more? The full album has every photo from this event.</p>
+                            <a href="<?php echo vvu_e($g_ext); ?>" target="_blank" rel="noopener noreferrer" class="vm-btn vm-btn--navy">
+                                <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                                View all photos
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </section>
 
@@ -110,205 +168,207 @@ if (!isset($vvu_gallery_self)) {
     <?php if ($album_slug !== ''): ?>
         <!-- An unknown/unpublished ?album= slug falls back to the full index
              rather than a dead end, but says so instead of silently ignoring it. -->
-        <section class="pt-10 bg-white dark:bg-gray-900">
-            <div class="container">
-                <div class="max-w-3xl mx-auto flex items-start gap-3 p-5 rounded-2xl bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-700">
-                    <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400">info</span>
-                    <p class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100">
-                        That album is no longer available. Browse all of our albums below.
-                    </p>
-                </div>
+        <div class="container">
+            <div class="g-notice">
+                <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                <span class="g-notice__text">That album is no longer available. Browse all of our albums below.</span>
             </div>
-        </section>
+        </div>
     <?php endif; ?>
 
-    <!-- Introduction Section -->
-    <section class="py-16 sm:py-20 lg:py-24 bg-white dark:bg-gray-900">
+    <!-- Introduction -->
+    <section class="vm-section vm-section--white g-intro">
         <div class="container">
-            <div class="max-w-5xl mx-auto text-center">
-                <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">
+            <div class="vm-head">
+                <div class="vm-kicker">
+                    <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
+                    <?php echo vvu_e($vvu_gallery_kicker); ?>
+                </div>
+                <div class="vm-heading" role="heading" aria-level="2">
                     <?php echo vvu_e(vvu_gallery_text($g_content, 'intro_heading', 'Experience VVU Through Our Lens')); ?>
-                </h2>
-                <div class="h-2 w-40 bg-blue-600 mx-auto rounded-full mb-8"></div>
-                <p class="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                    <?php echo nl2br(vvu_e(vvu_gallery_text($g_content, 'intro_text'))); ?>
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Filters + Search -->
-    <section class="py-8 sm:py-10 bg-gray-50 dark:bg-gray-950 border-y border-gray-200 dark:border-gray-800">
-        <div class="container">
-            <div class="max-w-4xl mx-auto text-center mb-8">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 dark:text-white">
-                    <?php echo vvu_e(vvu_gallery_text($g_content, 'albums_heading', 'Browse Our Albums')); ?>
-                </h2>
-                <?php if ($sub = vvu_gallery_text($g_content, 'albums_subheading')): ?>
-                    <p class="mt-3 text-base sm:text-lg text-gray-600 dark:text-gray-400 font-medium">
-                        <?php echo nl2br(vvu_e($sub)); ?>
-                    </p>
+                </div>
+                <?php if ($intro = vvu_gallery_text($g_content, 'intro_text')): ?>
+                    <p class="vm-lead"><?php echo nl2br(vvu_e($intro)); ?></p>
                 <?php endif; ?>
             </div>
-
-            <div class="max-w-xl mx-auto mb-8">
-                <label for="gallerySearch" class="sr-only">Search albums</label>
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">search</span>
-                    <input type="search" id="gallerySearch"
-                           placeholder="<?php echo vvu_e(vvu_gallery_text($g_content, 'search_placeholder', 'Search albums…')); ?>"
-                           class="w-full pl-12 pr-4 py-4 rounded-full border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-lg font-medium focus:outline-none focus:border-blue-600 transition-colors">
-                </div>
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-3" id="galleryFilters" role="group" aria-label="Filter albums by category">
-                <button type="button" class="g-pill" data-filter="all" aria-pressed="true">
-                    <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
-                    <?php echo vvu_e(vvu_gallery_text($g_content, 'all_filter_label', 'All Albums')); ?>
-                    <span class="g-pill__n"><?php echo count($g_albums); ?></span>
-                </button>
-                <?php foreach ($g_categories as $cat): ?>
-                    <button type="button" class="g-pill" data-filter="<?php echo vvu_e($cat['slug']); ?>" aria-pressed="false">
-                        <span class="material-symbols-outlined" aria-hidden="true"><?php echo vvu_e($cat['icon'] ?: 'photo_library'); ?></span>
-                        <?php echo vvu_e($cat['name']); ?>
-                        <span class="g-pill__n"><?php echo (int) $cat['album_count']; ?></span>
-                    </button>
-                <?php endforeach; ?>
-            </div>
         </div>
     </section>
 
-    <!-- Album Grid -->
-    <section class="py-14 sm:py-20 bg-gray-50 dark:bg-gray-950">
+    <!-- Albums: search, filters, grid -->
+    <section class="vm-section vm-section--tint g-albums-section">
         <div class="container">
-            <?php if (!$g_albums): ?>
-                <div class="text-center py-20 rounded-3xl bg-white dark:bg-gray-900">
-                    <span class="material-symbols-outlined text-6xl text-gray-400">photo_library</span>
-                    <p class="mt-4 text-xl font-bold text-gray-600 dark:text-gray-300">
-                        No albums have been published yet.
-                    </p>
+            <div class="vm-wrap">
+                <div class="vm-head">
+                    <div class="vm-kicker">
+                        <span class="material-symbols-outlined" aria-hidden="true">collections</span>
+                        Albums
+                    </div>
+                    <div class="vm-heading" role="heading" aria-level="2">
+                        <?php echo vvu_e(vvu_gallery_text($g_content, 'albums_heading', 'Browse Our Albums')); ?>
+                    </div>
+                    <?php if ($sub = vvu_gallery_text($g_content, 'albums_subheading')): ?>
+                        <p class="vm-lead"><?php echo nl2br(vvu_e($sub)); ?></p>
+                    <?php endif; ?>
                 </div>
-            <?php else: ?>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6" id="galleryAlbumGrid">
-                    <?php foreach ($g_albums as $album):
-                        $cover = vvu_gallery_src($album['cover_image']);
-                        $count = (int) $album['photo_count'];
-                    ?>
-                        <article class="g-card"
-                                 data-category="<?php echo vvu_e($album['category_slug'] ?? ''); ?>"
-                                 data-title="<?php echo vvu_e(mb_strtolower($album['title'])); ?>">
-                            <a href="<?php echo vvu_e($vvu_gallery_self); ?>?album=<?php echo urlencode($album['slug']); ?>" class="block">
-                                <div class="g-card__media">
+
+                <?php if ($g_albums): ?>
+                    <div class="vm-search g-search">
+                        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                        <label for="gallerySearch" class="sr-only">Search albums</label>
+                        <input type="search" id="gallerySearch" autocomplete="off"
+                               placeholder="<?php echo vvu_e(vvu_gallery_text($g_content, 'search_placeholder', 'Search albums…')); ?>">
+                    </div>
+
+                    <?php if ($g_categories): ?>
+                        <div class="g-pills" id="galleryFilters" role="group" aria-label="Filter albums by category">
+                            <button type="button" class="g-pill" data-filter="all" aria-pressed="true">
+                                <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
+                                <?php echo vvu_e(vvu_gallery_text($g_content, 'all_filter_label', 'All Albums')); ?>
+                                <span class="g-pill__n"><?php echo count($g_albums); ?></span>
+                            </button>
+                            <?php foreach ($g_categories as $cat): ?>
+                                <button type="button" class="g-pill" data-filter="<?php echo vvu_e($cat['slug']); ?>" aria-pressed="false">
+                                    <span class="material-symbols-outlined" aria-hidden="true"><?php echo vvu_e($cat['icon'] ?: 'photo_library'); ?></span>
+                                    <?php echo vvu_e($cat['name']); ?>
+                                    <span class="g-pill__n"><?php echo (int) $cat['album_count']; ?></span>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php if (!$g_albums): ?>
+                    <div class="vm-empty">
+                        <span class="material-symbols-outlined" aria-hidden="true">photo_library</span>
+                        <div class="vm-empty-title">Albums are on their way</div>
+                        <p class="vm-empty-text">No albums have been published yet. Please check back soon.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="g-albums" id="galleryAlbumGrid">
+                        <?php foreach ($g_albums as $album):
+                            $cover = $g_thumb($album['cover_image'], 720, 450);
+                            $count = (int) $album['photo_count'];
+                            $ext   = vvu_gallery_external_url($album);
+                            $href  = $vvu_gallery_self . '?album=' . urlencode($album['slug']);
+                            $desc  = trim((string) $album['description']);
+                        ?>
+                            <article class="g-card"
+                                     data-category="<?php echo vvu_e($album['category_slug'] ?? ''); ?>"
+                                     data-title="<?php echo vvu_e(mb_strtolower($album['title'] . ' ' . ($album['category_name'] ?? ''))); ?>">
+                                <a href="<?php echo vvu_e($href); ?>" class="g-card__media" tabindex="-1" aria-hidden="true">
                                     <?php if ($cover !== ''): ?>
-                                        <img src="<?php echo vvu_e($cover); ?>"
-                                             alt="<?php echo vvu_e($album['title']); ?>"
-                                             loading="lazy" decoding="async">
+                                        <img src="<?php echo vvu_e($cover); ?>" alt="" loading="lazy" decoding="async">
                                     <?php else: ?>
-                                        <div class="w-full h-full flex items-center justify-center bg-blue-900">
-                                            <span class="material-symbols-outlined text-6xl text-white/40">photo_library</span>
-                                        </div>
+                                        <span class="g-card__placeholder">
+                                            <span class="material-symbols-outlined">photo_library</span>
+                                        </span>
                                     <?php endif; ?>
-                                    <span class="g-card__scrim" aria-hidden="true"></span>
-
                                     <?php if (!empty($album['category_name'])): ?>
-                                        <span class="g-card__chip">
-                                            <span class="material-symbols-outlined text-base" aria-hidden="true"><?php echo vvu_e($album['category_icon'] ?: 'photo_library'); ?></span>
-                                            <?php echo vvu_e($album['category_name']); ?>
+                                        <span class="g-card__chip"><?php echo vvu_e($album['category_name']); ?></span>
+                                    <?php endif; ?>
+                                    <?php if ($count > 0): ?>
+                                    <span class="g-card__count">
+                                        <span class="material-symbols-outlined">photo_camera</span>
+                                        <span class="g-card__count-n"><?php echo $count; ?></span>
+                                    </span>
+                                    <?php endif; ?>
+                                    <span class="g-card__hover">
+                                        <span class="material-symbols-outlined">visibility</span>
+                                    </span>
+                                </a>
+
+                                <div class="g-card__body">
+                                    <?php if ($d = vvu_gallery_date($album['event_date'])): ?>
+                                        <span class="g-card__date">
+                                            <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                                            <?php echo vvu_e($d); ?>
                                         </span>
                                     <?php endif; ?>
+                                    <div class="g-card__title" role="heading" aria-level="3">
+                                        <a href="<?php echo vvu_e($href); ?>"><?php echo vvu_e($album['title']); ?></a>
+                                    </div>
+                                    <?php if ($desc !== ''): ?>
+                                        <p class="g-card__text"><?php echo vvu_e($desc); ?></p>
+                                    <?php endif; ?>
 
-                                    <span class="g-card__count">
-                                        <span class="material-symbols-outlined text-base" aria-hidden="true">photo_camera</span>
-                                        <?php echo $count; ?>
-                                    </span>
-
-                                    <div class="g-card__body">
-                                        <?php if ($d = vvu_gallery_date($album['event_date'])): ?>
-                                            <div class="flex items-center gap-2 mb-2">
-                                                <span class="material-symbols-outlined text-yellow-400 text-lg" aria-hidden="true">calendar_month</span>
-                                                <span class="text-yellow-400 font-bold text-sm"><?php echo vvu_e($d); ?></span>
-                                            </div>
-                                        <?php endif; ?>
-                                        <h3 class="g-card__title text-lg sm:text-xl font-black text-white">
-                                            <?php echo vvu_e($album['title']); ?>
-                                        </h3>
-                                        <span class="g-card__cta text-sm">
+                                    <div class="g-card__foot">
+                                        <a href="<?php echo vvu_e($href); ?>" class="g-card__link">
                                             View album
-                                            <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_forward</span>
-                                        </span>
+                                            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                                        </a>
+                                        <?php if ($ext): ?>
+                                            <a href="<?php echo vvu_e($ext); ?>" target="_blank" rel="noopener noreferrer" class="g-card__all"
+                                               aria-label="View all photos of <?php echo vvu_e($album['title']); ?> (opens in a new tab)">
+                                                <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                                                All photos
+                                            </a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
-                            </a>
-                        </article>
-                    <?php endforeach; ?>
-                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
 
-                <p id="galleryEmpty" class="hidden text-center py-20 text-xl font-bold text-gray-600 dark:text-gray-300">
-                    <?php echo vvu_e(vvu_gallery_text($g_content, 'empty_state_text', 'No albums match your search yet.')); ?>
-                </p>
-            <?php endif; ?>
+                    <div id="galleryEmpty" class="vm-empty hidden">
+                        <span class="material-symbols-outlined" aria-hidden="true">search_off</span>
+                        <div class="vm-empty-title">
+                            <?php echo vvu_e(vvu_gallery_text($g_content, 'empty_state_text', 'No albums match your search yet.')); ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
     </section>
 <?php endif; ?>
 
-    <?php if ($g_stats): ?>
-    <!-- Stats Section -->
-    <section class="py-16 sm:py-24 bg-blue-900 overflow-hidden relative">
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[150px] -mr-72 -mt-72"></div>
-        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px] -ml-72 -mb-72"></div>
-
-        <div class="container relative z-10">
-            <div class="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-5">
+    <!-- Closing band: copy, buttons and counters -->
+    <?php
+        $g_cta_1 = vvu_gallery_text($g_content, 'cta_1_text');
+        $g_cta_2 = vvu_gallery_text($g_content, 'cta_2_text');
+        $g_lead  = vvu_gallery_text($g_content, 'cta_text', vvu_gallery_text($g_content, 'stats_text'));
+    ?>
+    <section class="vm-cta g-cta">
+        <div class="container">
+            <div class="vm-cta-head">
+                <div class="vm-kicker">
+                    <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
                     <?php echo vvu_e(vvu_gallery_text($g_content, 'stats_heading', 'Gallery Highlights')); ?>
-                </h2>
-                <p class="text-lg sm:text-xl md:text-2xl text-blue-100 font-medium leading-relaxed">
-                    <?php echo nl2br(vvu_e(vvu_gallery_text($g_content, 'stats_text'))); ?>
-                </p>
-            </div>
-
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10">
-                <?php foreach ($g_stats as $stat): ?>
-                    <div class="text-center">
-                        <div class="w-16 h-16 sm:w-24 sm:h-24 rounded-3xl bg-yellow-400 flex items-center justify-center mx-auto mb-5 shadow-2xl">
-                            <span class="material-symbols-outlined text-3xl sm:text-5xl text-blue-900"><?php echo vvu_e($stat['icon'] ?: 'photo_library'); ?></span>
-                        </div>
-                        <div class="text-3xl sm:text-5xl md:text-6xl font-black text-yellow-400 mb-2"><?php echo vvu_e($stat['value_text']); ?></div>
-                        <div class="text-blue-100 uppercase tracking-widest text-sm sm:text-lg font-black"><?php echo vvu_e($stat['label']); ?></div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </section>
-    <?php endif; ?>
-
-    <!-- CTA Section -->
-    <section class="relative py-16 sm:py-24 overflow-hidden bg-white dark:bg-gray-900">
-        <div class="container relative z-10">
-            <div class="max-w-5xl mx-auto text-center">
-                <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
-                    <?php echo vvu_e(vvu_gallery_text($g_content, 'cta_heading', 'Want to See More?')); ?>
-                </h2>
-                <p class="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10 max-w-3xl mx-auto leading-relaxed font-medium">
-                    <?php echo nl2br(vvu_e(vvu_gallery_text($g_content, 'cta_text'))); ?>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
-                    <?php if ($t = vvu_gallery_text($g_content, 'cta_1_text')): ?>
-                        <a href="<?php echo vvu_e(vvu_url(vvu_gallery_text($g_content, 'cta_1_link', '#'))); ?>"
-                           class="px-8 sm:px-10 py-4 sm:py-5 bg-blue-600 hover:bg-blue-700 text-white text-lg sm:text-xl font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                            <span class="material-symbols-outlined text-2xl sm:text-3xl text-white"><?php echo vvu_e(vvu_gallery_text($g_content, 'cta_1_icon', 'event')); ?></span>
-                            <?php echo vvu_e($t); ?>
-                        </a>
-                    <?php endif; ?>
-                    <?php if ($t = vvu_gallery_text($g_content, 'cta_2_text')): ?>
-                        <a href="<?php echo vvu_e(vvu_url(vvu_gallery_text($g_content, 'cta_2_link', '#'))); ?>"
-                           class="px-8 sm:px-10 py-4 sm:py-5 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-lg sm:text-xl font-bold rounded-2xl transition-all border-2 border-gray-200 dark:border-gray-700 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
-                            <span class="material-symbols-outlined text-2xl sm:text-3xl"><?php echo vvu_e(vvu_gallery_text($g_content, 'cta_2_icon', 'newspaper')); ?></span>
-                            <?php echo vvu_e($t); ?>
-                        </a>
-                    <?php endif; ?>
                 </div>
+                <div class="vm-cta-heading" role="heading" aria-level="2">
+                    <?php echo vvu_e(vvu_gallery_text($g_content, 'cta_heading', 'Want to See More?')); ?>
+                </div>
+                <?php if ($g_lead !== ''): ?>
+                    <p class="vm-cta-lead"><?php echo nl2br(vvu_e($g_lead)); ?></p>
+                <?php endif; ?>
+
+                <?php if ($g_cta_1 !== '' || $g_cta_2 !== ''): ?>
+                    <div class="vm-actions">
+                        <?php if ($g_cta_1 !== ''): ?>
+                            <a href="<?php echo vvu_e(vvu_url(vvu_gallery_text($g_content, 'cta_1_link', '#'))); ?>" class="vm-btn vm-btn--gold">
+                                <span class="material-symbols-outlined" aria-hidden="true"><?php echo vvu_e(vvu_gallery_text($g_content, 'cta_1_icon', 'event')); ?></span>
+                                <?php echo vvu_e($g_cta_1); ?>
+                            </a>
+                        <?php endif; ?>
+                        <?php if ($g_cta_2 !== ''): ?>
+                            <a href="<?php echo vvu_e(vvu_url(vvu_gallery_text($g_content, 'cta_2_link', '#'))); ?>" class="vm-btn vm-btn--ghost">
+                                <span class="material-symbols-outlined" aria-hidden="true"><?php echo vvu_e(vvu_gallery_text($g_content, 'cta_2_icon', 'newspaper')); ?></span>
+                                <?php echo vvu_e($g_cta_2); ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             </div>
+
+            <?php if ($g_stats): ?>
+                <div class="vm-stats" style="--vm-cols: <?php echo min(4, count($g_stats)); ?>">
+                    <?php foreach ($g_stats as $stat): ?>
+                        <div class="vm-stat">
+                            <span class="vm-stat-value"><?php echo vvu_e($stat['value_text']); ?></span>
+                            <span class="vm-stat-label"><?php echo vvu_e($stat['label']); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 </main>

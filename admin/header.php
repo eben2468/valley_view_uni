@@ -44,7 +44,7 @@ require_once('../includes/upload_helper.php');
     <script src="js/admin-responsive.js?v=1.0" defer></script>
     <!-- Shrinks oversized photos in the browser so uploads can't trip the
          server's request-size limit (HTTP 413) -->
-    <script src="js/upload-guard.js?v=1.1" defer></script>
+    <script src="js/upload-guard.js?v=1.2" defer></script>
     <!-- Crop dialog for file inputs marked data-crop (homepage images) -->
     <script src="js/image-cropper.js?v=1.0" defer></script>
 

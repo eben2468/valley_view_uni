@@ -55,11 +55,28 @@
             : Math.round(bytes / 1024) + 'KB';
     }
 
-    function shouldProcess(file) {
+    /**
+     * Per-input overrides, e.g. gallery photos:
+     *   <input type="file" data-max-edge="1600" data-quality="0.82" data-threshold="300000">
+     * Falls back to the defaults above for any attribute left out.
+     */
+    function optionsFor(input) {
+        var d = (input && input.dataset) || {};
+        var edge = parseInt(d.maxEdge, 10);
+        var q = parseFloat(d.quality);
+        var t = parseInt(d.threshold, 10);
+        return {
+            maxEdge: edge > 0 ? edge : MAX_DIMENSION,
+            quality: q > 0 && q <= 1 ? q : QUALITY,
+            threshold: t >= 0 ? t : SIZE_THRESHOLD
+        };
+    }
+
+    function shouldProcess(file, opts) {
         if (!file || !file.type || file.type.indexOf('image/') !== 0) return false;
         if (file.type === 'image/gif') return false;   // keep animation intact
         if (file.type === 'image/svg+xml') return false;
-        return file.size > SIZE_THRESHOLD;
+        return file.size > (opts ? opts.threshold : SIZE_THRESHOLD);
     }
 
     /**
@@ -100,7 +117,8 @@
     }
 
     /** Resize one File; resolves with the original if anything goes wrong. */
-    function shrink(file) {
+    function shrink(file, opts) {
+        opts = opts || { maxEdge: MAX_DIMENSION, quality: QUALITY };
         return new Promise(function (resolve) {
             var url = URL.createObjectURL(file);
             var img = new Image();
@@ -108,7 +126,7 @@
             img.onload = function () {
                 URL.revokeObjectURL(url);
 
-                var scale = Math.min(1, MAX_DIMENSION / Math.max(img.width, img.height));
+                var scale = Math.min(1, opts.maxEdge / Math.max(img.width, img.height));
 
                 // Already within bounds and merely a heavy file — still worth
                 // re-encoding, but never upscale.
@@ -162,7 +180,7 @@
                     } catch (e) {
                         resolve(file);   // File constructor unavailable
                     }
-                }, type, QUALITY);
+                }, type, opts.quality);
             };
 
             img.onerror = function () {
@@ -210,14 +228,23 @@
 
     function processInput(input) {
         var files = Array.prototype.slice.call(input.files);
-        if (!files.some(shouldProcess)) return null;
+        var opts = optionsFor(input);
+        var needs = function (f) { return shouldProcess(f, opts); };
+        if (!files.some(needs)) return null;
 
         var before = files.reduce(function (sum, f) { return sum + f.size; }, 0);
-        note(input, 'Optimising image…');
+        var multi = files.length > 1;
+        note(input, multi ? 'Optimising ' + files.length + ' images…' : 'Optimising image…');
 
-        var job = Promise.all(files.map(function (f) {
-            return shouldProcess(f) ? shrink(f) : Promise.resolve(f);
-        })).then(function (processed) {
+        // One at a time: decoding 30 camera photos at once can exhaust memory
+        // on a laptop or phone, and the progress note stays meaningful.
+        var processed = [];
+        var job = files.reduce(function (chain, f, i) {
+            return chain.then(function () {
+                if (multi) note(input, 'Optimising image ' + (i + 1) + ' of ' + files.length + '…');
+                return needs(f) ? shrink(f, opts) : f;
+            }).then(function (out) { processed.push(out); });
+        }, Promise.resolve()).then(function () {
             var after = processed.reduce(function (sum, f) { return sum + f.size; }, 0);
 
             if (after >= before) {

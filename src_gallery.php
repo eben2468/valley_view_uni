@@ -9,6 +9,7 @@ require_once __DIR__ . '/includes/gallery_helper.php';
 // shared with gallery.php; only this key and the hero differ.
 $vvu_gallery_key  = 'src';
 $vvu_gallery_self = 'src_gallery.php';
+$vvu_gallery_kicker = 'SRC Gallery';
 
 // ?album=<slug> switches this same page into the album detail view, so every
 // photo set stays on src_gallery.php instead of needing a second template.

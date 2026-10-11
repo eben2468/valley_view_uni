@@ -6,6 +6,7 @@
  * gallery key:
  *
  *     'main' -> gallery.php          'src' -> src_gallery.php
+ *     'graduation' -> graduation_gallery.php
  *
  * Every getter takes that key, so adding another gallery page later needs a
  * new key and a new thin template, not another copy of this file.
@@ -194,6 +195,17 @@ if (!function_exists('vvu_gallery_content')) {
             return $fallback;
         }
         return $path;
+    }
+
+    /**
+     * The album's "View all photos" link (Google Photos, Drive…), or '' when
+     * there is none. Only http(s) links are honoured, so a stray value can
+     * never become a javascript: URL. Works before the column exists too.
+     */
+    function vvu_gallery_external_url($album)
+    {
+        $url = trim((string) ($album['external_url'] ?? ''));
+        return preg_match('#^https?://#i', $url) ? $url : '';
     }
 
     /** "07 June 2023" — falls back to whatever is stored if it will not parse. */

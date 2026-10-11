@@ -9,6 +9,20 @@ require_once(__DIR__ . '/../includes/db_connect.php');
 require_once(__DIR__ . '/../includes/admin_auth.php');
 require_once(__DIR__ . '/../includes/upload_helper.php');
 
+/** Whether gallery_albums has external_url yet (sql/graduation_gallery_migration.sql). */
+function gallery_has_external_url(PDO $pdo)
+{
+    static $has = null;
+    if ($has === null) {
+        try {
+            $has = (bool) $pdo->query("SHOW COLUMNS FROM gallery_albums LIKE 'external_url'")->fetch();
+        } catch (Throwable $e) {
+            $has = false;
+        }
+    }
+    return $has;
+}
+
 $album_id = (int) ($_GET['id'] ?? 0);
 if ($album_id <= 0) {
     header('Location: manage_gallery.php?tab=albums');
@@ -54,6 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ($_POST['status'] ?? 'active') === 'inactive' ? 'inactive' : 'active',
                 $album_id,
             ]);
+
+            if (gallery_has_external_url($pdo)) {
+                $ext = trim((string) ($_POST['external_url'] ?? ''));
+                if ($ext !== '' && !preg_match('#^https?://#i', $ext)) {
+                    throw new RuntimeException('The other details were saved, but the "View all photos" link must start with https:// — paste the full share link from Google Photos.');
+                }
+                $pdo->prepare("UPDATE gallery_albums SET external_url = ? WHERE id = ?")
+                    ->execute([$ext !== '' ? substr($ext, 0, 1000) : null, $album_id]);
+            }
             $success = 'Album details saved.';
         }
 
@@ -192,6 +215,7 @@ try {
     $GALLERIES = [
         'main' => ['label' => 'Main Photo Gallery', 'page' => 'gallery.php'],
         'src'  => ['label' => 'SRC Gallery',        'page' => 'src_gallery.php'],
+        'graduation' => ['label' => 'Graduation 2026', 'page' => 'graduation_gallery.php'],
     ];
     $gallery_meta = $GALLERIES[$gallery_key] ?? $GALLERIES['main'];
 
@@ -275,6 +299,32 @@ include 'sidebar.php';
                         <textarea name="description" class="form-control" rows="3"
                                   placeholder="Optional — shown above the photo grid."><?php echo htmlspecialchars($album['description'] ?? ''); ?></textarea>
                     </div>
+                    <?php if (gallery_has_external_url($pdo)): ?>
+                        <div class="col-12">
+                            <label class="form-label"><i class="fab fa-google"></i> “View all photos” link (Google Photos share link)</label>
+                            <div class="input-group">
+                                <input type="url" name="external_url" class="form-control"
+                                       value="<?php echo htmlspecialchars($album['external_url'] ?? ''); ?>"
+                                       placeholder="https://photos.app.goo.gl/…">
+                                <?php if (!empty($album['external_url'])): ?>
+                                    <a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars($album['external_url']); ?>" target="_blank" rel="noopener noreferrer">
+                                        <i class="fas fa-external-link-alt"></i> Test link
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                            <small class="text-muted">
+                                In Google Photos open the album → Share → Create link, and paste it here. Visitors get a
+                                “View all photos” button on the album card and the album page. Leave empty to hide the button.
+                            </small>
+                        </div>
+                    <?php else: ?>
+                        <div class="col-12">
+                            <div class="alert alert-warning mb-0 py-2">
+                                Import <code>sql/graduation_gallery_migration.sql</code> in phpMyAdmin to enable the
+                                “View all photos” (Google Photos) link for albums.
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     <div class="col-md-4">
                         <label class="form-label">Category</label>
                         <select name="category_id" class="form-select">
@@ -302,7 +352,7 @@ include 'sidebar.php';
                     <div class="col-md-8">
                         <label class="form-label">Cover image path / URL</label>
                         <input type="text" name="cover_image" class="form-control mb-2" value="<?php echo htmlspecialchars($album['cover_image'] ?? ''); ?>">
-                        <input type="file" name="cover_upload" class="form-control" accept="image/*">
+                        <input type="file" name="cover_upload" class="form-control" accept="image/*" data-crop="16/10" data-max-edge="1920" data-threshold="400000">
                         <small class="text-muted">Uploading a file replaces the path above. Or tick a photo below and use “Set as album cover”.</small>
                     </div>
                     <div class="col-md-4">
@@ -336,10 +386,12 @@ include 'sidebar.php';
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Upload image files (select many at once)</label>
-                        <input type="file" name="photo_files[]" class="form-control" accept="image/*" multiple>
+                        <input type="file" name="photo_files[]" class="form-control" accept="image/*" multiple
+                               data-max-edge="1600" data-quality="0.82" data-threshold="300000">
                         <small class="text-muted">
                             Saved to <code>uploads/gallery/albums/<?php echo $album_id; ?>/</code>.
-                            Very large batches can exceed the server's upload limit — add them in groups if a batch fails.
+                            Photos are compressed automatically in your browser (max 1600px) before upload, so pages load fast.
+                            Upload a selection of highlights (around 10–30); put the full album on Google Photos and paste its link above.
                         </small>
                     </div>
                     <div class="col-md-6">

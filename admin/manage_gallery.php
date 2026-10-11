@@ -19,6 +19,7 @@ $error   = '';
 $GALLERIES = [
     'main' => ['label' => 'Main Photo Gallery', 'page' => 'gallery.php',     'icon' => 'fa-images'],
     'src'  => ['label' => 'SRC Gallery',        'page' => 'src_gallery.php', 'icon' => 'fa-user-group'],
+    'graduation' => ['label' => 'Graduation 2026', 'page' => 'graduation_gallery.php', 'icon' => 'fa-graduation-cap'],
 ];
 
 $gallery_key = $_POST['gallery_key'] ?? $_GET['gallery'] ?? 'main';
@@ -26,6 +27,37 @@ if (!isset($GALLERIES[$gallery_key])) {
     $gallery_key = 'main';
 }
 $gallery_meta = $GALLERIES[$gallery_key];
+
+/**
+ * Whether gallery_albums has the external_url column yet
+ * (sql/graduation_gallery_migration.sql). Until it is imported, the
+ * "View all photos" link field is hidden instead of breaking saves.
+ */
+function gallery_has_external_url(PDO $pdo)
+{
+    static $has = null;
+    if ($has === null) {
+        try {
+            $has = (bool) $pdo->query("SHOW COLUMNS FROM gallery_albums LIKE 'external_url'")->fetch();
+        } catch (Throwable $e) {
+            $has = false;
+        }
+    }
+    return $has;
+}
+
+/** Keeps only http(s) links, so the public button can never run script. */
+function gallery_clean_url($url)
+{
+    $url = trim((string) $url);
+    if ($url === '') {
+        return null;
+    }
+    if (!preg_match('#^https?://#i', $url)) {
+        throw new RuntimeException('The "View all photos" link must start with https:// — paste the full share link from Google Photos.');
+    }
+    return substr($url, 0, 1000);
+}
 
 /** Builds a URL-safe slug, unique within one gallery's rows in a table. */
 function gallery_unique_slug(PDO $pdo, $table, $text, $galleryKey, $ignoreId = null)
@@ -126,6 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $catId = $_POST['category_id'] !== '' ? (int) $_POST['category_id'] : null;
             $date  = trim((string) ($_POST['event_date'] ?? '')) ?: null;
+            $extUrl = gallery_has_external_url($pdo) ? gallery_clean_url($_POST['external_url'] ?? '') : null;
 
             $stmt = $pdo->prepare("SELECT COALESCE(MAX(display_order), 0) FROM gallery_albums WHERE gallery_key = ?");
             $stmt->execute([$gallery_key]);
@@ -140,7 +173,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ($_POST['status'] ?? 'active') === 'inactive' ? 'inactive' : 'active',
             ]);
 
-            header('Location: edit_gallery_album.php?id=' . $pdo->lastInsertId() . '&created=1');
+            $newId = $pdo->lastInsertId();
+            if (gallery_has_external_url($pdo)) {
+                $pdo->prepare("UPDATE gallery_albums SET external_url = ? WHERE id = ?")
+                    ->execute([$extUrl, $newId]);
+            }
+
+            header('Location: edit_gallery_album.php?id=' . $newId . '&created=1');
             exit;
         }
         elseif ($action === 'delete_album') {
@@ -308,6 +347,14 @@ include 'sidebar.php';
         </div>
     <?php endif; ?>
 
+    <?php if ($schema_ready && (!gallery_has_external_url($pdo) || ($gallery_key === 'graduation' && !$content))): ?>
+        <div class="alert alert-warning">
+            <strong>One database update is still needed.</strong>
+            Import <code>sql/graduation_gallery_migration.sql</code> in phpMyAdmin to enable the Graduation 2026
+            gallery and the “View all photos” (Google Photos) link on albums, then reload this page.
+        </div>
+    <?php endif; ?>
+
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
             <div class="dashboard-card h-100"><div class="card-body">
@@ -380,7 +427,7 @@ include 'sidebar.php';
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Cover image (upload)</label>
-                        <input type="file" name="cover_upload" class="form-control" accept="image/*">
+                        <input type="file" name="cover_upload" class="form-control" accept="image/*" data-crop="16/10" data-max-edge="1920" data-threshold="400000">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">…or cover image path / URL</label>
@@ -390,6 +437,13 @@ include 'sidebar.php';
                         <label class="form-label">Description</label>
                         <textarea name="description" class="form-control" rows="2"></textarea>
                     </div>
+                    <?php if (gallery_has_external_url($pdo)): ?>
+                        <div class="col-12">
+                            <label class="form-label"><i class="fab fa-google"></i> “View all photos” link (Google Photos share link)</label>
+                            <input type="url" name="external_url" class="form-control" placeholder="https://photos.app.goo.gl/…">
+                            <small class="text-muted">Optional. Upload a few highlight photos to the album, and paste the link to the full album here — visitors get a “View all photos” button.</small>
+                        </div>
+                    <?php endif; ?>
                     <div class="col-md-4">
                         <label class="form-label">Status</label>
                         <select name="status" class="form-select">
@@ -461,7 +515,7 @@ include 'sidebar.php';
                                     <div class="fw-semibold"><?php echo htmlspecialchars($a['title']); ?></div>
                                     <small class="text-muted">
                                         <?php if ($a['is_featured']): ?><span class="badge bg-warning text-dark me-1">Featured</span><?php endif; ?>
-                                        /gallery.php?album=<?php echo htmlspecialchars($a['slug']); ?>
+                                        /<?php echo htmlspecialchars($gallery_meta['page']); ?>?album=<?php echo htmlspecialchars($a['slug']); ?>
                                     </small>
                                 </td>
                                 <td><?php echo $a['category_name'] ? htmlspecialchars($a['category_name']) : '<span class="text-muted">—</span>'; ?></td>
