@@ -8,6 +8,7 @@
 require_once(__DIR__ . '/../includes/db_connect.php');
 require_once(__DIR__ . '/../includes/admin_auth.php');
 require_once(__DIR__ . '/../includes/upload_helper.php');
+require_once(__DIR__ . '/../includes/gallery_helper.php');
 
 $success = '';
 $error   = '';
@@ -149,7 +150,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('An album needs a title.');
             }
             $slug  = gallery_unique_slug($pdo, 'gallery_albums', $title, $gallery_key);
-            $cover = trim((string) ($_POST['cover_image'] ?? ''));
+            $cover = vvu_gallery_resolve_image_link($_POST['cover_image'] ?? '', $linkError);
+            if ($cover === null && empty($_FILES['cover_upload']['name'])) {
+                throw new RuntimeException('Cover image: ' . $linkError);
+            }
             if (!empty($_FILES['cover_upload']['name'])) {
                 $uploaded = handleAdminFileUpload($_FILES['cover_upload'], 'gallery/covers', 'cover_');
                 if ($uploaded) {
@@ -285,6 +289,9 @@ function gallery_admin_preview($path)
     $path = trim((string) $path);
     if ($path === '') {
         return '';
+    }
+    if (vvu_gallery_is_google_image($path)) {
+        return vvu_gallery_img($path, 600);
     }
     return preg_match('#^(https?:)?//#i', $path) ? $path : '../' . ltrim($path, '/');
 }
@@ -430,8 +437,8 @@ include 'sidebar.php';
                         <input type="file" name="cover_upload" class="form-control" accept="image/*" data-crop="16/10" data-max-edge="1920" data-threshold="400000">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">…or cover image path / URL</label>
-                        <input type="text" name="cover_image" class="form-control" placeholder="uploads/gallery/...">
+                        <label class="form-label">…or Google Photos link / image URL</label>
+                        <input type="text" name="cover_image" class="form-control" placeholder="https://photos.app.goo.gl/…">
                     </div>
                     <div class="col-12">
                         <label class="form-label">Description</label>

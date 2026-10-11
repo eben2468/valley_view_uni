@@ -29,10 +29,9 @@ if (!isset($vvu_gallery_kicker)) {
     $vvu_gallery_kicker = 'Photo Gallery';
 }
 
-/** Resized copy for a card/tile when the server can make one, else the original. */
+/** Resized copy for a card/tile (Google resizes its own photos; local ones use vvu_thumb). */
 $g_thumb = function ($path, $w, $h) {
-    $path = vvu_gallery_src($path);
-    return ($path !== '' && function_exists('vvu_thumb')) ? vvu_thumb($path, $w, $h) : $path;
+    return vvu_gallery_img($path, $w, $h);
 };
 
 /** "Google Photos" when the link points there, so the button says where it goes. */
@@ -129,8 +128,8 @@ $g_host_label = function ($url) {
                 <?php else: ?>
                     <div class="g-photos" id="galleryPhotoGrid">
                         <?php foreach ($album_images as $i => $img):
-                            $full  = vvu_gallery_src($img['image_path']);
-                            $thumb = trim((string) $img['thumb_path']) !== '' ? vvu_gallery_src($img['thumb_path']) : $g_thumb($full, 480, 480);
+                            $full  = vvu_gallery_img($img['image_path'], 1600);
+                            $thumb = trim((string) $img['thumb_path']) !== '' ? (vvu_gallery_is_google_image($img['thumb_path']) ? vvu_gallery_img($img['thumb_path'], 480, 480) : vvu_gallery_src($img['thumb_path'])) : $g_thumb($img['image_path'], 480, 480);
                             $cap   = trim((string) $img['title']);
                             $alt   = $cap !== '' ? $cap : $active_album['title'] . ' — photo ' . ($i + 1);
                         ?>

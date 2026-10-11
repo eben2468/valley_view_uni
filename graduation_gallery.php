@@ -50,7 +50,7 @@ if ($g_hero === '') {
     <section class="relative min-h-[65vh] flex items-center overflow-hidden bg-gray-900">
         <!-- Background Image with Overlay -->
         <div class="absolute inset-0 z-0">
-            <img src="<?php echo vvu_e($g_hero); ?>"
+            <img src="<?php echo vvu_e(vvu_gallery_img($g_hero, 1920)); ?>"
                  alt="Valley View University Graduation 2026" class="w-full h-full object-cover animate-slow-zoom opacity-60">
             <div class="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-900/40 to-gray-900"></div>
         </div>

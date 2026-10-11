@@ -8,6 +8,7 @@
 require_once(__DIR__ . '/../includes/db_connect.php');
 require_once(__DIR__ . '/../includes/admin_auth.php');
 require_once(__DIR__ . '/../includes/upload_helper.php');
+require_once(__DIR__ . '/../includes/gallery_helper.php');
 
 /** Whether gallery_albums has external_url yet (sql/graduation_gallery_migration.sql). */
 function gallery_has_external_url(PDO $pdo)
@@ -44,7 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('An album needs a title.');
             }
 
-            $cover = trim((string) ($_POST['cover_image'] ?? ''));
+            $cover = vvu_gallery_resolve_image_link($_POST['cover_image'] ?? '', $linkError);
+            if ($cover === null && empty($_FILES['cover_upload']['name'])) {
+                throw new RuntimeException('Cover image: ' . $linkError);
+            }
             if (!empty($_FILES['cover_upload']['name'])) {
                 $uploaded = handleAdminFileUpload($_FILES['cover_upload'], 'gallery/covers', 'cover_');
                 if ($uploaded) {
@@ -119,17 +123,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // One path/URL per line
-            $lines = array_filter(array_map('trim', preg_split('/\R/', (string) ($_POST['photo_urls'] ?? ''))));
-            foreach ($lines as $line) {
-                $insert->execute([$album_id, $line, '', '', '', ++$next]);
+            // Google Photos share links are opened one by one, so give a long
+            // list of them time to resolve.
+            $lines = array_values(array_unique(array_filter(array_map('trim', preg_split('/\R/', (string) ($_POST['photo_urls'] ?? ''))))));
+            if (count($lines) > 5) {
+                @set_time_limit(30 + 15 * count($lines));
+            }
+            $linkErrors = [];
+            foreach ($lines as $n => $line) {
+                $path = vvu_gallery_resolve_image_link($line, $linkError);
+                if ($path === null || $path === '') {
+                    $linkErrors[] = 'Link ' . ($n + 1) . ': ' . $linkError;
+                    continue;
+                }
+                $insert->execute([$album_id, $path, '', '', '', ++$next]);
                 $added++;
             }
 
-            if ($added === 0 && $skipped === 0) {
-                $error = 'Nothing to add — choose some image files or paste at least one path.';
+            if ($added === 0 && $skipped === 0 && !$linkErrors) {
+                $error = 'Nothing to add — choose some image files or paste at least one link.';
             } else {
-                $success = $added . ' photo' . ($added === 1 ? '' : 's') . ' added.'
-                         . ($skipped ? ' ' . $skipped . ' file(s) were rejected — check the type and size.' : '');
+                if ($added || $skipped) {
+                    $success = $added . ' photo' . ($added === 1 ? '' : 's') . ' added.'
+                             . ($skipped ? ' ' . $skipped . ' file(s) were rejected — check the type and size.' : '');
+                }
+                if ($linkErrors) {
+                    $error = count($linkErrors) . ' link(s) could not be added. ' . implode(' ', array_slice($linkErrors, 0, 5));
+                }
             }
         }
 
@@ -137,15 +157,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         elseif ($action === 'save_photos') {
             $stmt = $pdo->prepare(
                 "UPDATE gallery_album_images
-                    SET title = ?, description = ?, image_path = ?, thumb_path = ?, display_order = ?, status = ?
+                    SET title = ?, description = ?, image_path = COALESCE(?, image_path), thumb_path = COALESCE(?, thumb_path), display_order = ?, status = ?
                   WHERE id = ? AND album_id = ?"
             );
+            // A pasted Google Photos link is resolved to its image; one that
+            // cannot be resolved leaves that photo's stored path unchanged
+            // (NULL -> COALESCE keeps the old value).
+            $linkErrors = [];
             foreach (($_POST['photo'] ?? []) as $pid => $row) {
+                $image = vvu_gallery_resolve_image_link($row['image_path'] ?? '', $linkError);
+                if ($image === null) {
+                    $linkErrors[] = $linkError;
+                }
+                $thumb = vvu_gallery_resolve_image_link($row['thumb_path'] ?? '', $linkError);
+                if ($thumb === null) {
+                    $linkErrors[] = $linkError;
+                }
                 $stmt->execute([
                     $row['title'] ?? '',
                     $row['description'] ?? '',
-                    $row['image_path'] ?? '',
-                    $row['thumb_path'] ?? '',
+                    $image,
+                    $thumb,
                     (int) ($row['display_order'] ?? 0),
                     ($row['status'] ?? 'active') === 'inactive' ? 'inactive' : 'active',
                     (int) $pid,
@@ -153,6 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
             }
             $success = 'Photo changes saved.';
+            if ($linkErrors) {
+                $error = 'Some links were not changed. ' . implode(' ', array_slice(array_unique($linkErrors), 0, 3));
+            }
         }
         elseif ($action === 'delete_photo') {
             $pdo->prepare("DELETE FROM gallery_album_images WHERE id = ? AND album_id = ?")
@@ -238,6 +273,9 @@ function gallery_admin_preview($path)
     $path = trim((string) $path);
     if ($path === '') {
         return '';
+    }
+    if (vvu_gallery_is_google_image($path)) {
+        return vvu_gallery_img($path, 600);
     }
     return preg_match('#^(https?:)?//#i', $path) ? $path : '../' . ltrim($path, '/');
 }
@@ -350,10 +388,10 @@ include 'sidebar.php';
                     </div>
 
                     <div class="col-md-8">
-                        <label class="form-label">Cover image path / URL</label>
-                        <input type="text" name="cover_image" class="form-control mb-2" value="<?php echo htmlspecialchars($album['cover_image'] ?? ''); ?>">
+                        <label class="form-label">Cover image — Google Photos link or path / URL</label>
+                        <input type="text" name="cover_image" class="form-control mb-2" placeholder="https://photos.app.goo.gl/…  or  https://lh3.googleusercontent.com/…" value="<?php echo htmlspecialchars($album['cover_image'] ?? ''); ?>">
                         <input type="file" name="cover_upload" class="form-control" accept="image/*" data-crop="16/10" data-max-edge="1920" data-threshold="400000">
-                        <small class="text-muted">Uploading a file replaces the path above. Or tick a photo below and use “Set as album cover”.</small>
+                        <small class="text-muted">Paste a Google Photos photo link (or image address) in the box above, <strong>or</strong> upload a file — an upload replaces the link. You can also tick a photo below and use “Set as album cover”.</small>
                     </div>
                     <div class="col-md-4">
                         <?php if ($p = gallery_admin_preview($album['cover_image'])): ?>
@@ -395,9 +433,14 @@ include 'sidebar.php';
                         </small>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">…or paste image paths / URLs, one per line</label>
+                        <label class="form-label">…or paste Google Photos links, one per line</label>
                         <textarea name="photo_urls" class="form-control" rows="4"
-                                  placeholder="uploads/gallery/albums/3/images/games-10.jpg&#10;https://example.com/photo.jpg"></textarea>
+                                  placeholder="https://photos.app.goo.gl/AbC123…&#10;https://lh3.googleusercontent.com/pw/…"></textarea>
+                        <small class="text-muted d-block mt-1">
+                            In Google Photos open a photo, then either <strong>Share → Copy link</strong> (the album must be shared by link)
+                            or right-click the picture → <strong>Copy image address</strong>. Paste one link per line. The photo is shown
+                            straight from Google at the right size, so nothing is uploaded here. Image paths/URLs from other sites also work.
+                        </small>
                     </div>
                 </div>
                 <button class="btn btn-success mt-3"><i class="fas fa-plus"></i> Add photos</button>
