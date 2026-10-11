@@ -6,6 +6,7 @@ require_once('../includes/video_helper.php');
 // Needed here, not just via header.php: the video save below runs before the
 // header is included.
 require_once('../includes/upload_helper.php');
+require_once('../includes/image_helper.php');
 
 // Make sure the slider timing table/column and the button placement columns
 // exist, then handle a save
@@ -572,7 +573,7 @@ $stats = [
                                         <?php foreach ($gallery as $image): ?>
                                         <div class="col-md-3 mb-3">
                                             <div class="gallery-item">
-                                                <img src="../<?php echo htmlspecialchars($image['image_url']); ?>" alt="<?php echo htmlspecialchars($image['caption']); ?>" class="img-fluid" style="border-radius: 8px;">
+                                                <img src="<?php echo htmlspecialchars(vvu_admin_img_preview($image['image_url'])); ?>" alt="<?php echo htmlspecialchars($image['caption']); ?>" class="img-fluid" style="border-radius: 8px;">
                                                 <div class="mt-2">
                                                     <small class="text-muted"><?php echo htmlspecialchars($image['caption']); ?></small>
                                                     <div class="mt-1">
@@ -765,7 +766,7 @@ $stats = [
                                         <div class="row align-items-center">
                                             <div class="col-md-3 text-center">
                                                 <?php if (!empty($stats_banner['bg_image'])): ?>
-                                                    <img src="../<?php echo htmlspecialchars($stats_banner['bg_image']); ?>" class="img-fluid rounded border" style="max-height: 120px;">
+                                                    <img src="<?php echo htmlspecialchars(vvu_admin_img_preview($stats_banner['bg_image'])); ?>" class="img-fluid rounded border" style="max-height: 120px;">
                                                 <?php else: ?>
                                                     <div class="p-4 bg-secondary text-white rounded"><i class="fas fa-image fa-2x"></i></div>
                                                 <?php endif; ?>

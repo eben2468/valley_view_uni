@@ -2,6 +2,7 @@
 require_once('../includes/db_connect.php');
 require_once('../includes/upload_helper.php');
 require_once __DIR__ . '/../includes/admin_auth.php';
+require_once __DIR__ . '/../includes/image_helper.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
@@ -11,7 +12,8 @@ if (!isset($_SESSION['admin_id'])) {
 $action = $_GET['action'] ?? 'edit'; $id = $_GET['id'] ?? null;
 if (isset($_GET['delete'])) { $pdo->prepare("DELETE FROM homepage_programs WHERE id = ?")->execute([$_GET['delete']]); header("Location: manage_homepage_content.php?tab=programs"); exit(); }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $image_url = $_POST['image_url'];
+    // A pasted Google Photos link becomes its image URL; an upload still wins.
+    $image_url = vvu_resolve_image_link($_POST['image_url'] ?? '', $link_error);
     
     // Handle file upload
     $uploaded_path = handleAdminFileUpload($_FILES['image_file'], 'programs');
@@ -19,36 +21,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $image_url = $uploaded_path;
     }
 
+    if ($image_url === null) {
+        $form_error = 'Image link: ' . $link_error;
+    } else {
     $data = [$image_url, $_POST['title'], $_POST['category'], $_POST['description'], $_POST['rating'], $_POST['link_url'], $_POST['button1_link'], $_POST['button2_link'], $_POST['button3_link'], $_POST['display_order'], isset($_POST['is_active']) ? 1 : 0];
     if ($action === 'add') $pdo->prepare("INSERT INTO homepage_programs (image_url, title, category, description, rating, link_url, button1_link, button2_link, button3_link, display_order, is_active) VALUES (?,?,?,?,?,?,?,?,?,?,?)")->execute($data);
     else $pdo->prepare("UPDATE homepage_programs SET image_url=?, title=?, category=?, description=?, rating=?, link_url=?, button1_link=?, button2_link=?, button3_link=?, display_order=?, is_active=? WHERE id=?")->execute([...$data, $id]);
     header("Location: manage_homepage_content.php?tab=programs"); exit();
+    }
 }
 $item = null; if ($id) { $stmt = $pdo->prepare("SELECT * FROM homepage_programs WHERE id = ?"); $stmt->execute([$id]); $item = $stmt->fetch(); }
+if (!empty($form_error)) { $item = array_merge($item ?: [], $_POST); }
 
 include 'header.php'; include 'sidebar.php';
 ?>
 <main class="main-content"><h4><?= $action === 'add' ? 'Add' : 'Edit' ?> Program</h4>
-<div class="row mt-4"><div class="col-lg-8"><div class="dashboard-card"><div class="card-body"><form method="POST" enctype="multipart/form-data">
+<div class="row mt-4"><div class="col-lg-8"><div class="dashboard-card"><div class="card-body"><?php if (!empty($form_error)): ?><div class="alert alert-danger"><i class="fas fa-triangle-exclamation me-1"></i><?= htmlspecialchars($form_error) ?></div><?php endif; ?>
+<form method="POST" enctype="multipart/form-data">
 <div class="mb-3"><label>Title *</label><input type="text" name="title" class="form-control" value="<?= htmlspecialchars($item['title'] ?? '') ?>" required></div>
 <div class="mb-3"><label>Category *</label><input type="text" name="category" class="form-control" value="<?= htmlspecialchars($item['category'] ?? '') ?>" required></div>
 <div class="mb-3"><label>Description *</label><textarea name="description" class="form-control" rows="3" required><?= htmlspecialchars($item['description'] ?? '') ?></textarea></div>
 
 <div class="mb-3">
-    <label>Image URL</label>
-    <input type="text" name="image_url" class="form-control" value="<?= htmlspecialchars($item['image_url'] ?? '') ?>" placeholder="Enter image URL">
+    <label>Image — Google Photos link or image URL</label>
+    <input type="text" name="image_url" class="form-control" value="<?= htmlspecialchars($item['image_url'] ?? '') ?>" placeholder="https://photos.app.goo.gl/…  or  https://lh3.googleusercontent.com/…">
+                <?php include __DIR__ . '/includes/google_photos_help.php'; ?>
 </div>
 <div class="mb-3">
     <label>Or Upload Image</label>
     <input type="file" name="image_file" class="form-control" accept="image/*" data-crop="8/9">
-    <small class="text-muted">Uploading a file will override the URL above.</small>
+    <small class="text-muted">Uploading a file will override the link above.</small>
 </div>
 
 <?php if ($item && $item['image_url']): 
-    $preview_url = $item['image_url'];
-    if (!filter_var($preview_url, FILTER_VALIDATE_URL) && !empty($preview_url)) {
-        $preview_url = '../' . $preview_url;
-    }
+    $preview_url = vvu_admin_img_preview($item['image_url']);
 ?>
 <div class="mb-3">
     <label>Current Image</label><br>

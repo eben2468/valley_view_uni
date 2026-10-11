@@ -3,6 +3,7 @@ require_once('../includes/db_connect.php');
 require_once('../includes/slider_settings.php');
 require_once('../includes/slider_buttons.php');
 require_once __DIR__ . '/../includes/admin_auth.php';
+require_once __DIR__ . '/../includes/image_helper.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
@@ -90,6 +91,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $image_url = $_POST['current_image'] ?? '';
 
+        // Or a pasted Google Photos link (an uploaded file below still wins).
+        $image_link = trim($_POST['image_link'] ?? '');
+        if ($image_link !== '' && !(isset($_FILES['slider_image']) && $_FILES['slider_image']['error'] === UPLOAD_ERR_OK)) {
+            $resolved = vvu_resolve_image_link($image_link, $link_error);
+            if ($resolved === null) {
+                throw new Exception('Image link: ' . $link_error);
+            }
+            $image_url = $resolved;
+        }
+
         // Handle File Upload
         if (isset($_FILES['slider_image']) && $_FILES['slider_image']['error'] === UPLOAD_ERR_OK) {
             $fileTmpPath = $_FILES['slider_image']['tmp_name'];
@@ -121,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($image_url) && $action === 'add') {
-            throw new Exception('Please upload an image.');
+            throw new Exception('Please upload an image or paste a Google Photos link.');
         }
 
         $values = [
@@ -242,7 +253,10 @@ include 'sidebar.php';
                                     <?php if (!empty($slider['image_url'])): ?>
                                         <p class="small text-muted mb-2">Current image: <?php echo htmlspecialchars($slider['image_url']); ?></p>
                                     <?php endif; ?>
-                                    <input type="file" name="slider_image" id="sliderImageInput" class="form-control" accept="image/*" data-crop="16/9" <?php echo $action === 'add' ? 'required' : ''; ?>>
+                                    <input type="file" name="slider_image" id="sliderImageInput" class="form-control" accept="image/*" data-crop="16/9">
+                                    <label class="form-label mt-2 mb-1 small fw-semibold">…or paste a Google Photos link</label>
+                                    <input type="text" name="image_link" class="form-control" placeholder="https://photos.app.goo.gl/…  or  https://lh3.googleusercontent.com/…" value="<?php echo htmlspecialchars($_POST['image_link'] ?? ''); ?>">
+                                    <?php include __DIR__ . '/includes/google_photos_help.php'; ?>
                                     <input type="hidden" name="current_image" value="<?php echo htmlspecialchars($slider['image_url'] ?? ''); ?>">
                                     <small class="text-muted">Recommended size: 1920x1080px. Allowed formats: JPG, PNG, WEBP. The preview updates as soon as you pick a file.</small>
                                 </div>
@@ -524,7 +538,7 @@ include 'sidebar.php';
                                     <div class="vvu-preview-scaler" id="previewScaler">
                                         <div class="vvu-slide-preview-stage" id="previewStage">
                                             <img id="previewImage" alt=""
-                                                 src="<?php echo !empty($slider['image_url']) ? '../' . htmlspecialchars($slider['image_url']) : ''; ?>">
+                                                 src="<?php echo !empty($slider['image_url']) ? htmlspecialchars(vvu_admin_img_preview($slider['image_url'], 1280)) : ''; ?>">
                                             <div class="vvu-preview-caption pos-<?php echo htmlspecialchars($content_position_current); ?>" id="previewCaption">
                                                 <div class="slider-con">
                                                     <h2 id="previewTitle"></h2>

@@ -1,6 +1,7 @@
 <?php
 require_once('../includes/db_connect.php');
 require_once __DIR__ . '/../includes/admin_auth.php';
+require_once __DIR__ . '/../includes/image_helper.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
@@ -13,7 +14,11 @@ $error_msg = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $banner_text = $_POST['banner_text'];
-        $bg_image = $_POST['bg_image'];
+        // A pasted Google Photos link becomes its image URL; an upload still wins.
+        $bg_image = vvu_resolve_image_link($_POST['bg_image'] ?? '', $link_error);
+        if ($bg_image === null && !(isset($_FILES['bg_image_file']) && $_FILES['bg_image_file']['error'] === UPLOAD_ERR_OK)) {
+            throw new Exception('Background image link: ' . $link_error);
+        }
         $is_active = isset($_POST['is_active']) ? 1 : 0;
         
         // Handle file upload if provided
@@ -80,9 +85,10 @@ include 'sidebar.php';
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label class="form-label">Background Image URL</label>
+                                    <label class="form-label">Background Image — Google Photos link or image URL</label>
                                     <input type="text" name="bg_image" id="bg_image" class="form-control" 
                                            value="<?php echo htmlspecialchars($banner['bg_image'] ?? ''); ?>">
+                                    <?php include __DIR__ . '/includes/google_photos_help.php'; ?>
                                 </div>
                                 
                                 <div class="mb-3">
@@ -91,7 +97,7 @@ include 'sidebar.php';
                                     <?php if (!empty($banner['bg_image'])): ?>
                                         <div class="mt-2">
                                             <small>Current Image:</small><br>
-                                            <img src="../<?php echo htmlspecialchars($banner['bg_image']); ?>" style="max-height: 150px; border-radius: 8px; margin-top: 5px;">
+                                            <img src="<?php echo htmlspecialchars(vvu_admin_img_preview($banner['bg_image'])); ?>" style="max-height: 150px; border-radius: 8px; margin-top: 5px;">
                                         </div>
                                     <?php endif; ?>
                                 </div>

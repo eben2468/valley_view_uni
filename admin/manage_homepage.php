@@ -3,6 +3,7 @@ include 'header.php';
 include 'sidebar.php';
 require_once('../includes/db_connect.php');
 require_once('../includes/upload_helper.php');
+require_once('../includes/image_helper.php');
 require_once('../includes/video_helper.php');
 
 // The video box can play an uploaded file as well as a YouTube embed; this
@@ -20,6 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Common image upload handling
         $image_url = $_POST['image_url'] ?? '';
+        // A pasted Google Photos link becomes its image URL (an upload still wins).
+        $has_upload = isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK;
+        if (isset($_POST['image_url']) && !$has_upload) {
+            $image_url = vvu_resolve_image_link($image_url, $link_error);
+            if ($image_url === null) {
+                throw new Exception('Image link: ' . $link_error);
+            }
+        }
         
         // SLIDER ACTIONS
         if ($action === 'add_slider' || $action === 'edit_slider') {
@@ -220,6 +229,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // STATS BANNER ACTIONS
         elseif ($action === 'edit_stats_banner') {
+            if (isset($_POST['bg_image']) && !(isset($_FILES['bg_image_file']) && $_FILES['bg_image_file']['error'] === UPLOAD_ERR_OK)) {
+                $_POST['bg_image'] = vvu_resolve_image_link($_POST['bg_image'], $link_error);
+                if ($_POST['bg_image'] === null) {
+                    throw new Exception('Background image link: ' . $link_error);
+                }
+            }
             if (isset($_FILES['bg_image_file']) && $_FILES['bg_image_file']['error'] === UPLOAD_ERR_OK) {
                 $uploaded = handleAdminFileUpload($_FILES['bg_image_file'], 'stats');
                 if ($uploaded) $_POST['bg_image'] = $uploaded;
@@ -357,7 +372,8 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             <div class="row">
                                 <div class="input-field col s12">
                                     <input type="text" name="image_url" value="<?php echo $edit_data['image_url'] ?? ''; ?>">
-                                    <label>Image URL</label>
+                                    <label>Image URL or Google Photos link</label>
+                                    <?php include __DIR__ . '/includes/google_photos_help.php'; ?>
                                 </div>
                             </div>
                             <div class="row">
@@ -468,7 +484,7 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                                 <?php foreach ($sliders as $slider): ?>
                                 <tr>
                                     <td><?php echo $slider['display_order']; ?></td>
-                                    <td><img src="../<?php echo $slider['image_url']; ?>" style="width:100px; height:60px; object-fit:cover;" alt=""></td>
+                                    <td><img src="<?php echo htmlspecialchars(vvu_admin_img_preview($slider['image_url'])); ?>" style="width:100px; height:60px; object-fit:cover;" alt=""></td>
                                     <td><?php echo htmlspecialchars($slider['title']); ?></td>
                                     <td><?php echo $slider['is_active'] ? '<span class="label label-success">Active</span>' : '<span class="label label-danger">Inactive</span>'; ?></td>
                                     <td>
@@ -503,7 +519,8 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             <div class="row">
                                 <div class="input-field col s12">
                                     <input type="text" name="image_url" value="<?php echo $edit_data['image_url'] ?? ''; ?>">
-                                    <label>Image URL</label>
+                                    <label>Image URL or Google Photos link</label>
+                                    <?php include __DIR__ . '/includes/google_photos_help.php'; ?>
                                 </div>
                             </div>
                             <div class="row">
@@ -578,7 +595,7 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                                 <?php foreach ($discover_cards as $card): ?>
                                 <tr>
                                     <td><?php echo $card['display_order']; ?></td>
-                                    <td><img src="../<?php echo $card['image_url']; ?>" style="width:80px; height:80px; object-fit:cover;" alt=""></td>
+                                    <td><img src="<?php echo htmlspecialchars(vvu_admin_img_preview($card['image_url'])); ?>" style="width:80px; height:80px; object-fit:cover;" alt=""></td>
                                     <td><?php echo htmlspecialchars($card['title']); ?></td>
                                     <td><?php echo htmlspecialchars($card['link_url']); ?></td>
                                     <td><?php echo $card['is_active'] ? '<span class="label label-success">Active</span>' : '<span class="label label-danger">Inactive</span>'; ?></td>
@@ -614,7 +631,8 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             <div class="row">
                                 <div class="input-field col s12">
                                     <input type="text" name="image_url" value="<?php echo $edit_data['image_url'] ?? ''; ?>">
-                                    <label>Image URL</label>
+                                    <label>Image URL or Google Photos link</label>
+                                    <?php include __DIR__ . '/includes/google_photos_help.php'; ?>
                                 </div>
                             </div>
                             <div class="row">
@@ -722,7 +740,7 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                                 <?php foreach ($programs as $prog): ?>
                                 <tr>
                                     <td><?php echo $prog['display_order']; ?></td>
-                                    <td><img src="../<?php echo $prog['image_url']; ?>" style="width:60px; height:60px; object-fit:cover;" alt=""></td>
+                                    <td><img src="<?php echo htmlspecialchars(vvu_admin_img_preview($prog['image_url'])); ?>" style="width:60px; height:60px; object-fit:cover;" alt=""></td>
                                     <td><?php echo htmlspecialchars($prog['title']); ?></td>
                                     <td><?php echo htmlspecialchars($prog['category']); ?></td>
                                     <td><?php echo $prog['rating']; ?></td>
@@ -759,7 +777,8 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             <div class="row">
                                 <div class="input-field col s12">
                                     <input type="text" name="image_url" value="<?php echo $edit_data['image_url'] ?? ''; ?>">
-                                    <label>Image URL</label>
+                                    <label>Image URL or Google Photos link</label>
+                                    <?php include __DIR__ . '/includes/google_photos_help.php'; ?>
                                 </div>
                             </div>
                             <div class="row">
@@ -819,7 +838,7 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                                 <?php foreach ($gallery as $img): ?>
                                 <tr>
                                     <td><?php echo $img['display_order']; ?></td>
-                                    <td><img src="../<?php echo $img['image_url']; ?>" style="width:80px; height:80px; object-fit:cover;" alt=""></td>
+                                    <td><img src="<?php echo htmlspecialchars(vvu_admin_img_preview($img['image_url'])); ?>" style="width:80px; height:80px; object-fit:cover;" alt=""></td>
                                     <td><?php echo htmlspecialchars($img['caption']); ?></td>
                                     <td><?php echo $img['is_active'] ? '<span class="label label-success">Active</span>' : '<span class="label label-danger">Inactive</span>'; ?></td>
                                     <td>
@@ -1225,7 +1244,8 @@ $study_options = $pdo->query("SELECT * FROM homepage_study_options ORDER BY disp
                             <div class="row">
                                 <div class="input-field col s12">
                                     <input type="text" name="bg_image" value="<?php echo $stats_banner['bg_image'] ?? ''; ?>">
-                                    <label>Background Image URL</label>
+                                    <label>Background Image URL or Google Photos link</label>
+                                    <?php include __DIR__ . '/includes/google_photos_help.php'; ?>
                                 </div>
                             </div>
                             <div class="row">

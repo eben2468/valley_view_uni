@@ -79,7 +79,7 @@ include 'includes/header.php';
             ?>
             <div class="item <?php echo $first ? 'active' : ''; ?><?php echo !$hasContent ? ' no-overlay' : ''; ?> pos-<?php echo strip_tags(!empty($slider['content_position']) ? $slider['content_position'] : 'middle-center'); ?>"
                  <?php if ($slider_timing['autoplay'] && !empty($slider['slide_interval'])): ?>data-interval="<?php echo (int)$slider['slide_interval'] * 1000; ?>"<?php endif; ?>>
-                <img src="<?php echo strip_tags($slider['image_url']); ?>" alt="">
+                <img src="<?php echo htmlspecialchars(vvu_img_src(strip_tags($slider['image_url']), 1920)); ?>" alt="">
                 <?php if ($hasCaption): ?>
                 <div class="carousel-caption slider-con">
                     <?php if ($hasTitle): ?>
@@ -819,7 +819,7 @@ function vvuSectionSubtitle($sections, $key, $default) {
             ?>
             <a class="vvu-dcard" href="<?php echo strip_tags($card['link_url']); ?>" style="--d:<?php echo ($d_i % 4) * 90 + intval(($d_i - 1) / 4) * 60; ?>ms">
                 <div class="vvu-dcard-media">
-                    <img src="<?php echo strip_tags($card['image_url']); ?>" alt="<?php echo htmlspecialchars($d_title, ENT_QUOTES); ?>" loading="lazy">
+                    <img src="<?php echo htmlspecialchars(vvu_img_src(strip_tags($card['image_url']), 1200)); ?>" alt="<?php echo htmlspecialchars($d_title, ENT_QUOTES); ?>" loading="lazy">
                 </div>
                 <div class="vvu-dcard-body">
                     <div class="vvu-dcard-title" role="heading" aria-level="3"><?php echo htmlspecialchars($d_title); ?></div>
@@ -859,7 +859,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- VVU AT A GLANCE (STATS BANNER) -->
 <?php if ($stats_banner): ?>
-<section class="vvu-stats-banner" <?php if (!empty($stats_banner['bg_image'])): ?>style="background-image:url('<?php echo htmlspecialchars(strip_tags($stats_banner['bg_image'])); ?>')"<?php endif; ?>>
+<section class="vvu-stats-banner" <?php if (!empty($stats_banner['bg_image'])): ?>style="background-image:url('<?php echo htmlspecialchars(vvu_img_src(strip_tags($stats_banner['bg_image']), 1920)); ?>')"<?php endif; ?>>
     <div class="vvu-stats-overlay"></div>
     <div class="container">
         <div class="vvu-stats-inner">
@@ -1191,7 +1191,7 @@ $video_playable  = $video && ($video_is_upload || $video_embed !== '');
                 </div>
                 <div class="modern-gallery-grid hp-gal" id="vvuGallery">
                     <?php foreach ($gallery as $i => $img):
-                        $full    = strip_tags($img['image_url']);
+                        $full    = vvu_img_src(strip_tags($img['image_url']), 1600);
                         $caption = strip_tags($img['caption']);
                         $is_more  = ($gal_extra > 0 && $i === $gal_visible - 1);
                         $is_extra = ($i >= $gal_visible);

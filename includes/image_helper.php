@@ -23,6 +23,10 @@ if (!function_exists('vvu_thumb')) {
      */
     function vvu_thumb($relPath, $w = 400, $h = 450) {
         $relPath = trim((string) $relPath);
+        if ($relPath !== '' && function_exists('vvu_is_google_image') && vvu_is_google_image($relPath)) {
+            // Google Photos resizes and crops on its side.
+            return vvu_google_image_base($relPath) . '=w' . (int) $w . '-h' . (int) $h . '-c';
+        }
         if ($relPath === '' || preg_match('#^(https?:)?//#i', $relPath)) {
             return $relPath; // remote image — nothing we can do locally
         }
@@ -117,5 +121,129 @@ if (!function_exists('vvu_thumb')) {
 
         imagedestroy($out);
         return $ok;
+    }
+}
+
+/**
+ * Google Photos images.
+ *
+ * Editors can paste a Google Photos link instead of uploading a file. What
+ * is stored is the bare image URL (lh3.googleusercontent.com/…, no size
+ * suffix); pages then ask Google for exactly the size they need, so a
+ * hotlinked photo is as light as a resized upload.
+ */
+if (!function_exists('vvu_is_google_image')) {
+
+    /** True for an image served by Google Photos (lh3.googleusercontent.com…). */
+    function vvu_is_google_image($url)
+    {
+        $host = strtolower((string) parse_url(trim((string) $url), PHP_URL_HOST));
+        return $host !== '' && preg_match('/(^|\.)(googleusercontent\.com|ggpht\.com)$/', $host) === 1;
+    }
+
+    /** A Google Photos image URL without its size suffix ("…=w600-h315-p-k"). */
+    function vvu_google_image_base($url)
+    {
+        $url = trim((string) $url);
+        $url = preg_replace('/[?#].*$/', '', $url);
+        // The size options follow the last "=" in the final path segment.
+        return preg_replace('#(/[^/=]+)=[^/]*$#', '$1', $url);
+    }
+
+    /**
+     * src="" for an image shown up to $w pixels wide. Google Photos images
+     * are requested at that width; anything else is returned unchanged.
+     */
+    function vvu_img_src($path, $w = 1600)
+    {
+        $path = trim((string) $path);
+        if ($path !== '' && vvu_is_google_image($path)) {
+            return vvu_google_image_base($path) . '=w' . max(1, (int) $w);
+        }
+        return $path;
+    }
+
+    /** src="" for an admin preview: Google images small, local paths from admin/. */
+    function vvu_admin_img_preview($path, $w = 400)
+    {
+        $path = trim((string) $path);
+        if ($path === '') {
+            return '';
+        }
+        if (vvu_is_google_image($path)) {
+            return vvu_img_src($path, $w);
+        }
+        return preg_match('#^(https?:)?//#i', $path) ? $path : '../' . ltrim($path, '/');
+    }
+
+    /**
+     * Turns what an editor pasted into something an <img> can show.
+     *
+     *   uploads/… or any non-Google image URL              -> kept as is
+     *   lh3.googleusercontent.com/… ("Copy image address")  -> size suffix removed
+     *   photos.app.goo.gl/… or photos.google.com/share/…/photo/… (a single
+     *   photo's share link) -> the page is fetched and its preview image used
+     *
+     * Returns the value to store, or null with $error set.
+     */
+    function vvu_resolve_image_link($input, &$error = null)
+    {
+        $error = null;
+        $url   = trim((string) $input);
+        if ($url === '' || !preg_match('#^https?://#i', $url)) {
+            return $url; // local path or empty
+        }
+        if (vvu_is_google_image($url)) {
+            return vvu_google_image_base($url);
+        }
+
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        if (!in_array($host, ['photos.app.goo.gl', 'photos.google.com', 'goo.gl'], true)) {
+            return $url; // some other image host
+        }
+
+        if (!function_exists('curl_init')) {
+            $error = 'This server cannot open Google Photos links. In Google Photos, right-click the photo and choose "Copy image address" instead.';
+            return null;
+        }
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER  => true,
+            CURLOPT_FOLLOWLOCATION  => true,
+            CURLOPT_MAXREDIRS       => 5,
+            CURLOPT_CONNECTTIMEOUT  => 8,
+            CURLOPT_TIMEOUT         => 15,
+            CURLOPT_PROTOCOLS       => CURLPROTO_HTTPS,
+            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTPS,
+            CURLOPT_USERAGENT       => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+            CURLOPT_HTTPHEADER      => ['Accept-Language: en'],
+        ]);
+        $html  = curl_exec($ch);
+        $final = (string) curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+        $code  = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($html === false || $code >= 400) {
+            $error = 'Could not open that Google Photos link. Check that the album is shared ("Share" → "Create link").';
+            return null;
+        }
+        if (strtolower((string) parse_url($final, PHP_URL_HOST)) !== 'photos.google.com') {
+            $error = 'That link does not lead to a shared Google Photos photo. Make sure the album is shared by link.';
+            return null;
+        }
+        if (strpos((string) parse_url($final, PHP_URL_PATH), '/photo/') === false) {
+            $error = 'That is a link to a whole album, not one photo. Open a single photo and copy that photo\'s link (or right-click it → "Copy image address").';
+            return null;
+        }
+        if (preg_match('#<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']#i', $html, $m)
+            || preg_match('#<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']#i', $html, $m)) {
+            $img = html_entity_decode($m[1], ENT_QUOTES);
+            if (vvu_is_google_image($img)) {
+                return vvu_google_image_base($img);
+            }
+        }
+        $error = 'Could not find the picture behind that link. In Google Photos, right-click the photo and choose "Copy image address", then paste that.';
+        return null;
     }
 }

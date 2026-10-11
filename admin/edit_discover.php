@@ -2,6 +2,7 @@
 require_once('../includes/db_connect.php');
 require_once('../includes/upload_helper.php');
 require_once __DIR__ . '/../includes/admin_auth.php';
+require_once __DIR__ . '/../includes/image_helper.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
@@ -22,7 +23,8 @@ if (isset($_GET['delete'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $image_url = $_POST['image_url'];
+    // A pasted Google Photos link becomes its image URL; an upload still wins.
+    $image_url = vvu_resolve_image_link($_POST['image_url'] ?? '', $link_error);
     
     // Handle file upload
     $uploaded_path = handleAdminFileUpload($_FILES['image_file'], 'discover');
@@ -30,6 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $image_url = $uploaded_path;
     }
 
+    if ($image_url === null) {
+        $form_error = 'Image link: ' . $link_error;
+    } else {
     $data = [$image_url, $_POST['title'], $_POST['link_url'], $_POST['display_order'], isset($_POST['is_active']) ? 1 : 0];
     if ($has_description) {
         $description = mb_substr(trim($_POST['description'] ?? ''), 0, 255);
@@ -46,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     header("Location: manage_homepage_content.php?tab=discover");
     exit();
+    }
 }
 
 $item = null;
@@ -54,6 +60,7 @@ if ($id) {
     $stmt->execute([$id]);
     $item = $stmt->fetch();
 }
+if (!empty($form_error)) { $item = array_merge($item ?: [], $_POST); }
 
 include 'header.php';
 include 'sidebar.php';
@@ -61,7 +68,8 @@ include 'sidebar.php';
 <main class="main-content">
     <h4><?= $action === 'add' ? 'Add' : 'Edit' ?> Discover Card</h4>
     <div class="row mt-4"><div class="col-lg-8"><div class="dashboard-card"><div class="card-body">
-        <form method="POST" enctype="multipart/form-data">
+        <?php if (!empty($form_error)): ?><div class="alert alert-danger"><i class="fas fa-triangle-exclamation me-1"></i><?= htmlspecialchars($form_error) ?></div><?php endif; ?>
+<form method="POST" enctype="multipart/form-data">
             <div class="mb-3"><label>Title *</label><input type="text" name="title" class="form-control" value="<?= htmlspecialchars($item['title'] ?? '') ?>" required></div>
             <?php if ($has_description): ?>
             <div class="mb-3">
@@ -73,20 +81,18 @@ include 'sidebar.php';
             <div class="alert alert-warning py-2 small">To add a short description to this card, import <code>discover_card_descriptions.sql</code> into the database first.</div>
             <?php endif; ?>
             <div class="mb-3">
-                <label>Image URL</label>
-                <input type="text" name="image_url" class="form-control" value="<?= htmlspecialchars($item['image_url'] ?? '') ?>" placeholder="Enter image URL">
+                <label>Image — Google Photos link or image URL</label>
+                <input type="text" name="image_url" class="form-control" value="<?= htmlspecialchars($item['image_url'] ?? '') ?>" placeholder="https://photos.app.goo.gl/…  or  https://lh3.googleusercontent.com/…">
+                <?php include __DIR__ . '/includes/google_photos_help.php'; ?>
             </div>
             <div class="mb-3">
                 <label>Or Upload Image</label>
                 <input type="file" name="image_file" class="form-control" accept="image/*" data-crop="16/10">
-                <small class="text-muted">Uploading a file will override the URL above.</small>
+                <small class="text-muted">Uploading a file will override the link above.</small>
             </div>
             
             <?php if ($item && $item['image_url']): 
-                $preview_url = $item['image_url'];
-                if (!filter_var($preview_url, FILTER_VALIDATE_URL) && !empty($preview_url)) {
-                    $preview_url = '../' . $preview_url;
-                }
+                $preview_url = vvu_admin_img_preview($item['image_url']);
             ?>
             <div class="mb-3">
                 <label>Current Image</label><br>

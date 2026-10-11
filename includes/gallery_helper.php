@@ -23,6 +23,8 @@
  * Declared with define() rather than const because const is not permitted
  * inside the conditional block below.
  */
+require_once __DIR__ . '/image_helper.php';
+
 if (!defined('VVU_GALLERY_DEFAULT')) {
     define('VVU_GALLERY_DEFAULT', 'main');
 }
@@ -208,23 +210,16 @@ if (!function_exists('vvu_gallery_content')) {
         return preg_match('#^https?://#i', $url) ? $url : '';
     }
 
-    /** True for an image served by Google Photos (lh3.googleusercontent.com…). */
+    /* Google Photos handling lives in includes/image_helper.php (shared with
+       the homepage); these keep the gallery's own names. */
     function vvu_gallery_is_google_image($url)
     {
-        $host = strtolower((string) parse_url(trim((string) $url), PHP_URL_HOST));
-        return $host !== '' && preg_match('/(^|\.)(googleusercontent\.com|ggpht\.com)$/', $host) === 1;
+        return vvu_is_google_image($url);
     }
 
-    /**
-     * A Google Photos image URL without its size suffix ("…=w600-h315-p-k"),
-     * so the page can request exactly the size it needs.
-     */
     function vvu_gallery_google_base($url)
     {
-        $url = trim((string) $url);
-        $url = preg_replace('/[?#].*$/', '', $url);
-        // The size options follow the last "=" in the final path segment.
-        return preg_replace('#(/[^/=]+)=[^/]*$#', '$1', $url);
+        return vvu_google_image_base($url);
     }
 
     /**
@@ -239,90 +234,15 @@ if (!function_exists('vvu_gallery_content')) {
         if ($path === '') {
             return '';
         }
-        if (vvu_gallery_is_google_image($path)) {
-            $base = vvu_gallery_google_base($path);
-            if ($w > 0 && $h > 0) {
-                return $base . '=w' . (int) $w . '-h' . (int) $h . '-c';
-            }
-            return $base . '=w' . (int) ($w > 0 ? $w : 2048);
-        }
-        if ($w > 0 && $h > 0 && function_exists('vvu_thumb')) {
+        if ($w > 0 && $h > 0) {
             return vvu_thumb($path, $w, $h);
         }
-        return $path;
+        return vvu_img_src($path, $w > 0 ? $w : 2048);
     }
 
-    /**
-     * Turns what an editor pasted into something an <img> can show.
-     *
-     *   uploads/… or any non-Google https image   -> kept as is
-     *   lh3.googleusercontent.com/… ("Copy image address") -> size suffix removed
-     *   photos.app.goo.gl/… or photos.google.com/share/…/photo/… (a single
-     *   photo's share link) -> the page is fetched and its preview image used
-     *
-     * Returns the value to store, or null with $error set.
-     */
     function vvu_gallery_resolve_image_link($input, &$error = null)
     {
-        $error = null;
-        $url   = trim((string) $input);
-        if ($url === '' || !preg_match('#^https?://#i', $url)) {
-            return $url; // local path or empty
-        }
-        if (vvu_gallery_is_google_image($url)) {
-            return vvu_gallery_google_base($url);
-        }
-
-        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
-        $isGooglePhotos = in_array($host, ['photos.app.goo.gl', 'photos.google.com', 'goo.gl'], true);
-        if (!$isGooglePhotos) {
-            return $url; // some other image host
-        }
-
-        if (!function_exists('curl_init')) {
-            $error = 'This server cannot open Google Photos links. In Google Photos, right-click the photo and choose "Copy image address" instead.';
-            return null;
-        }
-
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS      => 5,
-            CURLOPT_CONNECTTIMEOUT => 8,
-            CURLOPT_TIMEOUT        => 15,
-            CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
-            CURLOPT_REDIR_PROTOCOLS=> CURLPROTO_HTTPS,
-            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
-            CURLOPT_HTTPHEADER     => ['Accept-Language: en'],
-        ]);
-        $html  = curl_exec($ch);
-        $final = (string) curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-        $code  = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($html === false || $code >= 400) {
-            $error = 'Could not open that Google Photos link. Check that the album is shared ("Share" → "Create link").';
-            return null;
-        }
-        $finalHost = strtolower((string) parse_url($final, PHP_URL_HOST));
-        if ($finalHost !== 'photos.google.com') {
-            $error = 'That link does not lead to a shared Google Photos photo. Make sure the album is shared by link.';
-            return null;
-        }
-        if (strpos((string) parse_url($final, PHP_URL_PATH), '/photo/') === false) {
-            $error = 'That is a link to a whole album. Paste it in the "View all photos" field instead — or open one photo and copy that photo\'s link.';
-            return null;
-        }
-        if (preg_match('#<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']#i', $html, $m)
-            || preg_match('#<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']#i', $html, $m)) {
-            $img = html_entity_decode($m[1], ENT_QUOTES);
-            if (vvu_gallery_is_google_image($img)) {
-                return vvu_gallery_google_base($img);
-            }
-        }
-        $error = 'Could not find the picture behind that link. In Google Photos, right-click the photo and choose "Copy image address", then paste that.';
-        return null;
+        return vvu_resolve_image_link($input, $error);
     }
 
     /** "07 June 2023" — falls back to whatever is stored if it will not parse. */
