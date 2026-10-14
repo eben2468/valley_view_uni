@@ -42,6 +42,17 @@ function r_subnav($current = 'index.php')
                     </a>
                 <?php endforeach; ?>
             </div>
+            <?php
+            // Public pages do not start a session, so "signed in" is only known
+            // on the account pages; elsewhere the link goes to login.php, which
+            // forwards a signed-in researcher straight to their dashboard.
+            $signedIn = session_status() === PHP_SESSION_ACTIVE && !empty($_SESSION['research_account_id']);
+            ?>
+            <a class="vvus-subnav__account <?php echo in_array($current, ['account.php'], true) ? 'is-active' : ''; ?>"
+               href="<?php echo $signedIn ? 'account.php' : 'login.php'; ?>">
+                <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+                <span><?php echo $signedIn ? 'My Research' : 'Researcher sign in'; ?></span>
+            </a>
         </div>
     </nav>
     <?php

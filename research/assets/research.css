@@ -204,6 +204,18 @@
     scrollbar-width: none;
 }
 .vvus-subnav__links::-webkit-scrollbar { display: none; }
+/* Researcher sign-in / dashboard link, set apart at the end of the bar. */
+.vvus-subnav__account {
+    display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto;
+    height: 36px; padding: 0 15px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface);
+    font-size: 13px; font-weight: 700; color: var(--navy); text-decoration: none; white-space: nowrap;
+}
+.vvus-subnav__account:hover, .vvus-subnav__account.is-active { border-color: var(--gold); color: var(--gold); }
+@media (max-width: 640px) {
+    .vvus-subnav__account span { display: none; }
+    .vvus-subnav__account { padding: 0 11px; }
+}
 .vvus-subnav__links a {
     display: inline-flex;
     align-items: center;

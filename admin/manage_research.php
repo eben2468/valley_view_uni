@@ -2,10 +2,11 @@
 /**
  * Admin → Research Portal (VVU Scholar)
  *
- * The single editor behind everything under research/. Ten tabs:
+ * The single editor behind everything under research/. Eleven tabs:
  *
  *   Page Content · Sections · Stat Tiles · Researchers · Publications
- *   Faculties · Research Areas · Highlights · Partners · Import Data
+ *   Faculties · Research Areas · Highlights · Partners · Import Data ·
+ *   Researcher Accounts (profile claims — admin/includes/research_accounts_admin.php)
  *
  * The six list-shaped tabs (sections, stats, units, areas, highlights,
  * partners) are driven by one declarative spec and one generic renderer near
@@ -26,6 +27,7 @@ require_once('../includes/db_connect.php');
 require_once(__DIR__ . '/../research/includes/research_helper.php');
 require_once(__DIR__ . '/includes/research_import.php');
 require_once(__DIR__ . '/includes/research_openalex_sync.php');
+require_once(__DIR__ . '/includes/research_accounts_admin.php');
 
 /* ==========================================================================
    Tab definitions
@@ -42,7 +44,13 @@ $tabs = [
     'highlights'   => ['Highlights',      'fa-award'],
     'partners'     => ['Partners',        'fa-handshake-angle'],
     'import'       => ['Import Data',     'fa-cloud-arrow-down'],
+    'accounts'     => ['Researcher Accounts', 'fa-id-badge'],
 ];
+
+// Claims waiting for the Research Office show as a count on the tab.
+if ($vvuraPending = vvura_pending_count($pdo)) {
+    $tabs['accounts'][0] .= ' (' . $vvuraPending . ')';
+}
 
 $tab = $_GET['tab'] ?? 'settings';
 if (!isset($tabs[$tab])) {
@@ -305,6 +313,12 @@ function vvur_field_value(array $field, $name, array $existing = [])
         default:
             return isset($_POST[$name]) ? trim((string) $_POST[$name]) : '';
     }
+}
+
+// Researcher Accounts actions (acct_*) are handled in their own include.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos((string) ($_POST['action'] ?? ''), 'acct_') === 0) {
+    vvu_require_csrf();
+    vvura_handle_post($pdo);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -1920,6 +1934,12 @@ function vvur_delete_link($type, $id, $what, $csrf)
         </div>
 
     <?php
+    /* ======================================================================
+       TAB: Researcher accounts (admin/includes/research_accounts_admin.php)
+       ====================================================================== */
+    elseif ($tab === 'accounts'):
+        vvura_render($pdo);
+
     /* ======================================================================
        TABS: the six declarative list tabs
        ====================================================================== */

@@ -68,7 +68,7 @@ $heroLead = $topScholars[0] ?? null;
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="assets/research.css?v=1.0">
+<link rel="stylesheet" href="assets/research.css?v=1.1">
 <?php if ($trend): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <?php endif; ?>

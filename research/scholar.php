@@ -24,7 +24,7 @@ if (!$scholar) {
     $active_page = 'research';
     include __DIR__ . '/../includes/header.php';
     ?>
-    <link rel="stylesheet" href="assets/research.css?v=1.0">
+    <link rel="stylesheet" href="assets/research.css?v=1.1">
     <main id="main-content" class="vvus">
         <?php r_pagehero('VVU Scholar', 'Researcher not found', '', ['Research Portal' => 'index.php', 'Not found' => null]); ?>
         <?php r_subnav('authors.php'); ?>
@@ -102,7 +102,7 @@ $active_page = 'research';
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="assets/research.css?v=1.0">
+<link rel="stylesheet" href="assets/research.css?v=1.1">
 <?php if ($ownTrend): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <?php endif; ?>
