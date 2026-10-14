@@ -274,12 +274,17 @@ function r_metrics(PDO $pdo)
         $m['areas']    = (int) $pdo->query("SELECT COUNT(*) FROM research_areas WHERE is_active = 1")->fetchColumn();
         $m['collaborations'] = (int) $pdo->query("SELECT COUNT(*) FROM research_partners WHERE is_active = 1")->fetchColumn();
 
+        // "Years covered" never starts before the university existed
+        // (founded 1979): a mis-attributed older record from an import must
+        // not stretch the range. Override with the founding_year setting.
+        $founded = (int) r_set($pdo, 'founding_year', '1979');
+
         $row = $pdo->query(
             "SELECT COUNT(*)                AS n,
                     COALESCE(SUM(citations),0) AS cites,
                     COALESCE(MAX(citations),0) AS top,
                     SUM(is_open_access)     AS oa,
-                    MIN(pub_year)           AS y0,
+                    MIN(CASE WHEN pub_year >= " . $founded . " THEN pub_year END) AS y0,
                     MAX(pub_year)           AS y1
                FROM research_publications
               WHERE is_active = 1"
@@ -687,6 +692,7 @@ function r_coauthors(PDO $pdo, $scholarId, $limit = 8)
                     u.name AS unit_name, COUNT(*) AS shared
                FROM research_publication_authors a
                JOIN research_publication_authors b ON b.publication_id = a.publication_id AND b.scholar_id <> a.scholar_id
+               JOIN research_publications p ON p.id = a.publication_id AND p.is_active = 1
                JOIN research_scholars s ON s.id = b.scholar_id AND s.is_active = 1
                LEFT JOIN research_units u ON u.id = s.unit_id
               WHERE a.scholar_id = ?
