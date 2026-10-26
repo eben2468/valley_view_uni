@@ -43,7 +43,7 @@ if (!$scholar) {
     $active_page = 'research';
     include __DIR__ . '/../includes/header.php';
     ?>
-    <link rel="stylesheet" href="assets/research.css?v=1.2">
+    <link rel="stylesheet" href="assets/research.css?v=1.3">
     <main id="main-content" class="vvus">
         <?php r_pagehero('VVU Scholar', 'Researcher not found', '', ['Research Portal' => 'index.php', 'Not found' => null]); ?>
         <?php r_subnav('authors.php'); ?>
@@ -113,6 +113,23 @@ try {
     $ownTrend = [];
 }
 
+// Citations RECEIVED in each year (OpenAlex counts_by_year), when known —
+// what Google Scholar's bar chart shows — instead of the citations of the
+// papers published that year.
+$citesReceived = false;
+if (!empty($scholar['citations_per_year']) && ($perYear = json_decode($scholar['citations_per_year'], true))) {
+    $byYear = [];
+    foreach ($ownTrend as $row) { $byYear[$row['year']] = ['year' => $row['year'], 'publications' => $row['publications'], 'citations' => 0]; }
+    foreach ($perYear as $y => $c) {
+        $y = (int) $y;
+        if (!isset($byYear[$y])) { $byYear[$y] = ['year' => $y, 'publications' => 0, 'citations' => 0]; }
+        $byYear[$y]['citations'] = (int) $c;
+    }
+    ksort($byYear);
+    $ownTrend = array_values($byYear);
+    $citesReceived = true;
+}
+
 // Profile views (one per visitor per day) and the engagement totals.
 r_record_scholar_view($pdo, (int) $scholar['id']);
 r_autosync_tick($pdo);
@@ -126,7 +143,7 @@ $active_page = 'research';
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="assets/research.css?v=1.2">
+<link rel="stylesheet" href="assets/research.css?v=1.3">
 <?php if ($ownTrend): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <?php endif; ?>
@@ -267,6 +284,12 @@ include __DIR__ . '/../includes/header.php';
                             <b data-count="<?php echo (int) $scholar['i10_index']; ?>"><?php echo (int) $scholar['i10_index']; ?></b>
                             <span>i10-index</span>
                         </div>
+                        <?php if ((int) ($scholar['influential_citations'] ?? 0) > 0): ?>
+                            <div class="vvus-metric vvus-reveal" title="Citations that build substantially on this work (Semantic Scholar)">
+                                <b data-count="<?php echo (int) $scholar['influential_citations']; ?>"><?php echo (int) $scholar['influential_citations']; ?></b>
+                                <span>Influential cites</span>
+                            </div>
+                        <?php endif; ?>
                         <div class="vvus-metric vvus-reveal">
                             <b data-count="<?php echo (int) $scholar['publications_count']; ?>"><?php echo number_format($scholar['publications_count']); ?></b>
                             <span>Publications</span>
@@ -327,7 +350,7 @@ include __DIR__ . '/../includes/header.php';
                                 <h3>Output by year</h3>
                                 <div class="vvus-legend">
                                     <span><i style="background:#1d4ed8"></i> Publications</span>
-                                    <span><i style="background:#a16207"></i> Citations</span>
+                                    <span><i style="background:#a16207"></i> <?php echo $citesReceived ? 'Citations received' : 'Citations'; ?></span>
                                 </div>
                             </div>
                             <div class="vvus-card__body">

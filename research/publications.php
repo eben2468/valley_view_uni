@@ -85,7 +85,7 @@ $hasFilter = $q !== '' || $unitId || $areaId || $type !== '' || $year || $openOn
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="assets/research.css?v=1.2">
+<link rel="stylesheet" href="assets/research.css?v=1.3">
 <script src="assets/research.js?v=1.1" defer></script>
 
 <main id="main-content" class="vvus">

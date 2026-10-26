@@ -136,6 +136,51 @@ function r_asset($path, $root = '../')
     return $root . $path;
 }
 
+
+/**
+ * " AND vvu_output = 1" for University-level totals: a researcher's work
+ * published before or outside VVU shows on their profile but is not counted
+ * as VVU output. Empty until sql/research_citations_migration.sql is in.
+ */
+function r_vvu_sql($alias = '')
+{
+    global $pdo;
+    static $has = null;
+    if ($has === null) {
+        try {
+            $pdo->query("SELECT vvu_output FROM research_publications LIMIT 1");
+            $has = true;
+        } catch (Exception $e) {
+            $has = false;
+        }
+    }
+    return $has ? ' AND ' . $alias . 'vvu_output = 1' : '';
+}
+
+/**
+ * Sets a paper's displayed citation count to the highest of its sources —
+ * OpenAlex, Crossref, Semantic Scholar and a Google Scholar figure typed in
+ * by hand — once at least one source has reported. One parameter: the id.
+ */
+function r_best_citations_sql()
+{
+    global $pdo;
+    static $manual = null;
+    if ($manual === null) {
+        try {
+            $pdo->query("SELECT cites_manual FROM research_publications LIMIT 1");
+            $manual = true;
+        } catch (Exception $e) {
+            $manual = false;
+        }
+    }
+    $m = $manual ? ', COALESCE(cites_manual, 0)' : '';
+    $mw = $manual ? ' OR cites_manual IS NOT NULL' : '';
+    return "UPDATE research_publications
+               SET citations = GREATEST(COALESCE(cites_openalex, 0), COALESCE(cites_crossref, 0), COALESCE(cites_s2, 0)$m)
+             WHERE id = ? AND (cites_openalex IS NOT NULL OR cites_crossref IS NOT NULL OR cites_s2 IS NOT NULL$mw)";
+}
+
 /** A URL-safe slug. Falls back to a hash so two blank names never collide. */
 function r_slugify($text, $fallbackPrefix = 'item')
 {
@@ -287,7 +332,7 @@ function r_metrics(PDO $pdo)
                     MIN(CASE WHEN pub_year >= " . $founded . " THEN pub_year END) AS y0,
                     MAX(pub_year)           AS y1
                FROM research_publications
-              WHERE is_active = 1"
+              WHERE is_active = 1" . r_vvu_sql() . ""
         )->fetch(PDO::FETCH_ASSOC) ?: [];
 
         $m['publications'] = (int) ($row['n'] ?? 0);
@@ -299,7 +344,7 @@ function r_metrics(PDO $pdo)
             ? (int) round(((int) ($row['oa'] ?? 0)) / $m['publications'] * 100)
             : 0;
 
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM research_publications WHERE is_active = 1 AND pub_year = ?");
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM research_publications WHERE is_active = 1 AND pub_year = ?" . r_vvu_sql());
         $stmt->execute([(int) date('Y')]);
         $m['this_year'] = (int) $stmt->fetchColumn();
 
@@ -307,7 +352,7 @@ function r_metrics(PDO $pdo)
         // all can contribute, which keeps the scan small on a big library.
         $cites = $pdo->query(
             "SELECT citations FROM research_publications
-              WHERE is_active = 1 AND citations > 0
+              WHERE is_active = 1 AND citations > 0" . r_vvu_sql() . "
               ORDER BY citations DESC"
         )->fetchAll(PDO::FETCH_COLUMN);
         $m['h_index'] = r_h_index(array_map('intval', $cites));
@@ -362,7 +407,7 @@ function r_window_metrics(PDO $pdo, $from, $to)
                     COALESCE(MAX(citations),0) AS top,
                     COALESCE(SUM(is_open_access),0) AS oa
                FROM research_publications
-              WHERE is_active = 1 AND pub_year BETWEEN ? AND ?"
+              WHERE is_active = 1 AND pub_year BETWEEN ? AND ?" . r_vvu_sql()
         );
         $stmt->execute([$from, $to]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
@@ -422,7 +467,7 @@ function r_year_trend(PDO $pdo, $years = 10)
         $rows = $pdo->query(
             "SELECT pub_year AS y, COUNT(*) AS pubs, COALESCE(SUM(citations),0) AS cites
                FROM research_publications
-              WHERE is_active = 1 AND pub_year IS NOT NULL AND pub_year > 1900
+              WHERE is_active = 1 AND pub_year IS NOT NULL AND pub_year > 1900" . r_vvu_sql() . "
               GROUP BY pub_year ORDER BY pub_year"
         )->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
@@ -485,11 +530,11 @@ function r_units(PDO $pdo, $activeOnly = true, $topLevelOnly = true)
                  WHERE s.is_active = 1 AND s.unit_id IN $family)         AS scholar_count,
                (SELECT COUNT(*) FROM research_publications p
                  LEFT JOIN research_scholars ps ON ps.id = p.scholar_id
-                 WHERE p.is_active = 1
+                 WHERE p.is_active = 1" . r_vvu_sql('p.') . "
                    AND (p.unit_id IN $family OR ps.unit_id IN $family))  AS publication_count,
                (SELECT COALESCE(SUM(p.citations),0) FROM research_publications p
                  LEFT JOIN research_scholars ps ON ps.id = p.scholar_id
-                 WHERE p.is_active = 1
+                 WHERE p.is_active = 1" . r_vvu_sql('p.') . "
                    AND (p.unit_id IN $family OR ps.unit_id IN $family))  AS citation_count
           FROM research_units u
           $where
@@ -540,9 +585,9 @@ function r_areas(PDO $pdo, $activeOnly = true)
     $sql = "
         SELECT a.*,
                (SELECT COUNT(*) FROM research_publications p
-                 WHERE p.area_id = a.id AND p.is_active = 1)          AS publication_count,
+                 WHERE p.area_id = a.id AND p.is_active = 1" . r_vvu_sql('p.') . ")          AS publication_count,
                (SELECT COALESCE(SUM(p.citations),0) FROM research_publications p
-                 WHERE p.area_id = a.id AND p.is_active = 1)          AS citation_count,
+                 WHERE p.area_id = a.id AND p.is_active = 1" . r_vvu_sql('p.') . ")          AS citation_count,
                (SELECT COUNT(*) FROM research_scholar_areas sa
                  JOIN research_scholars s ON s.id = sa.scholar_id AND s.is_active = 1
                  WHERE sa.area_id = a.id)                             AS scholar_count
@@ -1049,6 +1094,35 @@ function r_recount_scholar(PDO $pdo, $scholarId)
         );
         $i10 = count(array_filter($cites, static function ($c) { return $c >= 10; }));
         $upd->execute([count($cites), array_sum($cites), r_h_index($cites), $i10, $scholarId]);
+
+        // Five-year figures and citations per year, from the per-source data
+        // (sql/research_citations_migration.sql). Skipped quietly before then.
+        try {
+            $st = $pdo->prepare(
+                "SELECT COALESCE(citations_5y, 0) c5, COALESCE(influential_citations, 0) inf, id
+                   FROM research_publications
+                  WHERE is_active = 1
+                    AND (scholar_id = :id OR id IN (SELECT publication_id FROM research_publication_authors WHERE scholar_id = :id2))"
+            );
+            $st->execute([':id' => $scholarId, ':id2' => $scholarId]);
+            $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+            $c5 = array_map(static function ($r) { return (int) $r['c5']; }, $rows);
+            $inf = array_sum(array_map(static function ($r) { return (int) $r['inf']; }, $rows));
+            $perYear = [];
+            if ($rows) {
+                $in = implode(',', array_map(static function ($r) { return (int) $r['id']; }, $rows));
+                foreach ($pdo->query("SELECT year, SUM(citations) c FROM research_citations_by_year WHERE publication_id IN ($in) GROUP BY year ORDER BY year") as $y) {
+                    $perYear[(int) $y['year']] = (int) $y['c'];
+                }
+            }
+            $pdo->prepare(
+                "UPDATE research_scholars
+                    SET citations_5y = ?, h_index_5y = ?, influential_citations = ?, citations_per_year = ?
+                  WHERE id = ?"
+            )->execute([array_sum($c5), r_h_index($c5), $inf, $perYear ? json_encode($perYear) : null, $scholarId]);
+        } catch (Exception $e) {
+            // citation columns not migrated yet
+        }
     } catch (Exception $e) {
         error_log('VVU Scholar: recount failed — ' . $e->getMessage());
     }

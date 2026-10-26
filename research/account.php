@@ -250,6 +250,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         /* ---------------------------------------------- remove a paper that isn't mine */
+        elseif ($action === 'save_citations') {
+            // Google Scholar "Cited by" figures for the researcher's own papers.
+            $set  = $pdo->prepare("UPDATE research_publications SET cites_manual = ? WHERE id = ?");
+            $best = $pdo->prepare(r_best_citations_sql());
+            $saved = 0;
+            foreach ((array) ($_POST['cites'] ?? []) as $pid => $val) {
+                $pid = (int) $pid;
+                if (!ra_is_mine($pdo, $pid, $sid)) { continue; }
+                $val = trim((string) $val);
+                $set->execute([$val === '' ? null : max(0, min(100000, (int) $val)), $pid]);
+                // With no source at all yet, a typed figure is the count.
+                $pdo->prepare("UPDATE research_publications SET citations = COALESCE(cites_manual, citations) WHERE id = ? AND cites_openalex IS NULL AND cites_crossref IS NULL AND cites_s2 IS NULL")->execute([$pid]);
+                $best->execute([$pid]);
+                $saved++;
+            }
+            r_recount_scholar($pdo, $sid);
+            ra_log($pdo, $aid, $sid, 'citations_updated', $saved . ' papers');
+            ra_flash('ok', 'Citation figures saved. Your totals have been recalculated.');
+            header('Location: account.php?tab=publications'); exit;
+        }
         elseif ($action === 'remove_pub') {
             $pubId = (int) ($_POST['pub_id'] ?? 0);
             if (!ra_is_mine($pdo, $pubId, $sid)) { throw new RuntimeException('That publication is not on your profile.'); }
@@ -766,6 +786,17 @@ elseif ($tab === 'publications'):
                 No publications are linked to your profile yet. <a href="account.php?tab=import">Import them from ORCID or Google Scholar</a>, or <a href="account.php?tab=add">add one</a>.
             </div></div>
         <?php else: ?>
+            <?php $hasManual = array_key_exists('cites_manual', $myPubs[0]); ?>
+            <?php if ($hasManual): ?>
+                <form method="post" action="account.php?tab=publications" id="ra-cites" class="ra-citesbar">
+                    <?php echo vvu_csrf_field(); ?>
+                    <input type="hidden" name="action" value="save_citations">
+                    <span><i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                        Citations are counted automatically from OpenAlex, Crossref and Semantic Scholar. For papers those indexes miss,
+                        type the <strong>“Cited by” number from your Google Scholar profile</strong> — the highest figure is shown.</span>
+                    <button class="vvus-btn vvus-btn--gold vvus-btn--sm" type="submit"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save citations</button>
+                </form>
+            <?php endif; ?>
             <ul class="ra-publist" id="ra-publist">
                 <?php foreach ($myPubs as $p): ?>
                     <li class="vvus-card ra-pub" data-text="<?php echo r_e(mb_strtolower($p['title'] . ' ' . $p['venue'])); ?>">
@@ -779,6 +810,14 @@ elseif ($tab === 'publications'):
                             </div>
                         </div>
                         <div class="ra-pub__tools">
+                            <?php if (!empty($hasManual)): ?>
+                                <label class="ra-gs" title="Google Scholar &quot;Cited by&quot;">
+                                    <i class="fa-brands fa-google-scholar" aria-hidden="true"></i>
+                                    <input type="number" min="0" max="100000" form="ra-cites" class="browser-default"
+                                           name="cites[<?php echo (int) $p['id']; ?>]" value="<?php echo $p['cites_manual'] !== null ? (int) $p['cites_manual'] : ''; ?>"
+                                           placeholder="—" aria-label="Google Scholar citations">
+                                </label>
+                            <?php endif; ?>
                             <?php if ((int) $p['editable']): ?>
                                 <a class="vvus-btn vvus-btn--ghost vvus-btn--sm" href="account.php?tab=add&amp;edit=<?php echo (int) $p['id']; ?>">Edit</a>
                             <?php endif; ?>

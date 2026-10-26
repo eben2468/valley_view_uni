@@ -46,7 +46,7 @@ if (!$pub) {
     $page_title = 'Publication not found — VVU Scholar';
     include __DIR__ . '/../includes/header.php';
     ?>
-    <link rel="stylesheet" href="assets/research.css?v=1.2">
+    <link rel="stylesheet" href="assets/research.css?v=1.3">
     <main id="main-content" class="vvus">
         <?php r_pagehero('VVU Scholar', 'Publication not found', '', ['Research Portal' => 'index.php', 'Not found' => null]); ?>
         <?php r_subnav('publications.php'); ?>
@@ -134,7 +134,7 @@ $keywords  = array_filter(array_map('trim', explode(',', (string) $pub['keywords
 $page_title = mb_substr($pub['title'], 0, 120) . ' — VVU Scholar';
 include __DIR__ . '/../includes/header.php';
 ?>
-<link rel="stylesheet" href="assets/research.css?v=1.2">
+<link rel="stylesheet" href="assets/research.css?v=1.3">
 <script src="assets/research.js?v=1.1" defer></script>
 
 <main id="main-content" class="vvus" style="<?php echo r_accent($pub['area_color'] ?? 'blue'); ?>">
@@ -350,6 +350,15 @@ include __DIR__ . '/../includes/header.php';
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
+                            <?php
+                            $srcs = [];
+                            foreach (['cites_openalex' => 'OpenAlex', 'cites_crossref' => 'Crossref', 'cites_s2' => 'Semantic Scholar', 'cites_manual' => 'Google Scholar'] as $col => $lab) {
+                                if (isset($pub[$col]) && $pub[$col] !== null) { $srcs[] = '<span>' . r_e($lab) . ' <b>' . number_format((int) $pub[$col]) . '</b></span>'; }
+                            }
+                            ?>
+                            <?php if ($srcs): ?>
+                                <p class="vvus-citesrc"><small>Citations by source (the highest is shown):</small><?php echo implode('', $srcs); ?></p>
+                            <?php endif; ?>
                             <?php if (!empty($pub['doi'])): ?>
                                 <a class="vvus-impact__more" href="https://www.altmetric.com/details/doi/<?php echo r_e(ltrim($pub['doi'], '/')); ?>" target="_blank" rel="noopener noreferrer">
                                     Online attention on Altmetric <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>

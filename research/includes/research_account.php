@@ -434,8 +434,8 @@ function ra_page_open(PDO $pdo, $title, $lead = '', array $crumbs = [])
     $active_page = 'research';
     include __DIR__ . '/../../includes/header.php';
     ?>
-    <link rel="stylesheet" href="assets/research.css?v=1.2">
-    <link rel="stylesheet" href="assets/research-account.css?v=1.1">
+    <link rel="stylesheet" href="assets/research.css?v=1.3">
+    <link rel="stylesheet" href="assets/research-account.css?v=1.2">
     <main id="main-content" class="vvus">
         <?php r_pagehero('VVU Scholar', $title, $lead, $crumbs ?: ['Research Portal' => 'index.php', $title => null]); ?>
         <?php r_subnav('account.php'); ?>

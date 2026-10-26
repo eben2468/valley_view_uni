@@ -30,6 +30,7 @@ if (!defined('VVU_RESEARCH_AUTOSYNC')) {
 require_once __DIR__ . '/research_import.php';
 require_once __DIR__ . '/research_openalex_sync.php';
 require_once __DIR__ . '/research_quality.php';
+require_once __DIR__ . '/research_citations.php';
 
 /** Is a scheduled run due? */
 function vvur_sync_due(PDO $pdo)
@@ -55,10 +56,10 @@ function vvur_set_setting(PDO $pdo, $key, $value)
  * profile: links the existing record when the work is already in the portal,
  * otherwise inserts it. Returns 'added' | 'linked' | 'skipped'.
  */
-function vvur_add_work_for(PDO $pdo, array $p, array $scholar)
+function vvur_add_work_for(PDO $pdo, array $p, array $scholar, array $extra = [])
 {
     $p['title'] = trim(strip_tags((string) ($p['title'] ?? '')));
-    if ($p['title'] === '' || mb_strlen($p['title']) < 8) {
+    if ($p['title'] === '' || mb_strlen($p['title']) < 8 || vvur_is_junk_work($p)) {
         return 'skipped';
     }
     $sid = (int) $scholar['id'];
@@ -101,11 +102,21 @@ function vvur_add_work_for(PDO $pdo, array $p, array $scholar)
         ($p['url'] ?? '') !== '' ? mb_substr($p['url'], 0, 600) : null,
         (string) ($p['abstract'] ?? ''), mb_substr((string) ($p['keywords'] ?? ''), 0, 600),
         max(0, (int) ($p['citations'] ?? 0)), !empty($p['is_open_access']) ? 1 : 0,
-        in_array($p['source'] ?? '', ['orcid', 'google_scholar', 'crossref', 'bibtex'], true) ? $p['source'] : 'orcid',
+        in_array($p['source'] ?? '', ['orcid', 'google_scholar', 'crossref', 'bibtex', 'openalex'], true) ? $p['source'] : 'orcid',
         ($p['external_id'] ?? '') !== '' ? mb_substr($p['external_id'], 0, 200) : null,
     ]);
     $pid = (int) $pdo->lastInsertId();
     $pdo->prepare("INSERT IGNORE INTO research_publication_authors (publication_id, scholar_id, author_order) VALUES (?,?,0)")->execute([$pid, $sid]);
+    // e.g. vvu_output = 0 for work published before / outside VVU
+    foreach ($extra as $col => $val) {
+        if (preg_match('/^[a-z_0-9]+$/', $col)) {
+            try {
+                $pdo->prepare("UPDATE research_publications SET `$col` = ? WHERE id = ?")->execute([$val, $pid]);
+            } catch (Exception $e) {
+                // column not migrated yet
+            }
+        }
+    }
     return 'added';
 }
 
@@ -274,20 +285,28 @@ function vvur_auto_sync(PDO $pdo, $trigger = 'cron', $budget = 240)
             $errors[] = $fetch['error'];
         }
 
-        /* 2. ORCID */
-        $orcidStats = ['people' => 0, 'added' => 0, 'linked' => 0];
-        foreach (vvur_sync_candidates($pdo, 'orcid', 25) as $sch) {
-            if (microtime(true) > $deadline - 30) { break; }
-            $res = vvur_orcid_works($sch['ident'], false, 200);
-            $pdo->prepare("UPDATE research_scholars SET works_synced_at = NOW() WHERE id = ?")->execute([$sch['id']]);
-            if (!$res['ok']) { $errors[] = 'ORCID ' . $sch['ident'] . ': ' . $res['error']; continue; }
-            $orcidStats['people']++;
-            foreach ($res['items'] as $item) {
-                $r = vvur_add_work_for($pdo, $item, $sch);
-                if (isset($orcidStats[$r])) { $orcidStats[$r]++; }
-            }
+        /* 2. Complete publication lists: every OpenAlex record of the
+         *    researcher (incl. merged duplicates) plus their ORCID record,
+         *    a few researchers per run in rotation, claimed profiles first.
+         *    ORCID is pulled for unclaimed profiles too when the scope
+         *    setting is "all"; their OpenAlex records always. */
+        $people = 0; $added = 0; $linked = 0;
+        $hasAcc = vvur_table_exists($pdo, 'research_accounts');
+        $claimedFirst = $hasAcc ? "(SELECT COUNT(*) FROM research_accounts a WHERE a.scholar_id = s.id AND a.status = 'active') DESC," : '';
+        $todo = $pdo->query(
+            "SELECT s.id FROM research_scholars s
+              WHERE s.is_active = 1 AND s.merged_into IS NULL
+                AND ((s.openalex_id IS NOT NULL AND s.openalex_id <> '') OR (s.orcid IS NOT NULL AND s.orcid <> ''))
+              ORDER BY $claimedFirst s.works_synced_at IS NOT NULL, s.works_synced_at ASC
+              LIMIT 8"
+        )->fetchAll(PDO::FETCH_COLUMN);
+        foreach ($todo as $sid) {
+            if (microtime(true) > $deadline - 60) { break; }
+            $r = vvur_pull_researcher_works($pdo, (int) $sid, min($deadline - 40, microtime(true) + 45));
+            $people++; $added += $r['added']; $linked += $r['linked'];
+            $errors = array_merge($errors, $r['errors']);
         }
-        $parts[] = sprintf('ORCID: %d researchers checked, %d works added, %d linked', $orcidStats['people'], $orcidStats['added'], $orcidStats['linked']);
+        $parts[] = sprintf('Publication lists: %d researchers completed, %d works added, %d linked', $people, $added, $linked);
 
         /* 3. Google Scholar (best effort) */
         $gsStats = ['people' => 0, 'added' => 0, 'linked' => 0];
@@ -313,9 +332,13 @@ function vvur_auto_sync(PDO $pdo, $trigger = 'cron', $budget = 240)
 
         /* 4. Impact figures */
         if (microtime(true) < $deadline - 10) {
-            $m = vvur_refresh_metrics($pdo, $deadline - 5);
-            $parts[] = sprintf('Impact figures: %d from OpenAlex, %d from Altmetric', $m['openalex'], $m['altmetric']);
-            $errors = array_merge($errors, $m['errors']);
+            // Citations from OpenAlex, Crossref and Semantic Scholar (+ FWCI,
+            // percentile, citations per year), then Altmetric when keyed.
+            $c = vvur_refresh_citations($pdo, $deadline - 10, '1=1', [], 600);
+            $m = vvur_refresh_metrics($pdo, $deadline - 5, 0, 40);
+            $parts[] = sprintf('Citations checked for %d papers (OpenAlex %d, Crossref %d, Semantic Scholar %d; %d changed), Altmetric %d',
+                $c['papers'], $c['openalex'], $c['crossref'], $c['s2'], $c['changed'], $m['altmetric']);
+            $errors = array_merge($errors, $c['errors'], $m['errors']);
         }
 
         /* 5. Clean-up */

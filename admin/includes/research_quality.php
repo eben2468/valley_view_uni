@@ -688,6 +688,50 @@ function vvur_title_key($title)
     return substr(strtolower(preg_replace('/[^A-Za-z0-9]/', '', $t)), 0, 120);
 }
 
+/** Content words of a title, crudely stemmed: "Managing" and "management" both → "manag". */
+function vvur_title_stems($title)
+{
+    $t = strtolower(html_entity_decode(strip_tags((string) $title), ENT_QUOTES, 'UTF-8'));
+    $stop = ['the', 'a', 'an', 'of', 'in', 'on', 'and', 'for', 'to', 'with', 'within', 'by', 'at', 'from', 'as', 'its', 'their', 'into', 'among', 'case', 'study'];
+    $out = [];
+    foreach (preg_split('/[^a-z0-9]+/', $t) as $w) {
+        if ($w === '' || in_array($w, $stop, true)) { continue; }
+        $w = preg_replace('/(ments|ment|ings|ing|ions|ion|ies|ed|es|s)$/', '', $w);
+        $w = rtrim($w, 'e');
+        if ($w !== '') { $out[$w] = true; }
+    }
+    ksort($out);
+    return array_keys($out);
+}
+
+/**
+ * Are two records the same work despite differently typed titles? Yes when
+ * the titles are at least 93% alike letter-for-letter, or have exactly the
+ * same stemmed words — and they do not carry two different published DOIs.
+ * ("…audit pressure and audit quality" vs "…auditor motivation and audit
+ * quality" is 88% alike with different words: two papers.)
+ */
+function vvur_same_work(array $a, array $b)
+{
+    $da = vvur_doi_key($a['doi'] ?? '');
+    $db = vvur_doi_key($b['doi'] ?? '');
+    if ($da !== '' && $db !== '' && $da !== $db && !vvur_is_preprint_doi($da) && !vvur_is_preprint_doi($db)) {
+        return false;
+    }
+    $x = vvur_title_key($a['title']);
+    $y = vvur_title_key($b['title']);
+    if ($x === '' || $y === '') {
+        return false;
+    }
+    $max = max(strlen($x), strlen($y));
+    if (abs(strlen($x) - strlen($y)) / $max <= 0.1 && 1 - levenshtein(substr($x, 0, 255), substr($y, 0, 255)) / min($max, 255) >= 0.93) {
+        return true;
+    }
+    $sa = vvur_title_stems($a['title']);
+    $sb = vvur_title_stems($b['title']);
+    return count($sa) >= 4 && $sa === $sb;
+}
+
 /** Titles too generic to identify a work ("Preface", "Index"…). */
 function vvur_generic_title($key)
 {
@@ -732,6 +776,32 @@ function vvur_publication_duplicate_groups(PDO $pdo)
             if (isset($seenDoi[$dk])) { $parent[$find($id)] = $find($seenDoi[$dk]); } else { $seenDoi[$dk] = $id; }
         }
     }
+
+    // Near-identical titles: the same work typed slightly differently by two
+    // sources ("…on Forex Market…" / "…on the forex market…", "Managing" /
+    // "the management of"). Compared within the same or adjacent year only.
+    $byYear = [];
+    foreach ($byId as $id => $r) {
+        $tk = vvur_title_key($r['title']);
+        if (vvur_generic_title($tk) || $r['pub_year'] === null) {
+            continue;
+        }
+        $byYear[(int) $r['pub_year']][] = $id;
+    }
+    foreach ($byYear as $year => $ids) {
+        $pool = array_merge($ids, $byYear[$year - 1] ?? []);
+        foreach ($ids as $a) {
+            foreach ($pool as $b) {
+                if ($b === $a || ($b > $a && in_array($b, $ids, true)) || $find($a) === $find($b)) {
+                    continue;
+                }
+                if (vvur_same_work($byId[$a], $byId[$b])) {
+                    $parent[$find($a)] = $find($b);
+                }
+            }
+        }
+    }
+
     $groups = [];
     foreach (array_keys($byId) as $id) {
         $groups[$find($id)][] = $id;
@@ -746,6 +816,7 @@ function vvur_publication_duplicate_groups(PDO $pdo)
                 return [
                     ($r['doi'] && !vvur_is_preprint_doi($r['doi'])) ? 1 : 0,   // published version
                     $r['pub_type'] === 'preprint' ? 0 : 1,
+                    $r['source'] === 'openalex' ? 1 : 0,                     // keeps receiving updates
                     (int) $r['citations'],
                     trim((string) $r['abstract']) !== '' ? 1 : 0,
                     $r['doi'] ? 1 : 0,
@@ -787,6 +858,17 @@ function vvur_dedupe_publications(PDO $pdo)
                     k.scholar_id = COALESCE(k.scholar_id, d.sid)
               WHERE k.id = $keep"
         );
+        try {
+            // VVU output if any copy was (a hand-entered record may know better than OpenAlex).
+            $pdo->exec(
+                "UPDATE research_publications k
+                    JOIN (SELECT MAX(vvu_output) v FROM research_publications WHERE id IN ($in)) d
+                     SET k.vvu_output = GREATEST(k.vvu_output, d.v)
+                  WHERE k.id = $keep"
+            );
+        } catch (Exception $e) {
+            // vvu_output not migrated yet
+        }
         $pdo->exec("UPDATE research_publications SET is_active = 0 WHERE id IN ($in)");
         $hidden += count($ids);
         foreach ($pdo->query("SELECT scholar_id FROM research_publication_authors WHERE publication_id = $keep") as $r) {
@@ -797,6 +879,38 @@ function vvur_dedupe_publications(PDO $pdo)
         r_recount_scholar($pdo, $sid);
     }
     return ['groups' => count($groups), 'hidden' => $hidden];
+}
+
+/**
+ * A record that is not a paper: an ORCID / Scholar entry whose "title" is the
+ * journal itself ("Journal of Economics, Finance and Accounting Studies"),
+ * usually with a journal-level DOI and no year.
+ */
+function vvur_is_junk_work(array $p)
+{
+    $t = trim((string) ($p['title'] ?? ''));
+    if ($t === '') {
+        return true;
+    }
+    $journalName = preg_match('/^(the\s+)?(international\s+|african\s+|global\s+|asian\s+|european\s+|american\s+)*(journal|proceedings|transactions|bulletin|annals)\s+(of|on|for)\b/i', $t)
+        && !preg_match('/[:?]/', $t) && str_word_count($t) <= 10;
+    $sameAsVenue = !empty($p['venue']) && strcasecmp(trim($p['venue']), $t) === 0;
+    return ($journalName && empty($p['pub_year'])) || $sameAsVenue;
+}
+
+/** Withdraws imported records that are journals rather than papers. */
+function vvur_withdraw_junk(PDO $pdo)
+{
+    $n = 0;
+    $rows = $pdo->query("SELECT id, title, venue, pub_year FROM research_publications WHERE is_active = 1 AND source IN ('orcid', 'google_scholar', 'bibtex', 'csv')")->fetchAll(PDO::FETCH_ASSOC);
+    $hide = $pdo->prepare("UPDATE research_publications SET is_active = 0 WHERE id = ?");
+    foreach ($rows as $r) {
+        if (vvur_is_junk_work($r)) {
+            $hide->execute([$r['id']]);
+            $n++;
+        }
+    }
+    return $n;
 }
 
 /* ==========================================================================
@@ -820,6 +934,7 @@ function vvur_quality_run(PDO $pdo, array $works = [], array $syncOpts = [])
     }
     $out['affiliations'] = $works ? vvur_verify_affiliations($pdo, $works) : null;
     list($out['scholar_groups'], $out['scholars_merged']) = vvur_merge_all_duplicates($pdo);
+    $out['junk'] = vvur_withdraw_junk($pdo);
     $out['publications'] = vvur_dedupe_publications($pdo);
     return $out;
 }

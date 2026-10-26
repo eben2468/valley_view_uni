@@ -8,6 +8,7 @@
  */
 
 require_once __DIR__ . '/research_autosync.php';
+require_once __DIR__ . '/research_citations.php';
 require_once __DIR__ . '/../../research/includes/research_engage.php';
 
 if (!function_exists('vvurq_handle_post')) {
@@ -38,6 +39,23 @@ function vvurq_handle_post(PDO $pdo)
                     $msg .= ' (Only part of OpenAlex was read — ' . ($fetch['error'] ?: 'time ran out') . ' Run it again to check the rest.)';
                 }
                 vvur_redirect('quality', 'success', 'Clean-up finished. ' . $msg);
+
+            /* ---------------------------------------- citations & publication lists */
+            case 'q_refresh_scholar':
+                @set_time_limit(400);
+                $sid = (int) ($_POST['scholar_id'] ?? 0);
+                if (!$sid) { vvur_redirect('quality', 'warning', 'Choose a researcher.'); }
+                $r = vvur_pull_researcher_works($pdo, $sid, microtime(true) + 300);
+                vvur_redirect('quality', 'success', $r['summary']);
+
+            case 'q_refresh_citations':
+                @set_time_limit(400);
+                $c = vvur_refresh_citations($pdo, microtime(true) + 300, '1=1', [], 1500);
+                r_recount_all($pdo);
+                vvur_redirect('quality', 'success', sprintf(
+                    'Citations re-checked for %d papers — OpenAlex %d, Crossref %d, Semantic Scholar %d; %d counts changed%s. Researcher totals recalculated.',
+                    $c['papers'], $c['openalex'], $c['crossref'], $c['s2'], $c['changed'],
+                    $c['errors'] ? ' (' . implode('; ', array_unique($c['errors'])) . ')' : ''));
 
             /* ---------------------------------------- merges */
             case 'q_merge':
@@ -74,6 +92,9 @@ function vvurq_handle_post(PDO $pdo)
                 vvur_set_setting($pdo, 'auto_sync_enabled', !empty($_POST['auto_sync_enabled']) ? '1' : '0');
                 vvur_set_setting($pdo, 'auto_sync_hours', (string) max(1, min(720, (int) ($_POST['auto_sync_hours'] ?? 24))));
                 vvur_set_setting($pdo, 'auto_sync_orcid_scope', ($_POST['auto_sync_orcid_scope'] ?? '') === 'all' ? 'all' : 'claimed');
+                if (isset($_POST['s2_api_key'])) {
+                    vvur_set_setting($pdo, 's2_api_key', preg_replace('/[^A-Za-z0-9_-]/', '', (string) $_POST['s2_api_key']));
+                }
                 vvur_set_setting($pdo, 'reviews_require_approval', !empty($_POST['reviews_require_approval']) ? '1' : '0');
                 if (isset($_POST['openalex_api_key'])) {
                     vvur_set_setting($pdo, 'openalex_api_key', preg_replace('/[^A-Za-z0-9_-]/', '', (string) $_POST['openalex_api_key']));
@@ -204,6 +225,8 @@ function vvurq_render_quality(PDO $pdo)
                         </select>
                         <label class="form-label small fw-semibold mb-1">OpenAlex API key <span class="text-muted fw-normal">(free — <a href="https://openalex.org/settings/api" target="_blank" rel="noopener">get one</a>)</span></label>
                         <input type="text" class="form-control form-control-sm mb-2" name="openalex_api_key" autocomplete="off" value="<?php echo h(r_set($pdo, 'openalex_api_key', '')); ?>" placeholder="Without a key OpenAlex limits this server to a small daily allowance">
+                        <label class="form-label small fw-semibold mb-1">Semantic Scholar API key <span class="text-muted fw-normal">(optional — avoids its rate limit; <a href="https://www.semanticscholar.org/product/api#api-key-form" target="_blank" rel="noopener">request one</a>)</span></label>
+                        <input type="text" class="form-control form-control-sm mb-2" name="s2_api_key" autocomplete="off" value="<?php echo h(r_set($pdo, 's2_api_key', '')); ?>">
                         <label class="form-label small fw-semibold mb-1">Altmetric API key <span class="text-muted fw-normal">(optional — adds readers &amp; online attention; <a href="https://www.altmetric.com/solutions/free-tools/" target="_blank" rel="noopener">request one</a>)</span></label>
                         <input type="text" class="form-control form-control-sm mb-2" name="altmetric_api_key" autocomplete="off" value="<?php echo h(r_set($pdo, 'altmetric_api_key', '')); ?>">
                         <div class="form-check mb-2">
@@ -229,6 +252,36 @@ function vvurq_render_quality(PDO $pdo)
                         <code class="d-block p-2 bg-light border rounded" style="word-break:break-all">wget -q -O /dev/null "<?php echo h($cronUrl); ?>"</code>
                         <p class="mt-2 mb-0 text-muted">It only does work when the interval above has passed. Without a cron job, a visit to the portal starts the update in the background on servers running PHP-FPM.</p>
                     </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Citations & publication lists -->
+    <div class="card mt-4">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-quote-right me-2"></i>Citations &amp; publication lists</h5></div>
+        <div class="card-body">
+            <p class="small mb-3">Citations are checked against <strong>OpenAlex, Crossref and Semantic Scholar</strong> by DOI (and by title for papers without one); each paper shows the highest count, and researchers can add their Google Scholar figure for papers those indexes miss. The automatic update does this continuously; use these to do it now.</p>
+            <div class="row g-3">
+                <div class="col-lg-7">
+                    <form method="post" class="d-flex gap-2" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').innerHTML='Working… up to 5 minutes';">
+                        <?php echo vvu_csrf_field(); ?>
+                        <input type="hidden" name="action" value="q_refresh_scholar">
+                        <select name="scholar_id" class="form-select form-select-sm" required>
+                            <option value="">— Complete one researcher's record —</option>
+                            <?php foreach ($active as $id => $nm): ?><option value="<?php echo (int) $id; ?>"><?php echo h($nm); ?></option><?php endforeach; ?>
+                        </select>
+                        <button class="btn btn-sm btn-primary text-nowrap"><i class="fas fa-user-check"></i> Complete record</button>
+                    </form>
+                    <small class="text-muted">All their works from every OpenAlex record (including merged duplicates) and their ORCID, duplicates removed, citations re-checked.</small>
+                </div>
+                <div class="col-lg-5">
+                    <form method="post" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').innerHTML='Checking… up to 5 minutes';">
+                        <?php echo vvu_csrf_field(); ?>
+                        <input type="hidden" name="action" value="q_refresh_citations">
+                        <button class="btn btn-sm btn-outline-primary w-100"><i class="fas fa-rotate"></i> Re-check all citations now</button>
+                    </form>
+                    <small class="text-muted">Up to 1,500 papers per click, longest-unchecked first.</small>
                 </div>
             </div>
         </div>

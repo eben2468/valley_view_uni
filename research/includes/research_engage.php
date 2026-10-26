@@ -215,7 +215,21 @@ function r_stars($value, $size = '')
 function r_publication_impact(array $p)
 {
     $out = [];
-    $out[] = ['Citations', number_format((int) $p['citations']), 'fa-quote-right', 'Times other works have cited it (OpenAlex / Crossref).'];
+    // Where the citation figure comes from: the highest of the sources checked.
+    $src = [];
+    foreach (['cites_openalex' => 'OpenAlex', 'cites_crossref' => 'Crossref', 'cites_s2' => 'Semantic Scholar', 'cites_manual' => 'Google Scholar'] as $col => $label) {
+        if (isset($p[$col]) && $p[$col] !== null) {
+            $src[] = $label . ' ' . number_format((int) $p[$col]);
+        }
+    }
+    $out[] = ['Citations', number_format((int) $p['citations']), 'fa-quote-right',
+        $src ? 'Highest count across sources — ' . implode(' · ', $src) . '.' : 'Times other works have cited it.'];
+    if (!empty($p['citations_5y'])) {
+        $out[] = ['Cites (5 yrs)', number_format((int) $p['citations_5y']), 'fa-calendar-days', 'Citations received in the last five years (OpenAlex).'];
+    }
+    if (!empty($p['influential_citations'])) {
+        $out[] = ['Influential', number_format((int) $p['influential_citations']), 'fa-bolt', 'Citing papers that build substantially on this work (Semantic Scholar).'];
+    }
     if (isset($p['views'])) {
         $out[] = ['Reads', number_format((int) $p['views']), 'fa-book-open-reader', 'Visitors who opened this publication on VVU Scholar.'];
     }
