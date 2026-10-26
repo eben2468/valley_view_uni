@@ -12,6 +12,8 @@ $vvu_root = '../';
 
 require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/includes/research_partials.php';
+require_once __DIR__ . '/includes/research_engage.php';
+r_autosync_tick($pdo); // runs after the page is sent, only when an update is due
 
 $q        = trim((string) ($_GET['q'] ?? ''));
 $unitId   = (int) ($_GET['unit'] ?? 0);
@@ -83,8 +85,8 @@ $hasFilter = $q !== '' || $unitId || $areaId || $type !== '' || $year || $openOn
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="assets/research.css?v=1.1">
-<script src="assets/research.js?v=1.0" defer></script>
+<link rel="stylesheet" href="assets/research.css?v=1.2">
+<script src="assets/research.js?v=1.1" defer></script>
 
 <main id="main-content" class="vvus">
 

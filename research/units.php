@@ -37,8 +37,8 @@ $active_page = 'research';
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="assets/research.css?v=1.1">
-<script src="assets/research.js?v=1.0" defer></script>
+<link rel="stylesheet" href="assets/research.css?v=1.2">
+<script src="assets/research.js?v=1.1" defer></script>
 
 <main id="main-content" class="vvus">
 

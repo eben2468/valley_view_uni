@@ -19,6 +19,8 @@ $vvu_root = '../';
 
 require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/includes/research_partials.php';
+require_once __DIR__ . '/includes/research_engage.php';
+r_autosync_tick($pdo); // runs after the page is sent, only when an update is due
 
 $page_title  = r_set($pdo, 'meta_title', 'VVU Scholar — Research Portal | Valley View University');
 $active_page = 'research';
@@ -68,11 +70,11 @@ $heroLead = $topScholars[0] ?? null;
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="assets/research.css?v=1.1">
+<link rel="stylesheet" href="assets/research.css?v=1.2">
 <?php if ($trend): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <?php endif; ?>
-<script src="assets/research.js?v=1.0" defer></script>
+<script src="assets/research.js?v=1.1" defer></script>
 
 <main id="main-content" class="vvus">
 

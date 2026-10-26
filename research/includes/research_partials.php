@@ -217,13 +217,11 @@ function r_publication_row(array $p, array $opts = [])
                 <?php endif; ?>
             </div>
 
-            <?php if ($link !== ''): ?>
-                <a class="vvus-pub__title" href="<?php echo r_e($link); ?>" target="_blank" rel="noopener noreferrer">
-                    <?php echo r_e($p['title']); ?>
-                </a>
-            <?php else: ?>
-                <h3 class="vvus-pub__title"><?php echo r_e($p['title']); ?></h3>
-            <?php endif; ?>
+            <?php // The title opens the publication's own page (impact, reviews,
+                  // related work); the DOI button below still goes to the publisher. ?>
+            <a class="vvus-pub__title" href="publication.php?id=<?php echo (int) $p['id']; ?>">
+                <?php echo r_e($p['title']); ?>
+            </a>
 
             <?php if (!empty($p['authors'])): ?>
                 <p class="vvus-pub__authors">
@@ -290,6 +288,14 @@ function r_publication_row(array $p, array $opts = [])
         <div class="vvus-pub__aside">
             <b><?php echo r_e(r_compact($p['citations'])); ?></b>
             <span>Citations</span>
+            <?php
+            // Reads · recommendations · rating, when there are any.
+            $eng = [];
+            if (!empty($p['views'])) { $eng[] = '<span title="Reads on VVU Scholar"><i class="fa-solid fa-book-open-reader" aria-hidden="true"></i>' . r_e(r_compact($p['views'])) . '</span>'; }
+            if (!empty($p['recommendations'])) { $eng[] = '<span title="Recommendations"><i class="fa-solid fa-thumbs-up" aria-hidden="true"></i>' . r_e(r_compact($p['recommendations'])) . '</span>'; }
+            if (!empty($p['rating_count'])) { $eng[] = '<span title="Average reader rating"><i class="fa-solid fa-star" aria-hidden="true"></i>' . r_e(number_format((int) $p['rating_sum'] / (int) $p['rating_count'], 1)) . '</span>'; }
+            if ($eng) { echo '<div class="vvus-pub__engage">' . implode('', $eng) . '</div>'; }
+            ?>
         </div>
     </article>
     <?php

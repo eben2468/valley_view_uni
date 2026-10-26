@@ -113,6 +113,39 @@ function vvur_http_get($url, array $headers = [])
     return $out;
 }
 
+/**
+ * OpenAlex query parameters plus the API key, when one is set in
+ * Admin → Research Portal → Data Quality & Sync. Without a key OpenAlex
+ * shares a small daily budget between everyone on the server's IP address and
+ * starts answering 401 once it is spent; a free key has its own budget.
+ */
+function vvur_oa_q(array $params)
+{
+    global $pdo;
+    static $key = null;
+    if ($key === null) {
+        $key = '';
+        if ($pdo instanceof PDO && function_exists('r_set')) {
+            $key = trim((string) r_set($pdo, 'openalex_api_key', ''));
+        }
+    }
+    if ($key !== '') {
+        $params['api_key'] = $key;
+    }
+    return $params;
+}
+
+/** A plain-language explanation for an OpenAlex refusal. */
+function vvur_oa_error(array $res)
+{
+    if (in_array((int) ($res['status'] ?? 0), [401, 403, 429], true)) {
+        return 'OpenAlex refused the request (HTTP ' . (int) $res['status'] . '): the free daily allowance for this server '
+             . 'is used up. Get a free API key at openalex.org/settings/api and paste it into '
+             . 'Admin → Research Portal → Data Quality & Sync.';
+    }
+    return (string) ($res['error'] ?? 'OpenAlex could not be reached.');
+}
+
 /** A blank normalised publication, so every importer returns the same shape. */
 function vvur_blank_publication()
 {
@@ -287,13 +320,13 @@ function vvur_openalex_works(array $args = [])
     $items  = [];
 
     for ($page = 0; $page < $maxPages && $cursor !== ''; $page++) {
-        $url = 'https://api.openalex.org/works?' . http_build_query([
+        $url = 'https://api.openalex.org/works?' . http_build_query(vvur_oa_q([
             'filter'   => implode(',', $filters),
             'per-page' => 100,
             'select'   => $select,
             'cursor'   => $cursor,
             'mailto'   => 'research@vvu.edu.gh',
-        ]);
+        ]));
 
         $res = vvur_http_get($url, ['Accept: application/json']);
         if (!$res['ok']) {
@@ -809,39 +842,52 @@ function vvur_researchgate_profile($url)
  */
 function vvur_find_duplicate(PDO $pdo, array $p)
 {
+    // Keys shared with the clean-up (admin/includes/research_quality.php), so
+    // an import and the clean-up always agree about what "the same paper" is.
+    require_once __DIR__ . '/research_quality.php';
+
     try {
         // The source's own id is the strongest key there is — an OpenAlex work
         // id or a BibTeX cite key identifies the record even when the DOI is
         // missing and the title has been re-punctuated.
         if (!empty($p['external_id']) && !empty($p['source'])) {
             $stmt = $pdo->prepare(
-                "SELECT id FROM research_publications WHERE external_id = ? AND source = ? LIMIT 1"
+                "SELECT id FROM research_publications WHERE external_id = ? AND source = ?
+                  ORDER BY is_active DESC LIMIT 1"
             );
             $stmt->execute([$p['external_id'], $p['source']]);
             $id = (int) $stmt->fetchColumn();
             if ($id) { return $id; }
         }
 
-        if (!empty($p['doi'])) {
-            $stmt = $pdo->prepare("SELECT id FROM research_publications WHERE doi = ? LIMIT 1");
-            $stmt->execute([$p['doi']]);
-            $id = (int) $stmt->fetchColumn();
-            if ($id) { return $id; }
+        // One index of the whole catalogue per request: DOI family and title.
+        // Live records are indexed first, so a withdrawn copy never shadows
+        // the record that was kept.
+        static $index = null;
+        if ($index === null) {
+            $index = ['doi' => [], 'title' => []];
+            $rows = $pdo->query(
+                "SELECT id, doi, title FROM research_publications ORDER BY is_active DESC, id ASC"
+            )->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                $dk = vvur_doi_key($row['doi']);
+                if ($dk !== '' && !isset($index['doi'][$dk])) {
+                    $index['doi'][$dk] = (int) $row['id'];
+                }
+                $tk = vvur_title_key($row['title']);
+                if (!vvur_generic_title($tk) && !isset($index['title'][$tk])) {
+                    $index['title'][$tk] = (int) $row['id'];
+                }
+            }
         }
 
-        $key = preg_replace('/[^a-z0-9]/', '', strtolower((string) $p['title']));
-        if ($key === '') { return 0; }
-
-        $stmt = $pdo->prepare(
-            "SELECT id, title FROM research_publications
-              WHERE pub_year <=> ? OR ? IS NULL
-              LIMIT 500"
-        );
-        $stmt->execute([$p['pub_year'], $p['pub_year']]);
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            if (preg_replace('/[^a-z0-9]/', '', strtolower($row['title'])) === $key) {
-                return (int) $row['id'];
-            }
+        $dk = vvur_doi_key($p['doi'] ?? '');
+        if ($dk !== '' && isset($index['doi'][$dk])) {
+            return $index['doi'][$dk];
+        }
+        $tk = vvur_title_key($p['title'] ?? '');
+        if (!vvur_generic_title($tk) && isset($index['title'][$tk])) {
+            return $index['title'][$tk];
         }
     } catch (Exception $e) {
         error_log('VVU Scholar: duplicate check failed — ' . $e->getMessage());

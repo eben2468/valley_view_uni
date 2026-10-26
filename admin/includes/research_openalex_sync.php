@@ -20,6 +20,7 @@
 
 require_once __DIR__ . '/research_import.php';
 require_once __DIR__ . '/../../research/includes/research_helper.php';
+require_once __DIR__ . '/research_quality.php';
 
 if (!defined('VVU_RESEARCH_OPENALEX_SYNC')) {
     define('VVU_RESEARCH_OPENALEX_SYNC', 1);
@@ -135,8 +136,18 @@ function vvur_oa_id($url)
     return $url ? substr(strrchr($url, '/'), 1) : '';
 }
 
-/** True when this authorship credits Valley View University. */
+/**
+ * True when this authorship genuinely credits Valley View University. The
+ * institution tag alone is not trusted: OpenAlex also hands it to US street
+ * addresses and schools called "Valley View". See research_quality.php.
+ */
 function vvur_oa_is_vvu(array $authorship)
+{
+    return vvur_authorship_is_vvu($authorship);
+}
+
+/** The original, tag-only test (kept for reference). */
+function vvur_oa_is_vvu_tagged(array $authorship)
 {
     foreach (($authorship['institutions'] ?? []) as $inst) {
         if (($inst['id'] ?? '') === VVUR_OPENALEX_INSTITUTION_URL) {
@@ -194,22 +205,22 @@ function vvur_openalex_fetch(array $args = [])
                     'next_cursor' => $cursor, 'complete' => false];
         }
 
-        $url = 'https://api.openalex.org/works?' . http_build_query([
+        $url = 'https://api.openalex.org/works?' . http_build_query(vvur_oa_q([
             'filter'   => implode(',', $filters),
             'per-page' => 100,
             'select'   => $select,
             'cursor'   => $cursor,
             'mailto'   => 'research@vvu.edu.gh',
-        ]);
+        ]));
 
         $res = vvur_http_get($url, ['Accept: application/json']);
         if (!$res['ok']) {
             if ($works) {
                 // Keep what arrived; report where to resume from.
-                return ['ok' => true, 'error' => 'Stopped early: ' . $res['error'],
+                return ['ok' => true, 'error' => 'Stopped early: ' . vvur_oa_error($res),
                         'works' => $works, 'next_cursor' => $cursor, 'complete' => false];
             }
-            return ['ok' => false, 'error' => 'OpenAlex could not be reached. ' . $res['error'],
+            return ['ok' => false, 'error' => 'OpenAlex could not be reached. ' . vvur_oa_error($res),
                     'works' => [], 'next_cursor' => '', 'complete' => true];
         }
 
@@ -330,7 +341,10 @@ function vvur_openalex_sync(PDO $pdo, array $works, array $opts = [])
     $unitRules = vvur_openalex_unit_rules();
 
     $scholarIds = [];
-    $find   = $pdo->prepare("SELECT id, unit_id FROM research_scholars WHERE openalex_id = ?");
+    $merged = vvur_quality_ready($pdo);
+    $find   = $pdo->prepare($merged
+        ? "SELECT id, unit_id, merged_into FROM research_scholars WHERE openalex_id = ?"
+        : "SELECT id, unit_id, NULL AS merged_into FROM research_scholars WHERE openalex_id = ?");
     $insert = $pdo->prepare(
         "INSERT INTO research_scholars (full_name, slug, openalex_id, orcid, unit_id, is_active, last_synced_at)
          VALUES (?,?,?,?,?,1,NOW())"
@@ -363,7 +377,12 @@ function vvur_openalex_sync(PDO $pdo, array $works, array $opts = [])
         $find->execute([$oaId]);
         $existing = $find->fetch(PDO::FETCH_ASSOC);
 
-        if ($existing) {
+        if ($existing && !empty($existing['merged_into'])) {
+            // Merged into another profile: import onto that one, and leave the
+            // name the editors settled on alone.
+            $id = vvur_live_scholar_id($pdo, (int) $existing['merged_into']);
+            $stats['scholars_seen']++;
+        } elseif ($existing) {
             $id = (int) $existing['id'];
             $update->execute([$author['name'], $author['orcid'], $id]);
             // Never overwrite a faculty an editor has set, unless asked to.
@@ -413,6 +432,7 @@ function vvur_openalex_sync(PDO $pdo, array $works, array $opts = [])
          VALUES (?,?,?)"
     );
     $leadUnitStmt = $pdo->prepare("SELECT unit_id FROM research_scholars WHERE id = ?");
+    $exStmt = $merged ? $pdo->prepare("SELECT 1 FROM research_author_exclusions WHERE publication_id = ? AND scholar_id = ?") : null;
 
     $touchedScholars = [];
 
@@ -456,6 +476,13 @@ function vvur_openalex_sync(PDO $pdo, array $works, array $opts = [])
         $findPub->execute([$mapped['external_id']]);
         $existing = $findPub->fetch(PDO::FETCH_ASSOC);
 
+        // No genuine VVU author: do not add it (an existing record is left
+        // for the clean-up to judge).
+        if (!$existing && !$vvuOnThis) {
+            $stats['skipped']++;
+            continue;
+        }
+
         if ($existing) {
             $updatePub->execute([
                 $mapped['title'], $mapped['authors'], $mapped['venue'], $mapped['publisher'],
@@ -478,6 +505,14 @@ function vvur_openalex_sync(PDO $pdo, array $works, array $opts = [])
         }
 
         foreach ($vvuOnThis as $order => $scholarId) {
+            // Never re-link someone removed from this paper (non-VVU address,
+            // or the researcher said "Not mine").
+            if ($merged) {
+                $exStmt->execute([$pubId, $scholarId]);
+                if ($exStmt->fetchColumn()) {
+                    continue;
+                }
+            }
             $linkStmt->execute([$pubId, $scholarId, $order]);
             $stats['links']++;
             $touchedScholars[$scholarId] = true;

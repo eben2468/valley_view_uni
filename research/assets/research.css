@@ -1520,3 +1520,104 @@
     .vvus { background: #fff; }
     .vvus-card, .vvus-person, .vvus-pub, .vvus-idcard { box-shadow: none; border-color: #ccc; }
 }
+
+/* --------------------------------------------------------------------------
+   Publication page, impact figures, recommend, ratings & reviews
+   -------------------------------------------------------------------------- */
+.vvus .vvus-pubpage__title { margin-top: 14px; max-width: 34ch; font-size: clamp(24px, 3vw, 36px); line-height: 1.25; }
+.vvus-pubpage { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; }
+.vvus-pubpage__main { display: grid; gap: 20px; min-width: 0; }
+.vvus-pubpage__side { position: sticky; top: 76px; display: grid; gap: 20px; }
+.vvus .vvus-pubpage__venue { display: flex; gap: 10px; margin: 0 0 18px; font-size: 15px; color: var(--ink-soft); line-height: 1.55; }
+.vvus .vvus-pubpage__venue i { color: var(--gold); margin-top: 3px; }
+.vvus .vvus-pubpage__venue strong { color: var(--ink); }
+.vvus-pubpage__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.vvus-pubpage__actions form { margin: 0; }
+.vvus .vvus-pubpage__h { margin: 26px 0 10px; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); }
+.vvus-pubpage__ids { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 24px 0 0; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+.vvus .vvus-pubpage__ids dt { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+.vvus .vvus-pubpage__ids dd { margin: 4px 0 0; font-size: 14px; word-break: break-word; }
+.vvus .vvus-pubpage__ids a { color: var(--navy-soft); font-weight: 600; }
+.vvus-pubpage__authors { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.vvus .vvus-pubpage__author {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-sm);
+    border: 1px solid var(--line); text-decoration: none; color: var(--ink);
+}
+.vvus .vvus-pubpage__author:hover { border-color: var(--navy-soft); }
+.vvus .vvus-pubpage__author span { display: flex; flex-direction: column; min-width: 0; }
+.vvus .vvus-pubpage__author strong { font-size: 14px; color: var(--navy); }
+.vvus .vvus-pubpage__author small { font-size: 12px; color: var(--ink-muted); }
+
+.vvus-impact { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.vvus .vvus-impact li {
+    display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center;
+    padding: 12px; border-radius: var(--radius-sm); background: var(--surface-2); cursor: help;
+}
+.vvus .vvus-impact i { grid-row: span 2; color: var(--gold); font-size: 15px; }
+.vvus .vvus-impact b { font-size: 18px; line-height: 1.2; color: var(--navy); }
+.vvus .vvus-impact span { font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+.vvus .vvus-impact small { display: none; }
+.vvus .vvus-impact__more { display: inline-flex; gap: 6px; align-items: center; margin-top: 14px; font-size: 13px; font-weight: 700; color: var(--navy-soft); }
+
+.vvus .vvus-btn.is-on { background: var(--navy); border-color: var(--navy); color: #fff; }
+.vvus .vvus-recommend b { margin-left: 2px; padding: 1px 8px; border-radius: 999px; background: rgba(15, 23, 42, .08); font-size: 12px; }
+.vvus .vvus-btn.is-on b { background: rgba(255, 255, 255, .2); }
+
+.vvus-stars { display: inline-flex; gap: 2px; color: #e9a508; font-size: 14px; }
+.vvus-stars--sm { font-size: 12px; }
+.vvus .vvus-ratingline { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-muted); }
+.vvus .vvus-ratingline b { color: var(--ink); }
+.vvus-reviews { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 14px; }
+.vvus .vvus-reviews li { padding-bottom: 14px; border-bottom: 1px solid var(--line-soft); }
+.vvus .vvus-reviews li:last-child { border-bottom: 0; }
+.vvus-reviews__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px; }
+.vvus .vvus-reviews__head strong { font-size: 14px; color: var(--ink); }
+.vvus .vvus-reviews__head small, .vvus .vvus-reviews__head time { font-size: 12px; color: var(--ink-muted); }
+.vvus .vvus-reviews__head time { margin-left: auto; }
+.vvus .vvus-reviews p { margin: 0; font-size: 14.5px; line-height: 1.65; color: var(--ink-soft); }
+.vvus .vvus-muted { color: var(--ink-muted); font-size: 14px; }
+
+.vvus-reviewform { border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.vvus .vvus-reviewform > summary { cursor: pointer; padding: 12px 16px; font-weight: 700; font-size: 14px; color: var(--navy); list-style: none; }
+.vvus .vvus-reviewform > summary::-webkit-details-marker { display: none; }
+.vvus .vvus-reviewform > summary i { color: #e9a508; margin-right: 6px; }
+.vvus-reviewform form { display: grid; gap: 14px; padding: 4px 16px 16px; }
+.vvus-reviewform__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.vvus .vvus-reviewform .vvus-input { box-sizing: border-box; }
+.vvus-starpick { display: inline-flex; flex-direction: row-reverse; justify-content: flex-end; gap: 4px; border: 0; padding: 0; margin: 0; }
+.vvus .vvus-starpick legend { width: 100%; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 4px; }
+.vvus .vvus-starpick input { position: absolute !important; opacity: 0 !important; width: 1px !important; height: 1px !important; pointer-events: none; }
+.vvus .vvus-starpick label { cursor: pointer; font-size: 26px; color: var(--line); transition: color .12s ease; }
+.vvus .vvus-starpick input:checked ~ label,
+.vvus .vvus-starpick label:hover,
+.vvus .vvus-starpick label:hover ~ label { color: #e9a508; }
+.vvus .vvus-starpick input:focus-visible + label { outline: 2px solid var(--navy-soft); outline-offset: 2px; border-radius: 4px; }
+.vvus-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.vvus .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+
+.vvus-notice { margin-bottom: 18px; padding: 13px 16px; border-radius: var(--radius-sm); font-size: 14.5px; border: 1px solid; }
+.vvus-notice--ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+.vvus-notice--error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+
+/* The small engagement line in publication lists */
+.vvus .vvus-pub__engage { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 12px; color: var(--ink-muted); }
+.vvus .vvus-pub__engage i { color: var(--gold); margin-right: 4px; }
+
+/* Researcher impact strip */
+.vvus-impactstrip { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.vvus .vvus-impactstrip div { padding: 12px 14px; border-radius: var(--radius-sm); background: var(--surface-2); }
+.vvus .vvus-impactstrip b { display: block; font-size: 18px; color: var(--navy); }
+.vvus .vvus-impactstrip span { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+
+@media (max-width: 960px) {
+    .vvus-pubpage { grid-template-columns: minmax(0, 1fr); }
+    .vvus-pubpage__side { position: static; order: -1; }
+}
+@media (max-width: 560px) {
+    .vvus-reviewform__grid { grid-template-columns: 1fr; }
+}
+@media (prefers-color-scheme: dark) {
+    .vvus .vvus-btn.is-on { background: #93b4fd; border-color: #93b4fd; color: #0b1324; }
+    .vvus-notice--ok { background: #0f2a1c; border-color: #166534; color: #bbf7d0; }
+    .vvus-notice--error { background: #2a1215; border-color: #7f1d1d; color: #fecaca; }
+}

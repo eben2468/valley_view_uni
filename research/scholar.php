@@ -14,9 +14,28 @@ $vvu_root = '../';
 
 require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/includes/research_partials.php';
+require_once __DIR__ . '/includes/research_engage.php';
 
 $slug    = trim((string) ($_GET['p'] ?? ''));
 $scholar = $slug !== '' ? r_scholar_by_slug($pdo, $slug) : null;
+
+// A profile merged into another one (the same person split by an import)
+// sends old links to the profile that was kept.
+if (!$scholar && $slug !== '') {
+    try {
+        $st = $pdo->prepare(
+            "SELECT k.slug FROM research_scholars m JOIN research_scholars k ON k.id = m.merged_into
+              WHERE m.slug = ? AND k.is_active = 1 LIMIT 1"
+        );
+        $st->execute([$slug]);
+        if ($to = $st->fetchColumn()) {
+            header('Location: scholar.php?p=' . rawurlencode($to), true, 301);
+            exit;
+        }
+    } catch (Exception $e) {
+        // merged_into not migrated yet: fall through to the 404 below
+    }
+}
 
 if (!$scholar) {
     http_response_code(404);
@@ -24,7 +43,7 @@ if (!$scholar) {
     $active_page = 'research';
     include __DIR__ . '/../includes/header.php';
     ?>
-    <link rel="stylesheet" href="assets/research.css?v=1.1">
+    <link rel="stylesheet" href="assets/research.css?v=1.2">
     <main id="main-content" class="vvus">
         <?php r_pagehero('VVU Scholar', 'Researcher not found', '', ['Research Portal' => 'index.php', 'Not found' => null]); ?>
         <?php r_subnav('authors.php'); ?>
@@ -94,6 +113,11 @@ try {
     $ownTrend = [];
 }
 
+// Profile views (one per visitor per day) and the engagement totals.
+r_record_scholar_view($pdo, (int) $scholar['id']);
+r_autosync_tick($pdo);
+$impact = r_scholar_impact($pdo, (int) $scholar['id']);
+
 $fullName    = trim(($scholar['title'] ? $scholar['title'] . ' ' : '') . $scholar['full_name']);
 $interests   = array_filter(array_map('trim', explode(',', (string) $scholar['interests'])));
 $page_title  = $fullName . ' — VVU Scholar | Valley View University';
@@ -102,11 +126,11 @@ $active_page = 'research';
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="assets/research.css?v=1.1">
+<link rel="stylesheet" href="assets/research.css?v=1.2">
 <?php if ($ownTrend): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <?php endif; ?>
-<script src="assets/research.js?v=1.0" defer></script>
+<script src="assets/research.js?v=1.1" defer></script>
 
 <main id="main-content" class="vvus" style="<?php echo r_accent($scholar['unit_color'] ?? 'blue'); ?>">
 
@@ -259,6 +283,31 @@ include __DIR__ . '/../includes/header.php';
                                 <span>h-index (5y)</span>
                             </div>
                         <?php endif; ?>
+                    </div>
+
+                    <!-- Engagement & impact -->
+                    <div class="vvus-card vvus-reveal">
+                        <div class="vvus-card__head"><h3>Engagement &amp; impact</h3></div>
+                        <div class="vvus-card__body">
+                            <div class="vvus-impactstrip">
+                                <div title="Reads of this researcher's publications on VVU Scholar"><b><?php echo number_format($impact['reads']); ?></b><span>Reads</span></div>
+                                <div title="Recommendations from readers"><b><?php echo number_format($impact['recommendations']); ?></b><span>Recommendations</span></div>
+                                <div title="Average rating from readers"><b><?php echo $impact['rating'] !== null ? number_format($impact['rating'], 1) . ' ★' : '—'; ?></b><span><?php echo (int) $impact['ratings']; ?> rating<?php echo (int) $impact['ratings'] === 1 ? '' : 's'; ?></span></div>
+                                <div title="Profile views on VVU Scholar"><b><?php echo number_format($impact['views']); ?></b><span>Profile views</span></div>
+                                <?php if ($impact['readers'] > 0): ?>
+                                    <div title="Saved to reference libraries (Mendeley, via Altmetric)"><b><?php echo number_format($impact['readers']); ?></b><span>Readers</span></div>
+                                <?php endif; ?>
+                                <?php if ($impact['fwci'] !== null): ?>
+                                    <div title="Average field-weighted citation impact; 1.00 is the world average (OpenAlex)"><b><?php echo number_format($impact['fwci'], 2); ?></b><span>Avg. FWCI</span></div>
+                                <?php endif; ?>
+                                <?php if ($impact['top10'] > 0): ?>
+                                    <div title="Papers among the world's 10% most cited for their field and year (OpenAlex)"><b><?php echo (int) $impact['top10']; ?></b><span>Top-10% papers</span></div>
+                                <?php endif; ?>
+                                <?php if ($impact['altmetric'] > 0): ?>
+                                    <div title="Total Altmetric attention score"><b><?php echo number_format($impact['altmetric']); ?></b><span>Altmetric</span></div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Biography -->

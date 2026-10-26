@@ -27,6 +27,8 @@ require_once('../includes/db_connect.php');
 require_once(__DIR__ . '/../research/includes/research_helper.php');
 require_once(__DIR__ . '/includes/research_import.php');
 require_once(__DIR__ . '/includes/research_openalex_sync.php');
+require_once(__DIR__ . '/includes/research_quality.php');
+require_once(__DIR__ . '/includes/research_quality_admin.php');
 require_once(__DIR__ . '/includes/research_accounts_admin.php');
 
 /* ==========================================================================
@@ -45,7 +47,13 @@ $tabs = [
     'partners'     => ['Partners',        'fa-handshake-angle'],
     'import'       => ['Import Data',     'fa-cloud-arrow-down'],
     'accounts'     => ['Researcher Accounts', 'fa-id-badge'],
+    'quality'      => ['Data Quality & Sync', 'fa-broom'],
+    'reviews'      => ['Reviews', 'fa-star'],
 ];
+
+if ($vvurqPending = vvurq_pending_reviews($pdo)) {
+    $tabs['reviews'][0] .= ' (' . $vvurqPending . ')';
+}
 
 // Claims waiting for the Research Office show as a count on the tab.
 if ($vvuraPending = vvura_pending_count($pdo)) {
@@ -137,6 +145,9 @@ $specs = [
                 'areas' => 'Research areas',
                 'open_access' => 'Open access share (%)', 'this_year' => 'Published this year',
                 'collaborations' => 'Partner institutions',
+                'reads' => 'Reads on VVU Scholar', 'recommendations' => 'Recommendations',
+                'reviews' => 'Reader ratings', 'readers' => 'Mendeley readers',
+                'top10_papers' => 'Papers in the world\'s top 10% most cited',
             ], 'help' => 'Pick a live figure and the tile counts itself. Leave on the first option to type your own number.'],
             'stat_value'    => ['label' => 'Fixed value', 'type' => 'text', 'col' => 4, 'help' => 'Ignored when a live figure is selected above.'],
             'stat_suffix'   => ['label' => 'Suffix', 'type' => 'text', 'col' => 2, 'help' => 'e.g. % or +'],
@@ -313,6 +324,12 @@ function vvur_field_value(array $field, $name, array $existing = [])
         default:
             return isset($_POST[$name]) ? trim((string) $_POST[$name]) : '';
     }
+}
+
+// Data quality, sync and review actions (q_*, rv_*) live in their own include.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('/^(q|rv)_/', (string) ($_POST['action'] ?? ''))) {
+    vvu_require_csrf();
+    vvurq_handle_post($pdo);
 }
 
 // Researcher Accounts actions (acct_*) are handled in their own include.
@@ -628,11 +645,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'OpenAlex returned no works for that filter. Nothing was changed.');
                 }
 
-                $stats = vvur_openalex_sync($pdo, $fetch['works'], [
+                // Strict import (genuine VVU affiliations only), then the
+                // clean-up: non-VVU authors removed, split profiles merged,
+                // duplicate papers collapsed. See includes/research_quality.php.
+                $quality = vvur_quality_run($pdo, $fetch['works'], [
+                    'overwrite_units' => !empty($_POST['oa_overwrite_units']),
+                ]);
+                $stats = $quality['sync'] ?? vvur_openalex_sync($pdo, $fetch['works'], [
                     'overwrite_units' => !empty($_POST['oa_overwrite_units']),
                 ]);
 
                 $message = vvur_openalex_summary($stats);
+                if (!empty($quality['ok'])) {
+                    $message .= ' Clean-up: ' . vvur_quality_summary($quality);
+                }
                 if (!$fetch['complete'] && $fetch['next_cursor'] !== '') {
                     // More to come: hand the cursor back so the next click
                     // resumes instead of starting from the beginning.
@@ -764,6 +790,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $dupe = (int) ($p['_duplicate_of'] ?? 0);
                     if ($dupe) {
+                        // Already in the catalogue: still credit the chosen researcher.
+                        if ($scholarId) {
+                            $pdo->prepare("INSERT IGNORE INTO research_publication_authors (publication_id, scholar_id, author_order) VALUES (?, ?, 0)")
+                                ->execute([$dupe, $scholarId]);
+                        }
                         if ($updateDupes) {
                             $update->execute([(int) $p['citations'], $p['venue'], $p['doi'], $p['abstract'], $dupe]);
                             $refreshed++;
@@ -788,13 +819,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $added++;
                 }
 
+                // Two copies of one paper in the same batch, or the same work
+                // from another source, collapse to one record.
+                $collapsed = vvur_quality_ready($pdo) ? vvur_dedupe_publications($pdo)['hidden'] : 0;
                 if ($scholarId) { r_recount_scholar($pdo, $scholarId); }
                 unset($_SESSION['vvur_preview']);
 
                 vvur_redirect('import', 'success',
                     "Imported $added new publication(s)"
                     . ($refreshed ? ", refreshed $refreshed existing" : '')
-                    . ($skipped ? ", skipped $skipped already in the catalogue" : '') . '.');
+                    . ($skipped ? ", skipped $skipped already in the catalogue" : '')
+                    . ($collapsed ? ", merged $collapsed duplicate record(s)" : '') . '.');
                 break;
 
             /* ---------------------------------------------------------- */
@@ -1939,6 +1974,12 @@ function vvur_delete_link($type, $id, $what, $csrf)
        ====================================================================== */
     elseif ($tab === 'accounts'):
         vvura_render($pdo);
+
+    elseif ($tab === 'quality'):
+        vvurq_render_quality($pdo);
+
+    elseif ($tab === 'reviews'):
+        vvurq_render_reviews($pdo);
 
     /* ======================================================================
        TABS: the six declarative list tabs

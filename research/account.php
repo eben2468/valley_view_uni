@@ -71,6 +71,10 @@ function ra_is_mine(PDO $pdo, $pubId, $sid)
 /** Links a publication to the researcher (and makes them lead when it has none). */
 function ra_attach(PDO $pdo, $pubId, $sid)
 {
+    // The researcher is saying it IS theirs: lift any earlier "Not mine".
+    try {
+        $pdo->prepare("DELETE FROM research_author_exclusions WHERE publication_id = ? AND scholar_id = ?")->execute([(int) $pubId, (int) $sid]);
+    } catch (Exception $e) { /* table not migrated yet */ }
     $pdo->prepare("INSERT IGNORE INTO research_publication_authors (publication_id, scholar_id, author_order) VALUES (?,?,0)")
         ->execute([(int) $pubId, (int) $sid]);
     $pdo->prepare("UPDATE research_publications SET scholar_id = ? WHERE id = ? AND scholar_id IS NULL")
@@ -255,6 +259,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pub = $t->fetch(PDO::FETCH_ASSOC);
 
             $pdo->prepare("DELETE FROM research_publication_authors WHERE publication_id = ? AND scholar_id = ?")->execute([$pubId, $sid]);
+            // Remembered, so the next automatic import does not link it again.
+            try {
+                $pdo->prepare("INSERT IGNORE INTO research_author_exclusions (publication_id, scholar_id, reason) VALUES (?,?,?)")
+                    ->execute([$pubId, $sid, 'Researcher: not mine']);
+            } catch (Exception $e) { /* table not migrated yet */ }
             if ((int) $pub['scholar_id'] === $sid) {
                 // Hand the lead to another VVU co-author; if none is left the
                 // paper has no VVU author at all and leaves the catalogue.
@@ -299,6 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ra_flash('ok', 'Publication updated.');
             } else {
                 $res = ra_add_publication($pdo, $p, $scholar, $aid);
+                if (vvur_quality_ready($pdo)) { vvur_dedupe_publications($pdo); }
                 r_recount_scholar($pdo, $sid);
                 ra_log($pdo, $aid, $sid, 'publication_' . $res, $p['title']);
                 ra_flash($res === 'hidden' ? 'error' : 'ok', [
@@ -379,6 +389,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $counts[ra_add_publication($pdo, $p, $scholar, $aid)]++;
             }
             unset($_SESSION['ra_import']);
+            // The same work from two sources (or twice in one export) ends up
+            // as one record.
+            if (vvur_quality_ready($pdo)) { vvur_dedupe_publications($pdo); }
             r_recount_scholar($pdo, $sid);
             ra_log($pdo, $aid, $sid, 'publications_imported',
                 $bag['source'] . ': ' . $counts['added'] . ' added, ' . $counts['linked'] . ' linked');

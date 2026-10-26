@@ -330,6 +330,11 @@ function r_metrics(PDO $pdo)
         error_log('VVU Scholar: metric query failed — ' . $e->getMessage());
     }
 
+    // Reads, recommendations, reviews, readers and top-10% papers, so a stat
+    // tile can use them as its auto value (Admin → Stat Tiles → auto_key).
+    require_once __DIR__ . '/research_engage.php';
+    $m += r_engage_totals($pdo);
+
     return $cache = $m;
 }
 
